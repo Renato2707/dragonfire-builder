@@ -12,32 +12,6 @@ const PHASES = {
   LOW_HEALTH: 'low_health'
 };
 
-const TRIGGER_TYPES = {
-  COMBAT_START: PHASES.COMBAT_START,
-  EACH_ROUND: PHASES.TURN,
-  EACH_ACTION: PHASES.TURN,
-  ODD_ROUNDS: 'odd',
-  EVEN_ROUNDS: 'even',
-  AFTER_ATTACK: PHASES.AFTER_BASIC_ATTACK,
-  LOW_HEALTH: PHASES.LOW_HEALTH
-};
-
-const TRIGGER_MAP = {
-  'Start of Combat': { phase: PHASES.COMBAT_START, rounds: [1] },
-  'Each Action / Round': { phase: PHASES.TURN, rounds: ALL_ROUNDS },
-  'Each Round': { phase: PHASES.TURN, rounds: ALL_ROUNDS },
-  'Odd Rounds': { phase: PHASES.TURN, rounds: [1, 3, 5, 7, 9] },
-  'Odd-Numbered Rounds': { phase: PHASES.TURN, rounds: [1, 3, 5, 7, 9] },
-  'Even Rounds': { phase: PHASES.TURN, rounds: [2, 4, 6, 8, 10] },
-  'After Basic Attack': { phase: PHASES.AFTER_BASIC_ATTACK, rounds: ALL_ROUNDS },
-  'Low Health': { phase: PHASES.LOW_HEALTH, rounds: ALL_ROUNDS }
-};
-
-const ACTION_TYPES = {
-  MOD: 'mod', STATUS: 'status', DAMAGE: 'dmg', HEAL: 'heal',
-  STACK: 'stack', COPY_STATUS: 'copy_status', MOD_COMMAND: 'mod_command'
-};
-
 function normalizeTiming(item, habitTrigger) {
   if (item.phase && Array.isArray(item.rounds) && item.rounds.length > 0) {
     return { phase: item.phase, rounds: item.rounds.slice() };
@@ -50,8 +24,6 @@ function normalizeTiming(item, habitTrigger) {
   if (when === 'after_attack') return { phase: PHASES.AFTER_BASIC_ATTACK, rounds: item.rounds || ALL_ROUNDS.slice() };
   if (when === 'low_health') return { phase: PHASES.LOW_HEALTH, rounds: item.rounds || ALL_ROUNDS.slice() };
   if (when === 'rounds' && Array.isArray(item.rounds)) return { phase: PHASES.TURN, rounds: item.rounds.slice() };
-  const mapped = TRIGGER_MAP[habitTrigger];
-  if (mapped) return { phase: mapped.phase, rounds: mapped.rounds.slice() };
   return { phase: PHASES.TURN, rounds: ALL_ROUNDS.slice() };
 }
 
@@ -69,15 +41,6 @@ function parseTargeting(targetingString) {
   return targeting;
 }
 
-function parseDuration(durationString) {
-  if (!durationString) return 1;
-  const lower = durationString.toLowerCase();
-  if (lower.includes('whole combat') || lower.includes('permanent')) return 'combat';
-  if (lower.includes('instant') || lower.includes('immediate')) return 0;
-  const match = durationString.match(/(\d+)/);
-  return match ? parseInt(match[1], 10) : 1;
-}
-
 function resolveChance(actionRaw, rankIndex) {
   if (!actionRaw || actionRaw.chance == null) return 100;
   if (Array.isArray(actionRaw.chance)) return actionRaw.chance[rankIndex] ?? actionRaw.chance[0] ?? 100;
@@ -92,30 +55,30 @@ class Habit {
     this.unlockStar = habitData.unlockStar;
     this.trigger = habitData.trigger;
     this.targeting = habitData.targeting;
-    this.effectType = habitData.effectType;
-    this.duration = habitData.duration;
-    this.description = habitData.description;
-    this.scaling = habitData.scaling || [];
-    this.scalingRaw = habitData.scalingRaw;
     this.structured = habitData.structured || [];
     this.parsedActions = [];
     this.blocks = [];
     this.targetingParsed = parseTargeting(this.targeting);
-    this.durationParsed = parseDuration(this.duration);
     this.parseActions();
     this.triggerType = this.blocks[0] ? this.blocks[0].phase : PHASES.TURN;
   }
 
   parseActions() {
-    if (!this.structured || this.structured.length === 0) return;
-    for (const item of this.structured) {
+    for (const item of this.structured || []) {
       const timing = normalizeTiming(item, this.trigger);
-      this.blocks.push({ phase: timing.phase, rounds: timing.rounds, requires: item.requires || null, actions: item.actions || [] });
+      this.blocks.push({
+        phase: timing.phase,
+        rounds: timing.rounds,
+        requires: item.requires || null,
+        actions: item.actions || []
+      });
       for (const action of item.actions || []) {
         this.parsedActions.push({
-          when: timing.phase, phase: timing.phase, rounds: timing.rounds,
-          requires: item.requires || null, type: action.t, data: action,
-          chance: action.chance ? (Array.isArray(action.chance) ? action.chance[0] : action.chance) : 100
+          phase: timing.phase,
+          rounds: timing.rounds,
+          requires: item.requires || null,
+          type: action.t,
+          data: action
         });
       }
     }
@@ -126,33 +89,22 @@ class Habit {
   }
 
   getScalingValue(action, rankIndex) {
-    if (action.data && action.data.mods) {
+    const data = action.data || action;
+    if (data.mods) {
       const values = {};
-      for (const mod of action.data.mods) {
+      for (const mod of data.mods) {
         if (Array.isArray(mod.pct)) values[mod.stat] = mod.pct[rankIndex];
         else if (typeof mod.pct === 'number') values[mod.stat] = mod.pct;
       }
       return values;
     }
-    if (action.data && Array.isArray(action.data.pct)) return action.data.pct[rankIndex];
-    if (action.data && action.data.val) return action.data.val;
+    if (Array.isArray(data.pct)) return data.pct[rankIndex];
+    if (data.val) return data.val;
     return null;
   }
 
   shouldTrigger(battleRound, battlePhase) {
     return this.blocks.some(block => block.phase === battlePhase && block.rounds.includes(battleRound));
-  }
-}
-
-async function loadDragonHabits(dragonId) {
-  try {
-    const response = await fetch(`./data/${dragonId}_habits.json`);
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const data = await response.json();
-    return (data.habits || []).map(habitData => new Habit(habitData, dragonId));
-  } catch (error) {
-    console.error(`Falha ao carregar habits de ${dragonId}:`, error);
-    return [];
   }
 }
 
@@ -164,9 +116,8 @@ function executeHabitAction(habit, actionData, attacker, targets, rank = 1, opti
   const result = { success: true, missed: false, chance: 100, executed: 0, log: [], damages: [], heals: [], effects: [] };
   const rankIndex = Math.max(0, Math.min(4, rank - 1));
   const raw = actionData.data || actionData;
-  const chance = resolveChance(raw, rankIndex);
-  result.chance = chance;
-  if (!options.skipChance && !rollChance(chance)) {
+  result.chance = resolveChance(raw, rankIndex);
+  if (!options.skipChance && !rollChance(result.chance)) {
     result.success = false;
     result.missed = true;
     return result;
@@ -174,13 +125,13 @@ function executeHabitAction(habit, actionData, attacker, targets, rank = 1, opti
   const scalingValue = habit.getScalingValue(actionData, rankIndex);
   const actionType = raw.t || actionData.type;
   if (actionType === 'mod' || actionType === 'stack') {
-    result.effects = executeModAction(habit, actionData, targets, scalingValue);
+    result.effects = executeModAction(habit, actionData, attacker, targets, scalingValue);
     result.executed = result.effects.length;
   } else if (actionType === 'status') {
-    result.effects = executeStatusAction(habit, actionData, targets, scalingValue);
+    result.effects = targets.filter(t => t && !t.isDead).map(t => ({ target: t.name, statusType: raw.st }));
     result.executed = result.effects.length;
   } else if (actionType === 'dmg') {
-    result.damages = executeDamageAction(habit, actionData, attacker, targets, scalingValue);
+    result.damages = executeDamageAction(habit, actionData, attacker, targets, scalingValue, options.round);
     result.executed = result.damages.length;
   } else if (actionType === 'heal') {
     result.heals = executeHealAction(habit, actionData, attacker, targets, scalingValue);
@@ -189,41 +140,40 @@ function executeHabitAction(habit, actionData, attacker, targets, rank = 1, opti
   return result;
 }
 
-function executeModAction(habit, actionData, targets, scalingValue) {
+function executeModAction(habit, actionData, attacker, targets, scalingValue) {
   const effects = [];
   if (!scalingValue) return effects;
   const raw = actionData.data || actionData;
   const duration = raw.dur == null ? 'combat' : raw.dur;
+  const options = { excludeBasic: !!raw.excludeBasic, stackId: raw.id || null };
   for (const target of targets) {
     if (!target || target.isDead) continue;
-    for (const stat in scalingValue) {
-      const value = scalingValue[stat];
-      if (typeof target.addStatModifier === 'function') target.addStatModifier(stat, value, duration);
-      effects.push({ target: target.name, stat, value, duration, log: `${target.name}: ${stat} ${value > 0 ? '+' : ''}${value}%` });
+    if (raw.t === 'stack' && typeof target.addStack === 'function') {
+      const count = target.addStack(raw.id || 'stack', scalingValue, duration, { ...options, stacks: raw.stacks || 1 });
+      if (raw.tgt && raw.tgt.linkAs && attacker) attacker.links[raw.tgt.linkAs] = target;
+      effects.push({ target: target.name, log: `${target.name}: stack ${raw.id || ''} x${count}` });
+    } else {
+      for (const stat in scalingValue) {
+        target.addStatModifier(stat, scalingValue[stat], duration, options);
+        effects.push({ target: target.name, log: `${target.name}: ${stat} ${scalingValue[stat] > 0 ? '+' : ''}${scalingValue[stat]}%` });
+      }
     }
   }
   return effects;
 }
 
-function executeStatusAction(habit, actionData, targets) {
-  const effects = [];
-  const actionRaw = actionData.data || actionData;
-  for (const target of targets) {
-    if (!target || target.isDead) continue;
-    effects.push({ target: target.name, statusType: actionRaw.st, duration: actionRaw.dur || 2, log: `${target.name}: ${actionRaw.st}` });
-  }
-  return effects;
-}
-
-function executeDamageAction(habit, actionData, attacker, targets, scalingValue) {
+function executeDamageAction(habit, actionData, attacker, targets, scalingValue, round) {
   const damages = [];
   const raw = actionData.data || actionData;
   const damageType = (raw.dt || 'physical').toUpperCase();
-  const rate = typeof scalingValue === 'number' ? scalingValue : 0;
+  let rate = typeof scalingValue === 'number' ? scalingValue : 0;
+  if (raw.roundBonus && round != null) {
+    const bonus = raw.roundBonus[String(round)] ?? raw.roundBonus[round];
+    if (bonus) rate *= bonus;
+  }
   for (const target of targets) {
     if (!target || target.isDead) continue;
-    const amount = calculateFinalDamage(attacker, target, damageType, rate);
-    damages.push({ target: target.name, amount, log: `${target.name}: Dano -${amount}` });
+    damages.push({ target: target.name, amount: calculateFinalDamage(attacker, target, damageType, rate) });
   }
   return damages;
 }
@@ -242,8 +192,12 @@ function executeHealAction(habit, actionData, attacker, targets, scalingValue) {
 }
 
 export {
-  ALL_ROUNDS, PHASES, TRIGGER_TYPES, TRIGGER_MAP, ACTION_TYPES,
-  normalizeTiming, parseTargeting, parseDuration, resolveChance,
-  Habit, loadDragonHabits, loadDragonHabitsSync,
-  executeHabitAction, executeModAction, executeStatusAction, executeDamageAction, executeHealAction
+  ALL_ROUNDS,
+  PHASES,
+  normalizeTiming,
+  parseTargeting,
+  resolveChance,
+  Habit,
+  loadDragonHabitsSync,
+  executeHabitAction
 };
