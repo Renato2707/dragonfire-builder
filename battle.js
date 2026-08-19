@@ -39,13 +39,11 @@ class Battle {
   initialize() {
     this.isActive = true;
     this.currentRound = 0;
-
     this.logSeparator('BATTLE START');
     this.logInfo(`3v3 Combat - Maximum ${this.maxRounds} rounds`);
     this.logTeamStatus('Team A', this.teamA);
     this.logTeamStatus('Team B', this.teamB);
     this.logSeparator();
-
     this.executeHabitsForPhase(PHASES.COMBAT_START, this.allCharacters, 1);
   }
 
@@ -54,66 +52,49 @@ class Battle {
   }
 
   runRound() {
-    if (!this.isActive || this.isFinished) {
-      return false;
-    }
-
+    if (!this.isActive || this.isFinished) return false;
     this.currentRound += 1;
-
     if (this.currentRound > this.maxRounds) {
       this.endBattle(null, `Maximum ${this.maxRounds} rounds reached`);
       return false;
     }
-
     this.phaseStartOfRound();
-
     if (!isTeamAlive(this.teamA) || !isTeamAlive(this.teamB)) {
       this.checkVictory();
       return false;
     }
-
     const actionOrder = this.phaseCalculateInitiative();
-
     for (const character of actionOrder) {
       if (character.isDead) continue;
-
       if (!canAct(character)) {
         this.logAction(`${character.name} cannot act this turn (${this.getActiveEffectString(character)})`);
         continue;
       }
-
       this.executeCharacterAction(character);
-
       if (!isTeamAlive(this.teamA) || !isTeamAlive(this.teamB)) {
         this.checkVictory();
         return false;
       }
     }
-
     this.phaseEndOfRound();
-
     if (!isTeamAlive(this.teamA) || !isTeamAlive(this.teamB)) {
       this.checkVictory();
       return false;
     }
-
     this.logRoundSummary();
     return true;
   }
 
   phaseStartOfRound() {
     this.logSeparator(`ROUND ${this.currentRound}`);
-
     for (const character of this.allCharacters) {
       updateEffects(character);
     }
-
     this.executeHabitsForPhase(PHASES.ROUND_START, this.allCharacters, this.currentRound);
   }
 
   phaseCalculateInitiative() {
-    const alive = this.allCharacters.filter(c => !c.isDead);
-    return sortByInitiative(alive);
+    return sortByInitiative(this.allCharacters.filter(c => !c.isDead));
   }
 
   phaseEndOfRound() {
@@ -121,6 +102,9 @@ class Battle {
       if (character.isDead) continue;
       processDamageEffects(character);
       processHealingEffects(character);
+      if (typeof character.tickPercentMods === 'function') {
+        character.tickPercentMods();
+      }
       if (character.isDead) {
         this.logAction(`💀 ${character.name} fell!`);
       }
@@ -131,8 +115,7 @@ class Battle {
     const r = round || (phase === PHASES.COMBAT_START ? 1 : this.currentRound);
     for (const character of characters) {
       if (!character || character.isDead) continue;
-      const habits = character.getHabitsForPhase(r, phase);
-      for (const habit of habits) {
+      for (const habit of character.getHabitsForPhase(r, phase)) {
         this.executeHabit(character, habit, phase, r);
       }
     }
@@ -141,65 +124,45 @@ class Battle {
   executeCharacterAction(character) {
     this.executeHabitsForPhase(PHASES.TURN, [character], this.currentRound);
     if (character.isDead) return;
-
     if (character.getHealthPercentage() < 50) {
       this.executeHabitsForPhase(PHASES.LOW_HEALTH, [character], this.currentRound);
     }
     if (character.isDead) return;
-
     if (!canAttack(character)) {
       this.logAction(`${character.name} cannot attack`);
       return;
     }
-
     const targetTeam = character.teamId === 0 ? this.teamB : this.teamA;
     const alive = targetTeam.filter(c => !c.isDead);
     if (alive.length === 0) return;
-
-    const randomIndex = Math.floor(Math.random() * alive.length);
-    this.executeBasicAttack(character, alive[randomIndex]);
-
+    this.executeBasicAttack(character, alive[Math.floor(Math.random() * alive.length)]);
     if (!character.isDead) {
       this.executeHabitsForPhase(PHASES.AFTER_BASIC_ATTACK, [character], this.currentRound);
     }
   }
 
   selectCharacterAction(character) {
-    if (!canAttack(character)) {
-      return null;
-    }
-    return {
-      type: 'basic_attack',
-      name: 'Basic Attack'
-    };
+    if (!canAttack(character)) return null;
+    return { type: 'basic_attack', name: 'Basic Attack' };
   }
 
   executeBasicAttack(attacker, defender) {
     const damageType = this.selectDamageType(attacker);
     const baseDamage = calculateFinalDamage(attacker, defender, damageType);
     const actualDamage = defender.takeDamage(baseDamage);
-
     this.logAction(
       `${attacker.name} attacks ${defender.name} (${damageType}): -${actualDamage} HP ` +
       `(${Math.round(defender.currentHealth)}/${Math.round(defender.maxHealth)})`
     );
-
     attacker.logAction(`Attacked ${defender.name} for ${actualDamage} damage`);
-
-    if (defender.isDead) {
-      this.logAction(`💀 ${defender.name} fell!`);
-    }
-
-    if (Math.random() * 100 < 30) {
-      this.applyRandomEffect(attacker, defender);
-    }
+    if (defender.isDead) this.logAction(`💀 ${defender.name} fell!`);
+    if (Math.random() * 100 < 30) this.applyRandomEffect(attacker, defender);
   }
 
   selectDamageType(attacker) {
     const str = attacker.getModifiedStat('str');
     const inst = attacker.getModifiedStat('inst');
     const int = attacker.getModifiedStat('int');
-
     if (str >= inst && str >= int) return 'PHYSICAL';
     if (int >= str && int >= inst) return 'FIRE';
     return 'TACTICAL';
@@ -213,12 +176,7 @@ class Battle {
 
   resolveTargets(character, habit, action) {
     const tgt = (action && action.tgt) || habit.targetingParsed;
-    if (!tgt) {
-      return [character];
-    }
-    if (tgt.side === 'self') {
-      return [character];
-    }
+    if (!tgt || tgt.side === 'self') return [character];
     const allies = character.teamId === 0 ? this.teamA : this.teamB;
     const enemies = character.teamId === 0 ? this.teamB : this.teamA;
     return selectTargets(character, allies, enemies, tgt);
@@ -227,10 +185,7 @@ class Battle {
   executeHabit(character, habit, phase, round) {
     const r = round || this.currentRound || 1;
     const p = phase || PHASES.TURN;
-    const blocks = typeof habit.getBlocksFor === 'function'
-      ? habit.getBlocksFor(r, p)
-      : null;
-
+    const blocks = typeof habit.getBlocksFor === 'function' ? habit.getBlocksFor(r, p) : null;
     const actionEntries = [];
     if (blocks && blocks.length) {
       for (const block of blocks) {
@@ -245,10 +200,7 @@ class Battle {
         }
       }
     }
-
-    if (actionEntries.length === 0) {
-      return;
-    }
+    if (actionEntries.length === 0) return;
 
     this.logAction(`${character.name} uses ${habit.name}`);
 
@@ -261,12 +213,14 @@ class Battle {
       }
 
       const actionResult = executeHabitAction(habit, action, character, targets, character.habitRank);
-      const actionType = action.type || (raw && raw.t);
+      if (actionResult.missed) {
+        this.logAction(`  ➜ ${habit.name} misses (${actionResult.chance}%)`);
+        continue;
+      }
 
+      const actionType = action.type || raw.t;
       if (actionType === 'mod' || actionType === 'stack') {
-        for (const effect of actionResult.effects) {
-          this.logAction(`  ➜ ${effect.log}`);
-        }
+        for (const effect of actionResult.effects) this.logAction(`  ➜ ${effect.log}`);
       } else if (actionType === 'status') {
         const statusType = (raw.st || '').toUpperCase();
         const duration = raw.dur || 2;
@@ -276,20 +230,18 @@ class Battle {
           this.logAction(`  ➜ ${statusType} applied to ${target.name} (${duration} rounds)`);
         }
       } else if (actionType === 'dmg') {
-        for (const target of targets) {
-          if (target.isDead) continue;
-          const damage = actionResult.damages[0] ? actionResult.damages[0].amount : 50;
-          const actualDamage = target.takeDamage(damage);
-          this.logAction(`  ➜ ${character.name} deals ${actualDamage} damage to ${target.name}`);
-          if (target.isDead) {
-            this.logAction(`    💀 ${target.name} fell!`);
-          }
+        for (const dmg of actionResult.damages) {
+          const target = targets.find(t => t.name === dmg.target);
+          if (!target || target.isDead) continue;
+          const actualDamage = target.takeDamage(dmg.amount);
+          this.logAction(`  ➜ ${character.name} deals ${actualDamage} ${((raw.dt || '') + ' ').toUpperCase()}damage to ${target.name}`);
+          if (target.isDead) this.logAction(`    💀 ${target.name} fell!`);
         }
       } else if (actionType === 'heal') {
-        for (const target of targets) {
-          if (target.isDead) continue;
-          const healing = actionResult.heals[0] ? actionResult.heals[0].amount : 50;
-          const actualHealing = target.heal(healing);
+        for (const heal of actionResult.heals) {
+          const target = targets.find(t => t.name === heal.target);
+          if (!target || target.isDead) continue;
+          const actualHealing = target.heal(heal.amount);
           this.logAction(`  ➜ ${character.name} heals ${target.name} for ${actualHealing} HP`);
         }
       } else {
@@ -305,14 +257,9 @@ class Battle {
   checkVictory() {
     const teamAAlive = isTeamAlive(this.teamA);
     const teamBAlive = isTeamAlive(this.teamB);
-
-    if (!teamAAlive && !teamBAlive) {
-      this.endBattle(null, 'Both teams eliminated');
-    } else if (!teamAAlive) {
-      this.endBattle('B', 'Team A eliminated');
-    } else if (!teamBAlive) {
-      this.endBattle('A', 'Team B eliminated');
-    }
+    if (!teamAAlive && !teamBAlive) this.endBattle(null, 'Both teams eliminated');
+    else if (!teamAAlive) this.endBattle('B', 'Team A eliminated');
+    else if (!teamBAlive) this.endBattle('A', 'Team B eliminated');
   }
 
   endBattle(winner, reason) {
@@ -320,19 +267,12 @@ class Battle {
     this.isFinished = true;
     this.winner = winner;
     this.endReason = reason;
-
     this.logSeparator('BATTLE END');
     this.logInfo(`Round ${this.currentRound}/${this.maxRounds}`);
     this.logInfo(`Reason: ${reason}`);
-
-    if (winner === 'A') {
-      this.logInfo('🏆 TEAM A WINS!');
-    } else if (winner === 'B') {
-      this.logInfo('🏆 TEAM B WINS!');
-    } else {
-      this.logInfo('⚔️ DRAW - Both teams eliminated or timeout');
-    }
-
+    if (winner === 'A') this.logInfo('🏆 TEAM A WINS!');
+    else if (winner === 'B') this.logInfo('🏆 TEAM B WINS!');
+    else this.logInfo('⚔️ DRAW - Both teams eliminated or timeout');
     this.logSeparator();
     this.logFinalStatus();
   }
@@ -377,20 +317,13 @@ class Battle {
     this.logInfo('Final Status:');
     this.logTeamStatus('Team A', this.teamA);
     this.logTeamStatus('Team B', this.teamB);
-    const survivorsA = this.teamA.filter(c => !c.isDead);
-    const survivorsB = this.teamB.filter(c => !c.isDead);
-    this.logInfo(`Survivors: Team A: ${survivorsA.length}, Team B: ${survivorsB.length}`);
+    this.logInfo(`Survivors: Team A: ${this.teamA.filter(c => !c.isDead).length}, Team B: ${this.teamB.filter(c => !c.isDead).length}`);
   }
 
   getActiveEffectString(character) {
-    if (!character.activeEffects || character.activeEffects.length === 0) {
-      return 'no effects';
-    }
+    if (!character.activeEffects || character.activeEffects.length === 0) return 'no effects';
     const effectNames = character.activeEffects
-      .filter(e => {
-        if (typeof e.isExpired === 'function') return !e.isExpired();
-        return e.duration > 0;
-      })
+      .filter(e => (typeof e.isExpired === 'function' ? !e.isExpired() : e.duration > 0))
       .map(e => e.name)
       .join(', ');
     return effectNames || 'no effects';
@@ -452,10 +385,7 @@ class Battle {
       healthPercent: character.getHealthPercentage(),
       isDead: character.isDead,
       activeEffects: (character.activeEffects || [])
-        .filter(e => {
-          if (typeof e.isExpired === 'function') return !e.isExpired();
-          return e.duration > 0;
-        })
+        .filter(e => (typeof e.isExpired === 'function' ? !e.isExpired() : e.duration > 0))
         .map(e => ({ name: e.name, duration: e.duration }))
     };
   }
