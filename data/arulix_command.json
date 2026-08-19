@@ -1,0 +1,51 @@
+{
+  "dragonId": "arulix",
+  "name": "Twisting Coil",
+  "command": [
+    {
+      "phase": "turn",
+      "rounds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+      "actions": [
+        {
+          "t": "mod",
+          "mods": [{ "stat": "fire_dealt", "pct": -15 }],
+          "dur": 1,
+          "chance": 25,
+          "tgt": { "side": "enemy", "count": "all", "select": "dealer:fire" }
+        }
+      ]
+    },
+    {
+      "phase": "turn",
+      "rounds": [1, 2, 3, 5, 8],
+      "actions": [
+        {
+          "t": "dmg",
+          "dt": "tactical",
+          "pct": 45,
+          "tgt": { "side": "enemy", "count": "all", "select": "dealer:physical" }
+        }
+      ]
+    }
+  ],
+  "vanguard": [
+    {
+      "phase": "combat_start",
+      "rounds": [1],
+      "actions": [
+        {
+          "t": "mod",
+          "mods": [{ "stat": "str", "fixed": 15 }, { "stat": "int", "fixed": 15 }, { "stat": "inst", "fixed": 15 }],
+          "dur": "combat",
+          "tgt": { "side": "self" }
+        },
+        {
+          "t": "mod",
+          "mods": [{ "stat": "dmg_received", "pct": -8 }],
+          "dur": "combat",
+          "tgt": { "side": "ally", "count": 1, "slot": 2, "excludeSelf": true }
+        }
+      ]
+    }
+  ]
+}
