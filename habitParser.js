@@ -1,5 +1,4 @@
 // habitParser.js
-// Timing canônico: phase + rounds [1..10]
 
 import { rollChance, calculateFinalDamage } from './utils.js';
 
@@ -35,13 +34,8 @@ const TRIGGER_MAP = {
 };
 
 const ACTION_TYPES = {
-  MOD: 'mod',
-  STATUS: 'status',
-  DAMAGE: 'dmg',
-  HEAL: 'heal',
-  STACK: 'stack',
-  COPY_STATUS: 'copy_status',
-  MOD_COMMAND: 'mod_command'
+  MOD: 'mod', STATUS: 'status', DAMAGE: 'dmg', HEAL: 'heal',
+  STACK: 'stack', COPY_STATUS: 'copy_status', MOD_COMMAND: 'mod_command'
 };
 
 function normalizeTiming(item, habitTrigger) {
@@ -72,14 +66,6 @@ function parseTargeting(targetingString) {
   if (match) targeting.count = parseInt(match[1], 10);
   if (lower.includes('adjacent')) targeting.position = 'adjacent';
   else if (lower.includes('same lane')) targeting.position = 'same_lane';
-  else if (lower.includes('flank')) {
-    if (lower.includes('left')) targeting.position = 'left_flank';
-    else if (lower.includes('right')) targeting.position = 'right_flank';
-    else targeting.position = 'flank';
-  }
-  if (lower.includes('lowest')) targeting.select = 'lowest_troops';
-  else if (lower.includes('highest')) targeting.select = 'highest_troops';
-  else if (lower.includes('random')) targeting.select = 'random';
   return targeting;
 }
 
@@ -89,15 +75,12 @@ function parseDuration(durationString) {
   if (lower.includes('whole combat') || lower.includes('permanent')) return 'combat';
   if (lower.includes('instant') || lower.includes('immediate')) return 0;
   const match = durationString.match(/(\d+)/);
-  if (match) return parseInt(match[1], 10);
-  return 1;
+  return match ? parseInt(match[1], 10) : 1;
 }
 
 function resolveChance(actionRaw, rankIndex) {
-  if (actionRaw.chance == null) return 100;
-  if (Array.isArray(actionRaw.chance)) {
-    return actionRaw.chance[rankIndex] ?? actionRaw.chance[0] ?? 100;
-  }
+  if (!actionRaw || actionRaw.chance == null) return 100;
+  if (Array.isArray(actionRaw.chance)) return actionRaw.chance[rankIndex] ?? actionRaw.chance[0] ?? 100;
   return actionRaw.chance;
 }
 
@@ -124,26 +107,14 @@ class Habit {
   }
 
   parseActions() {
-    if (!this.structured || this.structured.length === 0) {
-      console.warn(`Habit ${this.name} não tem structured`);
-      return;
-    }
+    if (!this.structured || this.structured.length === 0) return;
     for (const item of this.structured) {
       const timing = normalizeTiming(item, this.trigger);
-      this.blocks.push({
-        phase: timing.phase,
-        rounds: timing.rounds,
-        requires: item.requires || null,
-        actions: item.actions || []
-      });
+      this.blocks.push({ phase: timing.phase, rounds: timing.rounds, requires: item.requires || null, actions: item.actions || [] });
       for (const action of item.actions || []) {
         this.parsedActions.push({
-          when: timing.phase,
-          phase: timing.phase,
-          rounds: timing.rounds,
-          requires: item.requires || null,
-          type: action.t,
-          data: action,
+          when: timing.phase, phase: timing.phase, rounds: timing.rounds,
+          requires: item.requires || null, type: action.t, data: action,
           chance: action.chance ? (Array.isArray(action.chance) ? action.chance[0] : action.chance) : 100
         });
       }
@@ -154,27 +125,14 @@ class Habit {
     return this.blocks.filter(block => block.phase === phase && block.rounds.includes(round));
   }
 
-  getActionByRank(rank) {
-    const rankIndex = Math.max(0, Math.min(4, rank - 1));
-    return this.parsedActions.map(action => ({
-      ...action,
-      rankIndex,
-      rankValue: this.getScalingValue(action, rankIndex)
-    }));
-  }
-
   getScalingValue(action, rankIndex) {
     if (action.data && action.data.mods) {
       const values = {};
       for (const mod of action.data.mods) {
         if (Array.isArray(mod.pct)) values[mod.stat] = mod.pct[rankIndex];
         else if (typeof mod.pct === 'number') values[mod.stat] = mod.pct;
-        else if (mod.fixed) values[mod.stat] = Array.isArray(mod.fixed) ? mod.fixed[rankIndex] : mod.fixed;
       }
       return values;
-    }
-    if (action.data && action.data.chance) {
-      return Array.isArray(action.data.chance) ? action.data.chance[rankIndex] : action.data.chance;
     }
     if (action.data && Array.isArray(action.data.pct)) return action.data.pct[rankIndex];
     if (action.data && action.data.val) return action.data.val;
@@ -184,16 +142,12 @@ class Habit {
   shouldTrigger(battleRound, battlePhase) {
     return this.blocks.some(block => block.phase === battlePhase && block.rounds.includes(battleRound));
   }
-
-  getDescription() {
-    return `${this.name} (★${this.unlockStar}): ${this.trigger || this.triggerType} → ${this.targeting}`;
-  }
 }
 
 async function loadDragonHabits(dragonId) {
   try {
     const response = await fetch(`./data/${dragonId}_habits.json`);
-    if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
     return (data.habits || []).map(habitData => new Habit(habitData, dragonId));
   } catch (error) {
@@ -206,33 +160,19 @@ function loadDragonHabitsSync(habitData, dragonId) {
   return (habitData.habits || []).map(h => new Habit(h, dragonId));
 }
 
-function executeHabitAction(habit, actionData, attacker, targets, rank = 1) {
-  const result = {
-    success: true,
-    missed: false,
-    chance: 100,
-    executed: 0,
-    log: [],
-    damages: [],
-    heals: [],
-    effects: []
-  };
-
+function executeHabitAction(habit, actionData, attacker, targets, rank = 1, options = {}) {
+  const result = { success: true, missed: false, chance: 100, executed: 0, log: [], damages: [], heals: [], effects: [] };
   const rankIndex = Math.max(0, Math.min(4, rank - 1));
   const raw = actionData.data || actionData;
   const chance = resolveChance(raw, rankIndex);
   result.chance = chance;
-
-  if (!rollChance(chance)) {
+  if (!options.skipChance && !rollChance(chance)) {
     result.success = false;
     result.missed = true;
-    result.log.push(`chance ${chance}% falhou`);
     return result;
   }
-
   const scalingValue = habit.getScalingValue(actionData, rankIndex);
   const actionType = raw.t || actionData.type;
-
   if (actionType === 'mod' || actionType === 'stack') {
     result.effects = executeModAction(habit, actionData, targets, scalingValue);
     result.executed = result.effects.length;
@@ -246,7 +186,6 @@ function executeHabitAction(habit, actionData, attacker, targets, rank = 1) {
     result.heals = executeHealAction(habit, actionData, attacker, targets, scalingValue);
     result.executed = result.heals.length;
   }
-
   return result;
 }
 
@@ -255,39 +194,23 @@ function executeModAction(habit, actionData, targets, scalingValue) {
   if (!scalingValue) return effects;
   const raw = actionData.data || actionData;
   const duration = raw.dur == null ? 'combat' : raw.dur;
-
   for (const target of targets) {
     if (!target || target.isDead) continue;
     for (const stat in scalingValue) {
       const value = scalingValue[stat];
-      if (typeof target.addStatModifier === 'function') {
-        target.addStatModifier(stat, value, duration);
-      }
-      effects.push({
-        target: target.name,
-        stat,
-        value,
-        duration,
-        log: `${target.name}: ${stat} ${value > 0 ? '+' : ''}${value}%`
-      });
+      if (typeof target.addStatModifier === 'function') target.addStatModifier(stat, value, duration);
+      effects.push({ target: target.name, stat, value, duration, log: `${target.name}: ${stat} ${value > 0 ? '+' : ''}${value}%` });
     }
   }
   return effects;
 }
 
-function executeStatusAction(habit, actionData, targets, scalingValue) {
+function executeStatusAction(habit, actionData, targets) {
   const effects = [];
   const actionRaw = actionData.data || actionData;
-  const statusType = actionRaw.st;
-  const duration = actionRaw.dur || 2;
   for (const target of targets) {
     if (!target || target.isDead) continue;
-    effects.push({
-      target: target.name,
-      statusType,
-      duration,
-      log: `${target.name}: ${statusType} aplicado (${duration} rodadas)`
-    });
+    effects.push({ target: target.name, statusType: actionRaw.st, duration: actionRaw.dur || 2, log: `${target.name}: ${actionRaw.st}` });
   }
   return effects;
 }
@@ -300,11 +223,7 @@ function executeDamageAction(habit, actionData, attacker, targets, scalingValue)
   for (const target of targets) {
     if (!target || target.isDead) continue;
     const amount = calculateFinalDamage(attacker, target, damageType, rate);
-    damages.push({
-      target: target.name,
-      amount,
-      log: `${target.name}: Dano -${amount}`
-    });
+    damages.push({ target: target.name, amount, log: `${target.name}: Dano -${amount}` });
   }
   return damages;
 }
@@ -315,37 +234,16 @@ function executeHealAction(habit, actionData, attacker, targets, scalingValue) {
   for (const target of targets) {
     if (!target || target.isDead) continue;
     let amount = target.maxHealth * (rate / 100);
-    if (typeof attacker.getRecoveryDealtMultiplier === 'function') {
-      amount *= attacker.getRecoveryDealtMultiplier();
-    }
-    if (typeof target.getRecoveryReceivedMultiplier === 'function') {
-      amount *= target.getRecoveryReceivedMultiplier();
-    }
-    amount = Math.max(1, Math.round(amount));
-    heals.push({
-      target: target.name,
-      amount,
-      log: `${target.name}: Cura +${amount}`
-    });
+    if (typeof attacker.getRecoveryDealtMultiplier === 'function') amount *= attacker.getRecoveryDealtMultiplier();
+    if (typeof target.getRecoveryReceivedMultiplier === 'function') amount *= target.getRecoveryReceivedMultiplier();
+    heals.push({ target: target.name, amount: Math.max(1, Math.round(amount)) });
   }
   return heals;
 }
 
 export {
-  ALL_ROUNDS,
-  PHASES,
-  TRIGGER_TYPES,
-  TRIGGER_MAP,
-  ACTION_TYPES,
-  normalizeTiming,
-  parseTargeting,
-  parseDuration,
-  Habit,
-  loadDragonHabits,
-  loadDragonHabitsSync,
-  executeHabitAction,
-  executeModAction,
-  executeStatusAction,
-  executeDamageAction,
-  executeHealAction
+  ALL_ROUNDS, PHASES, TRIGGER_TYPES, TRIGGER_MAP, ACTION_TYPES,
+  normalizeTiming, parseTargeting, parseDuration, resolveChance,
+  Habit, loadDragonHabits, loadDragonHabitsSync,
+  executeHabitAction, executeModAction, executeStatusAction, executeDamageAction, executeHealAction
 };
