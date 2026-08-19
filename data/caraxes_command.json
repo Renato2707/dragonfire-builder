@@ -1,0 +1,39 @@
+{
+  "dragonId": "caraxes",
+  "name": "Blood and Fire",
+  "command": [
+    {
+      "phase": "turn",
+      "rounds": [3, 6, 9],
+      "actions": [
+        {
+          "t": "dmg",
+          "dt": "fire",
+          "pct": 100,
+          "ifBonus": { "status": "first_strike", "pct": 150 },
+          "tgt": { "side": "enemy", "count": 3, "select": "any" }
+        }
+      ]
+    }
+  ],
+  "vanguard": [
+    {
+      "phase": "combat_start",
+      "rounds": [1],
+      "actions": [
+        {
+          "t": "mod",
+          "mods": [{ "stat": "fire_dealt", "pct": 16 }],
+          "dur": "combat",
+          "tgt": { "side": "self" }
+        },
+        {
+          "t": "mod",
+          "mods": [{ "stat": "str", "fixed": 20 }, { "stat": "init", "fixed": 20 }],
+          "dur": "combat",
+          "tgt": { "side": "ally", "count": 1, "slot": 2, "excludeSelf": true }
+        }
+      ]
+    }
+  ]
+}
