@@ -1,80 +1,59 @@
-// battle.js (Refatorado - Nível 5: Battle Engine)
-// Responsabilidade: Orquestrar simulação de batalha com Damage, Effects, Habits, Positioning
+// battle.js
+// Ciclo: combat_start → round_start → turn → básico → after_basic_attack / low_health
 
 import { calculateFinalDamage, sortByInitiative, isTeamAlive } from './utils.js';
-import { 
-  updateEffects, 
-  processDamageEffects, 
+import {
+  updateEffects,
+  processDamageEffects,
   processHealingEffects,
   canAct,
-  canUseAbilities,
   canAttack,
   applyEffect
 } from './effects.js';
-import { 
+import {
   selectTargets,
-  visualizeBattle,
   getPositionName
 } from './positionSystem.js';
-import { 
-  loadDragonHabitsSync,
-  executeHabitAction
+import {
+  executeHabitAction,
+  PHASES
 } from './habitParser.js';
-
-// ============================================================================
-// SEÇÃO 1: CLASSE BATTLE
-// ============================================================================
 
 class Battle {
   constructor(teamA, teamB, options = {}) {
-    // Teams
     this.teamA = teamA;
     this.teamB = teamB;
     this.allCharacters = [...teamA, ...teamB];
-    
-    // Configuração
     this.maxRounds = options.maxRounds || 10;
     this.verbose = options.verbose !== false;
-    
-    // Estado
     this.currentRound = 0;
     this.isActive = false;
     this.isFinished = false;
-    this.winner = null;  // 'A', 'B', ou null (empate)
+    this.winner = null;
     this.endReason = '';
-    
-    // Histórico
     this.battleLog = [];
     this.roundHistory = [];
     this.actionLog = [];
   }
 
-  // ========================================================================
-  // SEÇÃO 2: INICIALIZAÇÃO E CICLO
-  // ========================================================================
-
   initialize() {
-    // Executar setup inicial (antes de rodada 1)
     this.isActive = true;
     this.currentRound = 0;
-    
+
     this.logSeparator('BATTLE START');
     this.logInfo(`3v3 Combat - Maximum ${this.maxRounds} rounds`);
     this.logTeamStatus('Team A', this.teamA);
     this.logTeamStatus('Team B', this.teamB);
     this.logSeparator();
-    
-    // Executar "Start of Combat" habits
-    this.executeStartOfCombatHabits();
+
+    this.executeHabitsForPhase(PHASES.COMBAT_START, this.allCharacters, 1);
   }
 
   start() {
-    // Sinônimo para initialize()
     this.initialize();
   }
 
   runRound() {
-    // Executar uma rodada completa
     if (!this.isActive || this.isFinished) {
       return false;
     }
@@ -86,20 +65,16 @@ class Battle {
       return false;
     }
 
-    // Fase 1: Início da rodada (durações, efeitos passivos)
     this.phaseStartOfRound();
 
-    // Fase 2: Verificar equipes vivas
     if (!isTeamAlive(this.teamA) || !isTeamAlive(this.teamB)) {
       this.checkVictory();
       return false;
     }
 
-    // Fase 3: Calcular iniciativa e ordenar
     const actionOrder = this.phaseCalculateInitiative();
 
-    // Fase 4: Executar ações
-    for (let character of actionOrder) {
+    for (const character of actionOrder) {
       if (character.isDead) continue;
 
       if (!canAct(character)) {
@@ -109,144 +84,99 @@ class Battle {
 
       this.executeCharacterAction(character);
 
-      // Verificar derrota durante ação
       if (!isTeamAlive(this.teamA) || !isTeamAlive(this.teamB)) {
         this.checkVictory();
         return false;
       }
     }
 
-    // Fase 5: Processamento de efeitos no final da rodada
     this.phaseEndOfRound();
 
-    // Verificar derrota por dano de efeito
     if (!isTeamAlive(this.teamA) || !isTeamAlive(this.teamB)) {
       this.checkVictory();
       return false;
     }
 
-    // Fase 6: Log da rodada
     this.logRoundSummary();
-
     return true;
   }
 
-  // ========================================================================
-  // SEÇÃO 3: FASES DA RODADA
-  // ========================================================================
-
   phaseStartOfRound() {
-    // Fase 1: Atualizar efeitos, remover expirados
     this.logSeparator(`ROUND ${this.currentRound}`);
 
-    for (let character of this.allCharacters) {
+    for (const character of this.allCharacters) {
       updateEffects(character);
     }
+
+    this.executeHabitsForPhase(PHASES.ROUND_START, this.allCharacters, this.currentRound);
   }
 
   phaseCalculateInitiative() {
-    // Fase 2: Calcular INIT, aplicar SLOW/FIRST-STRIKE, ordenar
     const alive = this.allCharacters.filter(c => !c.isDead);
     return sortByInitiative(alive);
   }
 
   phaseEndOfRound() {
-    // Fase 5: Processar DoT, cura, verificar morte
-    for (let character of this.allCharacters) {
+    for (const character of this.allCharacters) {
       if (character.isDead) continue;
-
-      const dotDamage = processDamageEffects(character);
-      const healing = processHealingEffects(character);
-
+      processDamageEffects(character);
+      processHealingEffects(character);
       if (character.isDead) {
         this.logAction(`💀 ${character.name} fell!`);
       }
     }
   }
 
-  // ========================================================================
-  // SEÇÃO 4: EXECUÇÃO DE AÇÕES
-  // ========================================================================
+  executeHabitsForPhase(phase, characters, round) {
+    const r = round || (phase === PHASES.COMBAT_START ? 1 : this.currentRound);
+    for (const character of characters) {
+      if (!character || character.isDead) continue;
+      const habits = character.getHabitsForPhase(r, phase);
+      for (const habit of habits) {
+        this.executeHabit(character, habit, phase, r);
+      }
+    }
+  }
 
   executeCharacterAction(character) {
-    // Selecionar ação e alvo
-    const action = this.selectCharacterAction(character);
+    this.executeHabitsForPhase(PHASES.TURN, [character], this.currentRound);
+    if (character.isDead) return;
 
-    if (!action) {
-      // Nenhuma ação disponível, pular turno
+    if (character.getHealthPercentage() < 50) {
+      this.executeHabitsForPhase(PHASES.LOW_HEALTH, [character], this.currentRound);
+    }
+    if (character.isDead) return;
+
+    if (!canAttack(character)) {
+      this.logAction(`${character.name} cannot attack`);
       return;
     }
 
-    // Se for Basic Attack, executar diretamente
-    if (action.type === 'basic_attack') {
-      const targetTeam = character.teamId === 0 ? this.teamB : this.teamA;
-      const alive = targetTeam.filter(c => !c.isDead);
-      
-      if (alive.length === 0) return;
-      
-      const randomIndex = Math.floor(Math.random() * alive.length);
-      this.executeBasicAttack(character, alive[randomIndex]);
-      return;
-    }
-
-    // Se for Habit, selecionar alvos baseado em targeting
     const targetTeam = character.teamId === 0 ? this.teamB : this.teamA;
-    const targets = selectTargets(character, character.teamId === 0 ? this.teamA : this.teamB, targetTeam, action.habit.targetingParsed);
+    const alive = targetTeam.filter(c => !c.isDead);
+    if (alive.length === 0) return;
 
-    if (targets.length === 0) {
-      this.logAction(`${character.name} has no valid targets`);
-      return;
+    const randomIndex = Math.floor(Math.random() * alive.length);
+    this.executeBasicAttack(character, alive[randomIndex]);
+
+    if (!character.isDead) {
+      this.executeHabitsForPhase(PHASES.AFTER_BASIC_ATTACK, [character], this.currentRound);
     }
-
-    this.executeHabit(character, action.habit);
   }
 
   selectCharacterAction(character) {
-    // Selecionar qual ação executar (Habit ou Basic Attack)
-    // Por enquanto: apenas Basic Attack durante rodadas normais
-    // Habits "Start of Combat" já foram executadas no initialize()
-    
-    // Fallback: Basic Attack
     if (!canAttack(character)) {
       return null;
     }
-
     return {
       type: 'basic_attack',
       name: 'Basic Attack'
     };
   }
 
-  selectTargetsForAction(character, targetTeam, action) {
-    // Selecionar alvos baseado em ação
-    // Por enquanto: 1 alvo aleatório
-    // Será expandido para usar targetingParsed de Habits
-
-    if (action.type === 'basic_attack') {
-      const alive = targetTeam.filter(c => !c.isDead);
-      if (alive.length === 0) return [];
-
-      const randomIndex = Math.floor(Math.random() * alive.length);
-      return [alive[randomIndex]];
-    }
-
-    return [];
-  }
-
-  executeActionAgainstTarget(attacker, defender, action) {
-    // Executar uma ação contra um alvo (ou múltiplos alvos se Habit)
-    if (action.type === 'basic_attack') {
-      this.executeBasicAttack(attacker, defender);
-    } else if (action.type === 'habit') {
-      this.executeHabit(attacker, action.habit);
-    }
-  }
-
   executeBasicAttack(attacker, defender) {
-    // Ataque básico: dano simples
     const damageType = this.selectDamageType(attacker);
     const baseDamage = calculateFinalDamage(attacker, defender, damageType);
-
     const actualDamage = defender.takeDamage(baseDamage);
 
     this.logAction(
@@ -260,14 +190,12 @@ class Battle {
       this.logAction(`💀 ${defender.name} fell!`);
     }
 
-    // 30% chance de aplicar efeito aleatório
     if (Math.random() * 100 < 30) {
       this.applyRandomEffect(attacker, defender);
     }
   }
 
   selectDamageType(attacker) {
-    // Determinar tipo de dano baseado no stat mais alto
     const str = attacker.getModifiedStat('str');
     const inst = attacker.getModifiedStat('inst');
     const int = attacker.getModifiedStat('int');
@@ -278,98 +206,103 @@ class Battle {
   }
 
   applyRandomEffect(attacker, defender) {
-    // Aplicar efeito aleatório (placeholder para Habits depois)
     const possibleEffects = ['BURN', 'BLEED', 'VULNERABLE', 'SLOW'];
     const randomEffect = possibleEffects[Math.floor(Math.random() * possibleEffects.length)];
-
-    // Será substituído por sistema real de effects depois
     this.logAction(`  ➜ ${randomEffect} applied to ${defender.name}`);
   }
 
-  // ========================================================================
-  // SEÇÃO 5: HABITS
-  // ========================================================================
+  resolveTargets(character, habit, action) {
+    const tgt = (action && action.tgt) || habit.targetingParsed;
+    if (!tgt) {
+      return [character];
+    }
+    if (tgt.side === 'self') {
+      return [character];
+    }
+    const allies = character.teamId === 0 ? this.teamA : this.teamB;
+    const enemies = character.teamId === 0 ? this.teamB : this.teamA;
+    return selectTargets(character, allies, enemies, tgt);
+  }
 
-  executeHabit(character, habit) {
-    // Executar uma habit específica contra alvos selecionados
-    const targetTeam = character.teamId === 0 ? this.teamB : this.teamA;
-    const targets = selectTargets(character, character.teamId === 0 ? this.teamA : this.teamB, targetTeam, habit.targetingParsed);
+  executeHabit(character, habit, phase, round) {
+    const r = round || this.currentRound || 1;
+    const p = phase || PHASES.TURN;
+    const blocks = typeof habit.getBlocksFor === 'function'
+      ? habit.getBlocksFor(r, p)
+      : null;
 
-    if (targets.length === 0) {
-      this.logAction(`${character.name} uses ${habit.name} but has no valid targets`);
+    const actionEntries = [];
+    if (blocks && blocks.length) {
+      for (const block of blocks) {
+        for (const action of block.actions || []) {
+          actionEntries.push({ type: action.t, data: action, phase: block.phase, rounds: block.rounds });
+        }
+      }
+    } else {
+      for (const action of habit.parsedActions || []) {
+        if (!action.phase || (action.phase === p && (!action.rounds || action.rounds.includes(r)))) {
+          actionEntries.push(action);
+        }
+      }
+    }
+
+    if (actionEntries.length === 0) {
       return;
     }
 
-    this.logAction(`${character.name} uses ${habit.name} on ${targets.map(t => t.name).join(', ')}`);
+    this.logAction(`${character.name} uses ${habit.name}`);
 
-    // Executar cada ação da habit contra os alvos
-    for (let action of habit.parsedActions) {
+    for (const action of actionEntries) {
+      const raw = action.data || action;
+      const targets = this.resolveTargets(character, habit, raw);
+      if (targets.length === 0) {
+        this.logAction(`  ➜ ${habit.name}: no valid targets`);
+        continue;
+      }
+
       const actionResult = executeHabitAction(habit, action, character, targets, character.habitRank);
+      const actionType = action.type || (raw && raw.t);
 
-      // Aplicar efeitos baseado no tipo de ação
-      if (action.type === 'mod') {
-        // Modificador de stats
-        for (let effect of actionResult.effects) {
+      if (actionType === 'mod' || actionType === 'stack') {
+        for (const effect of actionResult.effects) {
           this.logAction(`  ➜ ${effect.log}`);
         }
-      } else if (action.type === 'status') {
-        // Efeito de status (BURN, STUN, etc)
-        const statusType = action.data.st.toUpperCase();
-        const duration = action.data.dur || 2;
-
-        for (let target of targets) {
+      } else if (actionType === 'status') {
+        const statusType = (raw.st || '').toUpperCase();
+        const duration = raw.dur || 2;
+        for (const target of targets) {
           if (target.isDead) continue;
           applyEffect(target, statusType, character.habitRank, character.name);
           this.logAction(`  ➜ ${statusType} applied to ${target.name} (${duration} rounds)`);
         }
-      } else if (action.type === 'dmg') {
-        // Dano direto
-        for (let target of targets) {
+      } else if (actionType === 'dmg') {
+        for (const target of targets) {
           if (target.isDead) continue;
-          const damage = actionResult.damages[0]?.amount || 50;
+          const damage = actionResult.damages[0] ? actionResult.damages[0].amount : 50;
           const actualDamage = target.takeDamage(damage);
           this.logAction(`  ➜ ${character.name} deals ${actualDamage} damage to ${target.name}`);
-
           if (target.isDead) {
             this.logAction(`    💀 ${target.name} fell!`);
           }
         }
-      } else if (action.type === 'heal') {
-        // Cura
-        for (let target of targets) {
+      } else if (actionType === 'heal') {
+        for (const target of targets) {
           if (target.isDead) continue;
-          const healing = actionResult.heals[0]?.amount || 50;
+          const healing = actionResult.heals[0] ? actionResult.heals[0].amount : 50;
           const actualHealing = target.heal(healing);
           this.logAction(`  ➜ ${character.name} heals ${target.name} for ${actualHealing} HP`);
         }
+      } else {
+        this.logAction(`  ➜ ${actionType || 'action'} (not fully applied)`);
       }
     }
   }
 
   executeStartOfCombatHabits() {
-    // Executar todas as habits que ativam "Start of Combat"
-    for (let character of this.allCharacters) {
-      if (character.isDead) continue;
-
-      const combatStartHabits = character.getHabitsByTrigger('combat_start');
-
-      for (let habit of combatStartHabits) {
-        if (habit.unlockStar > character.habitRank * 2) {
-          // Habit ainda não desbloqueada
-          continue;
-        }
-
-        this.executeHabit(character, habit);
-      }
-    }
+    this.executeHabitsForPhase(PHASES.COMBAT_START, this.allCharacters, 1);
   }
 
-  // ========================================================================
-  // SEÇÃO 6: VERIFICAÇÃO DE VITÓRIA
-  // ========================================================================
-
   checkVictory() {
-    // Verificar condições de vitória
     const teamAAlive = isTeamAlive(this.teamA);
     const teamBAlive = isTeamAlive(this.teamB);
 
@@ -383,7 +316,6 @@ class Battle {
   }
 
   endBattle(winner, reason) {
-    // Encerrar batalha
     this.isActive = false;
     this.isFinished = true;
     this.winner = winner;
@@ -405,16 +337,12 @@ class Battle {
     this.logFinalStatus();
   }
 
-  // ========================================================================
-  // SEÇÃO 7: LOGGING E VISUALIZAÇÃO
-  // ========================================================================
-
   logSeparator(title = '') {
     const sep = '═══════════════════════════════════════════════════════';
     if (title) {
-      this.battleLog.push(`${sep}`);
+      this.battleLog.push(sep);
       this.battleLog.push(title);
-      this.battleLog.push(`${sep}`);
+      this.battleLog.push(sep);
     } else {
       this.battleLog.push(sep);
     }
@@ -432,7 +360,7 @@ class Battle {
 
   logTeamStatus(teamName, team) {
     this.logInfo(`${teamName}:`);
-    for (let char of team) {
+    for (const char of team) {
       const status = char.isDead ? '💀 DEAD' : `${Math.round(char.currentHealth)}/${Math.round(char.maxHealth)} HP`;
       this.logAction(`${char.name}: ${status}`);
     }
@@ -449,34 +377,30 @@ class Battle {
     this.logInfo('Final Status:');
     this.logTeamStatus('Team A', this.teamA);
     this.logTeamStatus('Team B', this.teamB);
-
     const survivorsA = this.teamA.filter(c => !c.isDead);
     const survivorsB = this.teamB.filter(c => !c.isDead);
-
     this.logInfo(`Survivors: Team A: ${survivorsA.length}, Team B: ${survivorsB.length}`);
   }
 
   getActiveEffectString(character) {
-    // Retorna string com efeitos ativos
+    if (!character.activeEffects || character.activeEffects.length === 0) {
+      return 'no effects';
+    }
     const effectNames = character.activeEffects
-      .filter(e => !e.isExpired())
+      .filter(e => {
+        if (typeof e.isExpired === 'function') return !e.isExpired();
+        return e.duration > 0;
+      })
       .map(e => e.name)
       .join(', ');
-
     return effectNames || 'no effects';
   }
 
-  // ========================================================================
-  // SEÇÃO 8: RESULTADOS E EXPORTAÇÃO
-  // ========================================================================
-
   getLog() {
-    // Retorna log completo em formato string
     return this.battleLog.join('\n');
   }
 
   getResult() {
-    // Retorna objeto com resultado da batalha
     return {
       winner: this.winner,
       endReason: this.endReason,
@@ -489,10 +413,8 @@ class Battle {
   }
 
   getSummary() {
-    // Retorna resumo executivo
     const result = this.getResult();
     const winnerName = result.winner === 'A' ? 'Team A' : result.winner === 'B' ? 'Team B' : 'Draw';
-
     return {
       winner: winnerName,
       rounds: `${result.roundsPlayed}/${result.roundsMax}`,
@@ -501,10 +423,6 @@ class Battle {
       reason: result.endReason
     };
   }
-
-  // ========================================================================
-  // SEÇÃO 9: UTILITÁRIOS E HELPERS
-  // ========================================================================
 
   isBattleActive() {
     return this.isActive && !this.isFinished;
@@ -515,9 +433,7 @@ class Battle {
   }
 
   getTeamStatus(teamId) {
-    // Retorna {alive: number, dead: number, totalHP: number}
     const team = teamId === 0 ? this.teamA : this.teamB;
-    
     return {
       alive: team.filter(c => !c.isDead).length,
       dead: team.filter(c => c.isDead).length,
@@ -527,7 +443,6 @@ class Battle {
   }
 
   getCharacterStatus(character) {
-    // Retorna status detalhado de um character
     return {
       name: character.name,
       team: character.teamId === 0 ? 'A' : 'B',
@@ -536,15 +451,14 @@ class Battle {
       maxHealth: Math.round(character.maxHealth),
       healthPercent: character.getHealthPercentage(),
       isDead: character.isDead,
-      activeEffects: character.activeEffects
-        .filter(e => !e.isExpired())
+      activeEffects: (character.activeEffects || [])
+        .filter(e => {
+          if (typeof e.isExpired === 'function') return !e.isExpired();
+          return e.duration > 0;
+        })
         .map(e => ({ name: e.name, duration: e.duration }))
     };
   }
 }
-
-// ============================================================================
-// EXPORTS
-// ============================================================================
 
 export { Battle };
