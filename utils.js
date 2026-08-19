@@ -18,10 +18,7 @@ const DAMAGE_TYPES = {
 
 function getDamageTypeConfig(damageType) {
   const type = DAMAGE_TYPES[String(damageType || '').toUpperCase()];
-  if (!type) {
-    console.warn(`Tipo de dano desconhecido: ${damageType}, usando PHYSICAL`);
-    return DAMAGE_TYPES.PHYSICAL;
-  }
+  if (!type) return DAMAGE_TYPES.PHYSICAL;
   return type;
 }
 
@@ -38,39 +35,28 @@ function calculateMitigation(defender, damageType) {
   return Math.min(defenderStat * 0.3, defenderStat * 0.8);
 }
 
-function applyDamageMultipliers(baseDamage, attacker, defender, damageType) {
+function applyDamageMultipliers(baseDamage, attacker, defender, damageType, options = {}) {
   let finalDamage = baseDamage;
   if (attacker.damageBonus) finalDamage *= (1 + attacker.damageBonus / 100);
   if (attacker.damagePenalty) finalDamage *= (1 - attacker.damagePenalty / 100);
   if (defender.defenseBonus) finalDamage *= (1 - defender.defenseBonus / 100);
   if (defender.defensePenalty) finalDamage *= (1 + defender.defensePenalty / 100);
+  const flags = { basic: !!options.basic };
   if (typeof attacker.getDealtMultiplier === 'function') {
-    finalDamage *= attacker.getDealtMultiplier(damageType);
+    finalDamage *= attacker.getDealtMultiplier(damageType, flags);
   }
   if (typeof defender.getReceivedMultiplier === 'function') {
-    finalDamage *= defender.getReceivedMultiplier(damageType);
+    finalDamage *= defender.getReceivedMultiplier(damageType, flags);
   }
   return finalDamage;
 }
 
-function calculateFinalDamage(attacker, defender, damageType, bonusPercent = 0) {
+function calculateFinalDamage(attacker, defender, damageType, bonusPercent = 0, options = {}) {
   const baseDamage = calculateBaseDamage(attacker, damageType);
   const mitigation = calculateMitigation(defender, damageType);
-  let damageMitigated = applyDamageMultipliers(baseDamage - mitigation, attacker, defender, damageType);
+  let damageMitigated = applyDamageMultipliers(baseDamage - mitigation, attacker, defender, damageType, options);
   if (bonusPercent) damageMitigated *= (1 + bonusPercent / 100);
   return Math.max(1, Math.round(damageMitigated));
-}
-
-function calculateCriticalChance(attacker) {
-  return Math.min(30, Math.max(0, attacker.getModifiedStat('inst') / 4));
-}
-
-function getCriticalMultiplier() {
-  return 1.5;
-}
-
-function rollCritical(critChance) {
-  return rollChance(critChance);
 }
 
 function hasActiveId(character, id) {
@@ -94,67 +80,8 @@ function sortByInitiative(characters) {
   });
 }
 
-function getDistance(slot1, slot2) {
-  return Math.abs(slot1 - slot2);
-}
-
-function isInSameLane(slot1, slot2) {
-  return slot1 === slot2;
-}
-
-function isAdjacent(slot1, slot2) {
-  return getDistance(slot1, slot2) === 1;
-}
-
-function getAdjacentSlots(slot) {
-  const adjacent = [];
-  if (slot > 0) adjacent.push(slot - 1);
-  if (slot < 2) adjacent.push(slot + 1);
-  return adjacent;
-}
-
-function getSlotName(slot) {
-  return ['Left', 'Center', 'Right'][slot] || 'Unknown';
-}
-
-function validateCharacterTeam(characters) {
-  if (!Array.isArray(characters) || characters.length !== 3) return false;
-  return characters.every(c => c && c.name && typeof c.currentHealth === 'number');
-}
-
 function isTeamAlive(teamCharacters) {
   return teamCharacters.some(c => !c.isDead);
-}
-
-function validateDamageType(damageType) {
-  return Object.keys(DAMAGE_TYPES).includes(String(damageType || '').toUpperCase());
-}
-
-function formatHealth(current, max) {
-  return `${Math.round(current)}/${Math.round(max)}`;
-}
-
-function formatPercent(value) {
-  return `${Math.round(value)}%`;
-}
-
-function getHealthColor(healthPercent) {
-  if (healthPercent > 75) return 'green';
-  if (healthPercent > 50) return 'yellow';
-  if (healthPercent > 25) return 'orange';
-  return 'red';
-}
-
-function formatDamageReport(attacker, defender, damageType, baseDamage, mitigation, finalDamage) {
-  return {
-    attacker: attacker.name,
-    defender: defender.name,
-    type: damageType,
-    baseDamage: Math.round(baseDamage),
-    mitigation: Math.round(mitigation),
-    finalDamage: Math.round(finalDamage),
-    description: `${attacker.name} (${damageType}) → ${defender.name}: ${Math.round(finalDamage)} dano`
-  };
 }
 
 export {
@@ -166,21 +93,7 @@ export {
   calculateMitigation,
   applyDamageMultipliers,
   calculateFinalDamage,
-  calculateCriticalChance,
-  getCriticalMultiplier,
-  rollCritical,
   hasActiveId,
-  getDistance,
-  isInSameLane,
-  isAdjacent,
-  getAdjacentSlots,
-  getSlotName,
-  validateCharacterTeam,
   isTeamAlive,
-  validateDamageType,
-  sortByInitiative,
-  formatHealth,
-  formatPercent,
-  getHealthColor,
-  formatDamageReport
+  sortByInitiative
 };
