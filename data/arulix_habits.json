@@ -6,59 +6,29 @@
       "slot": 1,
       "unlockStar": 2,
       "name": "Hypnotic Helix",
-      "trigger": "Rounds 2, 4, 7, 9, Rounds 1, 3, 6, 8",
-      "targeting": "1 Enemy, 1 Enemy (Physical Attacker)",
-      "effectType": "Status Effect (Control/DoT)",
+      "targeting": "1 Enemy",
+      "effectType": "Status Effect",
       "duration": "2 Rounds",
-      "scalingRaw": "Chance: 12.5% | 15% | 17.5% | 21.3% | 25% ; Chance: 12.5% | 15% | 17.5% | 21.3% | 25%",
+      "scalingRaw": "Chance: 12.5% | 15% | 17.5% | 21.3% | 25%",
       "scaling": [
         {
           "label": "Chance",
-          "values": [
-            12.5,
-            15,
-            17.5,
-            21.3,
-            25
-          ],
-          "unit": "%",
-          "fixed": false
-        },
-        {
-          "label": "Chance",
-          "values": [
-            12.5,
-            15,
-            17.5,
-            21.3,
-            25
-          ],
+          "values": [12.5, 15, 17.5, 21.3, 25],
           "unit": "%",
           "fixed": false
         }
       ],
-      "description": "Rounds 2, 4, 7, 9, Rounds 1, 3, 6, 8: Apply Status Effect (Control/DoT) to 1 Enemy, 1 Enemy (Physical Attacker) (Chance: 12.5% | 15% | 17.5% | 21.3% | 25% ; Chance: 12.5% | 15% | 17.5% | 21.3% | 25%) for 2 Rounds.",
+      "description": "Rounds 1, 3, 6, 8: chance to Overwhelm 1 Enemy (prioritize Fire Damage dealers) for 2 rounds. Rounds 2, 4, 7, 9: chance to Stagger 1 Enemy (prioritize Physical Damage dealers) for 2 rounds.",
       "structured": [
         {
-          "when": "rounds",
-          "rounds": [
-            1,
-            3,
-            6,
-            8
-          ],
+          "phase": "turn",
+          "rounds": [1, 3, 6, 8],
           "actions": [
             {
               "t": "status",
               "st": "overwhelm",
               "dur": 2,
-              "chance": [
-                12.5,
-                15,
-                17.5,
-                21.3,
-                25
-              ],
+              "chance": [12.5, 15, 17.5, 21.3, 25],
               "tgt": {
                 "side": "enemy",
                 "count": 1,
@@ -68,25 +38,14 @@
           ]
         },
         {
-          "when": "rounds",
-          "rounds": [
-            2,
-            4,
-            7,
-            9
-          ],
+          "phase": "turn",
+          "rounds": [2, 4, 7, 9],
           "actions": [
             {
               "t": "status",
-              "st": "overwhelm",
+              "st": "stagger",
               "dur": 2,
-              "chance": [
-                12.5,
-                15,
-                17.5,
-                21.3,
-                25
-              ],
+              "chance": [12.5, 15, 17.5, 21.3, 25],
               "tgt": {
                 "side": "enemy",
                 "count": 1,
@@ -102,65 +61,35 @@
       "slot": 2,
       "unlockStar": 4,
       "name": "Battle Cunning",
-      "trigger": "Start of Combat",
       "targeting": "3 Enemies",
-      "effectType": "Stat Modifier (Buff)",
+      "effectType": "Stat Modifier",
       "duration": "Whole Combat",
       "scalingRaw": "STR: -4% | -4.8% | -5.6% | -6.8% | -8% ; INT: -4% | -4.8% | -5.6% | -6.8% | -8%",
       "scaling": [
         {
           "label": "STR",
-          "values": [
-            -4,
-            -4.8,
-            -5.6,
-            -6.8,
-            -8
-          ],
+          "values": [-4, -4.8, -5.6, -6.8, -8],
           "unit": "%",
           "fixed": false
         },
         {
           "label": "INT",
-          "values": [
-            -4,
-            -4.8,
-            -5.6,
-            -6.8,
-            -8
-          ],
+          "values": [-4, -4.8, -5.6, -6.8, -8],
           "unit": "%",
           "fixed": false
         }
       ],
-      "description": "Start of Combat: Apply Stat Modifier (Buff) to 3 Enemies (STR: -4% | -4.8% | -5.6% | -6.8% | -8% ; INT: -4% | -4.8% | -5.6% | -6.8% | -8%) for Whole Combat.",
+      "description": "Start of Combat: Reduce Strength and Intelligence of 3 Enemies in any lane until the end of combat (enhanced by Instinct).",
       "structured": [
         {
-          "when": "combat_start",
+          "phase": "combat_start",
+          "rounds": [1],
           "actions": [
             {
               "t": "mod",
               "mods": [
-                {
-                  "stat": "str",
-                  "pct": [
-                    -4,
-                    -4.8,
-                    -5.6,
-                    -6.8,
-                    -8
-                  ]
-                },
-                {
-                  "stat": "int",
-                  "pct": [
-                    -4,
-                    -4.8,
-                    -5.6,
-                    -6.8,
-                    -8
-                  ]
-                }
+                { "stat": "str", "pct": [-4, -4.8, -5.6, -6.8, -8] },
+                { "stat": "int", "pct": [-4, -4.8, -5.6, -6.8, -8] }
               ],
               "scaleStat": "inst",
               "dur": "combat",
@@ -179,47 +108,32 @@
       "slot": 3,
       "unlockStar": 6,
       "name": "Spiral Surge",
-      "trigger": "Rounds 1, 2, 3, 5, 8",
       "targeting": "2 Enemies",
-      "effectType": "Direct Damage (Nuke)",
-      "duration": "Whole Combat",
+      "effectType": "Direct Damage",
+      "duration": "Instant",
       "scalingRaw": "Rate: 20% | 24% | 28% | 34% | 40%",
       "scaling": [
         {
           "label": "Rate",
-          "values": [
-            20,
-            24,
-            28,
-            34,
-            40
-          ],
+          "values": [20, 24, 28, 34, 40],
           "unit": "%",
           "fixed": false
         }
       ],
-      "description": "Rounds 1, 2, 3, 5, 8: Apply Direct Damage (Nuke) to 2 Enemies (Rate: 20% | 24% | 28% | 34% | 40%) for Whole Combat.",
+      "description": "Rounds 1, 2, 3, 5, 8: Deal Physical Damage to 2 Enemies in any lane. Damage is increased by 1.5x on Round 5 and by 2x on Round 8.",
       "structured": [
         {
-          "when": "rounds",
-          "rounds": [
-            1,
-            2,
-            3,
-            5,
-            8
-          ],
+          "phase": "turn",
+          "rounds": [1, 2, 3, 5, 8],
           "actions": [
             {
               "t": "dmg",
               "dt": "physical",
-              "pct": [
-                20,
-                24,
-                28,
-                34,
-                40
-              ],
+              "pct": [20, 24, 28, 34, 40],
+              "roundBonus": {
+                "5": 1.5,
+                "8": 2
+              },
               "tgt": {
                 "side": "enemy",
                 "count": 2,
@@ -235,71 +149,55 @@
       "slot": 4,
       "unlockStar": 8,
       "name": "Iron Shell",
-      "trigger": "Start of Combat",
-      "targeting": "2 Allies",
-      "effectType": "Stat Modifier (Buff)",
+      "targeting": "2 other Allies",
+      "effectType": "Stat Modifier",
       "duration": "Whole Combat",
       "scalingRaw": "PHYSICAL_RECEIVED: -2.5% | -3% | -3.5% | -4.25% | -5% ; FIRE_RECEIVED: -2.5% | -3% | -3.5% | -4.25% | -5%",
       "scaling": [
         {
           "label": "PHYSICAL_RECEIVED",
-          "values": [
-            -2.5,
-            -3,
-            -3.5,
-            -4.25,
-            -5
-          ],
+          "values": [-2.5, -3, -3.5, -4.25, -5],
           "unit": "%",
           "fixed": false
         },
         {
           "label": "FIRE_RECEIVED",
-          "values": [
-            -2.5,
-            -3,
-            -3.5,
-            -4.25,
-            -5
-          ],
+          "values": [-2.5, -3, -3.5, -4.25, -5],
           "unit": "%",
           "fixed": false
         }
       ],
-      "description": "Start of Combat: Apply Stat Modifier (Buff) to 2 Allies (PHYSICAL_RECEIVED: -2.5% | -3% | -3.5% | -4.25% | -5% ; FIRE_RECEIVED: -2.5% | -3% | -3.5% | -4.25% | -5%) for Whole Combat.",
+      "description": "Start of Combat: Reduce Physical Damage Received (excluding Basic Attacks) and Fire Damage Received of 2 other Allies until the end of combat.",
       "structured": [
         {
-          "when": "combat_start",
+          "phase": "combat_start",
+          "rounds": [1],
           "actions": [
             {
               "t": "mod",
               "mods": [
-                {
-                  "stat": "physical_received",
-                  "pct": [
-                    -2.5,
-                    -3,
-                    -3.5,
-                    -4.25,
-                    -5
-                  ]
-                },
-                {
-                  "stat": "fire_received",
-                  "pct": [
-                    -2.5,
-                    -3,
-                    -3.5,
-                    -4.25,
-                    -5
-                  ]
-                }
+                { "stat": "physical_received", "pct": [-2.5, -3, -3.5, -4.25, -5] }
+              ],
+              "excludeBasic": true,
+              "dur": "combat",
+              "tgt": {
+                "side": "ally",
+                "count": 2,
+                "select": "any",
+                "excludeSelf": true
+              }
+            },
+            {
+              "t": "mod",
+              "mods": [
+                { "stat": "fire_received", "pct": [-2.5, -3, -3.5, -4.25, -5] }
               ],
               "dur": "combat",
               "tgt": {
                 "side": "ally",
                 "count": 2,
-                "select": "any"
+                "select": "any",
+                "excludeSelf": true
               }
             }
           ]
@@ -311,47 +209,50 @@
       "slot": 5,
       "unlockStar": 10,
       "name": "Mimicry",
-      "trigger": "Each Action / Round",
-      "targeting": "Self",
-      "effectType": "Ability Buff",
-      "duration": "Whole Combat",
-      "scalingRaw": "Rank 1: 10% | Rank 2: 12% | Rank 3: 14% | Rank 4: 17% | Rank 5: 20%",
+      "targeting": "1 Enemy, 1 Ally",
+      "effectType": "Copy Status",
+      "duration": "2 Rounds",
+      "scalingRaw": "Chance: 25% | 32.5% | 40% | 50% | 62.5%",
       "scaling": [
         {
-          "label": "Rank 1",
-          "values": [
-            10,
-            "Rank 2: 12%",
-            "Rank 3: 14%",
-            "Rank 4: 17%",
-            "Rank 5: 20%"
-          ],
+          "label": "Mimicry Chance",
+          "values": [25, 32.5, 40, 50, 62.5],
           "unit": "%",
           "fixed": false
         }
       ],
-      "description": "Each Action / Round: Apply Ability Buff to Self (Rank 1: 10% | Rank 2: 12% | Rank 3: 14% | Rank 4: 17% | Rank 5: 20%) for Whole Combat.",
+      "description": "Start of each Round: If any ally is afflicted with Weakened or Vulnerable, chance to copy that effect to 1 Enemy for 2 rounds. If any enemy is enhanced by Advantage or Resistance, chance to copy that effect to 1 Ally for 2 rounds.",
       "structured": [
         {
-          "when": "combat_start",
+          "phase": "round_start",
+          "rounds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
           "actions": [
             {
-              "t": "mod",
-              "mods": [
-                {
-                  "stat": "tactical_dealt",
-                  "pct": [
-                    10,
-                    12,
-                    14,
-                    17,
-                    20
-                  ]
-                }
-              ],
-              "dur": "combat",
+              "t": "copy_status",
+              "from": {
+                "side": "ally",
+                "status": ["weakened", "vulnerable"]
+              },
+              "dur": 2,
+              "chance": [25, 32.5, 40, 50, 62.5],
               "tgt": {
-                "side": "self"
+                "side": "enemy",
+                "count": 1,
+                "select": "any"
+              }
+            },
+            {
+              "t": "copy_status",
+              "from": {
+                "side": "enemy",
+                "status": ["advantage", "resistance"]
+              },
+              "dur": 2,
+              "chance": [25, 32.5, 40, 50, 62.5],
+              "tgt": {
+                "side": "ally",
+                "count": 1,
+                "select": "any"
               }
             }
           ]
