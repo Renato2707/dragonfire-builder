@@ -1,5 +1,18 @@
 // character.js
-// Responsabilidade: Definir a classe Character (dragão em batalha) com vida, posição, efeitos
+
+const CORE_STATS = ['str', 'inst', 'int', 'init'];
+
+const DEALT_BY_TYPE = {
+  PHYSICAL: 'physical_dealt',
+  TACTICAL: 'tactical_dealt',
+  FIRE: 'fire_dealt'
+};
+
+const RECEIVED_BY_TYPE = {
+  PHYSICAL: 'physical_received',
+  TACTICAL: 'tactical_received',
+  FIRE: 'fire_received'
+};
 
 class Character {
   constructor(dragonData, teamId, slotPosition) {
@@ -22,6 +35,7 @@ class Character {
     this.activeEffects = [];
     this.actionLog = [];
     this.roundsActive = 0;
+    this.percentMods = [];
 
     this.statModifiers = {
       str: 0,
@@ -44,24 +58,86 @@ class Character {
     return Math.max(50, base);
   }
 
+  addStatModifier(statName, amount, duration = 'combat') {
+    const stat = String(statName || '').toLowerCase();
+    if (!stat || amount == null || Number.isNaN(Number(amount))) return;
+    this.percentMods.push({
+      stat,
+      pct: Number(amount),
+      duration: duration === 'combat' || duration === 0 ? 'combat' : duration
+    });
+    if (CORE_STATS.includes(stat)) {
+      this.statModifiers[stat] = this.getPercentTotal(stat);
+    }
+  }
+
+  getPercentTotal(statName) {
+    const stat = String(statName || '').toLowerCase();
+    return this.percentMods
+      .filter(mod => mod.stat === stat)
+      .reduce((sum, mod) => sum + mod.pct, 0);
+  }
+
   getModifiedStat(statName) {
-    const base = this.stats[statName] || 0;
-    const modifier = this.statModifiers[statName] || 0;
-    return Math.max(0, base + modifier);
+    const stat = String(statName || '').toLowerCase();
+    const base = this.stats[stat] || 0;
+    const pct = this.getPercentTotal(stat);
+    if (CORE_STATS.includes(stat)) {
+      return Math.max(0, base * (1 + pct / 100));
+    }
+    return pct;
+  }
+
+  getDealtMultiplier(damageType) {
+    const key = DEALT_BY_TYPE[String(damageType || '').toUpperCase()];
+    const generic = this.getPercentTotal('dmg_dealt');
+    const typed = key ? this.getPercentTotal(key) : 0;
+    return 1 + (generic + typed) / 100;
+  }
+
+  getReceivedMultiplier(damageType) {
+    const key = RECEIVED_BY_TYPE[String(damageType || '').toUpperCase()];
+    const generic = this.getPercentTotal('dmg_received');
+    const typed = key ? this.getPercentTotal(key) : 0;
+    return 1 + (generic + typed) / 100;
+  }
+
+  getRecoveryDealtMultiplier() {
+    return 1 + this.getPercentTotal('recovery_dealt') / 100;
+  }
+
+  getRecoveryReceivedMultiplier() {
+    return 1 + this.getPercentTotal('recovery_received') / 100;
+  }
+
+  tickPercentMods() {
+    for (const mod of this.percentMods) {
+      if (typeof mod.duration === 'number') {
+        mod.duration -= 1;
+      }
+    }
+    this.percentMods = this.percentMods.filter(mod =>
+      mod.duration === 'combat' || (typeof mod.duration === 'number' && mod.duration > 0)
+    );
+    for (const stat of CORE_STATS) {
+      this.statModifiers[stat] = this.getPercentTotal(stat);
+    }
+  }
+
+  resetStatModifiers() {
+    this.percentMods = [];
+    this.statModifiers = { str: 0, inst: 0, int: 0, init: 0 };
   }
 
   takeDamage(amount) {
     if (this.isDead) return 0;
-
     const actualDamage = Math.max(0, amount);
     this.currentHealth -= actualDamage;
-
     if (this.currentHealth <= 0) {
       this.currentHealth = 0;
       this.isDead = true;
       this.actionLog.push(`MORTE: ${this.name} caiu`);
     }
-
     return actualDamage;
   }
 
@@ -74,7 +150,6 @@ class Character {
 
   applyEffect(effect) {
     if (this.isDead) return false;
-
     this.activeEffects.push({
       name: effect.name,
       duration: effect.duration,
@@ -82,7 +157,6 @@ class Character {
       magnitude: effect.magnitude || 0,
       appliedBy: effect.appliedBy
     });
-
     this.actionLog.push(`EFEITO: ${effect.name} aplicado por ${effect.duration} rodada(s)`);
     return true;
   }
@@ -109,16 +183,6 @@ class Character {
       effect.duration -= 1;
     }
     this.activeEffects = this.activeEffects.filter(e => e.duration > 0);
-  }
-
-  addStatModifier(statName, amount) {
-    if (this.statModifiers[statName] !== undefined) {
-      this.statModifiers[statName] += amount;
-    }
-  }
-
-  resetStatModifiers() {
-    this.statModifiers = { str: 0, inst: 0, int: 0, init: 0 };
   }
 
   getHealthPercentage() {
@@ -177,4 +241,4 @@ class Character {
   }
 }
 
-export { Character };
+export { Character, CORE_STATS, DEALT_BY_TYPE, RECEIVED_BY_TYPE };
