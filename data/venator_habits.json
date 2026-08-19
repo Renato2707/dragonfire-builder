@@ -1,0 +1,331 @@
+{
+  "dragonId": "venator",
+  "habits": [
+    {
+      "dragonId": "venator",
+      "slot": 1,
+      "unlockStar": 2,
+      "name": "Hunter's Bane",
+      "trigger": "Start of Combat",
+      "targeting": "1 Enemy",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "Whole Combat",
+      "scalingRaw": "INT: -30% | -36% | -42% | -51% | -60%",
+      "scaling": [
+        {
+          "label": "INT",
+          "values": [
+            -30,
+            -36,
+            -42,
+            -51,
+            -60
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Start of Combat: Apply Stat Modifier (Buff) to 1 Enemy (INT: -30% | -36% | -42% | -51% | -60%) for Whole Combat.",
+      "structured": [
+        {
+          "when": "combat_start",
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "int",
+                  "pct": [
+                    -30,
+                    -36,
+                    -42,
+                    -51,
+                    -60
+                  ]
+                }
+              ],
+              "scaleStat": "str",
+              "dur": "combat",
+              "tgt": {
+                "side": "enemy",
+                "count": 1,
+                "select": "prefer_dealer:fire"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "venator",
+      "slot": 2,
+      "unlockStar": 4,
+      "name": "Dragon's Might",
+      "trigger": "Start of Combat",
+      "targeting": "1 Self",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "Whole Combat",
+      "scalingRaw": "PHYSICAL_DEALT: 12.5% | 15% | 17.5% | 21.25% | 25%",
+      "scaling": [
+        {
+          "label": "PHYSICAL_DEALT",
+          "values": [
+            12.5,
+            15,
+            17.5,
+            21.25,
+            25
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Start of Combat: Apply Stat Modifier (Buff) to 1 Self (PHYSICAL_DEALT: 12.5% | 15% | 17.5% | 21.25% | 25%) for Whole Combat.",
+      "structured": [
+        {
+          "when": "combat_start",
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "physical_dealt",
+                  "pct": [
+                    12.5,
+                    15,
+                    17.5,
+                    21.25,
+                    25
+                  ]
+                }
+              ],
+              "dur": "combat",
+              "tgt": {
+                "side": "self"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "venator",
+      "slot": 3,
+      "unlockStar": 6,
+      "name": "Feral Precision",
+      "trigger": "Rounds 4, 6, 8, Each Action / Round",
+      "targeting": "1 Self, 1 Enemy (Lowest Troops)",
+      "effectType": "Direct Damage (Nuke), Status Effect (Control/DoT)",
+      "duration": "2 Rounds, Whole Combat",
+      "scalingRaw": "Rate: 20% | 24% | 28% | 34% | 40% ; Chance: 40% | 42% | 44% | 47% | 50%",
+      "scaling": [
+        {
+          "label": "Rate",
+          "values": [
+            20,
+            24,
+            28,
+            34,
+            40
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "Chance",
+          "values": [
+            40,
+            42,
+            44,
+            47,
+            50
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Rounds 4, 6, 8, Each Action / Round: Apply Direct Damage (Nuke), Status Effect (Control/DoT) to 1 Self, 1 Enemy (Lowest Troops) (Rate: 20% | 24% | 28% | 34% | 40% ; Chance: 40% | 42% | 44% | 47% | 50%) for 2 Rounds, Whole Combat.",
+      "structured": [
+        {
+          "when": "each",
+          "actions": [
+            {
+              "t": "dmg",
+              "dt": "physical",
+              "pct": [
+                20,
+                24,
+                28,
+                34,
+                40
+              ],
+              "tgt": {
+                "side": "enemy",
+                "count": 1,
+                "select": "least_troops"
+              }
+            }
+          ]
+        },
+        {
+          "when": "rounds",
+          "rounds": [
+            4,
+            6,
+            8
+          ],
+          "actions": [
+            {
+              "t": "status",
+              "st": "double_strike",
+              "dur": 2,
+              "chance": [
+                40,
+                42,
+                44,
+                47,
+                50
+              ],
+              "tgt": {
+                "side": "self"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "venator",
+      "slot": 4,
+      "unlockStar": 8,
+      "name": "Armor Break",
+      "trigger": "Start of Combat",
+      "targeting": "1 Enemy",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "Whole Combat",
+      "scalingRaw": "PHYSICAL_RECEIVED: 8% | 9.6% | 11.2% | 13.6% | 16%",
+      "scaling": [
+        {
+          "label": "PHYSICAL_RECEIVED",
+          "values": [
+            8,
+            9.6,
+            11.2,
+            13.6,
+            16
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Start of Combat: Apply Stat Modifier (Buff) to 1 Enemy (PHYSICAL_RECEIVED: 8% | 9.6% | 11.2% | 13.6% | 16%) for Whole Combat.",
+      "structured": [
+        {
+          "when": "combat_start",
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "physical_received",
+                  "pct": [
+                    8,
+                    9.6,
+                    11.2,
+                    13.6,
+                    16
+                  ]
+                }
+              ],
+              "dur": "combat",
+              "tgt": {
+                "side": "enemy",
+                "count": 1,
+                "select": "any"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "venator",
+      "slot": 5,
+      "unlockStar": 10,
+      "name": "Desperate Ambush",
+      "trigger": "Each Action / Round",
+      "targeting": "1 Enemy",
+      "effectType": "Direct Damage (Nuke), Status Effect (Control/DoT)",
+      "duration": "2 Rounds, Whole Combat",
+      "scalingRaw": "Rate: 60% | 78% | 96% | 120% | 150% ; Chance: 12% | 15.6% | 19.2% | 24% | 30%",
+      "scaling": [
+        {
+          "label": "Rate",
+          "values": [
+            60,
+            78,
+            96,
+            120,
+            150
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "Chance",
+          "values": [
+            12,
+            15.6,
+            19.2,
+            24,
+            30
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Each Action / Round: Apply Direct Damage (Nuke), Status Effect (Control/DoT) to 1 Enemy (Rate: 60% | 78% | 96% | 120% | 150% ; Chance: 12% | 15.6% | 19.2% | 24% | 30%) for 2 Rounds, Whole Combat.",
+      "structured": [
+        {
+          "when": "each",
+          "selfCond": "troops_below_50",
+          "actions": [
+            {
+              "t": "dmg",
+              "dt": "physical",
+              "pct": [
+                60,
+                78,
+                96,
+                120,
+                150
+              ],
+              "tgt": {
+                "side": "enemy",
+                "count": 1,
+                "select": "prefer_dealer:fire"
+              }
+            },
+            {
+              "t": "status",
+              "st": "overwhelm",
+              "dur": 2,
+              "chance": [
+                12,
+                15.6,
+                19.2,
+                24,
+                30
+              ],
+              "tgt": {
+                "side": "enemy",
+                "count": 1,
+                "select": "prefer_dealer:fire"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

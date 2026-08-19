@@ -1,0 +1,320 @@
+{
+  "dragonId": "caraxes",
+  "habits": [
+    {
+      "dragonId": "caraxes",
+      "slot": 1,
+      "unlockStar": 2,
+      "name": "Battle Dread",
+      "trigger": "Start of Combat",
+      "targeting": "3 Enemies",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "Whole Combat",
+      "scalingRaw": "STR: -6.5% | -7.8% | -9.1% | -11.05% | -13% ; INIT: -6.5% | -7.8% | -9.1% | -11.05% | -13%",
+      "scaling": [
+        {
+          "label": "STR",
+          "values": [
+            -6.5,
+            -7.8,
+            -9.1,
+            -11.05,
+            -13
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "INIT",
+          "values": [
+            -6.5,
+            -7.8,
+            -9.1,
+            -11.05,
+            -13
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Start of Combat: Apply Stat Modifier (Buff) to 3 Enemies (STR: -6.5% | -7.8% | -9.1% | -11.05% | -13% ; INIT: -6.5% | -7.8% | -9.1% | -11.05% | -13%) for Whole Combat.",
+      "structured": [
+        {
+          "when": "combat_start",
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "str",
+                  "pct": [
+                    -6.5,
+                    -7.8,
+                    -9.1,
+                    -11.05,
+                    -13
+                  ]
+                },
+                {
+                  "stat": "init",
+                  "pct": [
+                    -6.5,
+                    -7.8,
+                    -9.1,
+                    -11.05,
+                    -13
+                  ]
+                }
+              ],
+              "scaleStat": "int",
+              "dur": "combat",
+              "tgt": {
+                "side": "enemy",
+                "count": 3,
+                "select": "any"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "caraxes",
+      "slot": 2,
+      "unlockStar": 4,
+      "name": "Dragon's Flair",
+      "trigger": "Start of Combat",
+      "targeting": "1 Self",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "Whole Combat",
+      "scalingRaw": "FIRE_DEALT: 12.5% | 15% | 17.5% | 21.25% | 25%",
+      "scaling": [
+        {
+          "label": "FIRE_DEALT",
+          "values": [
+            12.5,
+            15,
+            17.5,
+            21.25,
+            25
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Start of Combat: Apply Stat Modifier (Buff) to 1 Self (FIRE_DEALT: 12.5% | 15% | 17.5% | 21.25% | 25%) for Whole Combat.",
+      "structured": [
+        {
+          "when": "combat_start",
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "fire_dealt",
+                  "pct": [
+                    12.5,
+                    15,
+                    17.5,
+                    21.25,
+                    25
+                  ]
+                }
+              ],
+              "dur": "combat",
+              "tgt": {
+                "side": "self"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "caraxes",
+      "slot": 3,
+      "unlockStar": 6,
+      "name": "Crippling Inferno",
+      "trigger": "Each Action / Round",
+      "targeting": "3 Enemies",
+      "effectType": "Status Effect (Control/DoT)",
+      "duration": "2 Rounds",
+      "scalingRaw": "Chance: 10% | 12% | 14% | 17% | 20% ; Chance: 10% | 12% | 14% | 17% | 20%",
+      "scaling": [
+        {
+          "label": "Chance",
+          "values": [
+            10,
+            12,
+            14,
+            17,
+            20
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "Chance",
+          "values": [
+            10,
+            12,
+            14,
+            17,
+            20
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Each Action / Round: Apply Status Effect (Control/DoT) to 3 Enemies (Chance: 10% | 12% | 14% | 17% | 20% ; Chance: 10% | 12% | 14% | 17% | 20%) for 2 Rounds.",
+      "structured": [
+        {
+          "when": "each",
+          "actions": [
+            {
+              "t": "status",
+              "st": "slow",
+              "dur": 2,
+              "chance": [
+                10,
+                12,
+                14,
+                17,
+                20
+              ],
+              "tgt": {
+                "side": "enemy",
+                "count": 3,
+                "select": "any"
+              }
+            },
+            {
+              "t": "status",
+              "st": "burn",
+              "dur": 2,
+              "val": 20,
+              "chance": [
+                10,
+                12,
+                14,
+                17,
+                20
+              ],
+              "tgt": {
+                "side": "enemy",
+                "count": 3,
+                "select": "any"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "caraxes",
+      "slot": 4,
+      "unlockStar": 8,
+      "name": "Mass Enfeeble",
+      "trigger": "Start of Combat",
+      "targeting": "3 Enemies",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "Whole Combat",
+      "scalingRaw": "PHYSICAL_DEALT: -5.5% | -6.6% | -7.7% | -9.35% | -11%",
+      "scaling": [
+        {
+          "label": "PHYSICAL_DEALT",
+          "values": [
+            -5.5,
+            -6.6,
+            -7.7,
+            -9.35,
+            -11
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Start of Combat: Apply Stat Modifier (Buff) to 3 Enemies (PHYSICAL_DEALT: -5.5% | -6.6% | -7.7% | -9.35% | -11%) for Whole Combat.",
+      "structured": [
+        {
+          "when": "combat_start",
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "physical_dealt",
+                  "pct": [
+                    -5.5,
+                    -6.6,
+                    -7.7,
+                    -9.35,
+                    -11
+                  ]
+                }
+              ],
+              "dur": "combat",
+              "tgt": {
+                "side": "enemy",
+                "count": 3,
+                "select": "any"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "caraxes",
+      "slot": 5,
+      "unlockStar": 10,
+      "name": "Blood Wyrm",
+      "trigger": "Each Action / Round",
+      "targeting": "1 Self",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "1 Round",
+      "scalingRaw": "FIRE_DEALT: 8% | 10.4% | 12.8% | 16% | 20%",
+      "scaling": [
+        {
+          "label": "FIRE_DEALT",
+          "values": [
+            8,
+            10.4,
+            12.8,
+            16,
+            20
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Each Action / Round: Apply Stat Modifier (Buff) to 1 Self (FIRE_DEALT: 8% | 10.4% | 12.8% | 16% | 20%) for 1 Round.",
+      "structured": [
+        {
+          "when": "each",
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "fire_dealt",
+                  "pct": [
+                    8,
+                    10.4,
+                    12.8,
+                    16,
+                    20
+                  ]
+                }
+              ],
+              "dur": 1,
+              "tgt": {
+                "side": "self"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

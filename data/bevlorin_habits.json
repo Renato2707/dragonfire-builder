@@ -1,0 +1,351 @@
+{
+  "dragonId": "bevlorin",
+  "habits": [
+    {
+      "dragonId": "bevlorin",
+      "slot": 1,
+      "unlockStar": 2,
+      "name": "Fire Ward",
+      "trigger": "Start of Combat",
+      "targeting": "1 Self, 1 Ally (Adjacent Lane)",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "Whole Combat",
+      "scalingRaw": "FIRE_RECEIVED: -5% | -6% | -7% | -8.5% | -10% ; FIRE_RECEIVED: -5% | -6% | -7% | -8.5% | -10%",
+      "scaling": [
+        {
+          "label": "FIRE_RECEIVED",
+          "values": [
+            -5,
+            -6,
+            -7,
+            -8.5,
+            -10
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "FIRE_RECEIVED",
+          "values": [
+            -5,
+            -6,
+            -7,
+            -8.5,
+            -10
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Start of Combat: Apply Stat Modifier (Buff) to 1 Self, 1 Ally (Adjacent Lane) (FIRE_RECEIVED: -5% | -6% | -7% | -8.5% | -10% ; FIRE_RECEIVED: -5% | -6% | -7% | -8.5% | -10%) for Whole Combat.",
+      "structured": [
+        {
+          "when": "combat_start",
+          "actions": [
+            {
+              "t": "stack",
+              "mods": [
+                {
+                  "stat": "fire_received",
+                  "pct": [
+                    -5,
+                    -6,
+                    -7,
+                    -8.5,
+                    -10
+                  ]
+                }
+              ],
+              "dur": "combat",
+              "tgt": {
+                "side": "ally",
+                "count": 1,
+                "select": "adjacency"
+              },
+              "id": "fire_ward"
+            },
+            {
+              "t": "stack",
+              "mods": [
+                {
+                  "stat": "fire_received",
+                  "pct": [
+                    -5,
+                    -6,
+                    -7,
+                    -8.5,
+                    -10
+                  ]
+                }
+              ],
+              "dur": "combat",
+              "tgt": {
+                "side": "self"
+              },
+              "id": "fire_ward"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "bevlorin",
+      "slot": 2,
+      "unlockStar": 4,
+      "name": "Dragon's Fury",
+      "trigger": "Start of Combat",
+      "targeting": "1 Self",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "Whole Combat",
+      "scalingRaw": "PHYSICAL_DEALT: 4% | 4.8% | 5.6% | 6.8% | 8% ; FIRE_DEALT: 4% | 4.8% | 5.6% | 6.8% | 8%",
+      "scaling": [
+        {
+          "label": "PHYSICAL_DEALT",
+          "values": [
+            4,
+            4.8,
+            5.6,
+            6.8,
+            8
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "FIRE_DEALT",
+          "values": [
+            4,
+            4.8,
+            5.6,
+            6.8,
+            8
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Start of Combat: Apply Stat Modifier (Buff) to 1 Self (PHYSICAL_DEALT: 4% | 4.8% | 5.6% | 6.8% | 8% ; FIRE_DEALT: 4% | 4.8% | 5.6% | 6.8% | 8%) for Whole Combat.",
+      "structured": [
+        {
+          "when": "combat_start",
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "physical_dealt",
+                  "pct": [
+                    4,
+                    4.8,
+                    5.6,
+                    6.8,
+                    8
+                  ]
+                },
+                {
+                  "stat": "fire_dealt",
+                  "pct": [
+                    4,
+                    4.8,
+                    5.6,
+                    6.8,
+                    8
+                  ]
+                }
+              ],
+              "dur": "combat",
+              "tgt": {
+                "side": "self"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "bevlorin",
+      "slot": 3,
+      "unlockStar": 6,
+      "name": "Renewal",
+      "trigger": "Rounds 1, 3, 5, 7, 9",
+      "targeting": "3 Allies",
+      "effectType": "Troop Healing",
+      "duration": "Whole Combat",
+      "scalingRaw": "Rate: 17.5% | 21% | 24.5% | 29.75% | 35%",
+      "scaling": [
+        {
+          "label": "Rate",
+          "values": [
+            17.5,
+            21,
+            24.5,
+            29.75,
+            35
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Rounds 1, 3, 5, 7, 9: Apply Troop Healing to 3 Allies (Rate: 17.5% | 21% | 24.5% | 29.75% | 35%) for Whole Combat.",
+      "structured": [
+        {
+          "when": "rounds",
+          "rounds": [
+            1,
+            3,
+            5,
+            7,
+            9
+          ],
+          "actions": [
+            {
+              "t": "heal",
+              "pct": [
+                17.5,
+                21,
+                24.5,
+                29.75,
+                35
+              ],
+              "tgt": {
+                "side": "ally",
+                "count": 3,
+                "select": "any"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "bevlorin",
+      "slot": 4,
+      "unlockStar": 8,
+      "name": "Vital Essence",
+      "trigger": "Start of Combat",
+      "targeting": "1 Self",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "Whole Combat",
+      "scalingRaw": "STR: 10% | 12% | 14% | 17% | 20% ; RECOVERY: 15% | 18% | 21% | 25.5% | 30%",
+      "scaling": [
+        {
+          "label": "STR",
+          "values": [
+            10,
+            12,
+            14,
+            17,
+            20
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "RECOVERY",
+          "values": [
+            15,
+            18,
+            21,
+            25.5,
+            30
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Start of Combat: Apply Stat Modifier (Buff) to 1 Self (STR: 10% | 12% | 14% | 17% | 20% ; RECOVERY: 15% | 18% | 21% | 25.5% | 30%) for Whole Combat.",
+      "structured": [
+        {
+          "when": "combat_start",
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "str",
+                  "pct": [
+                    10,
+                    12,
+                    14,
+                    17,
+                    20
+                  ]
+                },
+                {
+                  "stat": "recovery",
+                  "pct": [
+                    15,
+                    18,
+                    21,
+                    25.5,
+                    30
+                  ]
+                }
+              ],
+              "dur": "combat",
+              "tgt": {
+                "side": "self"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "bevlorin",
+      "slot": 5,
+      "unlockStar": 10,
+      "name": "Bountiful Gifts",
+      "trigger": "Each Action / Round",
+      "targeting": "1 Ally",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "2 Rounds",
+      "scalingRaw": "STR: 16% | 20.8% | 25.6% | 32% | 40%",
+      "scaling": [
+        {
+          "label": "STR",
+          "values": [
+            16,
+            20.8,
+            25.6,
+            32,
+            40
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Each Action / Round: Apply Stat Modifier (Buff) to 1 Ally (STR: 16% | 20.8% | 25.6% | 32% | 40%) for 2 Rounds.",
+      "structured": [
+        {
+          "when": "each",
+          "chance": 20,
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "str",
+                  "pct": [
+                    16,
+                    20.8,
+                    25.6,
+                    32,
+                    40
+                  ]
+                }
+              ],
+              "scaleStat": "int",
+              "dur": 2,
+              "tgt": {
+                "side": "ally",
+                "count": 1,
+                "select": "highest_str"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

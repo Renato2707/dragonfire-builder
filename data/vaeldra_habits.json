@@ -1,0 +1,437 @@
+{
+  "dragonId": "vaeldra",
+  "habits": [
+    {
+      "dragonId": "vaeldra",
+      "slot": 1,
+      "unlockStar": 2,
+      "name": "Dragon's Valor",
+      "trigger": "Start of Combat",
+      "targeting": "1 Self",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "Whole Combat",
+      "scalingRaw": "DMG_RECEIVED: -5% | -6% | -7% | -8.5% | -10% ; STR: 8.5% | 10.2% | 11.9% | 14.45% | 17%",
+      "scaling": [
+        {
+          "label": "DMG_RECEIVED",
+          "values": [
+            -5,
+            -6,
+            -7,
+            -8.5,
+            -10
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "STR",
+          "values": [
+            8.5,
+            10.2,
+            11.9,
+            14.45,
+            17
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Start of Combat: Apply Stat Modifier (Buff) to 1 Self (DMG_RECEIVED: -5% | -6% | -7% | -8.5% | -10% ; STR: 8.5% | 10.2% | 11.9% | 14.45% | 17%) for Whole Combat.",
+      "structured": [
+        {
+          "when": "combat_start",
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "dmg_received",
+                  "pct": [
+                    -5,
+                    -6,
+                    -7,
+                    -8.5,
+                    -10
+                  ]
+                },
+                {
+                  "stat": "str",
+                  "pct": [
+                    8.5,
+                    10.2,
+                    11.9,
+                    14.45,
+                    17
+                  ]
+                }
+              ],
+              "dur": "combat",
+              "tgt": {
+                "side": "self"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "vaeldra",
+      "slot": 2,
+      "unlockStar": 4,
+      "name": "Ensnare",
+      "trigger": "Rounds 1",
+      "targeting": "2 Enemies (Adjacent Lane)",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "3 Rounds",
+      "scalingRaw": "INST: -18% | -21.6% | -25.2% | -30.6% | -36% ; INIT: -18% | -21.6% | -25.2% | -30.6% | -36%",
+      "scaling": [
+        {
+          "label": "INST",
+          "values": [
+            -18,
+            -21.6,
+            -25.2,
+            -30.6,
+            -36
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "INIT",
+          "values": [
+            -18,
+            -21.6,
+            -25.2,
+            -30.6,
+            -36
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Rounds 1: Apply Stat Modifier (Buff) to 2 Enemies (Adjacent Lane) (INST: -18% | -21.6% | -25.2% | -30.6% | -36% ; INIT: -18% | -21.6% | -25.2% | -30.6% | -36%) for 3 Rounds.",
+      "structured": [
+        {
+          "when": "rounds",
+          "rounds": [
+            1
+          ],
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "inst",
+                  "pct": [
+                    -18,
+                    -21.6,
+                    -25.2,
+                    -30.6,
+                    -36
+                  ]
+                },
+                {
+                  "stat": "init",
+                  "pct": [
+                    -18,
+                    -21.6,
+                    -25.2,
+                    -30.6,
+                    -36
+                  ]
+                }
+              ],
+              "scaleStat": "int",
+              "dur": 3,
+              "tgt": {
+                "side": "enemy",
+                "count": 2,
+                "select": "adjacency"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "vaeldra",
+      "slot": 3,
+      "unlockStar": 6,
+      "name": "Tempting Distraction",
+      "trigger": "Each Action / Round",
+      "targeting": "3 Enemies",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "2 Rounds",
+      "scalingRaw": "Chance: 25% | 25% | 25% | 25% | 25% ; PHYSICAL_RECEIVED: 6% | 7.2% | 8.4% | 10.2% | 12% ; FIRE_RECEIVED: 6% | 7.2% | 8.4% | 10.2% | 12%",
+      "scaling": [
+        {
+          "label": "Chance",
+          "values": [
+            25,
+            25,
+            25,
+            25,
+            25
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "PHYSICAL_RECEIVED",
+          "values": [
+            6,
+            7.2,
+            8.4,
+            10.2,
+            12
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "FIRE_RECEIVED",
+          "values": [
+            6,
+            7.2,
+            8.4,
+            10.2,
+            12
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Each Action / Round: Apply Stat Modifier (Buff) to 3 Enemies (Chance: 25% | 25% | 25% | 25% | 25% ; PHYSICAL_RECEIVED: 6% | 7.2% | 8.4% | 10.2% | 12% ; FIRE_RECEIVED: 6% | 7.2% | 8.4% | 10.2% | 12%) for 2 Rounds.",
+      "structured": [
+        {
+          "when": "each",
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "physical_received",
+                  "pct": [
+                    6,
+                    7.2,
+                    8.4,
+                    10.2,
+                    12
+                  ]
+                },
+                {
+                  "stat": "fire_received",
+                  "pct": [
+                    6,
+                    7.2,
+                    8.4,
+                    10.2,
+                    12
+                  ]
+                }
+              ],
+              "dur": 2,
+              "chance": [
+                25,
+                25,
+                25,
+                25,
+                25
+              ],
+              "tgt": {
+                "side": "enemy",
+                "count": 3,
+                "select": "any"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "vaeldra",
+      "slot": 4,
+      "unlockStar": 8,
+      "name": "Infernal Force",
+      "trigger": "Rounds 1",
+      "targeting": "1 Ally (Right Lane), 1 Ally (Left Lane)",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "3 Rounds",
+      "scalingRaw": "FIRE_DEALT: 12% | 14.4% | 16.8% | 20.4% | 24% ; PHYSICAL_DEALT: 12% | 14.4% | 16.8% | 20.4% | 24%",
+      "scaling": [
+        {
+          "label": "FIRE_DEALT",
+          "values": [
+            12,
+            14.4,
+            16.8,
+            20.4,
+            24
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "PHYSICAL_DEALT",
+          "values": [
+            12,
+            14.4,
+            16.8,
+            20.4,
+            24
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Rounds 1: Apply Stat Modifier (Buff) to 1 Ally (Right Lane), 1 Ally (Left Lane) (FIRE_DEALT: 12% | 14.4% | 16.8% | 20.4% | 24% ; PHYSICAL_DEALT: 12% | 14.4% | 16.8% | 20.4% | 24%) for 3 Rounds.",
+      "structured": [
+        {
+          "when": "rounds",
+          "rounds": [
+            1
+          ],
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "fire_dealt",
+                  "pct": [
+                    12,
+                    14.4,
+                    16.8,
+                    20.4,
+                    24
+                  ]
+                }
+              ],
+              "dur": 3,
+              "tgt": {
+                "side": "ally",
+                "count": 1,
+                "select": "prefer_lane:L"
+              }
+            },
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "physical_dealt",
+                  "pct": [
+                    12,
+                    14.4,
+                    16.8,
+                    20.4,
+                    24
+                  ]
+                }
+              ],
+              "dur": 3,
+              "tgt": {
+                "side": "ally",
+                "count": 1,
+                "select": "prefer_lane:R"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "vaeldra",
+      "slot": 5,
+      "unlockStar": 10,
+      "name": "Siren's Call",
+      "trigger": "Rounds 1, Rounds 1, 2, 3",
+      "targeting": "1 Self, All Enemies",
+      "effectType": "Stat Modifier (Buff), Status Effect (Control/DoT)",
+      "duration": "3 Rounds, 1 Round",
+      "scalingRaw": "PHYSICAL_RECEIVED: -10% | -13% | -16% | -20% | -25% ; Chance: 40% | 52% | 64% | 80% | 100%",
+      "scaling": [
+        {
+          "label": "PHYSICAL_RECEIVED",
+          "values": [
+            -10,
+            -13,
+            -16,
+            -20,
+            -25
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "Chance",
+          "values": [
+            40,
+            52,
+            64,
+            80,
+            100
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Rounds 1, Rounds 1, 2, 3: Apply Stat Modifier (Buff), Status Effect (Control/DoT) to 1 Self, All Enemies (PHYSICAL_RECEIVED: -10% | -13% | -16% | -20% | -25% ; Chance: 40% | 52% | 64% | 80% | 100%) for 3 Rounds, 1 Round.",
+      "structured": [
+        {
+          "when": "rounds",
+          "rounds": [
+            1
+          ],
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "physical_received",
+                  "pct": [
+                    -10,
+                    -13,
+                    -16,
+                    -20,
+                    -25
+                  ]
+                }
+              ],
+              "dur": 3,
+              "tgt": {
+                "side": "self"
+              }
+            }
+          ]
+        },
+        {
+          "when": "rounds",
+          "rounds": [
+            1,
+            2,
+            3
+          ],
+          "actions": [
+            {
+              "t": "status",
+              "st": "taunt",
+              "dur": 1,
+              "chance": [
+                40,
+                52,
+                64,
+                80,
+                100
+              ],
+              "tgt": {
+                "side": "enemy",
+                "count": "all"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

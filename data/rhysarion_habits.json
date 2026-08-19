@@ -1,0 +1,366 @@
+{
+  "dragonId": "rhysarion",
+  "habits": [
+    {
+      "dragonId": "rhysarion",
+      "slot": 1,
+      "unlockStar": 2,
+      "name": "Ebbing Fury",
+      "trigger": "Rounds 1, Rounds 4",
+      "targeting": "3 Allies, All Enemies, All Allies",
+      "effectType": "Stat Modifier (Buff), Troop Healing",
+      "duration": "3 Rounds, Whole Combat",
+      "scalingRaw": "DMG_DEALT: -27.5% | -33% | -38.5% | -46.75% | -55% ; DMG_DEALT: -27.5% | -33% | -38.5% | -46.75% | -55% ; Rate: 25% | 30% | 35% | 42.5% | 50%",
+      "scaling": [
+        {
+          "label": "DMG_DEALT",
+          "values": [
+            -27.5,
+            -33,
+            -38.5,
+            -46.75,
+            -55
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "DMG_DEALT",
+          "values": [
+            -27.5,
+            -33,
+            -38.5,
+            -46.75,
+            -55
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "Rate",
+          "values": [
+            25,
+            30,
+            35,
+            42.5,
+            50
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Rounds 1, Rounds 4: Apply Stat Modifier (Buff), Troop Healing to 3 Allies, All Enemies, All Allies (DMG_DEALT: -27.5% | -33% | -38.5% | -46.75% | -55% ; DMG_DEALT: -27.5% | -33% | -38.5% | -46.75% | -55% ; Rate: 25% | 30% | 35% | 42.5% | 50%) for 3 Rounds, Whole Combat.",
+      "structured": [
+        {
+          "when": "rounds",
+          "rounds": [
+            1
+          ],
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "dmg_dealt",
+                  "pct": [
+                    -27.5,
+                    -33,
+                    -38.5,
+                    -46.75,
+                    -55
+                  ]
+                }
+              ],
+              "dur": 3,
+              "tgt": {
+                "side": "enemy",
+                "count": "all"
+              }
+            },
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "dmg_dealt",
+                  "pct": [
+                    -27.5,
+                    -33,
+                    -38.5,
+                    -46.75,
+                    -55
+                  ]
+                }
+              ],
+              "dur": 3,
+              "tgt": {
+                "side": "ally",
+                "count": "all"
+              }
+            }
+          ]
+        },
+        {
+          "when": "rounds",
+          "rounds": [
+            4
+          ],
+          "actions": [
+            {
+              "t": "heal",
+              "pct": [
+                25,
+                30,
+                35,
+                42.5,
+                50
+              ],
+              "tgt": {
+                "side": "ally",
+                "count": 3,
+                "select": "any"
+              },
+              "scaleStat": "str"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "rhysarion",
+      "slot": 2,
+      "unlockStar": 4,
+      "name": "Sharp Resolve",
+      "trigger": "Start of Combat",
+      "targeting": "1 Self",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "Whole Combat",
+      "scalingRaw": "STR: 16% | 19.2% | 22.4% | 27.2% | 32% ; INT: 16% | 19.2% | 22.4% | 27.2% | 32%",
+      "scaling": [
+        {
+          "label": "STR",
+          "values": [
+            16,
+            19.2,
+            22.4,
+            27.2,
+            32
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "INT",
+          "values": [
+            16,
+            19.2,
+            22.4,
+            27.2,
+            32
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Start of Combat: Apply Stat Modifier (Buff) to 1 Self (STR: 16% | 19.2% | 22.4% | 27.2% | 32% ; INT: 16% | 19.2% | 22.4% | 27.2% | 32%) for Whole Combat.",
+      "structured": [
+        {
+          "when": "combat_start",
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "str",
+                  "pct": [
+                    16,
+                    19.2,
+                    22.4,
+                    27.2,
+                    32
+                  ]
+                },
+                {
+                  "stat": "int",
+                  "pct": [
+                    16,
+                    19.2,
+                    22.4,
+                    27.2,
+                    32
+                  ]
+                }
+              ],
+              "dur": "combat",
+              "tgt": {
+                "side": "self"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "rhysarion",
+      "slot": 3,
+      "unlockStar": 6,
+      "name": "Echoing Melody",
+      "trigger": "Rounds 2, 5, 8",
+      "targeting": "2 Allies",
+      "effectType": "Troop Healing",
+      "duration": "Whole Combat",
+      "scalingRaw": "Rate: 60% | 72% | 84% | 102% | 120%",
+      "scaling": [
+        {
+          "label": "Rate",
+          "values": [
+            60,
+            72,
+            84,
+            102,
+            120
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Rounds 2, 5, 8: Apply Troop Healing to 2 Allies (Rate: 60% | 72% | 84% | 102% | 120%) for Whole Combat.",
+      "structured": [
+        {
+          "when": "rounds",
+          "rounds": [
+            2,
+            5,
+            8
+          ],
+          "actions": [
+            {
+              "t": "heal",
+              "pct": [
+                60,
+                72,
+                84,
+                102,
+                120
+              ],
+              "tgt": {
+                "side": "ally",
+                "count": 2,
+                "select": "any"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "rhysarion",
+      "slot": 4,
+      "unlockStar": 8,
+      "name": "Unbroken Devotion",
+      "trigger": "Start of Combat",
+      "targeting": "2 Allies",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "Whole Combat",
+      "scalingRaw": "RECOVERY_RECEIVED: 20% | 24% | 28% | 34% | 40%",
+      "scaling": [
+        {
+          "label": "RECOVERY_RECEIVED",
+          "values": [
+            20,
+            24,
+            28,
+            34,
+            40
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Start of Combat: Apply Stat Modifier (Buff) to 2 Allies (RECOVERY_RECEIVED: 20% | 24% | 28% | 34% | 40%) for Whole Combat.",
+      "structured": [
+        {
+          "when": "combat_start",
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "recovery_received",
+                  "pct": [
+                    20,
+                    24,
+                    28,
+                    34,
+                    40
+                  ]
+                }
+              ],
+              "dur": "combat",
+              "tgt": {
+                "side": "ally",
+                "count": 2,
+                "select": "any"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "rhysarion",
+      "slot": 5,
+      "unlockStar": 10,
+      "name": "Inspiring Melody",
+      "trigger": "Each Action / Round",
+      "targeting": "1 Ally (Adjacent Lane)",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "3 Rounds",
+      "scalingRaw": "INIT: 20% | 20% | 20% | 20% | 20%",
+      "scaling": [
+        {
+          "label": "INIT",
+          "values": [
+            20,
+            20,
+            20,
+            20,
+            20
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Each Action / Round: Apply Stat Modifier (Buff) to 1 Ally (Adjacent Lane) (INIT: 20% | 20% | 20% | 20% | 20%) for 3 Rounds.",
+      "structured": [
+        {
+          "when": "each",
+          "chance": 20,
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "init",
+                  "pct": [
+                    20,
+                    20,
+                    20,
+                    20,
+                    20
+                  ]
+                }
+              ],
+              "scaleStat": "int",
+              "dur": 3,
+              "tgt": {
+                "side": "ally",
+                "count": 1,
+                "select": "adjacency"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

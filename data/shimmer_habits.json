@@ -1,0 +1,332 @@
+{
+  "dragonId": "shimmer",
+  "habits": [
+    {
+      "dragonId": "shimmer",
+      "slot": 1,
+      "unlockStar": 2,
+      "name": "Crushing Force",
+      "trigger": "Rounds 1",
+      "targeting": "1 Ally (Right Lane), 1 Ally (Left Lane)",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "3 Rounds",
+      "scalingRaw": "PHYSICAL_DEALT: 9% | 10.8% | 12.6% | 15.3% | 18% ; TACTICAL_DEALT: 9% | 10.8% | 12.6% | 15.3% | 18%",
+      "scaling": [
+        {
+          "label": "PHYSICAL_DEALT",
+          "values": [
+            9,
+            10.8,
+            12.6,
+            15.3,
+            18
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "TACTICAL_DEALT",
+          "values": [
+            9,
+            10.8,
+            12.6,
+            15.3,
+            18
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Rounds 1: Apply Stat Modifier (Buff) to 1 Ally (Right Lane), 1 Ally (Left Lane) (PHYSICAL_DEALT: 9% | 10.8% | 12.6% | 15.3% | 18% ; TACTICAL_DEALT: 9% | 10.8% | 12.6% | 15.3% | 18%) for 3 Rounds.",
+      "structured": [
+        {
+          "when": "rounds",
+          "rounds": [
+            1
+          ],
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "physical_dealt",
+                  "pct": [
+                    9,
+                    10.8,
+                    12.6,
+                    15.3,
+                    18
+                  ]
+                }
+              ],
+              "dur": 3,
+              "tgt": {
+                "side": "ally",
+                "count": 1,
+                "select": "prefer_lane:L"
+              }
+            },
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "tactical_dealt",
+                  "pct": [
+                    9,
+                    10.8,
+                    12.6,
+                    15.3,
+                    18
+                  ]
+                }
+              ],
+              "dur": 3,
+              "tgt": {
+                "side": "ally",
+                "count": 1,
+                "select": "prefer_lane:R"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "shimmer",
+      "slot": 2,
+      "unlockStar": 4,
+      "name": "Dragon's Insight",
+      "trigger": "Start of Combat",
+      "targeting": "1 Self",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "Whole Combat",
+      "scalingRaw": "DMG_RECEIVED: -4% | -4.8% | -5.6% | -6.8% | -8% ; INST: 5% | 6% | 7% | 8.5% | 10%",
+      "scaling": [
+        {
+          "label": "DMG_RECEIVED",
+          "values": [
+            -4,
+            -4.8,
+            -5.6,
+            -6.8,
+            -8
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "INST",
+          "values": [
+            5,
+            6,
+            7,
+            8.5,
+            10
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Start of Combat: Apply Stat Modifier (Buff) to 1 Self (DMG_RECEIVED: -4% | -4.8% | -5.6% | -6.8% | -8% ; INST: 5% | 6% | 7% | 8.5% | 10%) for Whole Combat.",
+      "structured": [
+        {
+          "when": "combat_start",
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "dmg_received",
+                  "pct": [
+                    -4,
+                    -4.8,
+                    -5.6,
+                    -6.8,
+                    -8
+                  ]
+                },
+                {
+                  "stat": "inst",
+                  "pct": [
+                    5,
+                    6,
+                    7,
+                    8.5,
+                    10
+                  ]
+                }
+              ],
+              "dur": "combat",
+              "tgt": {
+                "side": "self"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "shimmer",
+      "slot": 3,
+      "unlockStar": 6,
+      "name": "Loyal Shield",
+      "trigger": "Rounds 2, 4, 7, 9",
+      "targeting": "2 Allies",
+      "effectType": "Troop Healing",
+      "duration": "Whole Combat",
+      "scalingRaw": "Rate: 30% | 36% | 42% | 51% | 60%",
+      "scaling": [
+        {
+          "label": "Rate",
+          "values": [
+            30,
+            36,
+            42,
+            51,
+            60
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Rounds 2, 4, 7, 9: Apply Troop Healing to 2 Allies (Rate: 30% | 36% | 42% | 51% | 60%) for Whole Combat.",
+      "structured": [
+        {
+          "when": "rounds",
+          "rounds": [
+            2,
+            4,
+            7,
+            9
+          ],
+          "actions": [
+            {
+              "t": "heal",
+              "pct": [
+                30,
+                36,
+                42,
+                51,
+                60
+              ],
+              "tgt": {
+                "side": "ally",
+                "count": 2,
+                "select": "any"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "shimmer",
+      "slot": 4,
+      "unlockStar": 8,
+      "name": "Unbroken Devotion",
+      "trigger": "Start of Combat",
+      "targeting": "2 Allies",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "Whole Combat",
+      "scalingRaw": "RECOVERY_RECEIVED: 15% | 18% | 21% | 25.5% | 30%",
+      "scaling": [
+        {
+          "label": "RECOVERY_RECEIVED",
+          "values": [
+            15,
+            18,
+            21,
+            25.5,
+            30
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Start of Combat: Apply Stat Modifier (Buff) to 2 Allies (RECOVERY_RECEIVED: 15% | 18% | 21% | 25.5% | 30%) for Whole Combat.",
+      "structured": [
+        {
+          "when": "combat_start",
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "recovery_received",
+                  "pct": [
+                    15,
+                    18,
+                    21,
+                    25.5,
+                    30
+                  ]
+                }
+              ],
+              "dur": "combat",
+              "tgt": {
+                "side": "ally",
+                "count": 2,
+                "select": "any"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "shimmer",
+      "slot": 5,
+      "unlockStar": 10,
+      "name": "Sneak Attack",
+      "trigger": "Each Action / Round",
+      "targeting": "1 Ally",
+      "effectType": "Stat Modifier (Buff), Status Effect (Control/DoT)",
+      "duration": "2 Rounds",
+      "scalingRaw": "PHYSICAL_DEALT: 10%",
+      "scaling": [
+        {
+          "label": "PHYSICAL_DEALT",
+          "values": [
+            10
+          ],
+          "unit": "%",
+          "fixed": true
+        }
+      ],
+      "description": "Each Action / Round: Apply Stat Modifier (Buff), Status Effect (Control/DoT) to 1 Ally (PHYSICAL_DEALT: 10%) for 2 Rounds.",
+      "structured": [
+        {
+          "when": "each",
+          "chance": 14,
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "physical_dealt",
+                  "pct": 10
+                }
+              ],
+              "dur": 2,
+              "tgt": {
+                "side": "ally",
+                "count": 1,
+                "select": "highest_str"
+              }
+            },
+            {
+              "t": "status",
+              "st": "first_strike",
+              "dur": 2,
+              "tgt": {
+                "side": "ally",
+                "count": 1,
+                "select": "highest_str"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

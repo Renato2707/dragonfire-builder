@@ -1,0 +1,324 @@
+{
+  "dragonId": "tashix",
+  "habits": [
+    {
+      "dragonId": "tashix",
+      "slot": 1,
+      "unlockStar": 2,
+      "name": "Enervate",
+      "trigger": "Start of Combat",
+      "targeting": "1 Enemy",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "Whole Combat",
+      "scalingRaw": "TACTICAL_DEALT: -10.5% | -12.6% | -14.7% | -17.85% | -21%",
+      "scaling": [
+        {
+          "label": "TACTICAL_DEALT",
+          "values": [
+            -10.5,
+            -12.6,
+            -14.7,
+            -17.85,
+            -21
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Start of Combat: Apply Stat Modifier (Buff) to 1 Enemy (TACTICAL_DEALT: -10.5% | -12.6% | -14.7% | -17.85% | -21%) for Whole Combat.",
+      "structured": [
+        {
+          "when": "combat_start",
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "tactical_dealt",
+                  "pct": [
+                    -10.5,
+                    -12.6,
+                    -14.7,
+                    -17.85,
+                    -21
+                  ]
+                }
+              ],
+              "dur": "combat",
+              "tgt": {
+                "side": "enemy",
+                "count": 1,
+                "select": "dealer:tactical"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "tashix",
+      "slot": 2,
+      "unlockStar": 4,
+      "name": "Dragon's Cunning",
+      "trigger": "Start of Combat",
+      "targeting": "2 Enemies (Adjacent Lane), 1 Self",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "Whole Combat",
+      "scalingRaw": "INT: 12% | 14.4% | 16.8% | 20.4% | 24% ; INST: -10% | -12% | -14% | -17% | -20%",
+      "scaling": [
+        {
+          "label": "INT",
+          "values": [
+            12,
+            14.4,
+            16.8,
+            20.4,
+            24
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "INST",
+          "values": [
+            -10,
+            -12,
+            -14,
+            -17,
+            -20
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Start of Combat: Apply Stat Modifier (Buff) to 2 Enemies (Adjacent Lane), 1 Self (INT: 12% | 14.4% | 16.8% | 20.4% | 24% ; INST: -10% | -12% | -14% | -17% | -20%) for Whole Combat.",
+      "structured": [
+        {
+          "when": "combat_start",
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "int",
+                  "pct": [
+                    12,
+                    14.4,
+                    16.8,
+                    20.4,
+                    24
+                  ]
+                }
+              ],
+              "dur": "combat",
+              "tgt": {
+                "side": "self"
+              }
+            },
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "inst",
+                  "pct": [
+                    -10,
+                    -12,
+                    -14,
+                    -17,
+                    -20
+                  ]
+                }
+              ],
+              "scaleStat": "init",
+              "dur": "combat",
+              "tgt": {
+                "side": "enemy",
+                "count": 2,
+                "select": "adjacency"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "tashix",
+      "slot": 3,
+      "unlockStar": 6,
+      "name": "Cunning Ruse",
+      "trigger": "Each Action / Round",
+      "targeting": "3 Enemies",
+      "effectType": "Status Effect (Control/DoT)",
+      "duration": "2 Rounds",
+      "scalingRaw": "Chance: 10% | 12% | 14% | 17% | 20%",
+      "scaling": [
+        {
+          "label": "Chance",
+          "values": [
+            10,
+            12,
+            14,
+            17,
+            20
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Each Action / Round: Apply Status Effect (Control/DoT) to 3 Enemies (Chance: 10% | 12% | 14% | 17% | 20%) for 2 Rounds.",
+      "structured": [
+        {
+          "when": "each",
+          "actions": [
+            {
+              "t": "status",
+              "st": "weakened",
+              "dur": 2,
+              "chance": [
+                10,
+                12,
+                14,
+                17,
+                20
+              ],
+              "tgt": {
+                "side": "enemy",
+                "count": 3,
+                "select": "any"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "tashix",
+      "slot": 4,
+      "unlockStar": 8,
+      "name": "Battle Guile",
+      "trigger": "Start of Combat",
+      "targeting": "3 Enemies",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "Whole Combat",
+      "scalingRaw": "INST: -5% | -6% | -7% | -8.85% | -10.5% ; INIT: -5% | -6% | -7% | -8.85% | -10.5%",
+      "scaling": [
+        {
+          "label": "INST",
+          "values": [
+            -5,
+            -6,
+            -7,
+            -8.85,
+            -10.5
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "INIT",
+          "values": [
+            -5,
+            -6,
+            -7,
+            -8.85,
+            -10.5
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Start of Combat: Apply Stat Modifier (Buff) to 3 Enemies (INST: -5% | -6% | -7% | -8.85% | -10.5% ; INIT: -5% | -6% | -7% | -8.85% | -10.5%) for Whole Combat.",
+      "structured": [
+        {
+          "when": "combat_start",
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "inst",
+                  "pct": [
+                    -5,
+                    -6,
+                    -7,
+                    -8.85,
+                    -10.5
+                  ]
+                },
+                {
+                  "stat": "init",
+                  "pct": [
+                    -5,
+                    -6,
+                    -7,
+                    -8.85,
+                    -10.5
+                  ]
+                }
+              ],
+              "scaleStat": "init",
+              "dur": "combat",
+              "tgt": {
+                "side": "enemy",
+                "count": 3,
+                "select": "any"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "tashix",
+      "slot": 5,
+      "unlockStar": 10,
+      "name": "Veiled Ambush",
+      "trigger": "Rounds 7",
+      "targeting": "1 Enemy",
+      "effectType": "Direct Damage (Nuke)",
+      "duration": "Whole Combat",
+      "scalingRaw": "Rate: 150% | 220% | 290% | 380% | 500%",
+      "scaling": [
+        {
+          "label": "Rate",
+          "values": [
+            150,
+            220,
+            290,
+            380,
+            500
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Rounds 7: Apply Direct Damage (Nuke) to 1 Enemy (Rate: 150% | 220% | 290% | 380% | 500%) for Whole Combat.",
+      "structured": [
+        {
+          "when": "rounds",
+          "rounds": [
+            7
+          ],
+          "actions": [
+            {
+              "t": "dmg",
+              "dt": "fire",
+              "pct": [
+                150,
+                220,
+                290,
+                380,
+                500
+              ],
+              "tgt": {
+                "side": "enemy",
+                "count": 1,
+                "select": "most_troops"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

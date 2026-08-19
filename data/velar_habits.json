@@ -1,0 +1,349 @@
+{
+  "dragonId": "velar",
+  "habits": [
+    {
+      "dragonId": "velar",
+      "slot": 1,
+      "unlockStar": 2,
+      "name": "Strategic Leader",
+      "trigger": "Start of Combat",
+      "targeting": "1 Ally",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "Whole Combat",
+      "scalingRaw": "TACTICAL_DEALT: 10% | 12% | 14% | 17% | 20%",
+      "scaling": [
+        {
+          "label": "TACTICAL_DEALT",
+          "values": [
+            10,
+            12,
+            14,
+            17,
+            20
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Start of Combat: Apply Stat Modifier (Buff) to 1 Ally (TACTICAL_DEALT: 10% | 12% | 14% | 17% | 20%) for Whole Combat.",
+      "structured": [
+        {
+          "when": "combat_start",
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "tactical_dealt",
+                  "pct": [
+                    10,
+                    12,
+                    14,
+                    17,
+                    20
+                  ]
+                }
+              ],
+              "dur": "combat",
+              "tgt": {
+                "side": "ally",
+                "count": 1,
+                "select": "prefer_lane:C"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "velar",
+      "slot": 2,
+      "unlockStar": 4,
+      "name": "Quick Reflexes",
+      "trigger": "Start of Combat",
+      "targeting": "1 Self",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "Whole Combat",
+      "scalingRaw": "INST: 16% | 19.2% | 22.4% | 27.2% | 32% ; INIT: 16% | 19.2% | 22.4% | 27.2% | 32%",
+      "scaling": [
+        {
+          "label": "INST",
+          "values": [
+            16,
+            19.2,
+            22.4,
+            27.2,
+            32
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "INIT",
+          "values": [
+            16,
+            19.2,
+            22.4,
+            27.2,
+            32
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Start of Combat: Apply Stat Modifier (Buff) to 1 Self (INST: 16% | 19.2% | 22.4% | 27.2% | 32% ; INIT: 16% | 19.2% | 22.4% | 27.2% | 32%) for Whole Combat.",
+      "structured": [
+        {
+          "when": "combat_start",
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "inst",
+                  "pct": [
+                    16,
+                    19.2,
+                    22.4,
+                    27.2,
+                    32
+                  ]
+                },
+                {
+                  "stat": "init",
+                  "pct": [
+                    16,
+                    19.2,
+                    22.4,
+                    27.2,
+                    32
+                  ]
+                }
+              ],
+              "dur": "combat",
+              "tgt": {
+                "side": "self"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "velar",
+      "slot": 3,
+      "unlockStar": 6,
+      "name": "Gales of Power",
+      "trigger": "Rounds 2, 4, 6, 8",
+      "targeting": "3 Enemies, 3 Allies",
+      "effectType": "Status Effect (Control/DoT)",
+      "duration": "2 Rounds",
+      "scalingRaw": "Chance: 12% | 14.4% | 16.8% | 20.4% | 24% ; Chance: 12% | 14.4% | 16.8% | 20.4% | 24%",
+      "scaling": [
+        {
+          "label": "Chance",
+          "values": [
+            12,
+            14.4,
+            16.8,
+            20.4,
+            24
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "Chance",
+          "values": [
+            12,
+            14.4,
+            16.8,
+            20.4,
+            24
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Rounds 2, 4, 6, 8: Apply Status Effect (Control/DoT) to 3 Enemies, 3 Allies (Chance: 12% | 14.4% | 16.8% | 20.4% | 24% ; Chance: 12% | 14.4% | 16.8% | 20.4% | 24%) for 2 Rounds.",
+      "structured": [
+        {
+          "when": "rounds",
+          "rounds": [
+            2,
+            4,
+            6,
+            8
+          ],
+          "actions": [
+            {
+              "t": "status",
+              "st": "first_strike",
+              "dur": 2,
+              "chance": [
+                12,
+                14.4,
+                16.8,
+                20.4,
+                24
+              ],
+              "tgt": {
+                "side": "ally",
+                "count": 3,
+                "select": "any"
+              }
+            },
+            {
+              "t": "status",
+              "st": "slow",
+              "dur": 2,
+              "chance": [
+                12,
+                14.4,
+                16.8,
+                20.4,
+                24
+              ],
+              "tgt": {
+                "side": "enemy",
+                "count": 3,
+                "select": "any"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "velar",
+      "slot": 4,
+      "unlockStar": 8,
+      "name": "Fierce Unity",
+      "trigger": "Start of Combat",
+      "targeting": "3 Allies",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "Whole Combat",
+      "scalingRaw": "STR: 5% | 6% | 7% | 8.5% | 10% ; INST: 5% | 6% | 7% | 8.5% | 10%",
+      "scaling": [
+        {
+          "label": "STR",
+          "values": [
+            5,
+            6,
+            7,
+            8.5,
+            10
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "INST",
+          "values": [
+            5,
+            6,
+            7,
+            8.5,
+            10
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Start of Combat: Apply Stat Modifier (Buff) to 3 Allies (STR: 5% | 6% | 7% | 8.5% | 10% ; INST: 5% | 6% | 7% | 8.5% | 10%) for Whole Combat.",
+      "structured": [
+        {
+          "when": "combat_start",
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "str",
+                  "pct": [
+                    5,
+                    6,
+                    7,
+                    8.5,
+                    10
+                  ]
+                },
+                {
+                  "stat": "inst",
+                  "pct": [
+                    5,
+                    6,
+                    7,
+                    8.5,
+                    10
+                  ]
+                }
+              ],
+              "scaleStat": "init",
+              "dur": "combat",
+              "tgt": {
+                "side": "ally",
+                "count": 3,
+                "select": "any"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "velar",
+      "slot": 5,
+      "unlockStar": 10,
+      "name": "Breath of Renewal",
+      "trigger": "Rounds 2, 4, 6, 8",
+      "targeting": "3 Allies",
+      "effectType": "Troop Healing",
+      "duration": "Whole Combat",
+      "scalingRaw": "Rate: 18% | 23.4% | 28.8% | 36% | 45%",
+      "scaling": [
+        {
+          "label": "Rate",
+          "values": [
+            18,
+            23.4,
+            28.8,
+            36,
+            45
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Rounds 2, 4, 6, 8: Apply Troop Healing to 3 Allies (Rate: 18% | 23.4% | 28.8% | 36% | 45%) for Whole Combat.",
+      "structured": [
+        {
+          "when": "rounds",
+          "rounds": [
+            2,
+            4,
+            6,
+            8
+          ],
+          "actions": [
+            {
+              "t": "heal",
+              "pct": [
+                18,
+                23.4,
+                28.8,
+                36,
+                45
+              ],
+              "tgt": {
+                "side": "ally",
+                "count": 3,
+                "select": "any"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

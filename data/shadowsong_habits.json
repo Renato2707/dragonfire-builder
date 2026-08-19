@@ -1,0 +1,382 @@
+{
+  "dragonId": "shadowsong",
+  "habits": [
+    {
+      "dragonId": "shadowsong",
+      "slot": 1,
+      "unlockStar": 2,
+      "name": "Ensnare",
+      "trigger": "Rounds 1",
+      "targeting": "2 Enemies (Adjacent Lane)",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "3 Rounds",
+      "scalingRaw": "INST: -18% | -21.6% | -25.2% | -30.6% | -36% ; INIT: -18% | -21.6% | -25.2% | -30.6% | -36%",
+      "scaling": [
+        {
+          "label": "INST",
+          "values": [
+            -18,
+            -21.6,
+            -25.2,
+            -30.6,
+            -36
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "INIT",
+          "values": [
+            -18,
+            -21.6,
+            -25.2,
+            -30.6,
+            -36
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Rounds 1: Apply Stat Modifier (Buff) to 2 Enemies (Adjacent Lane) (INST: -18% | -21.6% | -25.2% | -30.6% | -36% ; INIT: -18% | -21.6% | -25.2% | -30.6% | -36%) for 3 Rounds.",
+      "structured": [
+        {
+          "when": "rounds",
+          "rounds": [
+            1
+          ],
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "inst",
+                  "pct": [
+                    -18,
+                    -21.6,
+                    -25.2,
+                    -30.6,
+                    -36
+                  ]
+                },
+                {
+                  "stat": "init",
+                  "pct": [
+                    -18,
+                    -21.6,
+                    -25.2,
+                    -30.6,
+                    -36
+                  ]
+                }
+              ],
+              "scaleStat": "int",
+              "dur": 3,
+              "tgt": {
+                "side": "enemy",
+                "count": 2,
+                "select": "adjacency"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "shadowsong",
+      "slot": 2,
+      "unlockStar": 4,
+      "name": "Blazing Onslaught",
+      "trigger": "Rounds 1",
+      "targeting": "1 Enemy (Left Lane), 1 Enemy (Right Lane)",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "3 Rounds",
+      "scalingRaw": "FIRE_RECEIVED: 15% | 18% | 21% | 25.5% | 30% ; PHYSICAL_RECEIVED: 15% | 18% | 21% | 25.5% | 30%",
+      "scaling": [
+        {
+          "label": "FIRE_RECEIVED",
+          "values": [
+            15,
+            18,
+            21,
+            25.5,
+            30
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "PHYSICAL_RECEIVED",
+          "values": [
+            15,
+            18,
+            21,
+            25.5,
+            30
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Rounds 1: Apply Stat Modifier (Buff) to 1 Enemy (Left Lane), 1 Enemy (Right Lane) (FIRE_RECEIVED: 15% | 18% | 21% | 25.5% | 30% ; PHYSICAL_RECEIVED: 15% | 18% | 21% | 25.5% | 30%) for 3 Rounds.",
+      "structured": [
+        {
+          "when": "rounds",
+          "rounds": [
+            1
+          ],
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "fire_received",
+                  "pct": [
+                    15,
+                    18,
+                    21,
+                    25.5,
+                    30
+                  ]
+                }
+              ],
+              "dur": 3,
+              "tgt": {
+                "side": "enemy",
+                "count": 1,
+                "select": "prefer_lane:L"
+              }
+            },
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "physical_received",
+                  "pct": [
+                    15,
+                    18,
+                    21,
+                    25.5,
+                    30
+                  ]
+                }
+              ],
+              "dur": 3,
+              "tgt": {
+                "side": "enemy",
+                "count": 1,
+                "select": "prefer_lane:R"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "shadowsong",
+      "slot": 3,
+      "unlockStar": 6,
+      "name": "Scorched Earth",
+      "trigger": "Each Action / Round",
+      "targeting": "2 Enemies (Adjacent Lane)",
+      "effectType": "Status Effect (Control/DoT)",
+      "duration": "2 Rounds",
+      "scalingRaw": "Chance: 10% | 12% | 14% | 17% | 20%",
+      "scaling": [
+        {
+          "label": "Chance",
+          "values": [
+            10,
+            12,
+            14,
+            17,
+            20
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Each Action / Round: Apply Status Effect (Control/DoT) to 2 Enemies (Adjacent Lane) (Chance: 10% | 12% | 14% | 17% | 20%) for 2 Rounds.",
+      "structured": [
+        {
+          "when": "each",
+          "actions": [
+            {
+              "t": "status",
+              "st": "vulnerable",
+              "dur": 2,
+              "val": 15,
+              "chance": [
+                10,
+                12,
+                14,
+                17,
+                20
+              ],
+              "tgt": {
+                "side": "enemy",
+                "count": 2,
+                "select": "adjacency"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "shadowsong",
+      "slot": 4,
+      "unlockStar": 8,
+      "name": "Dragon's Intellect",
+      "trigger": "Start of Combat",
+      "targeting": "1 Self",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "Whole Combat",
+      "scalingRaw": "DMG_RECEIVED: -5% | -6% | -7% | -8.5% | -10% ; INT: 8.5% | 10.2% | 11.9% | 14.45% | 17%",
+      "scaling": [
+        {
+          "label": "DMG_RECEIVED",
+          "values": [
+            -5,
+            -6,
+            -7,
+            -8.5,
+            -10
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "INT",
+          "values": [
+            8.5,
+            10.2,
+            11.9,
+            14.45,
+            17
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Start of Combat: Apply Stat Modifier (Buff) to 1 Self (DMG_RECEIVED: -5% | -6% | -7% | -8.5% | -10% ; INT: 8.5% | 10.2% | 11.9% | 14.45% | 17%) for Whole Combat.",
+      "structured": [
+        {
+          "when": "combat_start",
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "dmg_received",
+                  "pct": [
+                    -5,
+                    -6,
+                    -7,
+                    -8.5,
+                    -10
+                  ]
+                },
+                {
+                  "stat": "int",
+                  "pct": [
+                    8.5,
+                    10.2,
+                    11.9,
+                    14.45,
+                    17
+                  ]
+                }
+              ],
+              "dur": "combat",
+              "tgt": {
+                "side": "self"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "shadowsong",
+      "slot": 5,
+      "unlockStar": 10,
+      "name": "Blazing Conductor",
+      "trigger": "Rounds 2, 5, 8",
+      "targeting": "1 Enemy",
+      "effectType": "Direct Damage (Nuke)",
+      "duration": "Whole Combat",
+      "scalingRaw": "Rate: 60% | 78% | 96% | 120% | 150% ; Rate: 30% | 39% | 48% | 60% | 75%",
+      "scaling": [
+        {
+          "label": "Rate",
+          "values": [
+            60,
+            78,
+            96,
+            120,
+            150
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "Rate",
+          "values": [
+            30,
+            39,
+            48,
+            60,
+            75
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Rounds 2, 5, 8: Apply Direct Damage (Nuke) to 1 Enemy (Rate: 60% | 78% | 96% | 120% | 150% ; Rate: 30% | 39% | 48% | 60% | 75%) for Whole Combat.",
+      "structured": [
+        {
+          "when": "rounds",
+          "rounds": [
+            2,
+            5,
+            8
+          ],
+          "actions": [
+            {
+              "t": "dmg",
+              "dt": "fire",
+              "pct": [
+                60,
+                78,
+                96,
+                120,
+                150
+              ],
+              "tgt": {
+                "side": "enemy",
+                "count": 1,
+                "select": "any"
+              }
+            },
+            {
+              "t": "dmg",
+              "dt": "fire",
+              "pct": [
+                30,
+                39,
+                48,
+                60,
+                75
+              ],
+              "tgt": {
+                "side": "enemy",
+                "count": 1,
+                "select": "any"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

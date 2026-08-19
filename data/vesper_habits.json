@@ -1,0 +1,361 @@
+{
+  "dragonId": "vesper",
+  "habits": [
+    {
+      "dragonId": "vesper",
+      "slot": 1,
+      "unlockStar": 2,
+      "name": "Strategic Leader",
+      "trigger": "Start of Combat",
+      "targeting": "1 Ally",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "Whole Combat",
+      "scalingRaw": "TACTICAL_DEALT: 8% | 9.6% | 11.2% | 13.6% | 16%",
+      "scaling": [
+        {
+          "label": "TACTICAL_DEALT",
+          "values": [
+            8,
+            9.6,
+            11.2,
+            13.6,
+            16
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Start of Combat: Apply Stat Modifier (Buff) to 1 Ally (TACTICAL_DEALT: 8% | 9.6% | 11.2% | 13.6% | 16%) for Whole Combat.",
+      "structured": [
+        {
+          "when": "combat_start",
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "tactical_dealt",
+                  "pct": [
+                    8,
+                    9.6,
+                    11.2,
+                    13.6,
+                    16
+                  ]
+                }
+              ],
+              "dur": "combat",
+              "tgt": {
+                "side": "ally",
+                "count": 1,
+                "select": "any"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "vesper",
+      "slot": 2,
+      "unlockStar": 4,
+      "name": "Dragon Insight",
+      "trigger": "Start of Combat",
+      "targeting": "1 Self",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "Whole Combat",
+      "scalingRaw": "DMG_RECEIVED: -4% | -4.8% | -5.6% | -6.8% | -8% ; INST: 5% | 6% | 7% | 8.5% | 10%",
+      "scaling": [
+        {
+          "label": "DMG_RECEIVED",
+          "values": [
+            -4,
+            -4.8,
+            -5.6,
+            -6.8,
+            -8
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "INST",
+          "values": [
+            5,
+            6,
+            7,
+            8.5,
+            10
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Start of Combat: Apply Stat Modifier (Buff) to 1 Self (DMG_RECEIVED: -4% | -4.8% | -5.6% | -6.8% | -8% ; INST: 5% | 6% | 7% | 8.5% | 10%) for Whole Combat.",
+      "structured": [
+        {
+          "when": "combat_start",
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "dmg_received",
+                  "pct": [
+                    -4,
+                    -4.8,
+                    -5.6,
+                    -6.8,
+                    -8
+                  ]
+                },
+                {
+                  "stat": "inst",
+                  "pct": [
+                    5,
+                    6,
+                    7,
+                    8.5,
+                    10
+                  ]
+                }
+              ],
+              "dur": "combat",
+              "tgt": {
+                "side": "self"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "vesper",
+      "slot": 3,
+      "unlockStar": 6,
+      "name": "Savior's Waltz",
+      "trigger": "Each Action / Round",
+      "targeting": "1 Self, 1 Ally (Adjacent Lane)",
+      "effectType": "Stat Modifier (Debuff)",
+      "duration": "2 Rounds",
+      "scalingRaw": "Chance: 12.5% | 15% | 17.5% | 21.25% | 25% ; DMG_RECEIVED: -10% ; Chance: 12.5% | 15% | 17.5% | 21.25% | 25% ; DMG_RECEIVED: -10%",
+      "scaling": [
+        {
+          "label": "Chance",
+          "values": [
+            12.5,
+            15,
+            17.5,
+            21.25,
+            25
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "DMG_RECEIVED",
+          "values": [
+            -10
+          ],
+          "unit": "%",
+          "fixed": true
+        },
+        {
+          "label": "Chance",
+          "values": [
+            12.5,
+            15,
+            17.5,
+            21.25,
+            25
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "DMG_RECEIVED",
+          "values": [
+            -10
+          ],
+          "unit": "%",
+          "fixed": true
+        }
+      ],
+      "description": "Each Action / Round: Apply Stat Modifier (Debuff) to 1 Self, 1 Ally (Adjacent Lane) (Chance: 12.5% | 15% | 17.5% | 21.25% | 25% ; DMG_RECEIVED: -10% ; Chance: 12.5% | 15% | 17.5% | 21.25% | 25% ; DMG_RECEIVED: -10%) for 2 Rounds.",
+      "structured": [
+        {
+          "when": "each",
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "dmg_received",
+                  "pct": -10
+                }
+              ],
+              "dur": 2,
+              "chance": [
+                12.5,
+                15,
+                17.5,
+                21.25,
+                25
+              ],
+              "tgt": {
+                "side": "self"
+              }
+            },
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "dmg_received",
+                  "pct": -10
+                }
+              ],
+              "dur": 2,
+              "chance": [
+                12.5,
+                15,
+                17.5,
+                21.25,
+                25
+              ],
+              "tgt": {
+                "side": "ally",
+                "count": 1,
+                "select": "adjacency"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "vesper",
+      "slot": 4,
+      "unlockStar": 8,
+      "name": "Insightful Allies",
+      "trigger": "Start of Combat",
+      "targeting": "3 Allies",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "Whole Combat",
+      "scalingRaw": "INST: 8% | 9.6% | 11.2% | 13.6% | 16%",
+      "scaling": [
+        {
+          "label": "INST",
+          "values": [
+            8,
+            9.6,
+            11.2,
+            13.6,
+            16
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Start of Combat: Apply Stat Modifier (Buff) to 3 Allies (INST: 8% | 9.6% | 11.2% | 13.6% | 16%) for Whole Combat.",
+      "structured": [
+        {
+          "when": "combat_start",
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "inst",
+                  "pct": [
+                    8,
+                    9.6,
+                    11.2,
+                    13.6,
+                    16
+                  ]
+                }
+              ],
+              "scaleStat": "inst",
+              "dur": "combat",
+              "tgt": {
+                "side": "ally",
+                "count": 3,
+                "select": "any"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "vesper",
+      "slot": 5,
+      "unlockStar": 10,
+      "name": "Midnight Onslaught",
+      "trigger": "Rounds 6, 7, 8, 9, 10",
+      "targeting": "1 Enemy (Adjacent Lane)",
+      "effectType": "Stat Modifier (Debuff)",
+      "duration": "2 Rounds",
+      "scalingRaw": "Chance: 24% | 31.2% | 38.4% | 48% | 60% ; DMG_DEALT: -50%",
+      "scaling": [
+        {
+          "label": "Chance",
+          "values": [
+            24,
+            31.2,
+            38.4,
+            48,
+            60
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "DMG_DEALT",
+          "values": [
+            -50
+          ],
+          "unit": "%",
+          "fixed": true
+        }
+      ],
+      "description": "Rounds 6, 7, 8, 9, 10: Apply Stat Modifier (Debuff) to 1 Enemy (Adjacent Lane) (Chance: 24% | 31.2% | 38.4% | 48% | 60% ; DMG_DEALT: -50%) for 2 Rounds.",
+      "structured": [
+        {
+          "when": "rounds",
+          "rounds": [
+            6,
+            7,
+            8,
+            9,
+            10
+          ],
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "dmg_dealt",
+                  "pct": -50
+                }
+              ],
+              "dur": 2,
+              "chance": [
+                24,
+                31.2,
+                38.4,
+                48,
+                60
+              ],
+              "tgt": {
+                "side": "enemy",
+                "count": 1,
+                "select": "adjacency"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

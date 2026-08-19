@@ -1,0 +1,406 @@
+{
+  "dragonId": "jagadrix",
+  "habits": [
+    {
+      "dragonId": "jagadrix",
+      "slot": 1,
+      "unlockStar": 2,
+      "name": "Enervate",
+      "trigger": "Start of Combat",
+      "targeting": "1 Enemies (dealer:tactical)",
+      "effectType": "Stat Modifier (Debuff)",
+      "duration": "Whole Combat",
+      "scalingRaw": "Tactical Dmg: -8% | -9.6% | -11.2% | -13.6% | -16%",
+      "scaling": [
+        {
+          "label": "Tactical Dmg",
+          "values": [
+            -8,
+            -9.6,
+            -11.2,
+            -13.6,
+            -16
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Start of Combat: Tactical Dmg: -8% | -9.6% | -11.2% | -13.6% | -16% on 1 Enemies (dealer:tactical) for Whole Combat.",
+      "structured": [
+        {
+          "when": "combat_start",
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "tactical_dealt",
+                  "pct": [
+                    -8,
+                    -9.6,
+                    -11.2,
+                    -13.6,
+                    -16
+                  ]
+                }
+              ],
+              "dur": "combat",
+              "tgt": {
+                "side": "enemy",
+                "count": 1,
+                "select": "dealer:tactical"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "jagadrix",
+      "slot": 2,
+      "unlockStar": 4,
+      "name": "Second Wind",
+      "trigger": "Rounds 6",
+      "targeting": "1 Self",
+      "effectType": "Stat Modifier (Buff), Recovery, Status Effect",
+      "duration": "Whole Combat / Instant",
+      "scalingRaw": "Dmg Dealt: 10% | 12% | 14% | 17% | 20% ; Recovery: 150% | 180% | 210% | 255% | 300% ; nullify recovery",
+      "scaling": [
+        {
+          "label": "Dmg Dealt",
+          "values": [
+            10,
+            12,
+            14,
+            17,
+            20
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "Recovery",
+          "values": [
+            150,
+            180,
+            210,
+            255,
+            300
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "Value",
+          "values": [
+            "nullify recovery"
+          ],
+          "unit": null,
+          "fixed": true
+        }
+      ],
+      "description": "Rounds 6: Dmg Dealt: 10% | 12% | 14% | 17% | 20% ; Recovery: 150% | 180% | 210% | 255% | 300% ; nullify recovery on 1 Self for Whole Combat / Instant.",
+      "structured": [
+        {
+          "when": "rounds",
+          "rounds": [
+            6
+          ],
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "dmg_dealt",
+                  "pct": [
+                    10,
+                    12,
+                    14,
+                    17,
+                    20
+                  ]
+                }
+              ],
+              "dur": "combat",
+              "tgt": {
+                "side": "self"
+              }
+            },
+            {
+              "t": "heal",
+              "pct": [
+                150,
+                180,
+                210,
+                255,
+                300
+              ],
+              "tgt": {
+                "side": "self"
+              }
+            },
+            {
+              "t": "status",
+              "st": "nullify_recovery",
+              "dur": "combat",
+              "tgt": {
+                "side": "self"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "jagadrix",
+      "slot": 3,
+      "unlockStar": 6,
+      "name": "Whispering Sabotage",
+      "trigger": "Each Action / Round",
+      "targeting": "1 Enemies (same lane)",
+      "effectType": "Status Effect",
+      "duration": "2 Rounds",
+      "scalingRaw": "weakened (10%) ; Chance: 25% | 30% | 35% | 42.5% | 50%",
+      "scaling": [
+        {
+          "label": "Value",
+          "values": [
+            "weakened (10%)"
+          ],
+          "unit": "%",
+          "fixed": true
+        },
+        {
+          "label": "Chance",
+          "values": [
+            25,
+            30,
+            35,
+            42.5,
+            50
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Each Action / Round: weakened (10%) ; Chance: 25% | 30% | 35% | 42.5% | 50% on 1 Enemies (same lane) for 2 Rounds.",
+      "structured": [
+        {
+          "when": "each",
+          "actions": [
+            {
+              "t": "status",
+              "st": "weakened",
+              "val": 10,
+              "dur": 2,
+              "chance": [
+                25,
+                30,
+                35,
+                42.5,
+                50
+              ],
+              "tgt": {
+                "side": "enemy",
+                "count": 1,
+                "select": "same_lane"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "jagadrix",
+      "slot": 4,
+      "unlockStar": 8,
+      "name": "Quick-Witted",
+      "trigger": "Start of Combat",
+      "targeting": "1 Self",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "Whole Combat",
+      "scalingRaw": "INT: 12.5% | 15% | 17.5% | 21.25% | 25% ; INIT: 12.5% | 15% | 17.5% | 21.25% | 25%",
+      "scaling": [
+        {
+          "label": "INT",
+          "values": [
+            12.5,
+            15,
+            17.5,
+            21.25,
+            25
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "INIT",
+          "values": [
+            12.5,
+            15,
+            17.5,
+            21.25,
+            25
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Start of Combat: INT: 12.5% | 15% | 17.5% | 21.25% | 25% ; INIT: 12.5% | 15% | 17.5% | 21.25% | 25% on 1 Self for Whole Combat.",
+      "structured": [
+        {
+          "when": "combat_start",
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "int",
+                  "pct": [
+                    12.5,
+                    15,
+                    17.5,
+                    21.25,
+                    25
+                  ]
+                },
+                {
+                  "stat": "init",
+                  "pct": [
+                    12.5,
+                    15,
+                    17.5,
+                    21.25,
+                    25
+                  ]
+                }
+              ],
+              "dur": "combat",
+              "tgt": {
+                "side": "self"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "jagadrix",
+      "slot": 5,
+      "unlockStar": 10,
+      "name": "Echoes of Deceit",
+      "trigger": "Rounds 1 / Rounds 3, 6, 9",
+      "targeting": "1 Enemies (highest:inst), 1 Enemies (dealer:tactical)",
+      "effectType": "Stat Modifier (Debuff), Damage",
+      "duration": "Whole Combat / Instant",
+      "scalingRaw": "INST: -6% | -7.8% | -9.6% | -12% | -15% ; INIT: -6% | -7.8% | -9.6% | -12% | -15% ; Fire Dmg: 30% | 39% | 48% | 60% | 75%",
+      "scaling": [
+        {
+          "label": "INST",
+          "values": [
+            -6,
+            -7.8,
+            -9.6,
+            -12,
+            -15
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "INIT",
+          "values": [
+            -6,
+            -7.8,
+            -9.6,
+            -12,
+            -15
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "Fire Dmg",
+          "values": [
+            30,
+            39,
+            48,
+            60,
+            75
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Rounds 1 / Rounds 3, 6, 9: INST: -6% | -7.8% | -9.6% | -12% | -15% ; INIT: -6% | -7.8% | -9.6% | -12% | -15% ; Fire Dmg: 30% | 39% | 48% | 60% | 75% on 1 Enemies (highest:inst), 1 Enemies (dealer:tactical) for Whole Combat / Instant.",
+      "structured": [
+        {
+          "when": "rounds",
+          "rounds": [
+            1
+          ],
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "inst",
+                  "pct": [
+                    -6,
+                    -7.8,
+                    -9.6,
+                    -12,
+                    -15
+                  ]
+                },
+                {
+                  "stat": "init",
+                  "pct": [
+                    -6,
+                    -7.8,
+                    -9.6,
+                    -12,
+                    -15
+                  ]
+                }
+              ],
+              "dur": "combat",
+              "scaleStat": "init",
+              "tgt": {
+                "side": "enemy",
+                "count": 1,
+                "select": "highest:inst"
+              }
+            }
+          ]
+        },
+        {
+          "when": "rounds",
+          "rounds": [
+            3,
+            6,
+            9
+          ],
+          "actions": [
+            {
+              "t": "dmg",
+              "dt": "fire",
+              "pct": [
+                30,
+                39,
+                48,
+                60,
+                75
+              ],
+              "tgt": {
+                "side": "enemy",
+                "count": 1,
+                "select": "dealer:tactical"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

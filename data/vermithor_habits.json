@@ -1,0 +1,559 @@
+{
+  "dragonId": "vermithor",
+  "habits": [
+    {
+      "dragonId": "vermithor",
+      "slot": 1,
+      "unlockStar": 2,
+      "name": "Noble Sacrifice",
+      "trigger": "Rounds 1",
+      "targeting": "1 Self, 1 Enemies (prefer dealer:physical), 1 Enemies (prefer dealer:fire)",
+      "effectType": "Stat Modifier (Buff), Stat Modifier (Debuff)",
+      "duration": "5 Rounds",
+      "scalingRaw": "Tactical Dmg Received: 20% | 16% | 12% | 6% | 0% ; Physical Dmg: -13% | -13.4% | -13.8% | -14.4% | -15% ; Fire Dmg: -13% | -13.4% | -13.8% | -14.4% | -15%",
+      "scaling": [
+        {
+          "label": "Tactical Dmg Received",
+          "values": [
+            20,
+            16,
+            12,
+            6,
+            0
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "Physical Dmg",
+          "values": [
+            -13,
+            -13.4,
+            -13.8,
+            -14.4,
+            -15
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "Fire Dmg",
+          "values": [
+            -13,
+            -13.4,
+            -13.8,
+            -14.4,
+            -15
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Rounds 1: Tactical Dmg Received: 20% | 16% | 12% | 6% | 0% ; Physical Dmg: -13% | -13.4% | -13.8% | -14.4% | -15% ; Fire Dmg: -13% | -13.4% | -13.8% | -14.4% | -15% on 1 Self, 1 Enemies (prefer dealer:physical), 1 Enemies (prefer dealer:fire) for 5 Rounds.",
+      "structured": [
+        {
+          "when": "rounds",
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "tactical_received",
+                  "pct": [
+                    20,
+                    16,
+                    12,
+                    6,
+                    0
+                  ]
+                }
+              ],
+              "dur": 5,
+              "tgt": {
+                "side": "self"
+              }
+            },
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "physical_dealt",
+                  "pct": [
+                    -13,
+                    -13.4,
+                    -13.8,
+                    -14.4,
+                    -15
+                  ]
+                }
+              ],
+              "dur": 5,
+              "tgt": {
+                "side": "enemy",
+                "count": 1,
+                "select": "prefer_dealer:physical"
+              }
+            },
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "fire_dealt",
+                  "pct": [
+                    -13,
+                    -13.4,
+                    -13.8,
+                    -14.4,
+                    -15
+                  ]
+                }
+              ],
+              "dur": 5,
+              "tgt": {
+                "side": "enemy",
+                "count": 1,
+                "select": "prefer_dealer:fire"
+              }
+            }
+          ],
+          "rounds": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "vermithor",
+      "slot": 2,
+      "unlockStar": 4,
+      "name": "Nimble Resilience",
+      "trigger": "Start of Combat",
+      "targeting": "1 Self",
+      "effectType": "Stat Modifier (Debuff)",
+      "duration": "Whole Combat",
+      "scalingRaw": "Dmg Received: -6% | -7.2% | -8.4% | -10.2% | -12% ; INIT: 12% | 14.4% | 16.8% | 20.4% | 24%",
+      "scaling": [
+        {
+          "label": "Dmg Received",
+          "values": [
+            -6,
+            -7.2,
+            -8.4,
+            -10.2,
+            -12
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "INIT",
+          "values": [
+            12,
+            14.4,
+            16.8,
+            20.4,
+            24
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Start of Combat: Dmg Received: -6% | -7.2% | -8.4% | -10.2% | -12% ; INIT: 12% | 14.4% | 16.8% | 20.4% | 24% on 1 Self for Whole Combat.",
+      "structured": [
+        {
+          "when": "combat_start",
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "dmg_received",
+                  "pct": [
+                    -6,
+                    -7.2,
+                    -8.4,
+                    -10.2,
+                    -12
+                  ]
+                },
+                {
+                  "stat": "init",
+                  "pct": [
+                    12,
+                    14.4,
+                    16.8,
+                    20.4,
+                    24
+                  ]
+                }
+              ],
+              "dur": "combat",
+              "tgt": {
+                "side": "self"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "vermithor",
+      "slot": 3,
+      "unlockStar": 6,
+      "name": "Bronze Bulwark",
+      "trigger": "Rounds 2, 4, 6, 8 / Odd Rounds",
+      "targeting": "2 Enemies (adjacency), 1 Allies (least troops), Self",
+      "effectType": "Damage, Status Effect, Stat Modifier (Debuff)",
+      "duration": "Instant / 2 Rounds",
+      "scalingRaw": "Physical Dmg: 7.5% | 9% | 10.5% | 12.75% | 15% ; Tactical Dmg: 15% | 18% | 21% | 25.5% | 30% ; protect ; Chance: 10% | 12% | 14% | 17% | 20% ; Physical Dmg Received: -5% | -6% | -7% | -8.5% | -10% ; Fire Dmg Received: -5% | -6% | -7% | -8.5% | -10% ; Chance: 40% | 42% | 44% | 47% | 50%",
+      "scaling": [
+        {
+          "label": "Physical Dmg",
+          "values": [
+            7.5,
+            9,
+            10.5,
+            12.75,
+            15
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "Tactical Dmg",
+          "values": [
+            15,
+            18,
+            21,
+            25.5,
+            30
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "Value",
+          "values": [
+            "protect"
+          ],
+          "unit": null,
+          "fixed": true
+        },
+        {
+          "label": "Chance",
+          "values": [
+            10,
+            12,
+            14,
+            17,
+            20
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "Physical Dmg Received",
+          "values": [
+            -5,
+            -6,
+            -7,
+            -8.5,
+            -10
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "Fire Dmg Received",
+          "values": [
+            -5,
+            -6,
+            -7,
+            -8.5,
+            -10
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "Chance",
+          "values": [
+            40,
+            42,
+            44,
+            47,
+            50
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Rounds 2, 4, 6, 8 / Odd Rounds: Physical Dmg: 7.5% | 9% | 10.5% | 12.75% | 15% ; Tactical Dmg: 15% | 18% | 21% | 25.5% | 30% ; protect ; Chance: 10% | 12% | 14% | 17% | 20% ; Physical Dmg Received: -5% | -6% | -7% | -8.5% | -10% ; Fire Dmg Received: -5% | -6% | -7% | -8.5% | -10% ; Chance: 40% | 42% | 44% | 47% | 50% on 2 Enemies (adjacency), 1 Allies (least troops) and Self for Instant / 2 Rounds.",
+      "structured": [
+        {
+          "when": "rounds",
+          "rounds": [
+            2,
+            4,
+            6,
+            8
+          ],
+          "actions": [
+            {
+              "t": "dmg",
+              "dt": "physical",
+              "pct": [
+                7.5,
+                9,
+                10.5,
+                12.75,
+                15
+              ],
+              "tgt": {
+                "side": "enemy",
+                "count": 2,
+                "select": "adjacency"
+              }
+            },
+            {
+              "t": "dmg",
+              "dt": "tactical",
+              "pct": [
+                15,
+                18,
+                21,
+                25.5,
+                30
+              ],
+              "tgt": {
+                "side": "enemy",
+                "count": 2,
+                "select": "adjacency"
+              }
+            }
+          ]
+        },
+        {
+          "when": "odd",
+          "actions": [
+            {
+              "t": "status",
+              "st": "protect",
+              "dur": 2,
+              "chance": [
+                10,
+                12,
+                14,
+                17,
+                20
+              ],
+              "tgt": {
+                "side": "ally",
+                "count": 1,
+                "select": "least_troops"
+              }
+            },
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "physical_received",
+                  "pct": [
+                    -5,
+                    -6,
+                    -7,
+                    -8.5,
+                    -10
+                  ]
+                },
+                {
+                  "stat": "fire_received",
+                  "pct": [
+                    -5,
+                    -6,
+                    -7,
+                    -8.5,
+                    -10
+                  ]
+                }
+              ],
+              "dur": 2,
+              "chance": [
+                40,
+                42,
+                44,
+                47,
+                50
+              ],
+              "tgt": {
+                "side": "self"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "vermithor",
+      "slot": 4,
+      "unlockStar": 8,
+      "name": "Fury's Poise",
+      "trigger": "Start of Combat",
+      "targeting": "1 Self",
+      "effectType": "Stat Modifier (Debuff)",
+      "duration": "Whole Combat",
+      "scalingRaw": "Physical Dmg Received: -7.5% | -9% | -10.5% | -12.75% | -15% ; Fire Dmg Received: -7.5% | -9% | -10.5% | -12.75% | -15%",
+      "scaling": [
+        {
+          "label": "Physical Dmg Received",
+          "values": [
+            -7.5,
+            -9,
+            -10.5,
+            -12.75,
+            -15
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "Fire Dmg Received",
+          "values": [
+            -7.5,
+            -9,
+            -10.5,
+            -12.75,
+            -15
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Start of Combat: Physical Dmg Received: -7.5% | -9% | -10.5% | -12.75% | -15% ; Fire Dmg Received: -7.5% | -9% | -10.5% | -12.75% | -15% on 1 Self for Whole Combat.",
+      "structured": [
+        {
+          "when": "combat_start",
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "physical_received",
+                  "pct": [
+                    -7.5,
+                    -9,
+                    -10.5,
+                    -12.75,
+                    -15
+                  ]
+                }
+              ],
+              "dur": "combat",
+              "tgt": {
+                "side": "self"
+              }
+            },
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "fire_received",
+                  "pct": [
+                    -7.5,
+                    -9,
+                    -10.5,
+                    -12.75,
+                    -15
+                  ]
+                }
+              ],
+              "dur": "combat",
+              "tgt": {
+                "side": "self"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "vermithor",
+      "slot": 5,
+      "unlockStar": 10,
+      "name": "Vengeful Fury",
+      "trigger": "Each Action / Round (once per combat)",
+      "targeting": "1 Enemies (lowest:inst), 1 Enemies (lowest:int)",
+      "effectType": "Damage",
+      "duration": "Instant",
+      "scalingRaw": "Physical Dmg: 60% | 78% | 96% | 120% | 150% ; Tactical Dmg: 100% | 130% | 160% | 200% | 250%",
+      "scaling": [
+        {
+          "label": "Physical Dmg",
+          "values": [
+            60,
+            78,
+            96,
+            120,
+            150
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "Tactical Dmg",
+          "values": [
+            100,
+            130,
+            160,
+            200,
+            250
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Each Round, while you are below 50% of Max Troop Capacity: Physical Dmg: 60% | 78% | 96% | 120% | 150% on 1 Enemies (lowest:inst) ; Tactical Dmg: 100% | 130% | 160% | 200% | 250% on 1 Enemies (lowest:int), for Instant. This effect only triggers once per combat.",
+      "structured": [
+        {
+          "when": "each",
+          "onlyIf": "self:troops_below_50",
+          "actions": [
+            {
+              "t": "dmg",
+              "dt": "physical",
+              "pct": [
+                60,
+                78,
+                96,
+                120,
+                150
+              ],
+              "tgt": {
+                "side": "enemy",
+                "count": 1,
+                "select": "lowest:inst"
+              }
+            },
+            {
+              "t": "dmg",
+              "dt": "tactical",
+              "pct": [
+                100,
+                130,
+                160,
+                200,
+                250
+              ],
+              "tgt": {
+                "side": "enemy",
+                "count": 1,
+                "select": "lowest:int"
+              }
+            }
+          ],
+          "once": true
+        }
+      ]
+    }
+  ]
+}

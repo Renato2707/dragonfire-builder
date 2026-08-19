@@ -1,0 +1,435 @@
+{
+  "dragonId": "kalspire",
+  "habits": [
+    {
+      "dragonId": "kalspire",
+      "slot": 1,
+      "unlockStar": 2,
+      "name": "Robust Insight",
+      "trigger": "Start of Combat",
+      "targeting": "1 Self",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "Whole Combat",
+      "scalingRaw": "STR: 20% | 24% | 28% | 34% | 40% ; INST: 20% | 24% | 28% | 34% | 40%",
+      "scaling": [
+        {
+          "label": "STR",
+          "values": [
+            20,
+            24,
+            28,
+            34,
+            40
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "INST",
+          "values": [
+            20,
+            24,
+            28,
+            34,
+            40
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Start of Combat: Apply Stat Modifier (Buff) to 1 Self (STR: 20% | 24% | 28% | 34% | 40% ; INST: 20% | 24% | 28% | 34% | 40%) for Whole Combat.",
+      "structured": [
+        {
+          "when": "combat_start",
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "str",
+                  "pct": [
+                    20,
+                    24,
+                    28,
+                    34,
+                    40
+                  ]
+                },
+                {
+                  "stat": "inst",
+                  "pct": [
+                    20,
+                    24,
+                    28,
+                    34,
+                    40
+                  ]
+                }
+              ],
+              "dur": "combat",
+              "tgt": {
+                "side": "self"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "kalspire",
+      "slot": 2,
+      "unlockStar": 4,
+      "name": "Battle Cunning",
+      "trigger": "Start of Combat",
+      "targeting": "3 Enemies",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "Whole Combat",
+      "scalingRaw": "STR: -6.5% | -7.8% | -9.1% | -11.05% | -13% ; INT: -6.5% | -7.8% | -9.1% | -11.05% | -13%",
+      "scaling": [
+        {
+          "label": "STR",
+          "values": [
+            -6.5,
+            -7.8,
+            -9.1,
+            -11.05,
+            -13
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "INT",
+          "values": [
+            -6.5,
+            -7.8,
+            -9.1,
+            -11.05,
+            -13
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Start of Combat: Apply Stat Modifier (Buff) to 3 Enemies (STR: -6.5% | -7.8% | -9.1% | -11.05% | -13% ; INT: -6.5% | -7.8% | -9.1% | -11.05% | -13%) for Whole Combat.",
+      "structured": [
+        {
+          "when": "combat_start",
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "str",
+                  "pct": [
+                    -6.5,
+                    -7.8,
+                    -9.1,
+                    -11.05,
+                    -13
+                  ]
+                },
+                {
+                  "stat": "int",
+                  "pct": [
+                    -6.5,
+                    -7.8,
+                    -9.1,
+                    -11.05,
+                    -13
+                  ]
+                }
+              ],
+              "scaleStat": "inst",
+              "dur": "combat",
+              "tgt": {
+                "side": "enemy",
+                "count": 3,
+                "select": "any"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "kalspire",
+      "slot": 3,
+      "unlockStar": 6,
+      "name": "Tactical Assault",
+      "trigger": "Each Action / Round",
+      "targeting": "1 Enemy (Adjacent Lane), 2 Enemies (Adjacent Lane)",
+      "effectType": "Direct Damage (Nuke), Status Effect (Control/DoT)",
+      "duration": "2 Rounds, Whole Combat",
+      "scalingRaw": "Rate: 25% | 30% | 35% | 42.5% | 50% ; Chance: 15% | 18% | 21% | 25.5% | 30%",
+      "scaling": [
+        {
+          "label": "Rate",
+          "values": [
+            25,
+            30,
+            35,
+            42.5,
+            50
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "Chance",
+          "values": [
+            15,
+            18,
+            21,
+            25.5,
+            30
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Each Action / Round: Apply Direct Damage (Nuke), Status Effect (Control/DoT) to 1 Enemy (Adjacent Lane), 2 Enemies (Adjacent Lane) (Rate: 25% | 30% | 35% | 42.5% | 50% ; Chance: 15% | 18% | 21% | 25.5% | 30%) for 2 Rounds, Whole Combat.",
+      "structured": [
+        {
+          "when": "each",
+          "actions": [
+            {
+              "t": "dmg",
+              "dt": "physical",
+              "pct": [
+                25,
+                30,
+                35,
+                42.5,
+                50
+              ],
+              "tgt": {
+                "side": "enemy",
+                "count": 1,
+                "select": "adjacency"
+              }
+            },
+            {
+              "t": "status",
+              "st": "panic",
+              "dur": 2,
+              "chance": [
+                15,
+                18,
+                21,
+                25.5,
+                30
+              ],
+              "tgt": {
+                "side": "enemy",
+                "count": 2,
+                "select": "adjacency"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "kalspire",
+      "slot": 4,
+      "unlockStar": 8,
+      "name": "Dragon's Insight",
+      "trigger": "Start of Combat",
+      "targeting": "1 Self",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "Whole Combat",
+      "scalingRaw": "DMG_RECEIVED: -6% | -7.2% | -8.4% | -10.2% | -12% ; INST: 12% | 14.4% | 16.8% | 20.4% | 24%",
+      "scaling": [
+        {
+          "label": "DMG_RECEIVED",
+          "values": [
+            -6,
+            -7.2,
+            -8.4,
+            -10.2,
+            -12
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "INST",
+          "values": [
+            12,
+            14.4,
+            16.8,
+            20.4,
+            24
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Start of Combat: Apply Stat Modifier (Buff) to 1 Self (DMG_RECEIVED: -6% | -7.2% | -8.4% | -10.2% | -12% ; INST: 12% | 14.4% | 16.8% | 20.4% | 24%) for Whole Combat.",
+      "structured": [
+        {
+          "when": "combat_start",
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "dmg_received",
+                  "pct": [
+                    -6,
+                    -7.2,
+                    -8.4,
+                    -10.2,
+                    -12
+                  ]
+                },
+                {
+                  "stat": "inst",
+                  "pct": [
+                    12,
+                    14.4,
+                    16.8,
+                    20.4,
+                    24
+                  ]
+                }
+              ],
+              "dur": "combat",
+              "tgt": {
+                "side": "self"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "kalspire",
+      "slot": 5,
+      "unlockStar": 10,
+      "name": "Radiant Conqueror",
+      "trigger": "Rounds 2, Rounds 1",
+      "targeting": "1 Enemy, 1 Self",
+      "effectType": "Stat Modifier (Buff), Stat Modifier (Debuff), Status Effect (Control/DoT)",
+      "duration": "5 Rounds, 1 Round",
+      "scalingRaw": "DMG_RECEIVED: -50% ; PHYSICAL_DEALT: -10% | -13% | -16% | -20% | -25% ; FIRE_DEALT: -10% | -13% | -16% | -20% | -25%",
+      "scaling": [
+        {
+          "label": "DMG_RECEIVED",
+          "values": [
+            -50
+          ],
+          "unit": "%",
+          "fixed": true
+        },
+        {
+          "label": "PHYSICAL_DEALT",
+          "values": [
+            -10,
+            -13,
+            -16,
+            -20,
+            -25
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "FIRE_DEALT",
+          "values": [
+            -10,
+            -13,
+            -16,
+            -20,
+            -25
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Rounds 2, Rounds 1: Apply Stat Modifier (Buff), Stat Modifier (Debuff), Status Effect (Control/DoT) to 1 Enemy, 1 Self (DMG_RECEIVED: -50% ; PHYSICAL_DEALT: -10% | -13% | -16% | -20% | -25% ; FIRE_DEALT: -10% | -13% | -16% | -20% | -25%) for 5 Rounds, 1 Round.",
+      "structured": [
+        {
+          "when": "rounds",
+          "rounds": [
+            1
+          ],
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "dmg_received",
+                  "pct": -50
+                }
+              ],
+              "dur": 1,
+              "tgt": {
+                "side": "self"
+              }
+            },
+            {
+              "t": "status",
+              "st": "stun",
+              "dur": 1,
+              "tgt": {
+                "side": "self"
+              }
+            }
+          ]
+        },
+        {
+          "when": "rounds",
+          "rounds": [
+            2
+          ],
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "physical_dealt",
+                  "pct": [
+                    -10,
+                    -13,
+                    -16,
+                    -20,
+                    -25
+                  ]
+                }
+              ],
+              "dur": 5,
+              "tgt": {
+                "side": "enemy",
+                "count": 1,
+                "select": "highest_str"
+              }
+            },
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "fire_dealt",
+                  "pct": [
+                    -10,
+                    -13,
+                    -16,
+                    -20,
+                    -25
+                  ]
+                }
+              ],
+              "dur": 5,
+              "tgt": {
+                "side": "enemy",
+                "count": 1,
+                "select": "any"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

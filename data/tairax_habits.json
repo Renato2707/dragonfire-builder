@@ -1,0 +1,381 @@
+{
+  "dragonId": "tairax",
+  "habits": [
+    {
+      "dragonId": "tairax",
+      "slot": 1,
+      "unlockStar": 2,
+      "name": "Whisper of Ash",
+      "trigger": "Start of Combat",
+      "targeting": "Self",
+      "effectType": "Ability Buff",
+      "duration": "Whole Combat",
+      "scalingRaw": "Rank 1: 16% | -16% | Rank 2: 19.2% | -19.2% | Rank 3: 22.4% | -22.4% | Rank 4: 27.2% | -27.2% | Rank 5: 32% | -32%",
+      "scaling": [
+        {
+          "label": "Rank 1",
+          "values": [
+            16,
+            -16,
+            "Rank 2: 19.2%",
+            -19.2,
+            "Rank 3: 22.4%",
+            -22.4,
+            "Rank 4: 27.2%",
+            -27.2,
+            "Rank 5: 32%",
+            -32
+          ],
+          "unit": "%",
+          "fixed": true
+        }
+      ],
+      "description": "Start of Round 1: Reduce the Strength and Initiative by -16% (depends on rank) of 1 Enemy in the same lane for 5 rounds. Start of Round 6: Increase your Intelligence and Initiative by +16% for 5 rounds.",
+      "structured": [
+        {
+          "when": "rounds",
+          "rounds": [
+            1
+          ],
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "str",
+                  "pct": [
+                    -16,
+                    -19.2,
+                    -22.4,
+                    -27.2,
+                    -32
+                  ]
+                },
+                {
+                  "stat": "init",
+                  "pct": [
+                    -16,
+                    -19.2,
+                    -22.4,
+                    -27.2,
+                    -32
+                  ]
+                }
+              ],
+              "dur": 5,
+              "tgt": {
+                "side": "enemy",
+                "count": 1,
+                "select": "same_lane"
+              }
+            }
+          ]
+        },
+        {
+          "when": "rounds",
+          "rounds": [
+            6
+          ],
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "int",
+                  "pct": [
+                    16,
+                    19.2,
+                    22.4,
+                    27.2,
+                    32
+                  ]
+                },
+                {
+                  "stat": "init",
+                  "pct": [
+                    16,
+                    19.2,
+                    22.4,
+                    27.2,
+                    32
+                  ]
+                }
+              ],
+              "dur": 5,
+              "tgt": {
+                "side": "self"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "tairax",
+      "slot": 2,
+      "unlockStar": 4,
+      "name": "Sunder",
+      "trigger": "Start of Combat",
+      "targeting": "Self",
+      "effectType": "Ability Buff",
+      "duration": "Whole Combat",
+      "scalingRaw": "Rank 1: 7.50% | Rank 2: 9% | Rank 3: 10.50% | Rank 4: 12.75% | Rank 5: 15%",
+      "scaling": [
+        {
+          "label": "Rank 1",
+          "values": [
+            7.5,
+            "Rank 2: 9%",
+            "Rank 3: 10.50%",
+            "Rank 4: 12.75%",
+            "Rank 5: 15%"
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Start of Each Round: Increase the Damage Received by 7.5% (depends on rank) of all enemies afflicted with a Control effect until the end of the round. Control effects include Stun, Stagger, Overwhelm, Confusion.",
+      "structured": [
+        {
+          "when": "each",
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "dmg_received",
+                  "pct": [
+                    7.5,
+                    9,
+                    10.5,
+                    12.75,
+                    15
+                  ]
+                }
+              ],
+              "dur": 1,
+              "tgt": {
+                "side": "enemy",
+                "count": "all",
+                "select": "prioritize_afflicted_control"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "tairax",
+      "slot": 3,
+      "unlockStar": 6,
+      "name": "Gleamstrike",
+      "trigger": "Start of Combat",
+      "targeting": "Self",
+      "effectType": "Ability Buff",
+      "duration": "Whole Combat",
+      "scalingRaw": "Rank 1: 37.5% | 20% | Rank 2: 40% | 24% | Rank 3: 42.5% | 28% | Rank 4: 46.25% | 34% | Rank 5: 50% | 40%",
+      "scaling": [
+        {
+          "label": "Rank 1",
+          "values": [
+            37.5,
+            20,
+            "Rank 2: 40%",
+            24,
+            "Rank 3: 42.5%",
+            28,
+            "Rank 4: 46.25%",
+            34,
+            "Rank 5: 50%",
+            40
+          ],
+          "unit": "%",
+          "fixed": true
+        }
+      ],
+      "description": "Burning Ward gains: Odd-numbered Rounds: Increase chance the afflict Stagger to 37.5% (depends on rank). Stagger prevents the target from using Attack Modifier Commands or launching Basic Attacks. Each round: Deal Fire Damage to all enemies afflicted with a Control effect, damage rate 20% (depends on rank). Control effects include Stun, STagger, OVerwhelm and Confusion.",
+      "structured": [
+        {
+          "when": "odd",
+          "actions": [
+            {
+              "t": "status",
+              "st": "stagger",
+              "dur": 2,
+              "chance": [
+                37.5,
+                40,
+                42.5,
+                46.25,
+                50
+              ],
+              "tgt": {
+                "side": "enemy",
+                "count": 1
+              }
+            }
+          ]
+        },
+        {
+          "when": "each",
+          "actions": [
+            {
+              "t": "dmg",
+              "dt": "fire",
+              "pct": [
+                20,
+                24,
+                28,
+                34,
+                40
+              ],
+              "tgt": {
+                "side": "enemy",
+                "count": "all",
+                "select": "prioritize_afflicted_control"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "tairax",
+      "slot": 4,
+      "unlockStar": 8,
+      "name": "Gift of Fire",
+      "trigger": "Start of Combat",
+      "targeting": "Self",
+      "effectType": "Ability Buff",
+      "duration": "Whole Combat",
+      "scalingRaw": "Rank 1: 17.50% | Rank 2: 21% | Rank 3: 24.50% | Rank 4: 29.75% | Rank 5: 35%",
+      "scaling": [
+        {
+          "label": "Rank 1",
+          "values": [
+            17.5,
+            "Rank 2: 21%",
+            "Rank 3: 24.50%",
+            "Rank 4: 29.75%",
+            "Rank 5: 35%"
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Start of each Round: For each enemy afflicted with Burn, 17.5% (depends on rank) chance to apply Resistance -15% to 1 ally in any lane for 2 rounds (prioritizes targets not already affected by Resistance). Resistance reduced the target's damange received.",
+      "structured": [
+        {
+          "when": "each",
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "dmg_received",
+                  "pct": -15
+                }
+              ],
+              "dur": 2,
+              "chance": [
+                17.5,
+                21,
+                24.5,
+                29.75,
+                35
+              ],
+              "tgt": {
+                "side": "ally",
+                "count": 1,
+                "select": "any"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "tairax",
+      "slot": 5,
+      "unlockStar": 10,
+      "name": "Moonlit Hunt",
+      "trigger": "Start of Combat",
+      "targeting": "Self",
+      "effectType": "Ability Buff",
+      "duration": "Whole Combat",
+      "scalingRaw": "Rank 1: 5% | 12% | Rank 2: 6.5% | 15.6% | Rank 3: 8% | 19.2% | Rank 4: 10% | 24% | Rank 5: 12.5% | 30%",
+      "scaling": [
+        {
+          "label": "Rank 1",
+          "values": [
+            5,
+            12,
+            "Rank 2: 6.5%",
+            15.6,
+            "Rank 3: 8%",
+            19.2,
+            "Rank 4: 10%",
+            24,
+            "Rank 5: 12.5%",
+            30
+          ],
+          "unit": "%",
+          "fixed": true
+        }
+      ],
+      "description": "Start of Round 1: Grant yourself Evade 5% (depends on rank) for 5 rounds. Evade causes each instance of damange against the target to have a chance to be ignored. Start of Round 6: Increase your Fire damage dealt by 12% (depends on rank for 5 rounds.",
+      "structured": [
+        {
+          "when": "rounds",
+          "rounds": [
+            1
+          ],
+          "actions": [
+            {
+              "t": "status",
+              "st": "evade",
+              "dur": 5,
+              "val": [
+                5,
+                6.5,
+                8,
+                10,
+                12.5
+              ],
+              "tgt": {
+                "side": "self"
+              }
+            }
+          ]
+        },
+        {
+          "when": "rounds",
+          "rounds": [
+            6
+          ],
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "fire_dealt",
+                  "pct": [
+                    12,
+                    15.6,
+                    19.2,
+                    24,
+                    30
+                  ]
+                }
+              ],
+              "dur": 5,
+              "tgt": {
+                "side": "self"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

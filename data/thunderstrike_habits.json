@@ -1,0 +1,337 @@
+{
+  "dragonId": "thunderstrike",
+  "habits": [
+    {
+      "dragonId": "thunderstrike",
+      "slot": 1,
+      "unlockStar": 2,
+      "name": "Battle Rush",
+      "trigger": "Rounds 1",
+      "targeting": "2 Enemies (Adjacent Lane), 1 Self",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "3 Rounds",
+      "scalingRaw": "INIT: 25% | 30% | 35% | 42.5% | 50% ; INST: -15% | -18% | -21% | -25.5% | -30%",
+      "scaling": [
+        {
+          "label": "INIT",
+          "values": [
+            25,
+            30,
+            35,
+            42.5,
+            50
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "INST",
+          "values": [
+            -15,
+            -18,
+            -21,
+            -25.5,
+            -30
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Rounds 1: Apply Stat Modifier (Buff) to 2 Enemies (Adjacent Lane), 1 Self (INIT: 25% | 30% | 35% | 42.5% | 50% ; INST: -15% | -18% | -21% | -25.5% | -30%) for 3 Rounds.",
+      "structured": [
+        {
+          "when": "rounds",
+          "rounds": [
+            1
+          ],
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "init",
+                  "pct": [
+                    25,
+                    30,
+                    35,
+                    42.5,
+                    50
+                  ]
+                }
+              ],
+              "dur": 3,
+              "tgt": {
+                "side": "self"
+              }
+            },
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "inst",
+                  "pct": [
+                    -15,
+                    -18,
+                    -21,
+                    -25.5,
+                    -30
+                  ]
+                }
+              ],
+              "scaleStat": "str",
+              "dur": 3,
+              "tgt": {
+                "side": "enemy",
+                "count": 2,
+                "select": "adjacency"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "thunderstrike",
+      "slot": 2,
+      "unlockStar": 4,
+      "name": "Dragon's Might",
+      "trigger": "Start of Combat",
+      "targeting": "1 Self",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "Whole Combat",
+      "scalingRaw": "PHYSICAL_DEALT: 8% | 9.6% | 11.2% | 13.6% | 16%",
+      "scaling": [
+        {
+          "label": "PHYSICAL_DEALT",
+          "values": [
+            8,
+            9.6,
+            11.2,
+            13.6,
+            16
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Start of Combat: Apply Stat Modifier (Buff) to 1 Self (PHYSICAL_DEALT: 8% | 9.6% | 11.2% | 13.6% | 16%) for Whole Combat.",
+      "structured": [
+        {
+          "when": "combat_start",
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "physical_dealt",
+                  "pct": [
+                    8,
+                    9.6,
+                    11.2,
+                    13.6,
+                    16
+                  ]
+                }
+              ],
+              "dur": "combat",
+              "tgt": {
+                "side": "self"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "thunderstrike",
+      "slot": 3,
+      "unlockStar": 6,
+      "name": "Barbed Lash",
+      "trigger": "Rounds 2, 4, 6, 8, 10",
+      "targeting": "1 Enemy, 1 Enemy (Same Lane)",
+      "effectType": "Direct Damage (Nuke), Status Effect (Control/DoT)",
+      "duration": "2 Rounds, Whole Combat",
+      "scalingRaw": "Rate: 50% | 60% | 70% | 85% | 100% ; Chance: 25% | 30% | 35% | 42.5% | 50%",
+      "scaling": [
+        {
+          "label": "Rate",
+          "values": [
+            50,
+            60,
+            70,
+            85,
+            100
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "Chance",
+          "values": [
+            25,
+            30,
+            35,
+            42.5,
+            50
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Rounds 2, 4, 6, 8, 10: Apply Direct Damage (Nuke), Status Effect (Control/DoT) to 1 Enemy, 1 Enemy (Same Lane) (Rate: 50% | 60% | 70% | 85% | 100% ; Chance: 25% | 30% | 35% | 42.5% | 50%) for 2 Rounds, Whole Combat.",
+      "structured": [
+        {
+          "when": "rounds",
+          "rounds": [
+            2,
+            4,
+            6,
+            8,
+            10
+          ],
+          "actions": [
+            {
+              "t": "dmg",
+              "dt": "physical",
+              "pct": [
+                50,
+                60,
+                70,
+                85,
+                100
+              ],
+              "tgt": {
+                "side": "enemy",
+                "count": 1,
+                "select": "same_lane"
+              },
+              "linkNext": true
+            },
+            {
+              "t": "status",
+              "st": "bleed",
+              "dur": 2,
+              "chance": [
+                25,
+                30,
+                35,
+                42.5,
+                50
+              ],
+              "val": 20,
+              "tgt": {
+                "side": "enemy",
+                "count": 1,
+                "select": "linked"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "thunderstrike",
+      "slot": 4,
+      "unlockStar": 8,
+      "name": "Armor Break",
+      "trigger": "Start of Combat",
+      "targeting": "1 Enemy",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "Whole Combat",
+      "scalingRaw": "PHYSICAL_RECEIVED: 4.8% | 5.67% | 6.72% | 8.16% | 9.6%",
+      "scaling": [
+        {
+          "label": "PHYSICAL_RECEIVED",
+          "values": [
+            4.8,
+            5.67,
+            6.72,
+            8.16,
+            9.6
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Start of Combat: Apply Stat Modifier (Buff) to 1 Enemy (PHYSICAL_RECEIVED: 4.8% | 5.67% | 6.72% | 8.16% | 9.6%) for Whole Combat.",
+      "structured": [
+        {
+          "when": "combat_start",
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "physical_received",
+                  "pct": [
+                    4.8,
+                    5.67,
+                    6.72,
+                    8.16,
+                    9.6
+                  ]
+                }
+              ],
+              "dur": "combat",
+              "tgt": {
+                "side": "enemy",
+                "count": 1,
+                "select": "any"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "thunderstrike",
+      "slot": 5,
+      "unlockStar": 10,
+      "name": "Staggering Assault",
+      "trigger": "Each Action / Round",
+      "targeting": "1 Enemy (Same Lane)",
+      "effectType": "Status Effect (Control/DoT)",
+      "duration": "1 Round",
+      "scalingRaw": "Chance: 10% | 13% | 16% | 20% | 25%",
+      "scaling": [
+        {
+          "label": "Chance",
+          "values": [
+            10,
+            13,
+            16,
+            20,
+            25
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Each Action / Round: Apply Status Effect (Control/DoT) to 1 Enemy (Same Lane) (Chance: 10% | 13% | 16% | 20% | 25%) for 1 Round.",
+      "structured": [
+        {
+          "when": "each",
+          "actions": [
+            {
+              "t": "status",
+              "st": "overwhelm",
+              "dur": 1,
+              "chance": [
+                10,
+                13,
+                16,
+                20,
+                25
+              ],
+              "tgt": {
+                "side": "enemy",
+                "count": 1,
+                "select": "same_lane"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

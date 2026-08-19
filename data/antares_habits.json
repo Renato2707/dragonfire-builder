@@ -1,0 +1,344 @@
+{
+  "dragonId": "antares",
+  "habits": [
+    {
+      "dragonId": "antares",
+      "slot": 1,
+      "unlockStar": 2,
+      "name": "Blazing Onslaught",
+      "trigger": "Rounds 1",
+      "targeting": "1 Enemy (Left Lane), 1 Enemy (Right Lane)",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "3 Rounds",
+      "scalingRaw": "FIRE_RECEIVED: 11% | 13.2% | 15.4% | 18.7% | 22% ; PHYSICAL_RECEIVED: 11% | 13.2% | 15.4% | 18.7% | 22%",
+      "scaling": [
+        {
+          "label": "FIRE_RECEIVED",
+          "values": [
+            11,
+            13.2,
+            15.4,
+            18.7,
+            22
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "PHYSICAL_RECEIVED",
+          "values": [
+            11,
+            13.2,
+            15.4,
+            18.7,
+            22
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Rounds 1: Apply Stat Modifier (Buff) to 1 Enemy (Left Lane), 1 Enemy (Right Lane) (FIRE_RECEIVED: 11% | 13.2% | 15.4% | 18.7% | 22% ; PHYSICAL_RECEIVED: 11% | 13.2% | 15.4% | 18.7% | 22%) for 3 Rounds.",
+      "structured": [
+        {
+          "when": "rounds",
+          "rounds": [
+            1
+          ],
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "fire_received",
+                  "pct": [
+                    11,
+                    13.2,
+                    15.4,
+                    18.7,
+                    22
+                  ]
+                }
+              ],
+              "dur": 3,
+              "tgt": {
+                "side": "enemy",
+                "count": 1,
+                "select": "prefer_lane:L"
+              }
+            },
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "physical_received",
+                  "pct": [
+                    11,
+                    13.2,
+                    15.4,
+                    18.7,
+                    22
+                  ]
+                }
+              ],
+              "dur": 3,
+              "tgt": {
+                "side": "enemy",
+                "count": 1,
+                "select": "prefer_lane:R"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "antares",
+      "slot": 2,
+      "unlockStar": 4,
+      "name": "Dragon's Flair",
+      "trigger": "Start of Combat",
+      "targeting": "1 Self",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "Whole Combat",
+      "scalingRaw": "FIRE_DEALT: 8% | 9.6% | 11.2% | 13.6% | 16%",
+      "scaling": [
+        {
+          "label": "FIRE_DEALT",
+          "values": [
+            8,
+            9.6,
+            11.2,
+            13.6,
+            16
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Start of Combat: Apply Stat Modifier (Buff) to 1 Self (FIRE_DEALT: 8% | 9.6% | 11.2% | 13.6% | 16%) for Whole Combat.",
+      "structured": [
+        {
+          "when": "combat_start",
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "fire_dealt",
+                  "pct": [
+                    8,
+                    9.6,
+                    11.2,
+                    13.6,
+                    16
+                  ]
+                }
+              ],
+              "dur": "combat",
+              "tgt": {
+                "side": "self"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "antares",
+      "slot": 3,
+      "unlockStar": 6,
+      "name": "Fiery Precision",
+      "trigger": "Each Action / Round",
+      "targeting": "3 Enemies",
+      "effectType": "Direct Damage (Nuke)",
+      "duration": "Whole Combat",
+      "scalingRaw": "Rate: 20% | 24% | 28% | 34% | 40%",
+      "scaling": [
+        {
+          "label": "Rate",
+          "values": [
+            20,
+            24,
+            28,
+            34,
+            40
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Each Action / Round: Apply Direct Damage (Nuke) to 3 Enemies (Rate: 20% | 24% | 28% | 34% | 40%) for Whole Combat.",
+      "structured": [
+        {
+          "when": "each",
+          "actions": [
+            {
+              "t": "dmg",
+              "dt": "fire",
+              "pct": [
+                20,
+                24,
+                28,
+                34,
+                40
+              ],
+              "tgt": {
+                "side": "enemy",
+                "count": 3,
+                "select": "any"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "antares",
+      "slot": 4,
+      "unlockStar": 8,
+      "name": "Dragon's Intellect",
+      "trigger": "Start of Combat",
+      "targeting": "1 Self",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "Whole Combat",
+      "scalingRaw": "DMG_RECEIVED: -4% | -4.8% | -5.6% | -6.8% | -8% ; INT: 5% | 6% | 7% | 8.5% | 10%",
+      "scaling": [
+        {
+          "label": "DMG_RECEIVED",
+          "values": [
+            -4,
+            -4.8,
+            -5.6,
+            -6.8,
+            -8
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "INT",
+          "values": [
+            5,
+            6,
+            7,
+            8.5,
+            10
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Start of Combat: Apply Stat Modifier (Buff) to 1 Self (DMG_RECEIVED: -4% | -4.8% | -5.6% | -6.8% | -8% ; INT: 5% | 6% | 7% | 8.5% | 10%) for Whole Combat.",
+      "structured": [
+        {
+          "when": "combat_start",
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "dmg_received",
+                  "pct": [
+                    -4,
+                    -4.8,
+                    -5.6,
+                    -6.8,
+                    -8
+                  ]
+                },
+                {
+                  "stat": "int",
+                  "pct": [
+                    5,
+                    6,
+                    7,
+                    8.5,
+                    10
+                  ]
+                }
+              ],
+              "dur": "combat",
+              "tgt": {
+                "side": "self"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "antares",
+      "slot": 5,
+      "unlockStar": 10,
+      "name": "Redemption",
+      "trigger": "Start of Combat",
+      "targeting": "1 Self",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "Whole Combat",
+      "scalingRaw": "INT: 6% | 7.8% | 9.6% | 12% | 15% ; INIT: 6% | 7.8% | 9.6% | 12% | 15%",
+      "scaling": [
+        {
+          "label": "INT",
+          "values": [
+            6,
+            7.8,
+            9.6,
+            12,
+            15
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "INIT",
+          "values": [
+            6,
+            7.8,
+            9.6,
+            12,
+            15
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Start of Combat: Apply Stat Modifier (Buff) to 1 Self (INT: 6% | 7.8% | 9.6% | 12% | 15% ; INIT: 6% | 7.8% | 9.6% | 12% | 15%) for Whole Combat.",
+      "structured": [
+        {
+          "when": "combat_start",
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "int",
+                  "pct": [
+                    6,
+                    7.8,
+                    9.6,
+                    12,
+                    15
+                  ]
+                },
+                {
+                  "stat": "init",
+                  "pct": [
+                    6,
+                    7.8,
+                    9.6,
+                    12,
+                    15
+                  ]
+                }
+              ],
+              "dur": "combat",
+              "tgt": {
+                "side": "self"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

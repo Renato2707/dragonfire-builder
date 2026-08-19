@@ -1,0 +1,380 @@
+{
+  "dragonId": "nyrena",
+  "habits": [
+    {
+      "dragonId": "nyrena",
+      "slot": 1,
+      "unlockStar": 2,
+      "name": "Battle Dread",
+      "trigger": "Start of Combat",
+      "targeting": "3 Enemies",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "Whole Combat",
+      "scalingRaw": "STR: -4% | -4.8% | -5.6% | -6.8% | -8% ; INIT: -4% | -4.8% | -5.6% | -6.8% | -8%",
+      "scaling": [
+        {
+          "label": "STR",
+          "values": [
+            -4,
+            -4.8,
+            -5.6,
+            -6.8,
+            -8
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "INIT",
+          "values": [
+            -4,
+            -4.8,
+            -5.6,
+            -6.8,
+            -8
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Start of Combat: Apply Stat Modifier (Buff) to 3 Enemies (STR: -4% | -4.8% | -5.6% | -6.8% | -8% ; INIT: -4% | -4.8% | -5.6% | -6.8% | -8%) for Whole Combat.",
+      "structured": [
+        {
+          "when": "combat_start",
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "str",
+                  "pct": [
+                    -4,
+                    -4.8,
+                    -5.6,
+                    -6.8,
+                    -8
+                  ]
+                },
+                {
+                  "stat": "init",
+                  "pct": [
+                    -4,
+                    -4.8,
+                    -5.6,
+                    -6.8,
+                    -8
+                  ]
+                }
+              ],
+              "scaleStat": "int",
+              "dur": "combat",
+              "tgt": {
+                "side": "enemy",
+                "count": 3,
+                "select": "any"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "nyrena",
+      "slot": 2,
+      "unlockStar": 4,
+      "name": "Mindful Synergy",
+      "trigger": "Start of Combat",
+      "targeting": "3 Allies",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "Whole Combat",
+      "scalingRaw": "INT: 4% | 4.8% | 5.6% | 6.8% | 8% ; INST: 4% | 4.8% | 5.6% | 6.8% | 8%",
+      "scaling": [
+        {
+          "label": "INT",
+          "values": [
+            4,
+            4.8,
+            5.6,
+            6.8,
+            8
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "INST",
+          "values": [
+            4,
+            4.8,
+            5.6,
+            6.8,
+            8
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Start of Combat: Apply Stat Modifier (Buff) to 3 Allies (INT: 4% | 4.8% | 5.6% | 6.8% | 8% ; INST: 4% | 4.8% | 5.6% | 6.8% | 8%) for Whole Combat.",
+      "structured": [
+        {
+          "when": "combat_start",
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "int",
+                  "pct": [
+                    4,
+                    4.8,
+                    5.6,
+                    6.8,
+                    8
+                  ]
+                },
+                {
+                  "stat": "inst",
+                  "pct": [
+                    4,
+                    4.8,
+                    5.6,
+                    6.8,
+                    8
+                  ]
+                }
+              ],
+              "scaleStat": "init",
+              "dur": "combat",
+              "tgt": {
+                "side": "ally",
+                "count": 3,
+                "select": "any"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "nyrena",
+      "slot": 3,
+      "unlockStar": 6,
+      "name": "Deepen the Breach",
+      "trigger": "Rounds 1, Rounds 6",
+      "targeting": "1 Self, 1 Ally (Adjacent Lane)",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "5 Rounds",
+      "scalingRaw": "FIRE_DEALT: 8% | 9.6% | 11.2% | 13.6% | 16% ; FIRE_DEALT: 12%",
+      "scaling": [
+        {
+          "label": "FIRE_DEALT",
+          "values": [
+            8,
+            9.6,
+            11.2,
+            13.6,
+            16
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "FIRE_DEALT",
+          "values": [
+            12
+          ],
+          "unit": "%",
+          "fixed": true
+        }
+      ],
+      "description": "Rounds 1, Rounds 6: Apply Stat Modifier (Buff) to 1 Self, 1 Ally (Adjacent Lane) (FIRE_DEALT: 8% | 9.6% | 11.2% | 13.6% | 16% ; FIRE_DEALT: 12%) for 5 Rounds.",
+      "structured": [
+        {
+          "when": "rounds",
+          "rounds": [
+            1
+          ],
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "fire_dealt",
+                  "pct": [
+                    8,
+                    9.6,
+                    11.2,
+                    13.6,
+                    16
+                  ]
+                }
+              ],
+              "dur": 5,
+              "tgt": {
+                "side": "self"
+              }
+            }
+          ]
+        },
+        {
+          "when": "rounds",
+          "rounds": [
+            6
+          ],
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "fire_dealt",
+                  "pct": 12
+                }
+              ],
+              "dur": 5,
+              "tgt": {
+                "side": "ally",
+                "count": 1,
+                "select": "adjacency"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "nyrena",
+      "slot": 4,
+      "unlockStar": 8,
+      "name": "Dragon's Ire",
+      "trigger": "Start of Combat",
+      "targeting": "1 Self",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "Whole Combat",
+      "scalingRaw": "TACTICAL_DEALT: 4% | 4.8% | 5.6% | 6.8% | 8% ; FIRE_DEALT: 4% | 4.8% | 5.6% | 6.8% | 8%",
+      "scaling": [
+        {
+          "label": "TACTICAL_DEALT",
+          "values": [
+            4,
+            4.8,
+            5.6,
+            6.8,
+            8
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "FIRE_DEALT",
+          "values": [
+            4,
+            4.8,
+            5.6,
+            6.8,
+            8
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Start of Combat: Apply Stat Modifier (Buff) to 1 Self (TACTICAL_DEALT: 4% | 4.8% | 5.6% | 6.8% | 8% ; FIRE_DEALT: 4% | 4.8% | 5.6% | 6.8% | 8%) for Whole Combat.",
+      "structured": [
+        {
+          "when": "combat_start",
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "tactical_dealt",
+                  "pct": [
+                    4,
+                    4.8,
+                    5.6,
+                    6.8,
+                    8
+                  ]
+                },
+                {
+                  "stat": "fire_dealt",
+                  "pct": [
+                    4,
+                    4.8,
+                    5.6,
+                    6.8,
+                    8
+                  ]
+                }
+              ],
+              "dur": "combat",
+              "tgt": {
+                "side": "self"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "nyrena",
+      "slot": 5,
+      "unlockStar": 10,
+      "name": "The Long Siege",
+      "trigger": "Rounds 6, 7, 8, 9, 10",
+      "targeting": "3 Allies",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "1 Round",
+      "scalingRaw": "PHYSICAL_RECEIVED: -5% | -6.5% | -8% | -10% | -12.5%",
+      "scaling": [
+        {
+          "label": "PHYSICAL_RECEIVED",
+          "values": [
+            -5,
+            -6.5,
+            -8,
+            -10,
+            -12.5
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Rounds 6, 7, 8, 9, 10: Apply Stat Modifier (Buff) to 3 Allies (PHYSICAL_RECEIVED: -5% | -6.5% | -8% | -10% | -12.5%) for 1 Round.",
+      "structured": [
+        {
+          "when": "rounds",
+          "rounds": [
+            6,
+            7,
+            8,
+            9,
+            10
+          ],
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "physical_received",
+                  "pct": [
+                    -5,
+                    -6.5,
+                    -8,
+                    -10,
+                    -12.5
+                  ]
+                }
+              ],
+              "dur": 1,
+              "tgt": {
+                "side": "ally",
+                "count": 3,
+                "select": "any"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

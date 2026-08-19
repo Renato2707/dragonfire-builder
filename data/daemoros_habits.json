@@ -1,0 +1,404 @@
+{
+  "dragonId": "daemoros",
+  "habits": [
+    {
+      "dragonId": "daemoros",
+      "slot": 1,
+      "unlockStar": 2,
+      "name": "Instill Fear",
+      "trigger": "Each Action / Round",
+      "targeting": "1 Enemy",
+      "effectType": "Stat Modifier (Debuff), Status Effect (Control/DoT)",
+      "duration": "2 Rounds",
+      "scalingRaw": "Chance: 25% | 30% | 35% | 42.5% | 50% ; INT: -25% ; INST: -25% ; Chance: 25% | 30% | 35% | 42.5% | 50%",
+      "scaling": [
+        {
+          "label": "Chance",
+          "values": [
+            25,
+            30,
+            35,
+            42.5,
+            50
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "INT",
+          "values": [
+            -25
+          ],
+          "unit": "%",
+          "fixed": true
+        },
+        {
+          "label": "INST",
+          "values": [
+            -25
+          ],
+          "unit": "%",
+          "fixed": true
+        },
+        {
+          "label": "Chance",
+          "values": [
+            25,
+            30,
+            35,
+            42.5,
+            50
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Each Action / Round: Apply Stat Modifier (Debuff), Status Effect (Control/DoT) to 1 Enemy (Chance: 25% | 30% | 35% | 42.5% | 50% ; INT: -25% ; INST: -25% ; Chance: 25% | 30% | 35% | 42.5% | 50%) for 2 Rounds.",
+      "structured": [
+        {
+          "when": "each",
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "int",
+                  "pct": -25
+                },
+                {
+                  "stat": "inst",
+                  "pct": -25
+                }
+              ],
+              "scaleStat": "str",
+              "dur": 2,
+              "chance": [
+                25,
+                30,
+                35,
+                42.5,
+                50
+              ],
+              "tgt": {
+                "side": "enemy",
+                "count": 1,
+                "select": "any"
+              }
+            },
+            {
+              "t": "status",
+              "st": "panic",
+              "dur": 2,
+              "chance": [
+                25,
+                30,
+                35,
+                42.5,
+                50
+              ],
+              "tgt": {
+                "side": "enemy",
+                "count": 1,
+                "select": "any"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "daemoros",
+      "slot": 2,
+      "unlockStar": 4,
+      "name": "Powerful Reflexes",
+      "trigger": "Start of Combat",
+      "targeting": "1 Self",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "Whole Combat",
+      "scalingRaw": "STR: 16% | 19.2% | 22.4% | 27.2% | 32% ; INIT: 16% | 19.2% | 22.4% | 27.2% | 32%",
+      "scaling": [
+        {
+          "label": "STR",
+          "values": [
+            16,
+            19.2,
+            22.4,
+            27.2,
+            32
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "INIT",
+          "values": [
+            16,
+            19.2,
+            22.4,
+            27.2,
+            32
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Start of Combat: Apply Stat Modifier (Buff) to 1 Self (STR: 16% | 19.2% | 22.4% | 27.2% | 32% ; INIT: 16% | 19.2% | 22.4% | 27.2% | 32%) for Whole Combat.",
+      "structured": [
+        {
+          "when": "combat_start",
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "str",
+                  "pct": [
+                    16,
+                    19.2,
+                    22.4,
+                    27.2,
+                    32
+                  ]
+                },
+                {
+                  "stat": "init",
+                  "pct": [
+                    16,
+                    19.2,
+                    22.4,
+                    27.2,
+                    32
+                  ]
+                }
+              ],
+              "dur": "combat",
+              "tgt": {
+                "side": "self"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "daemoros",
+      "slot": 3,
+      "unlockStar": 6,
+      "name": "Shroud of Shadows",
+      "trigger": "Odd-Numbered Rounds",
+      "targeting": "1 Enemy (Adjacent Lane)",
+      "effectType": "Stat Modifier (Debuff)",
+      "duration": "2 Rounds",
+      "scalingRaw": "Chance: 15% | 18% | 21% | 25.5% | 30% ; DMG_DEALT: -50%",
+      "scaling": [
+        {
+          "label": "Chance",
+          "values": [
+            15,
+            18,
+            21,
+            25.5,
+            30
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "DMG_DEALT",
+          "values": [
+            -50
+          ],
+          "unit": "%",
+          "fixed": true
+        }
+      ],
+      "description": "Odd-Numbered Rounds: Apply Stat Modifier (Debuff) to 1 Enemy (Adjacent Lane) (Chance: 15% | 18% | 21% | 25.5% | 30% ; DMG_DEALT: -50%) for 2 Rounds.",
+      "structured": [
+        {
+          "when": "odd",
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "dmg_dealt",
+                  "pct": -50
+                }
+              ],
+              "dur": 2,
+              "chance": [
+                15,
+                18,
+                21,
+                25.5,
+                30
+              ],
+              "tgt": {
+                "side": "enemy",
+                "count": 1,
+                "select": "adjacency"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "daemoros",
+      "slot": 4,
+      "unlockStar": 8,
+      "name": "Darkening Fear",
+      "trigger": "Each Action / Round",
+      "targeting": "1 Enemy",
+      "effectType": "Stat Modifier (Debuff), Status Effect (Control/DoT)",
+      "duration": "2 Rounds",
+      "scalingRaw": "Chance: 25% | 30% | 35% | 42.5% | 50% ; INT: -25% ; INST: -25% ; Chance: 25% | 30% | 35% | 42.5% | 50%",
+      "scaling": [
+        {
+          "label": "Chance",
+          "values": [
+            25,
+            30,
+            35,
+            42.5,
+            50
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "INT",
+          "values": [
+            -25
+          ],
+          "unit": "%",
+          "fixed": true
+        },
+        {
+          "label": "INST",
+          "values": [
+            -25
+          ],
+          "unit": "%",
+          "fixed": true
+        },
+        {
+          "label": "Chance",
+          "values": [
+            25,
+            30,
+            35,
+            42.5,
+            50
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Each Action / Round: Apply Stat Modifier (Debuff), Status Effect (Control/DoT) to 1 Enemy (Chance: 25% | 30% | 35% | 42.5% | 50% ; INT: -25% ; INST: -25% ; Chance: 25% | 30% | 35% | 42.5% | 50%) for 2 Rounds.",
+      "structured": [
+        {
+          "when": "each",
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "int",
+                  "pct": -25
+                },
+                {
+                  "stat": "inst",
+                  "pct": -25
+                }
+              ],
+              "scaleStat": "str",
+              "dur": 2,
+              "chance": [
+                25,
+                30,
+                35,
+                42.5,
+                50
+              ],
+              "tgt": {
+                "side": "enemy",
+                "count": 1,
+                "select": "any"
+              }
+            },
+            {
+              "t": "status",
+              "st": "panic",
+              "dur": 2,
+              "chance": [
+                25,
+                30,
+                35,
+                42.5,
+                50
+              ],
+              "tgt": {
+                "side": "enemy",
+                "count": 1,
+                "select": "any"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "daemoros",
+      "slot": 5,
+      "unlockStar": 10,
+      "name": "Phantom's Veil",
+      "trigger": "Each Action / Round",
+      "targeting": "1 Self",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "1 Round",
+      "scalingRaw": "DMG_RECEIVED: -15% | -19.5% | -24% | -30% | -37.5%",
+      "scaling": [
+        {
+          "label": "DMG_RECEIVED",
+          "values": [
+            -15,
+            -19.5,
+            -24,
+            -30,
+            -37.5
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Each Action / Round: Apply Stat Modifier (Buff) to 1 Self (DMG_RECEIVED: -15% | -19.5% | -24% | -30% | -37.5%) for 1 Round.",
+      "structured": [
+        {
+          "when": "each",
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "dmg_received",
+                  "pct": [
+                    -15,
+                    -19.5,
+                    -24,
+                    -30,
+                    -37.5
+                  ]
+                }
+              ],
+              "dur": 1,
+              "tgt": {
+                "side": "self"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

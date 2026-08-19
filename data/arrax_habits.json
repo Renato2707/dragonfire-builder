@@ -1,0 +1,393 @@
+{
+  "dragonId": "arrax",
+  "habits": [
+    {
+      "dragonId": "arrax",
+      "slot": 1,
+      "unlockStar": 2,
+      "name": "Headlong Into Danger",
+      "trigger": "Rounds 4",
+      "targeting": "1 Self",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "4 Rounds",
+      "scalingRaw": "STR: 25% ; INIT: 10% ; PHYSICAL_DEALT: 25% ; PHYSICAL_RECEIVED: 10% | 8% | 6% | 3% | 0% ; INST: -40% | -32% | -24% | -12% | 0%",
+      "scaling": [
+        {
+          "label": "STR",
+          "values": [
+            25
+          ],
+          "unit": "%",
+          "fixed": true
+        },
+        {
+          "label": "INIT",
+          "values": [
+            10
+          ],
+          "unit": "%",
+          "fixed": true
+        },
+        {
+          "label": "PHYSICAL_DEALT",
+          "values": [
+            25
+          ],
+          "unit": "%",
+          "fixed": true
+        },
+        {
+          "label": "PHYSICAL_RECEIVED",
+          "values": [
+            10,
+            8,
+            6,
+            3,
+            0
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "INST",
+          "values": [
+            -40,
+            -32,
+            -24,
+            -12,
+            0
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Rounds 4: Apply Stat Modifier (Buff) to 1 Self (STR: 25% ; INIT: 10% ; PHYSICAL_DEALT: 25% ; PHYSICAL_RECEIVED: 10% | 8% | 6% | 3% | 0% ; INST: -40% | -32% | -24% | -12% | 0%) for 4 Rounds.",
+      "structured": [
+        {
+          "when": "rounds",
+          "rounds": [
+            4
+          ],
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "str",
+                  "pct": 25
+                },
+                {
+                  "stat": "init",
+                  "pct": 10
+                },
+                {
+                  "stat": "physical_dealt",
+                  "pct": 25
+                },
+                {
+                  "stat": "physical_received",
+                  "pct": [
+                    10,
+                    8,
+                    6,
+                    3,
+                    0
+                  ]
+                },
+                {
+                  "stat": "inst",
+                  "pct": [
+                    -40,
+                    -32,
+                    -24,
+                    -12,
+                    0
+                  ]
+                }
+              ],
+              "dur": 4,
+              "tgt": {
+                "side": "self"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "arrax",
+      "slot": 2,
+      "unlockStar": 4,
+      "name": "Stone Bulwark",
+      "trigger": "Start of Combat",
+      "targeting": "2 Allies",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "Whole Combat",
+      "scalingRaw": "TACTICAL_RECEIVED: -2.5% | -3% | -3.5% | -4.25% | -5% ; FIRE_RECEIVED: -2.5% | -3% | -3.5% | -4.25% | -5%",
+      "scaling": [
+        {
+          "label": "TACTICAL_RECEIVED",
+          "values": [
+            -2.5,
+            -3,
+            -3.5,
+            -4.25,
+            -5
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "FIRE_RECEIVED",
+          "values": [
+            -2.5,
+            -3,
+            -3.5,
+            -4.25,
+            -5
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Start of Combat: Apply Stat Modifier (Buff) to 2 Allies (TACTICAL_RECEIVED: -2.5% | -3% | -3.5% | -4.25% | -5% ; FIRE_RECEIVED: -2.5% | -3% | -3.5% | -4.25% | -5%) for Whole Combat.",
+      "structured": [
+        {
+          "when": "combat_start",
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "tactical_received",
+                  "pct": [
+                    -2.5,
+                    -3,
+                    -3.5,
+                    -4.25,
+                    -5
+                  ]
+                },
+                {
+                  "stat": "fire_received",
+                  "pct": [
+                    -2.5,
+                    -3,
+                    -3.5,
+                    -4.25,
+                    -5
+                  ]
+                }
+              ],
+              "dur": "combat",
+              "tgt": {
+                "side": "ally",
+                "count": 2,
+                "select": "any"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "arrax",
+      "slot": 3,
+      "unlockStar": 6,
+      "name": "Adaptive Guard",
+      "trigger": "Rounds 4",
+      "targeting": "3 Allies",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "4 Rounds",
+      "scalingRaw": "DMG_RECEIVED: -9% | -10.8% | -12.6% | -15.3% | -18%",
+      "scaling": [
+        {
+          "label": "DMG_RECEIVED",
+          "values": [
+            -9,
+            -10.8,
+            -12.6,
+            -15.3,
+            -18
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Rounds 4: Apply Stat Modifier (Buff) to 3 Allies (DMG_RECEIVED: -9% | -10.8% | -12.6% | -15.3% | -18%) for 4 Rounds.",
+      "structured": [
+        {
+          "when": "rounds",
+          "rounds": [
+            4
+          ],
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "dmg_received",
+                  "pct": [
+                    -9,
+                    -10.8,
+                    -12.6,
+                    -15.3,
+                    -18
+                  ]
+                }
+              ],
+              "dur": 4,
+              "tgt": {
+                "side": "ally",
+                "count": 3,
+                "select": "any"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "arrax",
+      "slot": 4,
+      "unlockStar": 8,
+      "name": "Fire Ward",
+      "trigger": "Start of Combat",
+      "targeting": "1 Self, 1 Ally (Adjacent Lane)",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "Whole Combat",
+      "scalingRaw": "FIRE_RECEIVED: -5% | -6% | -7% | -8.5% | -10% ; FIRE_RECEIVED: -5% | -6% | -7% | -8.5% | -10%",
+      "scaling": [
+        {
+          "label": "FIRE_RECEIVED",
+          "values": [
+            -5,
+            -6,
+            -7,
+            -8.5,
+            -10
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "FIRE_RECEIVED",
+          "values": [
+            -5,
+            -6,
+            -7,
+            -8.5,
+            -10
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Start of Combat: Apply Stat Modifier (Buff) to 1 Self, 1 Ally (Adjacent Lane) (FIRE_RECEIVED: -5% | -6% | -7% | -8.5% | -10% ; FIRE_RECEIVED: -5% | -6% | -7% | -8.5% | -10%) for Whole Combat.",
+      "structured": [
+        {
+          "when": "combat_start",
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "fire_received",
+                  "pct": [
+                    -5,
+                    -6,
+                    -7,
+                    -8.5,
+                    -10
+                  ]
+                }
+              ],
+              "dur": "combat",
+              "tgt": {
+                "side": "ally",
+                "count": 1,
+                "select": "adjacency"
+              }
+            },
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "fire_received",
+                  "pct": [
+                    -5,
+                    -6,
+                    -7,
+                    -8.5,
+                    -10
+                  ]
+                }
+              ],
+              "dur": "combat",
+              "tgt": {
+                "side": "self"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "arrax",
+      "slot": 5,
+      "unlockStar": 10,
+      "name": "Turn the Line",
+      "trigger": "Rounds 4",
+      "targeting": "2 Enemies (Adjacent Lane)",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "4 Rounds",
+      "scalingRaw": "PHYSICAL_RECEIVED: 9% | 11.7% | 14.4% | 18% | 22.5%",
+      "scaling": [
+        {
+          "label": "PHYSICAL_RECEIVED",
+          "values": [
+            9,
+            11.7,
+            14.4,
+            18,
+            22.5
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Rounds 4: Apply Stat Modifier (Buff) to 2 Enemies (Adjacent Lane) (PHYSICAL_RECEIVED: 9% | 11.7% | 14.4% | 18% | 22.5%) for 4 Rounds.",
+      "structured": [
+        {
+          "when": "rounds",
+          "rounds": [
+            4
+          ],
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "physical_received",
+                  "pct": [
+                    9,
+                    11.7,
+                    14.4,
+                    18,
+                    22.5
+                  ]
+                }
+              ],
+              "dur": 4,
+              "tgt": {
+                "side": "enemy",
+                "count": 2,
+                "select": "adjacency"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,440 @@
+{
+  "dragonId": "vermax",
+  "habits": [
+    {
+      "dragonId": "vermax",
+      "slot": 1,
+      "unlockStar": 2,
+      "name": "Trial by Flame",
+      "trigger": "Each Action / Round",
+      "targeting": "All Allies",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "1 Round",
+      "scalingRaw": "FIRE_RECEIVED: -5% | -6% | -7% | -8.5% | -10% ; FIRE_RECEIVED: -5% | -6% | -7% | -8.5% | -10% ; FIRE_RECEIVED: -5% | -6% | -7% | -8.5% | -10%",
+      "scaling": [
+        {
+          "label": "FIRE_RECEIVED",
+          "values": [
+            -5,
+            -6,
+            -7,
+            -8.5,
+            -10
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "FIRE_RECEIVED",
+          "values": [
+            -5,
+            -6,
+            -7,
+            -8.5,
+            -10
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "FIRE_RECEIVED",
+          "values": [
+            -5,
+            -6,
+            -7,
+            -8.5,
+            -10
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Each Action / Round: Apply Stat Modifier (Buff) to All Allies (FIRE_RECEIVED: -5% | -6% | -7% | -8.5% | -10% ; FIRE_RECEIVED: -5% | -6% | -7% | -8.5% | -10% ; FIRE_RECEIVED: -5% | -6% | -7% | -8.5% | -10%) for 1 Round.",
+      "structured": [
+        {
+          "when": "each",
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "fire_received",
+                  "pct": [
+                    -5,
+                    -6,
+                    -7,
+                    -8.5,
+                    -10
+                  ]
+                }
+              ],
+              "dur": 1,
+              "onlyIf": "target:troops_below_75",
+              "tgt": {
+                "side": "ally",
+                "count": "all"
+              }
+            },
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "fire_received",
+                  "pct": [
+                    -5,
+                    -6,
+                    -7,
+                    -8.5,
+                    -10
+                  ]
+                }
+              ],
+              "dur": 1,
+              "onlyIf": "target:troops_below_50",
+              "tgt": {
+                "side": "ally",
+                "count": "all"
+              }
+            },
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "fire_received",
+                  "pct": [
+                    -5,
+                    -6,
+                    -7,
+                    -8.5,
+                    -10
+                  ]
+                }
+              ],
+              "dur": 1,
+              "onlyIf": "target:troops_below_25",
+              "tgt": {
+                "side": "ally",
+                "count": "all"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "vermax",
+      "slot": 2,
+      "unlockStar": 4,
+      "name": "Reactive Instincts",
+      "trigger": "Start of Combat",
+      "targeting": "1 Ally",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "Whole Combat",
+      "scalingRaw": "INST: 18% | 21.6% | 25.2% | 30.6% | 36% ; INIT: 9% | 10.8% | 12.6% | 15.3% | 18%",
+      "scaling": [
+        {
+          "label": "INST",
+          "values": [
+            18,
+            21.6,
+            25.2,
+            30.6,
+            36
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "INIT",
+          "values": [
+            9,
+            10.8,
+            12.6,
+            15.3,
+            18
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Start of Combat: Apply Stat Modifier (Buff) to 1 Ally (INST: 18% | 21.6% | 25.2% | 30.6% | 36% ; INIT: 9% | 10.8% | 12.6% | 15.3% | 18%) for Whole Combat.",
+      "structured": [
+        {
+          "when": "combat_start",
+          "actions": [
+            {
+              "t": "mod",
+              "scaleStat": "str",
+              "dur": "combat",
+              "tgt": {
+                "side": "ally",
+                "count": 1,
+                "select": "highest:inst"
+              },
+              "mods": [
+                {
+                  "stat": "inst",
+                  "pct": [
+                    18,
+                    21.6,
+                    25.2,
+                    30.6,
+                    36
+                  ]
+                },
+                {
+                  "stat": "init",
+                  "pct": [
+                    9,
+                    10.8,
+                    12.6,
+                    15.3,
+                    18
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "vermax",
+      "slot": 3,
+      "unlockStar": 6,
+      "name": "Rallying Flame",
+      "trigger": "Start of Combat",
+      "targeting": "1 Self, 1 Ally",
+      "effectType": "Ability Buff",
+      "duration": "Whole Combat",
+      "scalingRaw": "Chance: 50% | 60% | 70% | 85% | 100% ; PHYSICAL_DEALT: 5% ; Chance: 50% | 60% | 70% | 85% | 100% ; TACTICAL_DEALT: 2.5%",
+      "scaling": [
+        {
+          "label": "Chance",
+          "values": [
+            50,
+            60,
+            70,
+            85,
+            100
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "PHYSICAL_DEALT",
+          "values": [
+            5
+          ],
+          "unit": "%",
+          "fixed": true
+        },
+        {
+          "label": "Chance",
+          "values": [
+            50,
+            60,
+            70,
+            85,
+            100
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "TACTICAL_DEALT",
+          "values": [
+            2.5
+          ],
+          "unit": "%",
+          "fixed": true
+        }
+      ],
+      "description": "Start of Combat: Apply Ability Buff to 1 Self, 1 Ally (Chance: 50% | 60% | 70% | 85% | 100% ; PHYSICAL_DEALT: 5% ; Chance: 50% | 60% | 70% | 85% | 100% ; TACTICAL_DEALT: 2.5%) for Whole Combat.",
+      "structured": [
+        {
+          "when": "combat_start",
+          "actions": [
+            {
+              "t": "stack",
+              "id": "unifying_flame",
+              "chance": [
+                50,
+                60,
+                70,
+                85,
+                100
+              ],
+              "max": 4,
+              "mods": [
+                {
+                  "stat": "physical_dealt",
+                  "pct": 5
+                }
+              ],
+              "tgt": {
+                "side": "self"
+              }
+            },
+            {
+              "t": "stack",
+              "id": "rallying",
+              "chance": [
+                50,
+                60,
+                70,
+                85,
+                100
+              ],
+              "max": 10,
+              "mods": [
+                {
+                  "stat": "tactical_dealt",
+                  "pct": 2.5
+                }
+              ],
+              "tgt": {
+                "side": "ally",
+                "count": 1,
+                "select": "dealer:tactical"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "vermax",
+      "slot": 4,
+      "unlockStar": 8,
+      "name": "Dragon's Valor",
+      "trigger": "Start of Combat",
+      "targeting": "1 Self",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "Whole Combat",
+      "scalingRaw": "DMG_RECEIVED: -5% | -6% | -7% | -8.5% | -10% ; STR: 8.5% | 10.2% | 11.9% | 14.45% | 17%",
+      "scaling": [
+        {
+          "label": "DMG_RECEIVED",
+          "values": [
+            -5,
+            -6,
+            -7,
+            -8.5,
+            -10
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "STR",
+          "values": [
+            8.5,
+            10.2,
+            11.9,
+            14.45,
+            17
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Start of Combat: Apply Stat Modifier (Buff) to 1 Self (DMG_RECEIVED: -5% | -6% | -7% | -8.5% | -10% ; STR: 8.5% | 10.2% | 11.9% | 14.45% | 17%) for Whole Combat.",
+      "structured": [
+        {
+          "when": "combat_start",
+          "actions": [
+            {
+              "t": "mod",
+              "dur": "combat",
+              "tgt": {
+                "side": "self"
+              },
+              "mods": [
+                {
+                  "stat": "dmg_received",
+                  "pct": [
+                    -5,
+                    -6,
+                    -7,
+                    -8.5,
+                    -10
+                  ]
+                },
+                {
+                  "stat": "str",
+                  "pct": [
+                    8.5,
+                    10.2,
+                    11.9,
+                    14.45,
+                    17
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "vermax",
+      "slot": 5,
+      "unlockStar": 10,
+      "name": "Unyielding Resolve",
+      "trigger": "Each Action / Round",
+      "targeting": "1 Self",
+      "effectType": "Status Effect (Control/DoT)",
+      "duration": "2 Rounds",
+      "scalingRaw": "Chance: 20% | 26% | 32% | 40% | 50%",
+      "scaling": [
+        {
+          "label": "Chance",
+          "values": [
+            20,
+            26,
+            32,
+            40,
+            50
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Each Action / Round: Apply Status Effect (Control/DoT) to 1 Self (Chance: 20% | 26% | 32% | 40% | 50%) for 2 Rounds.",
+      "structured": [
+        {
+          "when": "each",
+          "actions": [
+            {
+              "t": "status",
+              "st": "advantage",
+              "val": 15,
+              "dur": 2,
+              "chance": [
+                20,
+                26,
+                32,
+                40,
+                50
+              ],
+              "bonusChance": {
+                "cond": "self:weakened",
+                "chance": [
+                  30,
+                  39,
+                  48,
+                  60,
+                  75
+                ]
+              },
+              "tgt": {
+                "side": "self"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

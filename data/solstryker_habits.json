@@ -1,0 +1,344 @@
+{
+  "dragonId": "solstryker",
+  "habits": [
+    {
+      "dragonId": "solstryker",
+      "slot": 1,
+      "unlockStar": 2,
+      "name": "Steady Erosion",
+      "trigger": "Each Action / Round",
+      "targeting": "All Enemies",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "Whole Combat",
+      "scalingRaw": "STR: -2% | -2.4% | -2.8% | -3.4% | -4%",
+      "scaling": [
+        {
+          "label": "STR",
+          "values": [
+            -2,
+            -2.4,
+            -2.8,
+            -3.4,
+            -4
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Each Action / Round: Apply Stat Modifier (Buff) to All Enemies (STR: -2% | -2.4% | -2.8% | -3.4% | -4%) for Whole Combat.",
+      "structured": [
+        {
+          "when": "each",
+          "actions": [
+            {
+              "t": "stack",
+              "mods": [
+                {
+                  "stat": "str",
+                  "pct": [
+                    -2,
+                    -2.4,
+                    -2.8,
+                    -3.4,
+                    -4
+                  ]
+                }
+              ],
+              "scaleStat": "str",
+              "dur": "combat",
+              "tgt": {
+                "side": "enemy",
+                "count": "all"
+              },
+              "id": "steady_erosion"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "solstryker",
+      "slot": 2,
+      "unlockStar": 4,
+      "name": "Energy Drain",
+      "trigger": "Rounds 1",
+      "targeting": "2 Enemies (Adjacent Lane)",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "3 Rounds",
+      "scalingRaw": "STR: -15% | -18% | -21% | -25.5% | -30% ; INIT: -15% | -18% | -21% | -25.5% | -30%",
+      "scaling": [
+        {
+          "label": "STR",
+          "values": [
+            -15,
+            -18,
+            -21,
+            -25.5,
+            -30
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "INIT",
+          "values": [
+            -15,
+            -18,
+            -21,
+            -25.5,
+            -30
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Rounds 1: Apply Stat Modifier (Buff) to 2 Enemies (Adjacent Lane) (STR: -15% | -18% | -21% | -25.5% | -30% ; INIT: -15% | -18% | -21% | -25.5% | -30%) for 3 Rounds.",
+      "structured": [
+        {
+          "when": "rounds",
+          "rounds": [
+            1
+          ],
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "str",
+                  "pct": [
+                    -15,
+                    -18,
+                    -21,
+                    -25.5,
+                    -30
+                  ]
+                },
+                {
+                  "stat": "init",
+                  "pct": [
+                    -15,
+                    -18,
+                    -21,
+                    -25.5,
+                    -30
+                  ]
+                }
+              ],
+              "scaleStat": "inst",
+              "dur": 3,
+              "tgt": {
+                "side": "enemy",
+                "count": 2,
+                "select": "adjacency"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "solstryker",
+      "slot": 3,
+      "unlockStar": 6,
+      "name": "Oppressive Onslaught",
+      "trigger": "Each Action / Round",
+      "targeting": "1 Enemy",
+      "effectType": "Status Effect (Control/DoT)",
+      "duration": "2 Rounds",
+      "scalingRaw": "Chance: 10% | 12% | 14% | 17% | 20%",
+      "scaling": [
+        {
+          "label": "Chance",
+          "values": [
+            10,
+            12,
+            14,
+            17,
+            20
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Each Action / Round: Apply Status Effect (Control/DoT) to 1 Enemy (Chance: 10% | 12% | 14% | 17% | 20%) for 2 Rounds.",
+      "structured": [
+        {
+          "when": "each",
+          "actions": [
+            {
+              "t": "status",
+              "st": "overwhelm",
+              "dur": 2,
+              "chance": [
+                10,
+                12,
+                14,
+                17,
+                20
+              ],
+              "tgt": {
+                "side": "enemy",
+                "count": 1,
+                "select": "any"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "solstryker",
+      "slot": 4,
+      "unlockStar": 8,
+      "name": "Robust Insight",
+      "trigger": "Start of Combat",
+      "targeting": "1 Self",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "Whole Combat",
+      "scalingRaw": "STR: 12.5% | 15% | 17.5% | 21.25% | 25% ; INST: 12.5% | 15% | 17.5% | 21.25% | 25%",
+      "scaling": [
+        {
+          "label": "STR",
+          "values": [
+            12.5,
+            15,
+            17.5,
+            21.25,
+            25
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "INST",
+          "values": [
+            12.5,
+            15,
+            17.5,
+            21.25,
+            25
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Start of Combat: Apply Stat Modifier (Buff) to 1 Self (STR: 12.5% | 15% | 17.5% | 21.25% | 25% ; INST: 12.5% | 15% | 17.5% | 21.25% | 25%) for Whole Combat.",
+      "structured": [
+        {
+          "when": "combat_start",
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "str",
+                  "pct": [
+                    12.5,
+                    15,
+                    17.5,
+                    21.25,
+                    25
+                  ]
+                },
+                {
+                  "stat": "inst",
+                  "pct": [
+                    12.5,
+                    15,
+                    17.5,
+                    21.25,
+                    25
+                  ]
+                }
+              ],
+              "dur": "combat",
+              "tgt": {
+                "side": "self"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "solstryker",
+      "slot": 5,
+      "unlockStar": 10,
+      "name": "Amplified Drain",
+      "trigger": "Rounds 4",
+      "targeting": "2 Enemies (Adjacent Lane)",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "5 Rounds",
+      "scalingRaw": "STR: -15% | -19.5% | -24% | -30% | -37.5% ; INIT: -15% | -19.5% | -24% | -30% | -37.5%",
+      "scaling": [
+        {
+          "label": "STR",
+          "values": [
+            -15,
+            -19.5,
+            -24,
+            -30,
+            -37.5
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "INIT",
+          "values": [
+            -15,
+            -19.5,
+            -24,
+            -30,
+            -37.5
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Rounds 4: Apply Stat Modifier (Buff) to 2 Enemies (Adjacent Lane) (STR: -15% | -19.5% | -24% | -30% | -37.5% ; INIT: -15% | -19.5% | -24% | -30% | -37.5%) for 5 Rounds.",
+      "structured": [
+        {
+          "when": "rounds",
+          "rounds": [
+            4
+          ],
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "str",
+                  "pct": [
+                    -15,
+                    -19.5,
+                    -24,
+                    -30,
+                    -37.5
+                  ]
+                },
+                {
+                  "stat": "init",
+                  "pct": [
+                    -15,
+                    -19.5,
+                    -24,
+                    -30,
+                    -37.5
+                  ]
+                }
+              ],
+              "scaleStat": "inst",
+              "dur": 5,
+              "tgt": {
+                "side": "enemy",
+                "count": 2,
+                "select": "adjacency"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

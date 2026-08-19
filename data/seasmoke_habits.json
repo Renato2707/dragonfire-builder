@@ -1,0 +1,411 @@
+{
+  "dragonId": "seasmoke",
+  "habits": [
+    {
+      "dragonId": "seasmoke",
+      "slot": 1,
+      "unlockStar": 2,
+      "name": "Clever Maneuver",
+      "trigger": "Start of Combat",
+      "targeting": "1 Allies (highest:int)",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "Whole Combat",
+      "scalingRaw": "INT: 22% | 26.4% | 30.8% | 37.4% | 44% ; INIT: 12.5% | 15% | 17.5% | 21.25% | 25%",
+      "scaling": [
+        {
+          "label": "INT",
+          "values": [
+            22,
+            26.4,
+            30.8,
+            37.4,
+            44
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "INIT",
+          "values": [
+            12.5,
+            15,
+            17.5,
+            21.25,
+            25
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Start of Combat: INT: 22% | 26.4% | 30.8% | 37.4% | 44% ; INIT: 12.5% | 15% | 17.5% | 21.25% | 25% on 1 Allies (highest:int) for Whole Combat.",
+      "structured": [
+        {
+          "when": "combat_start",
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "int",
+                  "pct": [
+                    22,
+                    26.4,
+                    30.8,
+                    37.4,
+                    44
+                  ]
+                },
+                {
+                  "stat": "init",
+                  "pct": [
+                    12.5,
+                    15,
+                    17.5,
+                    21.25,
+                    25
+                  ]
+                }
+              ],
+              "dur": "combat",
+              "tgt": {
+                "side": "ally",
+                "count": 1,
+                "select": "highest:int"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "seasmoke",
+      "slot": 2,
+      "unlockStar": 4,
+      "name": "Wind's Favor",
+      "trigger": "Start of Combat",
+      "targeting": "3 Allies",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "Whole Combat",
+      "scalingRaw": "INIT: 12.5% | 15% | 17.5% | 21.25% | 25%",
+      "scaling": [
+        {
+          "label": "INIT",
+          "values": [
+            12.5,
+            15,
+            17.5,
+            21.25,
+            25
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Start of Combat: INIT: 12.5% | 15% | 17.5% | 21.25% | 25% on 3 Allies for Whole Combat.",
+      "structured": [
+        {
+          "when": "combat_start",
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "init",
+                  "pct": [
+                    12.5,
+                    15,
+                    17.5,
+                    21.25,
+                    25
+                  ]
+                }
+              ],
+              "dur": "combat",
+              "scaleStat": "init",
+              "tgt": {
+                "side": "ally",
+                "count": 3,
+                "select": "any"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "seasmoke",
+      "slot": 3,
+      "unlockStar": 6,
+      "name": "Infectious Wrath",
+      "trigger": "Each Action / Round / Rounds 3, 6, 9",
+      "targeting": "1 Enemies, 2 Enemies (adjacency)",
+      "effectType": "Stat Modifier (Debuff), Damage",
+      "duration": "3 Rounds / Instant",
+      "scalingRaw": "Recovery Received: -15% | -18% | -21% | -25.5% | -30% ; Chance: 20% ; Physical Dmg: 30% | 36% | 42% | 51% | 60%",
+      "scaling": [
+        {
+          "label": "Recovery Received",
+          "values": [
+            -15,
+            -18,
+            -21,
+            -25.5,
+            -30
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "Chance",
+          "values": [
+            20
+          ],
+          "unit": "%",
+          "fixed": true
+        },
+        {
+          "label": "Physical Dmg",
+          "values": [
+            30,
+            36,
+            42,
+            51,
+            60
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Each Action / Round / Rounds 3, 6, 9: Recovery Received: -15% | -18% | -21% | -25.5% | -30% ; Chance: 20% ; Physical Dmg: 30% | 36% | 42% | 51% | 60% on 1 Enemies, 2 Enemies (adjacency) for 3 Rounds / Instant.",
+      "structured": [
+        {
+          "when": "each",
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "recovery_received",
+                  "pct": [
+                    -15,
+                    -18,
+                    -21,
+                    -25.5,
+                    -30
+                  ]
+                }
+              ],
+              "dur": 3,
+              "chance": 20,
+              "tgt": {
+                "side": "enemy",
+                "count": 1,
+                "select": "any"
+              }
+            }
+          ]
+        },
+        {
+          "when": "rounds",
+          "rounds": [
+            3,
+            6,
+            9
+          ],
+          "actions": [
+            {
+              "t": "dmg",
+              "dt": "physical",
+              "pct": [
+                30,
+                36,
+                42,
+                51,
+                60
+              ],
+              "tgt": {
+                "side": "enemy",
+                "count": 2,
+                "select": "adjacency"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "seasmoke",
+      "slot": 4,
+      "unlockStar": 8,
+      "name": "Cunning Ferocity",
+      "trigger": "Start of Combat",
+      "targeting": "2 Allies (adjacency)",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "Whole Combat",
+      "scalingRaw": "INT: 7.5% | 9% | 10.5% | 12.75% | 15% ; Fire Dmg: 5% | 6% | 7% | 8.5% | 10%",
+      "scaling": [
+        {
+          "label": "INT",
+          "values": [
+            7.5,
+            9,
+            10.5,
+            12.75,
+            15
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "Fire Dmg",
+          "values": [
+            5,
+            6,
+            7,
+            8.5,
+            10
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Start of Combat: INT: 7.5% | 9% | 10.5% | 12.75% | 15% ; Fire Dmg: 5% | 6% | 7% | 8.5% | 10% on 2 Allies (adjacency) for Whole Combat.",
+      "structured": [
+        {
+          "when": "combat_start",
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "int",
+                  "pct": [
+                    7.5,
+                    9,
+                    10.5,
+                    12.75,
+                    15
+                  ]
+                },
+                {
+                  "stat": "fire_dealt",
+                  "pct": [
+                    5,
+                    6,
+                    7,
+                    8.5,
+                    10
+                  ]
+                }
+              ],
+              "dur": "combat",
+              "scaleStat": "inst",
+              "tgt": {
+                "side": "ally",
+                "count": 2,
+                "select": "adjacency"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "seasmoke",
+      "slot": 5,
+      "unlockStar": 10,
+      "name": "Loyal Bond",
+      "trigger": "Each Action / Round",
+      "targeting": "2 Allies (most troops), 2 Allies (least troops)",
+      "effectType": "Status Effect",
+      "duration": "2 Rounds",
+      "scalingRaw": "advantage (20%) ; Chance: 10% | 13% | 16% | 20% | 25% ; resistance (20%) ; Chance: 10% | 13% | 16% | 20% | 25%",
+      "scaling": [
+        {
+          "label": "Value",
+          "values": [
+            "advantage (20%)"
+          ],
+          "unit": "%",
+          "fixed": true
+        },
+        {
+          "label": "Chance",
+          "values": [
+            10,
+            13,
+            16,
+            20,
+            25
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "Value",
+          "values": [
+            "resistance (20%)"
+          ],
+          "unit": "%",
+          "fixed": true
+        },
+        {
+          "label": "Chance",
+          "values": [
+            10,
+            13,
+            16,
+            20,
+            25
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Each Action / Round: advantage (20%) ; Chance: 10% | 13% | 16% | 20% | 25% ; resistance (20%) ; Chance: 10% | 13% | 16% | 20% | 25% on 2 Allies (most troops), 2 Allies (least troops) for 2 Rounds.",
+      "structured": [
+        {
+          "when": "each",
+          "actions": [
+            {
+              "t": "status",
+              "st": "advantage",
+              "val": 20,
+              "dur": 2,
+              "chance": [
+                10,
+                13,
+                16,
+                20,
+                25
+              ],
+              "tgt": {
+                "side": "ally",
+                "count": 2,
+                "select": "most_troops"
+              }
+            },
+            {
+              "t": "status",
+              "st": "resistance",
+              "val": 20,
+              "dur": 2,
+              "chance": [
+                10,
+                13,
+                16,
+                20,
+                25
+              ],
+              "tgt": {
+                "side": "ally",
+                "count": 2,
+                "select": "least_troops"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

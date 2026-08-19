@@ -1,0 +1,362 @@
+{
+  "dragonId": "arulix",
+  "habits": [
+    {
+      "dragonId": "arulix",
+      "slot": 1,
+      "unlockStar": 2,
+      "name": "Hypnotic Helix",
+      "trigger": "Rounds 2, 4, 7, 9, Rounds 1, 3, 6, 8",
+      "targeting": "1 Enemy, 1 Enemy (Physical Attacker)",
+      "effectType": "Status Effect (Control/DoT)",
+      "duration": "2 Rounds",
+      "scalingRaw": "Chance: 12.5% | 15% | 17.5% | 21.3% | 25% ; Chance: 12.5% | 15% | 17.5% | 21.3% | 25%",
+      "scaling": [
+        {
+          "label": "Chance",
+          "values": [
+            12.5,
+            15,
+            17.5,
+            21.3,
+            25
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "Chance",
+          "values": [
+            12.5,
+            15,
+            17.5,
+            21.3,
+            25
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Rounds 2, 4, 7, 9, Rounds 1, 3, 6, 8: Apply Status Effect (Control/DoT) to 1 Enemy, 1 Enemy (Physical Attacker) (Chance: 12.5% | 15% | 17.5% | 21.3% | 25% ; Chance: 12.5% | 15% | 17.5% | 21.3% | 25%) for 2 Rounds.",
+      "structured": [
+        {
+          "when": "rounds",
+          "rounds": [
+            1,
+            3,
+            6,
+            8
+          ],
+          "actions": [
+            {
+              "t": "status",
+              "st": "overwhelm",
+              "dur": 2,
+              "chance": [
+                12.5,
+                15,
+                17.5,
+                21.3,
+                25
+              ],
+              "tgt": {
+                "side": "enemy",
+                "count": 1,
+                "select": "prefer_dealer:fire"
+              }
+            }
+          ]
+        },
+        {
+          "when": "rounds",
+          "rounds": [
+            2,
+            4,
+            7,
+            9
+          ],
+          "actions": [
+            {
+              "t": "status",
+              "st": "overwhelm",
+              "dur": 2,
+              "chance": [
+                12.5,
+                15,
+                17.5,
+                21.3,
+                25
+              ],
+              "tgt": {
+                "side": "enemy",
+                "count": 1,
+                "select": "prefer_dealer:physical"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "arulix",
+      "slot": 2,
+      "unlockStar": 4,
+      "name": "Battle Cunning",
+      "trigger": "Start of Combat",
+      "targeting": "3 Enemies",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "Whole Combat",
+      "scalingRaw": "STR: -4% | -4.8% | -5.6% | -6.8% | -8% ; INT: -4% | -4.8% | -5.6% | -6.8% | -8%",
+      "scaling": [
+        {
+          "label": "STR",
+          "values": [
+            -4,
+            -4.8,
+            -5.6,
+            -6.8,
+            -8
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "INT",
+          "values": [
+            -4,
+            -4.8,
+            -5.6,
+            -6.8,
+            -8
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Start of Combat: Apply Stat Modifier (Buff) to 3 Enemies (STR: -4% | -4.8% | -5.6% | -6.8% | -8% ; INT: -4% | -4.8% | -5.6% | -6.8% | -8%) for Whole Combat.",
+      "structured": [
+        {
+          "when": "combat_start",
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "str",
+                  "pct": [
+                    -4,
+                    -4.8,
+                    -5.6,
+                    -6.8,
+                    -8
+                  ]
+                },
+                {
+                  "stat": "int",
+                  "pct": [
+                    -4,
+                    -4.8,
+                    -5.6,
+                    -6.8,
+                    -8
+                  ]
+                }
+              ],
+              "scaleStat": "inst",
+              "dur": "combat",
+              "tgt": {
+                "side": "enemy",
+                "count": 3,
+                "select": "any"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "arulix",
+      "slot": 3,
+      "unlockStar": 6,
+      "name": "Spiral Surge",
+      "trigger": "Rounds 1, 2, 3, 5, 8",
+      "targeting": "2 Enemies",
+      "effectType": "Direct Damage (Nuke)",
+      "duration": "Whole Combat",
+      "scalingRaw": "Rate: 20% | 24% | 28% | 34% | 40%",
+      "scaling": [
+        {
+          "label": "Rate",
+          "values": [
+            20,
+            24,
+            28,
+            34,
+            40
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Rounds 1, 2, 3, 5, 8: Apply Direct Damage (Nuke) to 2 Enemies (Rate: 20% | 24% | 28% | 34% | 40%) for Whole Combat.",
+      "structured": [
+        {
+          "when": "rounds",
+          "rounds": [
+            1,
+            2,
+            3,
+            5,
+            8
+          ],
+          "actions": [
+            {
+              "t": "dmg",
+              "dt": "physical",
+              "pct": [
+                20,
+                24,
+                28,
+                34,
+                40
+              ],
+              "tgt": {
+                "side": "enemy",
+                "count": 2,
+                "select": "any"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "arulix",
+      "slot": 4,
+      "unlockStar": 8,
+      "name": "Iron Shell",
+      "trigger": "Start of Combat",
+      "targeting": "2 Allies",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "Whole Combat",
+      "scalingRaw": "PHYSICAL_RECEIVED: -2.5% | -3% | -3.5% | -4.25% | -5% ; FIRE_RECEIVED: -2.5% | -3% | -3.5% | -4.25% | -5%",
+      "scaling": [
+        {
+          "label": "PHYSICAL_RECEIVED",
+          "values": [
+            -2.5,
+            -3,
+            -3.5,
+            -4.25,
+            -5
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "FIRE_RECEIVED",
+          "values": [
+            -2.5,
+            -3,
+            -3.5,
+            -4.25,
+            -5
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Start of Combat: Apply Stat Modifier (Buff) to 2 Allies (PHYSICAL_RECEIVED: -2.5% | -3% | -3.5% | -4.25% | -5% ; FIRE_RECEIVED: -2.5% | -3% | -3.5% | -4.25% | -5%) for Whole Combat.",
+      "structured": [
+        {
+          "when": "combat_start",
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "physical_received",
+                  "pct": [
+                    -2.5,
+                    -3,
+                    -3.5,
+                    -4.25,
+                    -5
+                  ]
+                },
+                {
+                  "stat": "fire_received",
+                  "pct": [
+                    -2.5,
+                    -3,
+                    -3.5,
+                    -4.25,
+                    -5
+                  ]
+                }
+              ],
+              "dur": "combat",
+              "tgt": {
+                "side": "ally",
+                "count": 2,
+                "select": "any"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "arulix",
+      "slot": 5,
+      "unlockStar": 10,
+      "name": "Mimicry",
+      "trigger": "Each Action / Round",
+      "targeting": "Self",
+      "effectType": "Ability Buff",
+      "duration": "Whole Combat",
+      "scalingRaw": "Rank 1: 10% | Rank 2: 12% | Rank 3: 14% | Rank 4: 17% | Rank 5: 20%",
+      "scaling": [
+        {
+          "label": "Rank 1",
+          "values": [
+            10,
+            "Rank 2: 12%",
+            "Rank 3: 14%",
+            "Rank 4: 17%",
+            "Rank 5: 20%"
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Each Action / Round: Apply Ability Buff to Self (Rank 1: 10% | Rank 2: 12% | Rank 3: 14% | Rank 4: 17% | Rank 5: 20%) for Whole Combat.",
+      "structured": [
+        {
+          "when": "combat_start",
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "tactical_dealt",
+                  "pct": [
+                    10,
+                    12,
+                    14,
+                    17,
+                    20
+                  ]
+                }
+              ],
+              "dur": "combat",
+              "tgt": {
+                "side": "self"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

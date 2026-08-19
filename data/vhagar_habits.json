@@ -1,0 +1,450 @@
+{
+  "dragonId": "vhagar",
+  "habits": [
+    {
+      "dragonId": "vhagar",
+      "slot": 1,
+      "unlockStar": 2,
+      "name": "Ancestral Shield",
+      "trigger": "Rounds 1, Rounds 4",
+      "targeting": "1 Self",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "3 Rounds, Whole Combat",
+      "scalingRaw": "PHYSICAL_RECEIVED: -12% | -14.4% | -16.8% | -20.4% | -24% ; TACTICAL_RECEIVED: -12% | -14.4% | -16.8% | -20.4% | -24% ; RECOVERY_RECEIVED: 15% | 18% | 21% | 25.5% | 30%",
+      "scaling": [
+        {
+          "label": "PHYSICAL_RECEIVED",
+          "values": [
+            -12,
+            -14.4,
+            -16.8,
+            -20.4,
+            -24
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "TACTICAL_RECEIVED",
+          "values": [
+            -12,
+            -14.4,
+            -16.8,
+            -20.4,
+            -24
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "RECOVERY_RECEIVED",
+          "values": [
+            15,
+            18,
+            21,
+            25.5,
+            30
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Rounds 1, Rounds 4: Apply Stat Modifier (Buff) to 1 Self (PHYSICAL_RECEIVED: -12% | -14.4% | -16.8% | -20.4% | -24% ; TACTICAL_RECEIVED: -12% | -14.4% | -16.8% | -20.4% | -24% ; RECOVERY_RECEIVED: 15% | 18% | 21% | 25.5% | 30%) for 3 Rounds, Whole Combat.",
+      "structured": [
+        {
+          "when": "rounds",
+          "rounds": [
+            1
+          ],
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "physical_received",
+                  "pct": [
+                    -12,
+                    -14.4,
+                    -16.8,
+                    -20.4,
+                    -24
+                  ]
+                },
+                {
+                  "stat": "tactical_received",
+                  "pct": [
+                    -12,
+                    -14.4,
+                    -16.8,
+                    -20.4,
+                    -24
+                  ]
+                }
+              ],
+              "dur": 3,
+              "tgt": {
+                "side": "self"
+              }
+            }
+          ]
+        },
+        {
+          "when": "rounds",
+          "rounds": [
+            4
+          ],
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "recovery_received",
+                  "pct": [
+                    15,
+                    18,
+                    21,
+                    25.5,
+                    30
+                  ]
+                }
+              ],
+              "dur": "combat",
+              "tgt": {
+                "side": "self"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "vhagar",
+      "slot": 2,
+      "unlockStar": 4,
+      "name": "Battle Leader",
+      "trigger": "Start of Combat",
+      "targeting": "1 Ally (Right Lane)",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "Whole Combat",
+      "scalingRaw": "PHYSICAL_DEALT: 12.5% | 15% | 17.5% | 21.25% | 25%",
+      "scaling": [
+        {
+          "label": "PHYSICAL_DEALT",
+          "values": [
+            12.5,
+            15,
+            17.5,
+            21.25,
+            25
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Start of Combat: Apply Stat Modifier (Buff) to 1 Ally (Right Lane) (PHYSICAL_DEALT: 12.5% | 15% | 17.5% | 21.25% | 25%) for Whole Combat.",
+      "structured": [
+        {
+          "when": "combat_start",
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "physical_dealt",
+                  "pct": [
+                    12.5,
+                    15,
+                    17.5,
+                    21.25,
+                    25
+                  ]
+                }
+              ],
+              "dur": "combat",
+              "tgt": {
+                "side": "ally",
+                "count": 1,
+                "select": "prefer_lane:R"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "vhagar",
+      "slot": 3,
+      "unlockStar": 6,
+      "name": "Eclipse Cover",
+      "trigger": "Rounds 3, 4, 5, 6, 7",
+      "targeting": "1 Enemy, 1 Ally",
+      "effectType": "Status Effect (Control/DoT)",
+      "duration": "2 Rounds",
+      "scalingRaw": "Chance: 17.5% | 21% | 24.5% | 29.8% | 35% ; Chance: 17.5% | 21% | 24.5% | 29.8% | 35%",
+      "scaling": [
+        {
+          "label": "Chance",
+          "values": [
+            17.5,
+            21,
+            24.5,
+            29.8,
+            35
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "Chance",
+          "values": [
+            17.5,
+            21,
+            24.5,
+            29.8,
+            35
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Rounds 3, 4, 5, 6, 7: Apply Status Effect (Control/DoT) to 1 Enemy, 1 Ally (Chance: 17.5% | 21% | 24.5% | 29.8% | 35% ; Chance: 17.5% | 21% | 24.5% | 29.8% | 35%) for 2 Rounds.",
+      "structured": [
+        {
+          "when": "rounds",
+          "rounds": [
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "actions": [
+            {
+              "t": "status",
+              "st": "advantage",
+              "dur": 2,
+              "val": 20,
+              "chance": [
+                17.5,
+                21,
+                24.5,
+                29.8,
+                35
+              ],
+              "tgt": {
+                "side": "ally",
+                "count": 1,
+                "select": "most_troops"
+              }
+            },
+            {
+              "t": "status",
+              "st": "weakened",
+              "dur": 2,
+              "chance": [
+                17.5,
+                21,
+                24.5,
+                29.8,
+                35
+              ],
+              "tgt": {
+                "side": "enemy",
+                "count": 1,
+                "select": "most_troops"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "vhagar",
+      "slot": 4,
+      "unlockStar": 8,
+      "name": "Blazing Onslaught",
+      "trigger": "Rounds 1",
+      "targeting": "1 Enemy (Left Lane), 1 Enemy (Right Lane)",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "3 Rounds",
+      "scalingRaw": "FIRE_RECEIVED: 18% | 21.6% | 25.2% | 30.6% | 36% ; PHYSICAL_RECEIVED: 18% | 21.6% | 25.2% | 30.6% | 36%",
+      "scaling": [
+        {
+          "label": "FIRE_RECEIVED",
+          "values": [
+            18,
+            21.6,
+            25.2,
+            30.6,
+            36
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "PHYSICAL_RECEIVED",
+          "values": [
+            18,
+            21.6,
+            25.2,
+            30.6,
+            36
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Rounds 1: Apply Stat Modifier (Buff) to 1 Enemy (Left Lane), 1 Enemy (Right Lane) (FIRE_RECEIVED: 18% | 21.6% | 25.2% | 30.6% | 36% ; PHYSICAL_RECEIVED: 18% | 21.6% | 25.2% | 30.6% | 36%) for 3 Rounds.",
+      "structured": [
+        {
+          "when": "rounds",
+          "rounds": [
+            1
+          ],
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "fire_received",
+                  "pct": [
+                    18,
+                    21.6,
+                    25.2,
+                    30.6,
+                    36
+                  ]
+                }
+              ],
+              "dur": 3,
+              "tgt": {
+                "side": "enemy",
+                "count": 1,
+                "select": "prefer_lane:L"
+              }
+            },
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "physical_received",
+                  "pct": [
+                    18,
+                    21.6,
+                    25.2,
+                    30.6,
+                    36
+                  ]
+                }
+              ],
+              "dur": 3,
+              "tgt": {
+                "side": "enemy",
+                "count": 1,
+                "select": "prefer_lane:R"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "vhagar",
+      "slot": 5,
+      "unlockStar": 10,
+      "name": "Skyward Titan",
+      "trigger": "Each Action / Round",
+      "targeting": "1 Self",
+      "effectType": "Stat Modifier (Buff)",
+      "duration": "Whole Combat",
+      "scalingRaw": "STR: 5% | 6.5% | 8% | 10% | 12.5% ; PHYSICAL_RECEIVED: -2.5% | -3.25% | -4% | -5% | -6.25% ; TACTICAL_RECEIVED: -2.5% | -3.25% | -4% | -5% | -6.25%",
+      "scaling": [
+        {
+          "label": "STR",
+          "values": [
+            5,
+            6.5,
+            8,
+            10,
+            12.5
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "PHYSICAL_RECEIVED",
+          "values": [
+            -2.5,
+            -3.25,
+            -4,
+            -5,
+            -6.25
+          ],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "TACTICAL_RECEIVED",
+          "values": [
+            -2.5,
+            -3.25,
+            -4,
+            -5,
+            -6.25
+          ],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Each Action / Round: Apply Stat Modifier (Buff) to 1 Self (STR: 5% | 6.5% | 8% | 10% | 12.5% ; PHYSICAL_RECEIVED: -2.5% | -3.25% | -4% | -5% | -6.25% ; TACTICAL_RECEIVED: -2.5% | -3.25% | -4% | -5% | -6.25%) for Whole Combat.",
+      "structured": [
+        {
+          "when": "each",
+          "chance": 30,
+          "actions": [
+            {
+              "t": "stack",
+              "mods": [
+                {
+                  "stat": "str",
+                  "pct": [
+                    5,
+                    6.5,
+                    8,
+                    10,
+                    12.5
+                  ]
+                },
+                {
+                  "stat": "physical_received",
+                  "pct": [
+                    -2.5,
+                    -3.25,
+                    -4,
+                    -5,
+                    -6.25
+                  ]
+                },
+                {
+                  "stat": "tactical_received",
+                  "pct": [
+                    -2.5,
+                    -3.25,
+                    -4,
+                    -5,
+                    -6.25
+                  ]
+                }
+              ],
+              "dur": "combat",
+              "tgt": {
+                "side": "self"
+              },
+              "id": "bulwark"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
