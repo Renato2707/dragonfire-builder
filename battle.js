@@ -2,14 +2,8 @@
 
 import { calculateFinalDamage, sortByInitiative, isTeamAlive, rollChance } from './utils.js';
 import {
-  updateEffects,
-  processDamageEffects,
-  processHealingEffects,
-  canAct,
-  canAttack,
-  canUseAbilities,
-  applyEffect,
-  hasEffect
+  updateEffects, processDamageEffects, processHealingEffects,
+  canAct, canAttack, canUseAbilities, applyEffect, hasEffect
 } from './effects.js';
 import { selectTargets, getPositionName } from './positionSystem.js';
 import { executeHabitAction, resolveChance, PHASES } from './habitParser.js';
@@ -38,6 +32,7 @@ class Battle {
     this.logTeamStatus('Team A', this.teamA);
     this.logTeamStatus('Team B', this.teamB);
     this.logSeparator();
+    for (const character of this.allCharacters) this.executeVanguard(character);
     this.executeHabitsForPhase(PHASES.COMBAT_START, this.allCharacters, 1);
   }
 
@@ -95,9 +90,6 @@ class Battle {
         processHealingEffects(character);
         if (typeof character.tickPercentMods === 'function') character.tickPercentMods();
       }
-      if (character.isDead && character.diedThisRound) {
-        this.logAction(`💀 ${character.name} fell!`);
-      }
     }
     for (const character of this.allCharacters) {
       if (typeof character.advanceRetreatFlags === 'function') character.advanceRetreatFlags();
@@ -111,11 +103,35 @@ class Battle {
   blockAllowed(character, block) {
     const req = block.requires;
     if (!req) return true;
-    if (req.command) return false;
+    if (req.command && character.commandUsedThisRound !== req.command) return false;
     if (req.troop && this.troopOf(character) !== req.troop) return false;
     if (req.linkedRetreated) {
       const linked = character.links && character.links[req.linkedRetreated];
       if (!linked || !(linked.retreatedLastRound || linked.isDead)) return false;
+    }
+    return true;
+  }
+
+  executeVanguard(character) {
+    const kit = character.vanguardKit;
+    if (!kit) return;
+    this.executeKit(character, kit, PHASES.COMBAT_START, 1, 'Vanguard');
+  }
+
+  executeCommand(character) {
+    const kit = character.commandKit;
+    if (!kit || !canUseAbilities(character)) return;
+    const fired = this.executeKit(character, kit, PHASES.TURN, this.currentRound, kit.name || 'Command');
+    if (fired) character.commandUsedThisRound = kit.name;
+  }
+
+  executeKit(character, habitLike, phase, round, label) {
+    if (!habitLike || typeof habitLike.getBlocksFor !== 'function') return false;
+    const blocks = habitLike.getBlocksFor(round, phase);
+    if (!blocks.length) return false;
+    this.logAction(`${character.name} uses ${label}`);
+    for (const block of blocks) {
+      for (const action of block.actions || []) this.runAction(character, habitLike, action, round);
     }
     return true;
   }
@@ -132,6 +148,8 @@ class Battle {
   }
 
   executeCharacterAction(character) {
+    this.executeCommand(character);
+    if (character.isDead) return;
     if (canUseAbilities(character)) {
       this.executeHabitsForPhase(PHASES.TURN, [character], this.currentRound);
     }
@@ -153,8 +171,7 @@ class Battle {
   }
 
   selectBasicAttackTarget(character) {
-    const targetTeam = character.teamId === 0 ? this.teamB : this.teamA;
-    const alive = targetTeam.filter(c => !c.isDead);
+    const alive = this.enemiesOf(character).filter(c => !c.isDead);
     if (!alive.length) return null;
     const taunters = alive.filter(c => hasEffect(c, 'taunt'));
     return taunters[0] || alive[Math.floor(Math.random() * alive.length)];
@@ -163,10 +180,7 @@ class Battle {
   executeBasicAttack(attacker, defender) {
     const damageType = this.selectDamageType(attacker);
     const actualDamage = defender.takeDamage(calculateFinalDamage(attacker, defender, damageType, 0, { basic: true }));
-    this.logAction(
-      `${attacker.name} attacks ${defender.name} (${damageType}): -${actualDamage} HP ` +
-      `(${Math.round(defender.currentHealth)}/${Math.round(defender.maxHealth)})`
-    );
+    this.logAction(`${attacker.name} attacks ${defender.name} (${damageType}): -${actualDamage} HP`);
     if (defender.isDead) this.logAction(`💀 ${defender.name} fell!`);
   }
 
@@ -190,7 +204,9 @@ class Battle {
   resolveTargets(character, habit, action) {
     const tgt = (action && action.tgt) || habit.targetingParsed;
     if (!tgt || tgt.side === 'self') return [character];
-    return selectTargets(character, this.alliesOf(character), this.enemiesOf(character), tgt);
+    let targets = selectTargets(character, this.alliesOf(character), this.enemiesOf(character), tgt);
+    if (tgt.slot != null) targets = targets.filter(c => c.slotPosition === Number(tgt.slot));
+    return targets;
   }
 
   matchingPerTarget(character, spec) {
@@ -198,90 +214,76 @@ class Battle {
     const pool = spec.side === 'enemy' ? this.enemiesOf(character) : this.alliesOf(character);
     return pool.filter(c => {
       if (!c) return false;
-      if (spec.filter && spec.filter.troopsBelow != null) {
-        if (c.getHealthPercentage() >= spec.filter.troopsBelow) return false;
-      }
-      if (spec.filter && spec.filter.troopsAbove != null) {
-        if (c.getHealthPercentage() <= spec.filter.troopsAbove) return false;
-      }
-      if (spec.filter && spec.filter.retreatedPreviousRound) {
-        if (!c.retreatedLastRound) return false;
-      }
+      if (spec.filter && spec.filter.troopsBelow != null && c.getHealthPercentage() >= spec.filter.troopsBelow) return false;
+      if (spec.filter && spec.filter.troopsAbove != null && c.getHealthPercentage() <= spec.filter.troopsAbove) return false;
+      if (spec.filter && spec.filter.retreatedPreviousRound && !c.retreatedLastRound) return false;
       return true;
     });
   }
 
   executeHabit(character, habit, phase, round) {
     const r = round || this.currentRound || 1;
-    const p = phase || PHASES.TURN;
-    const blocks = (typeof habit.getBlocksFor === 'function' ? habit.getBlocksFor(r, p) : [])
-      .filter(block => this.blockAllowed(character, block));
+    const blocks = (habit.getBlocksFor(r, phase) || []).filter(block => this.blockAllowed(character, block));
     if (!blocks.length) return;
-
     this.logAction(`${character.name} uses ${habit.name}`);
-    const rankIndex = Math.max(0, Math.min(4, (character.habitRank || 1) - 1));
-
     for (const block of blocks) {
-      for (const action of block.actions || []) {
-        const raw = action;
-        if (raw.t === 'copy_status') {
-          this.executeCopyStatus(character, habit, raw, rankIndex);
+      for (const action of block.actions || []) this.runAction(character, habit, action, r);
+    }
+  }
+
+  runAction(character, habit, raw, round) {
+    if (raw.t === 'mod_command') {
+      const rankIndex = Math.max(0, Math.min(4, (character.habitRank || 1) - 1));
+      const value = Array.isArray(raw.pct) ? raw.pct[rankIndex] : raw.pct;
+      character.commandMods[raw.field] = value;
+      this.logAction(`  ➜ ${raw.command || 'command'} ${raw.field} = ${value}`);
+      return;
+    }
+    if (raw.t === 'copy_status') {
+      this.executeCopyStatus(character, habit, raw);
+      return;
+    }
+    let repeats = 1;
+    if (raw.perTarget) {
+      repeats = this.matchingPerTarget(character, raw.perTarget).length;
+      if (!repeats) return;
+    }
+    const targets = this.resolveTargets(character, habit, raw);
+    if (!targets.length) return;
+    const rankIndex = Math.max(0, Math.min(4, (character.habitRank || 1) - 1));
+    for (let i = 0; i < repeats; i += 1) {
+      for (const target of targets) {
+        if (target.isDead) continue;
+        let chance = resolveChance(raw, rankIndex, character);
+        if (raw.chanceIf && raw.chanceIf.taunt && hasEffect(target, 'taunt')) chance *= raw.chanceIf.taunt;
+        if (chance < 100 && !rollChance(chance)) {
+          this.logAction(`  ➜ ${habit.name} misses ${target.name} (${chance}%)`);
           continue;
         }
-
-        let repeats = 1;
-        if (raw.perTarget) {
-          repeats = this.matchingPerTarget(character, raw.perTarget).length;
-          if (repeats === 0) continue;
-        }
-
-        const targets = this.resolveTargets(character, habit, raw);
-        if (!targets.length) {
-          this.logAction(`  ➜ ${habit.name}: no valid targets`);
-          continue;
-        }
-
-        for (let i = 0; i < repeats; i += 1) {
-          for (const target of targets) {
-            if (target.isDead) continue;
-            let chance = resolveChance(raw, rankIndex);
-            if (raw.chanceIf && raw.chanceIf.taunt && hasEffect(target, 'taunt')) chance *= raw.chanceIf.taunt;
-            if (chance < 100 && !rollChance(chance)) {
-              this.logAction(`  ➜ ${habit.name} misses ${target.name} (${chance}%)`);
-              continue;
-            }
-            const actionResult = executeHabitAction(habit, { type: raw.t, data: raw }, character, [target], character.habitRank, {
-              skipChance: true,
-              round: r
-            });
-            this.logActionResult(character, habit, raw, target, actionResult);
-          }
-        }
+        const actionResult = executeHabitAction(habit, { type: raw.t, data: raw }, character, [target], character.habitRank, {
+          skipChance: true,
+          round
+        });
+        this.logActionResult(character, habit, raw, target, actionResult);
       }
     }
   }
 
-  executeCopyStatus(character, habit, raw, rankIndex) {
-    const chance = resolveChance(raw, rankIndex);
+  executeCopyStatus(character, habit, raw) {
     const sourceSide = raw.from && raw.from.side === 'enemy' ? this.enemiesOf(character) : this.alliesOf(character);
     const statuses = (raw.from && raw.from.status) || [];
     const present = [];
     for (const src of sourceSide) {
-      for (const st of statuses) {
-        if (hasEffect(src, st)) present.push(st);
-      }
+      for (const st of statuses) if (hasEffect(src, st)) present.push(st);
     }
     if (!present.length) return;
-    const targets = this.resolveTargets(character, habit, raw);
-    for (const target of targets) {
+    const rankIndex = Math.max(0, Math.min(4, (character.habitRank || 1) - 1));
+    const chance = resolveChance(raw, rankIndex, character);
+    for (const target of this.resolveTargets(character, habit, raw)) {
       if (target.isDead) continue;
-      if (chance < 100 && !rollChance(chance)) {
-        this.logAction(`  ➜ ${habit.name} mimic misses ${target.name}`);
-        continue;
-      }
-      const copied = present[0];
-      applyEffect(target, copied.toUpperCase(), character.habitRank, character.name, { duration: raw.dur });
-      this.logAction(`  ➜ copied ${copied} to ${target.name}`);
+      if (chance < 100 && !rollChance(chance)) continue;
+      applyEffect(target, present[0].toUpperCase(), character.habitRank, character.name, { duration: raw.dur });
+      this.logAction(`  ➜ copied ${present[0]} to ${target.name}`);
     }
   }
 
@@ -306,8 +308,6 @@ class Battle {
       for (const heal of actionResult.heals) {
         this.logAction(`  ➜ ${character.name} heals ${target.name} for ${target.heal(heal.amount)} HP`);
       }
-    } else {
-      this.logAction(`  ➜ ${actionType || 'action'} (not fully applied)`);
     }
   }
 
@@ -325,21 +325,15 @@ class Battle {
     this.winner = winner;
     this.endReason = reason;
     this.logSeparator('BATTLE END');
-    this.logInfo(`Round ${this.currentRound}/${this.maxRounds}`);
-    this.logInfo(`Reason: ${reason}`);
-    if (winner === 'A') this.logInfo('🏆 TEAM A WINS!');
-    else if (winner === 'B') this.logInfo('🏆 TEAM B WINS!');
-    else this.logInfo('⚔️ DRAW');
-    this.logSeparator();
+    this.logInfo(`Round ${this.currentRound}/${this.maxRounds} — ${reason}`);
+    this.logInfo(winner === 'A' ? '🏆 TEAM A WINS!' : winner === 'B' ? '🏆 TEAM B WINS!' : '⚔️ DRAW');
     this.logFinalStatus();
   }
 
   logSeparator(title = '') {
     const sep = '═'.repeat(55);
     if (title) {
-      this.battleLog.push(sep);
-      this.battleLog.push(title);
-      this.battleLog.push(sep);
+      this.battleLog.push(sep, title, sep);
     } else this.battleLog.push(sep);
   }
 
@@ -356,8 +350,7 @@ class Battle {
   logTeamStatus(teamName, team) {
     this.logInfo(`${teamName}:`);
     for (const char of team) {
-      const status = char.isDead ? '💀 DEAD' : `${Math.round(char.currentHealth)}/${Math.round(char.maxHealth)} HP`;
-      this.logAction(`${char.name}: ${status}`);
+      this.logAction(`${char.name}: ${char.isDead ? '💀 DEAD' : `${Math.round(char.currentHealth)}/${Math.round(char.maxHealth)} HP`}`);
     }
   }
 
@@ -430,11 +423,7 @@ class Battle {
       position: getPositionName(character.slotPosition),
       health: Math.round(character.currentHealth),
       maxHealth: Math.round(character.maxHealth),
-      healthPercent: character.getHealthPercentage(),
-      isDead: character.isDead,
-      activeEffects: (character.activeEffects || [])
-        .filter(e => (typeof e.isExpired === 'function' ? !e.isExpired() : e.duration > 0))
-        .map(e => ({ name: e.name, duration: e.duration }))
+      isDead: character.isDead
     };
   }
 }
