@@ -3,29 +3,26 @@
 
 class Character {
   constructor(dragonData, teamId, slotPosition) {
-    // Dados estáticos (vêm do JSON)
     this.id = dragonData.id;
     this.name = dragonData.name;
     this.breed = dragonData.breed;
     this.rarity = dragonData.rarity;
-    this.stats = { ...dragonData.stats }; // Cópia para não modificar original
+    this.stats = { ...dragonData.stats };
     this.habits = dragonData.habits;
     this.affinity = dragonData.affinity || [];
     this.weaknesses = dragonData.weaknesses || [];
     this.vanguardText = dragonData.vanguardText;
     this.commandText = dragonData.commandText;
 
-    // Estado dinâmico (muda durante a batalha)
-    this.teamId = teamId; // 0 ou 1
-    this.slotPosition = slotPosition; // 0, 1, 2 (esquerda, centro, direita)
+    this.teamId = teamId;
+    this.slotPosition = slotPosition;
     this.maxHealth = this.calculateMaxHealth();
     this.currentHealth = this.maxHealth;
     this.isDead = false;
-    this.activeEffects = []; // Array de efeitos aplicados
-    this.actionLog = []; // Histórico de ações deste character
-    this.roundsActive = 0; // Quantas rodadas ele sobreviveu
+    this.activeEffects = [];
+    this.actionLog = [];
+    this.roundsActive = 0;
 
-    // Modificadores de combate
     this.statModifiers = {
       str: 0,
       inst: 0,
@@ -33,32 +30,29 @@ class Character {
       init: 0
     };
 
-    // Modificadores de efeitos (Advantage, Weakened, Resistance, Vulnerable)
-    this.damageBonus = 0;      // % de bônus de dano
-    this.damagePenalty = 0;    // % de penalidade de dano
-    this.defenseBonus = 0;     // % de redução de dano recebido
-    this.defensePenalty = 0;   // % de aumento de dano recebido
+    this.damageBonus = 0;
+    this.damagePenalty = 0;
+    this.defenseBonus = 0;
+    this.defensePenalty = 0;
 
-    // Habits
-    this.parsedHabits = [];    // Array de Habit parseadas
-    this.habitRank = 1;        // Rank das habits (1-5, correspondendo a ★2-★10)
+    this.parsedHabits = [];
+    this.habitRank = 1;
   }
 
   calculateMaxHealth() {
-    // Fórmula simples: baseada em STR + INT
     const base = (this.stats.str + this.stats.int) * 2;
-    return Math.max(50, base); // Mínimo 50 de vida
+    return Math.max(50, base);
   }
 
   getModifiedStat(statName) {
     const base = this.stats[statName] || 0;
     const modifier = this.statModifiers[statName] || 0;
-    return Math.max(0, base + modifier); // Nunca negativo
+    return Math.max(0, base + modifier);
   }
 
   takeDamage(amount) {
     if (this.isDead) return 0;
-    
+
     const actualDamage = Math.max(0, amount);
     this.currentHealth -= actualDamage;
 
@@ -73,14 +67,12 @@ class Character {
 
   heal(amount) {
     if (this.isDead) return 0;
-
     const actualHeal = Math.min(amount, this.maxHealth - this.currentHealth);
     this.currentHealth += actualHeal;
     return actualHeal;
   }
 
   applyEffect(effect) {
-    // effect = { name, duration, magnitude, appliedBy }
     if (this.isDead) return false;
 
     this.activeEffects.push({
@@ -113,11 +105,9 @@ class Character {
   }
 
   updateEffects() {
-    // Chamado ao final de cada rodada
-    for (let effect of this.activeEffects) {
+    for (const effect of this.activeEffects) {
       effect.duration -= 1;
     }
-    // Remove efeitos expirados
     this.activeEffects = this.activeEffects.filter(e => e.duration > 0);
   }
 
@@ -136,7 +126,6 @@ class Character {
   }
 
   getInitiative() {
-    // Iniciativa = init modificado
     return this.getModifiedStat('init');
   }
 
@@ -144,30 +133,35 @@ class Character {
     this.actionLog.push(action);
   }
 
-  // ========================================================================
-  // HABITS
-  // ========================================================================
-
   setHabits(parsedHabits) {
-    // Carregar habits parseadas
     this.parsedHabits = parsedHabits || [];
   }
 
   setHabitRank(rank) {
-    // Definir rank das habits (1-5)
     this.habitRank = Math.max(1, Math.min(5, rank));
   }
 
+  isHabitUnlocked(habit) {
+    return !(habit.unlockStar > this.habitRank * 2);
+  }
+
   getHabitsByTrigger(triggerType) {
-    // Retorna habits que ativam com um trigger específico
-    return this.parsedHabits.filter(habit => habit.triggerType === triggerType);
+    return this.parsedHabits.filter(habit => {
+      if (habit.blocks && habit.blocks.length) {
+        return habit.blocks.some(block => block.phase === triggerType);
+      }
+      return habit.triggerType === triggerType;
+    });
+  }
+
+  getHabitsForPhase(round, phase) {
+    return this.parsedHabits.filter(habit =>
+      this.isHabitUnlocked(habit) && habit.shouldTrigger(round, phase)
+    );
   }
 
   getUsableHabits(round, phase) {
-    // Retorna habits que podem ser usadas nesta rodada/fase
-    return this.parsedHabits.filter(habit => 
-      habit.shouldTrigger(round, phase)
-    );
+    return this.getHabitsForPhase(round, phase);
   }
 
   getStatus() {
