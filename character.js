@@ -1,18 +1,8 @@
 // character.js
 
 const CORE_STATS = ['str', 'inst', 'int', 'init'];
-
-const DEALT_BY_TYPE = {
-  PHYSICAL: 'physical_dealt',
-  TACTICAL: 'tactical_dealt',
-  FIRE: 'fire_dealt'
-};
-
-const RECEIVED_BY_TYPE = {
-  PHYSICAL: 'physical_received',
-  TACTICAL: 'tactical_received',
-  FIRE: 'fire_received'
-};
+const DEALT_BY_TYPE = { PHYSICAL: 'physical_dealt', TACTICAL: 'tactical_dealt', FIRE: 'fire_dealt' };
+const RECEIVED_BY_TYPE = { PHYSICAL: 'physical_received', TACTICAL: 'tactical_received', FIRE: 'fire_received' };
 
 class Character {
   constructor(dragonData, teamId, slotPosition) {
@@ -27,7 +17,6 @@ class Character {
     this.vanguardText = dragonData.vanguardText;
     this.commandText = dragonData.commandText;
     this.troopType = dragonData.troopType || null;
-
     this.teamId = teamId;
     this.slotPosition = slotPosition;
     this.maxHealth = this.calculateMaxHealth();
@@ -37,11 +26,10 @@ class Character {
     this.diedThisRound = false;
     this.activeEffects = [];
     this.actionLog = [];
-    this.roundsActive = 0;
     this.percentMods = [];
+    this.flatMods = { str: 0, inst: 0, int: 0, init: 0 };
     this.links = {};
     this.stacks = {};
-
     this.statModifiers = { str: 0, inst: 0, int: 0, init: 0 };
     this.damageBonus = 0;
     this.damagePenalty = 0;
@@ -49,6 +37,10 @@ class Character {
     this.defensePenalty = 0;
     this.parsedHabits = [];
     this.habitRank = 1;
+    this.commandKit = null;
+    this.vanguardKit = null;
+    this.commandUsedThisRound = null;
+    this.commandMods = {};
   }
 
   calculateMaxHealth() {
@@ -58,6 +50,10 @@ class Character {
   addStatModifier(statName, amount, duration = 'combat', options = {}) {
     const stat = String(statName || '').toLowerCase();
     if (!stat || amount == null || Number.isNaN(Number(amount))) return;
+    if (options.fixed && CORE_STATS.includes(stat)) {
+      this.flatMods[stat] = (this.flatMods[stat] || 0) + Number(amount);
+      return;
+    }
     this.percentMods.push({
       stat,
       pct: Number(amount),
@@ -65,47 +61,39 @@ class Character {
       excludeBasic: !!options.excludeBasic,
       stackId: options.stackId || null
     });
-    if (CORE_STATS.includes(stat)) {
-      this.statModifiers[stat] = this.getPercentTotal(stat);
-    }
+    if (CORE_STATS.includes(stat)) this.statModifiers[stat] = this.getPercentTotal(stat);
   }
 
   addStack(stackId, mods, duration, options = {}) {
     this.stacks[stackId] = (this.stacks[stackId] || 0) + (options.stacks || 1);
-    for (const stat in mods) {
-      this.addStatModifier(stat, mods[stat], duration, { ...options, stackId });
-    }
+    for (const stat in mods) this.addStatModifier(stat, mods[stat], duration, { ...options, stackId });
     return this.stacks[stackId];
   }
 
   getPercentTotal(statName, options = {}) {
     const stat = String(statName || '').toLowerCase();
-    const basic = !!options.basic;
     return this.percentMods
-      .filter(mod => mod.stat === stat && !(basic && mod.excludeBasic))
+      .filter(mod => mod.stat === stat && !(options.basic && mod.excludeBasic))
       .reduce((sum, mod) => sum + mod.pct, 0);
   }
 
   getModifiedStat(statName) {
     const stat = String(statName || '').toLowerCase();
     const base = this.stats[stat] || 0;
+    const flat = this.flatMods[stat] || 0;
     const pct = this.getPercentTotal(stat);
-    if (CORE_STATS.includes(stat)) return Math.max(0, base * (1 + pct / 100));
+    if (CORE_STATS.includes(stat)) return Math.max(0, (base + flat) * (1 + pct / 100));
     return pct;
   }
 
   getDealtMultiplier(damageType, options = {}) {
     const key = DEALT_BY_TYPE[String(damageType || '').toUpperCase()];
-    const generic = this.getPercentTotal('dmg_dealt', options);
-    const typed = key ? this.getPercentTotal(key, options) : 0;
-    return 1 + (generic + typed) / 100;
+    return 1 + (this.getPercentTotal('dmg_dealt', options) + (key ? this.getPercentTotal(key, options) : 0)) / 100;
   }
 
   getReceivedMultiplier(damageType, options = {}) {
     const key = RECEIVED_BY_TYPE[String(damageType || '').toUpperCase()];
-    const generic = this.getPercentTotal('dmg_received', options);
-    const typed = key ? this.getPercentTotal(key, options) : 0;
-    return 1 + (generic + typed) / 100;
+    return 1 + (this.getPercentTotal('dmg_received', options) + (key ? this.getPercentTotal(key, options) : 0)) / 100;
   }
 
   getRecoveryDealtMultiplier() {
@@ -133,25 +121,18 @@ class Character {
   advanceRetreatFlags() {
     this.retreatedLastRound = this.diedThisRound;
     this.diedThisRound = false;
-  }
-
-  resetStatModifiers() {
-    this.percentMods = [];
-    this.statModifiers = { str: 0, inst: 0, int: 0, init: 0 };
-    this.stacks = {};
+    this.commandUsedThisRound = null;
   }
 
   takeDamage(amount) {
     if (this.isDead) return 0;
-    const actualDamage = Math.max(0, amount);
-    this.currentHealth -= actualDamage;
+    this.currentHealth -= Math.max(0, amount);
     if (this.currentHealth <= 0) {
       this.currentHealth = 0;
       this.isDead = true;
       this.noteDeath();
-      this.actionLog.push(`MORTE: ${this.name} caiu`);
     }
-    return actualDamage;
+    return Math.max(0, amount);
   }
 
   heal(amount) {
@@ -161,32 +142,12 @@ class Character {
     return actualHeal;
   }
 
-  applyEffect(effect) {
-    if (this.isDead) return false;
-    this.activeEffects.push({
-      name: effect.name,
-      duration: effect.duration,
-      maxDuration: effect.duration,
-      magnitude: effect.magnitude || 0,
-      appliedBy: effect.appliedBy
-    });
-    return true;
-  }
-
-  hasEffect(effectName) {
-    return this.activeEffects.some(e => e.name === effectName && e.duration > 0);
-  }
-
   getHealthPercentage() {
     return this.maxHealth > 0 ? (this.currentHealth / this.maxHealth) * 100 : 0;
   }
 
   getInitiative() {
     return this.getModifiedStat('init');
-  }
-
-  logAction(action) {
-    this.actionLog.push(action);
   }
 
   setHabits(parsedHabits) {
@@ -201,17 +162,16 @@ class Character {
     this.troopType = troopType || null;
   }
 
-  isHabitUnlocked(habit) {
-    return !(habit.unlockStar > this.habitRank * 2);
+  setCommandKit(kit) {
+    this.commandKit = kit;
   }
 
-  getHabitsByTrigger(triggerType) {
-    return this.parsedHabits.filter(habit => {
-      if (habit.blocks && habit.blocks.length) {
-        return habit.blocks.some(block => block.phase === triggerType);
-      }
-      return habit.triggerType === triggerType;
-    });
+  setVanguardKit(kit) {
+    this.vanguardKit = kit;
+  }
+
+  isHabitUnlocked(habit) {
+    return !(habit.unlockStar > this.habitRank * 2);
   }
 
   getHabitsForPhase(round, phase) {
@@ -227,7 +187,6 @@ class Character {
       maxHealth: this.maxHealth,
       healthPercent: this.getHealthPercentage(),
       isDead: this.isDead,
-      activeEffects: this.activeEffects.map(e => `${e.name} (${e.duration})`),
       initiative: this.getInitiative()
     };
   }
