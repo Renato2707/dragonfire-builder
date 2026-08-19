@@ -107,7 +107,7 @@ async function loadKit(character) {
     console.warn(`Habits: ${character.name}`, error);
   }
   try {
-    const cmdRes = await fetch(`./data/${character.id}_command.json`);
+    const cmdRes = await fetch(`./data/${character.id}_vanguard_command.json`);
     if (cmdRes.ok) {
       const cmdData = await cmdRes.json();
       const kit = loadCommandSync(cmdData, character.id);
@@ -116,7 +116,7 @@ async function loadKit(character) {
       character.setVanguardKit(kit.vanguard);
     }
   } catch (error) {
-    console.warn(`Command: ${character.name}`, error);
+    console.warn(`Vanguard/Command: ${character.name}`, error);
   }
 }
 
