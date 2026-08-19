@@ -1,0 +1,63 @@
+{
+  "dragonId": "bevlorin",
+  "name": "Nature's Reckoning",
+  "command": [
+    {
+      "phase": "turn",
+      "rounds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+      "actions": [
+        {
+          "t": "mod",
+          "mods": [{ "stat": "fire_dealt", "pct": -10 }],
+          "dur": 2,
+          "chance": 20,
+          "tgt": { "side": "enemy", "count": 3, "select": "dealer:fire" }
+        }
+      ]
+    },
+    {
+      "phase": "turn",
+      "rounds": [1, 5, 9],
+      "actions": [
+        {
+          "t": "dmg",
+          "dt": "physical",
+          "pct": 30,
+          "tgt": { "side": "enemy", "count": 3, "select": "any" }
+        }
+      ]
+    },
+    {
+      "phase": "turn",
+      "rounds": [3, 7],
+      "actions": [
+        {
+          "t": "dmg",
+          "dt": "physical",
+          "pct": 90,
+          "tgt": { "side": "enemy", "count": 1, "select": "same_lane" }
+        }
+      ]
+    }
+  ],
+  "vanguard": [
+    {
+      "phase": "combat_start",
+      "rounds": [1],
+      "actions": [
+        {
+          "t": "mod",
+          "mods": [{ "stat": "dmg_received", "pct": -8 }],
+          "dur": "combat",
+          "tgt": { "side": "self" }
+        },
+        {
+          "t": "mod",
+          "mods": [{ "stat": "tactical_dealt", "pct": 16 }],
+          "dur": "combat",
+          "tgt": { "side": "ally", "count": 1, "slot": 0, "excludeSelf": true }
+        }
+      ]
+    }
+  ]
+}
