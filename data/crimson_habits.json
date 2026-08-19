@@ -6,50 +6,29 @@
       "slot": 1,
       "unlockStar": 2,
       "name": "Enervate",
-      "trigger": "Start of Combat",
-      "targeting": "1 Enemy",
-      "effectType": "Stat Modifier (Buff)",
+      "targeting": "1 Enemy (Tactical dealer)",
+      "effectType": "Stat Modifier",
       "duration": "Whole Combat",
       "scalingRaw": "TACTICAL_DEALT: -13.5% | -16.2% | -18.9% | -22.95% | -27%",
       "scaling": [
         {
           "label": "TACTICAL_DEALT",
-          "values": [
-            -13.5,
-            -16.2,
-            -18.9,
-            -22.95,
-            -27
-          ],
+          "values": [-13.5, -16.2, -18.9, -22.95, -27],
           "unit": "%",
           "fixed": false
         }
       ],
-      "description": "Start of Combat: Apply Stat Modifier (Buff) to 1 Enemy (TACTICAL_DEALT: -13.5% | -16.2% | -18.9% | -22.95% | -27%) for Whole Combat.",
+      "description": "Start of Combat: Reduce Tactical Damage Dealt of 1 Enemy that deals Tactical Damage until the end of combat.",
       "structured": [
         {
-          "when": "combat_start",
+          "phase": "combat_start",
+          "rounds": [1],
           "actions": [
             {
               "t": "mod",
-              "mods": [
-                {
-                  "stat": "tactical_dealt",
-                  "pct": [
-                    -13.5,
-                    -16.2,
-                    -18.9,
-                    -22.95,
-                    -27
-                  ]
-                }
-              ],
+              "mods": [{ "stat": "tactical_dealt", "pct": [-13.5, -16.2, -18.9, -22.95, -27] }],
               "dur": "combat",
-              "tgt": {
-                "side": "enemy",
-                "count": 1,
-                "select": "dealer:tactical"
-              }
+              "tgt": { "side": "enemy", "count": 1, "select": "dealer:tactical" }
             }
           ]
         }
@@ -60,70 +39,38 @@
       "slot": 2,
       "unlockStar": 4,
       "name": "Dragon's Intellect",
-      "trigger": "Start of Combat",
       "targeting": "1 Self",
-      "effectType": "Stat Modifier (Buff)",
+      "effectType": "Stat Modifier",
       "duration": "Whole Combat",
       "scalingRaw": "DMG_RECEIVED: -6% | -7.2% | -8.4% | -10.2% | -12% ; INT: 12% | 14.4% | 16.8% | 20.4% | 24%",
       "scaling": [
         {
           "label": "DMG_RECEIVED",
-          "values": [
-            -6,
-            -7.2,
-            -8.4,
-            -10.2,
-            -12
-          ],
+          "values": [-6, -7.2, -8.4, -10.2, -12],
           "unit": "%",
           "fixed": false
         },
         {
           "label": "INT",
-          "values": [
-            12,
-            14.4,
-            16.8,
-            20.4,
-            24
-          ],
+          "values": [12, 14.4, 16.8, 20.4, 24],
           "unit": "%",
           "fixed": false
         }
       ],
-      "description": "Start of Combat: Apply Stat Modifier (Buff) to 1 Self (DMG_RECEIVED: -6% | -7.2% | -8.4% | -10.2% | -12% ; INT: 12% | 14.4% | 16.8% | 20.4% | 24%) for Whole Combat.",
+      "description": "Start of Combat: Reduce your Damage Received and increase your Intelligence until the end of combat.",
       "structured": [
         {
-          "when": "combat_start",
+          "phase": "combat_start",
+          "rounds": [1],
           "actions": [
             {
               "t": "mod",
               "mods": [
-                {
-                  "stat": "dmg_received",
-                  "pct": [
-                    -6,
-                    -7.2,
-                    -8.4,
-                    -10.2,
-                    -12
-                  ]
-                },
-                {
-                  "stat": "int",
-                  "pct": [
-                    12,
-                    14.4,
-                    16.8,
-                    20.4,
-                    24
-                  ]
-                }
+                { "stat": "dmg_received", "pct": [-6, -7.2, -8.4, -10.2, -12] },
+                { "stat": "int", "pct": [12, 14.4, 16.8, 20.4, 24] }
               ],
               "dur": "combat",
-              "tgt": {
-                "side": "self"
-              }
+              "tgt": { "side": "self" }
             }
           ]
         }
@@ -134,45 +81,35 @@
       "slot": 3,
       "unlockStar": 6,
       "name": "Bloodscale Fury",
-      "trigger": "Each Action / Round",
-      "targeting": "1 Enemy",
-      "effectType": "Status Effect (Control/DoT)",
+      "targeting": "1 Enemy (not Stunned)",
+      "effectType": "Status Effect",
       "duration": "2 Rounds",
       "scalingRaw": "Chance: 17.5% | 21% | 24.5% | 29.75% | 35%",
       "scaling": [
         {
           "label": "Chance",
-          "values": [
-            17.5,
-            21,
-            24.5,
-            29.75,
-            35
-          ],
+          "values": [17.5, 21, 24.5, 29.75, 35],
           "unit": "%",
           "fixed": false
         }
       ],
-      "description": "Each Action / Round: Apply Status Effect (Control/DoT) to 1 Enemy (Chance: 17.5% | 21% | 24.5% | 29.75% | 35%) for 2 Rounds.",
+      "description": "Each Round: chance to afflict Weakened (-20%) on 1 Enemy (prioritize targets not afflicted with Stun) for 2 rounds. Chance is doubled against targets with Taunt.",
       "structured": [
         {
-          "when": "each",
+          "phase": "turn",
+          "rounds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
           "actions": [
             {
               "t": "status",
               "st": "weakened",
+              "val": -20,
               "dur": 2,
-              "chance": [
-                17.5,
-                21,
-                24.5,
-                29.75,
-                35
-              ],
+              "chance": [17.5, 21, 24.5, 29.75, 35],
+              "chanceIf": { "taunt": 2 },
               "tgt": {
                 "side": "enemy",
                 "count": 1,
-                "select": "any"
+                "select": "prefer_without:stun"
               }
             }
           ]
@@ -184,104 +121,65 @@
       "slot": 4,
       "unlockStar": 8,
       "name": "Unlikely Hero",
-      "trigger": "Each Action / Round",
-      "targeting": "1 Enemy, 1 Enemy (Lowest Troops)",
-      "effectType": "Stat Modifier (Buff)",
+      "targeting": "Enemies by troop threshold",
+      "effectType": "Stat Modifier",
       "duration": "1 Round",
-      "scalingRaw": "PHYSICAL_RECEIVED: 10% | 12% | 14% | 17% | 20% ; FIRE_RECEIVED: 10% | 12% | 14% | 17% | 20% ; RECOVERY_RECEIVED: -20% | -24% | -28% | -34% | -40%",
+      "scalingRaw": "RECEIVED: 10% | 12% | 14% | 17% | 20% ; RECOVERY_RECEIVED: -20% | -24% | -28% | -34% | -40%",
       "scaling": [
         {
-          "label": "PHYSICAL_RECEIVED",
-          "values": [
-            10,
-            12,
-            14,
-            17,
-            20
-          ],
-          "unit": "%",
-          "fixed": false
-        },
-        {
-          "label": "FIRE_RECEIVED",
-          "values": [
-            10,
-            12,
-            14,
-            17,
-            20
-          ],
+          "label": "RECEIVED",
+          "values": [10, 12, 14, 17, 20],
           "unit": "%",
           "fixed": false
         },
         {
           "label": "RECOVERY_RECEIVED",
-          "values": [
-            -20,
-            -24,
-            -28,
-            -34,
-            -40
-          ],
+          "values": [-20, -24, -28, -34, -40],
           "unit": "%",
           "fixed": false
         }
       ],
-      "description": "Each Action / Round: Apply Stat Modifier (Buff) to 1 Enemy, 1 Enemy (Lowest Troops) (PHYSICAL_RECEIVED: 10% | 12% | 14% | 17% | 20% ; FIRE_RECEIVED: 10% | 12% | 14% | 17% | 20% ; RECOVERY_RECEIVED: -20% | -24% | -28% | -34% | -40%) for 1 Round.",
+      "description": "Start of Each Round: increase Physical (excluding Basic Attacks) and Fire Damage Received for all Enemies above 75% troops until end of round. Reduce Recovery Received for all Enemies below 25% troops until end of round.",
       "structured": [
         {
-          "when": "each",
+          "phase": "round_start",
+          "rounds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
           "actions": [
             {
               "t": "mod",
               "mods": [
-                {
-                  "stat": "physical_received",
-                  "pct": [
-                    10,
-                    12,
-                    14,
-                    17,
-                    20
-                  ]
-                },
-                {
-                  "stat": "fire_received",
-                  "pct": [
-                    10,
-                    12,
-                    14,
-                    17,
-                    20
-                  ]
-                }
+                { "stat": "physical_received", "pct": [10, 12, 14, 17, 20] }
               ],
+              "excludeBasic": true,
               "dur": 1,
               "tgt": {
                 "side": "enemy",
-                "count": 1,
-                "select": "most_troops"
+                "count": "all",
+                "filter": { "troopsAbove": 75 }
               }
             },
             {
               "t": "mod",
               "mods": [
-                {
-                  "stat": "recovery_received",
-                  "pct": [
-                    -20,
-                    -24,
-                    -28,
-                    -34,
-                    -40
-                  ]
-                }
+                { "stat": "fire_received", "pct": [10, 12, 14, 17, 20] }
               ],
               "dur": 1,
               "tgt": {
                 "side": "enemy",
-                "count": 1,
-                "select": "least_troops"
+                "count": "all",
+                "filter": { "troopsAbove": 75 }
+              }
+            },
+            {
+              "t": "mod",
+              "mods": [
+                { "stat": "recovery_received", "pct": [-20, -24, -28, -34, -40] }
+              ],
+              "dur": 1,
+              "tgt": {
+                "side": "enemy",
+                "count": "all",
+                "filter": { "troopsBelow": 25 }
               }
             }
           ]
@@ -293,99 +191,54 @@
       "slot": 5,
       "unlockStar": 10,
       "name": "Vermin's Bane",
-      "trigger": "Rounds 2, 4, 6, 8, 10",
-      "targeting": "1 Enemy",
-      "effectType": "Stat Modifier (Buff)",
-      "duration": "2 Rounds",
-      "scalingRaw": "Chance: 50% | 50% | 50% | 50% | 50% ; INST: -12% | -15.6% | -19.2% | -24% | -30% ; INIT: -12% | -15.6% | -19.2% | -24% | -30%",
+      "targeting": "1 Enemy (highest INST) / Bloodscale Terror",
+      "effectType": "Stat Modifier, Command Modifier",
+      "duration": "2 Rounds / Instant",
+      "scalingRaw": "INST_INIT: -12% | -15.6% | -19.2% | -24% | -30% ; Stun Chance: 40% | 52% | 64% | 80% | 100%",
       "scaling": [
         {
-          "label": "Chance",
-          "values": [
-            50,
-            50,
-            50,
-            50,
-            50
-          ],
+          "label": "INST_INIT",
+          "values": [-12, -15.6, -19.2, -24, -30],
           "unit": "%",
           "fixed": false
         },
         {
-          "label": "INST",
-          "values": [
-            -12,
-            -15.6,
-            -19.2,
-            -24,
-            -30
-          ],
-          "unit": "%",
-          "fixed": false
-        },
-        {
-          "label": "INIT",
-          "values": [
-            -12,
-            -15.6,
-            -19.2,
-            -24,
-            -30
-          ],
+          "label": "Stun Chance",
+          "values": [40, 52, 64, 80, 100],
           "unit": "%",
           "fixed": false
         }
       ],
-      "description": "Rounds 2, 4, 6, 8, 10: Apply Stat Modifier (Buff) to 1 Enemy (Chance: 50% | 50% | 50% | 50% | 50% ; INST: -12% | -15.6% | -19.2% | -24% | -30% ; INIT: -12% | -15.6% | -19.2% | -24% | -30%) for 2 Rounds.",
+      "description": "Bloodscale Terror gains: even-numbered rounds, 50% chance to reduce INST and INIT of the enemy with the highest INST for 2 rounds (enhanced by Intelligence). Round 1: Stun chance increased.",
       "structured": [
         {
-          "when": "rounds",
-          "rounds": [
-            2,
-            4,
-            6,
-            8,
-            10
-          ],
+          "phase": "turn",
+          "rounds": [2, 4, 6, 8, 10],
+          "requires": { "command": "Bloodscale Terror" },
           "actions": [
             {
               "t": "mod",
               "mods": [
-                {
-                  "stat": "inst",
-                  "pct": [
-                    -12,
-                    -15.6,
-                    -19.2,
-                    -24,
-                    -30
-                  ]
-                },
-                {
-                  "stat": "init",
-                  "pct": [
-                    -12,
-                    -15.6,
-                    -19.2,
-                    -24,
-                    -30
-                  ]
-                }
+                { "stat": "inst", "pct": [-12, -15.6, -19.2, -24, -30] },
+                { "stat": "init", "pct": [-12, -15.6, -19.2, -24, -30] }
               ],
               "scaleStat": "int",
               "dur": 2,
-              "chance": [
-                50,
-                50,
-                50,
-                50,
-                50
-              ],
-              "tgt": {
-                "side": "enemy",
-                "count": 1,
-                "select": "any"
-              }
+              "chance": 50,
+              "tgt": { "side": "enemy", "count": 1, "select": "highest_inst" }
+            }
+          ]
+        },
+        {
+          "phase": "round_start",
+          "rounds": [1],
+          "requires": { "command": "Bloodscale Terror" },
+          "actions": [
+            {
+              "t": "mod_command",
+              "command": "Bloodscale Terror",
+              "field": "stun_chance",
+              "pct": [40, 52, 64, 80, 100]
             }
           ]
         }
