@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador de Batalha 3v3 - Dragões</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #e0e0e0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #0f3460;
+            padding-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            color: #e94560;
+            margin-bottom: 10px;
+        }
+
+        .setup-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .team-panel {
+            background: #0f1f3f;
+            border: 2px solid #0f3460;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .team-panel h2 {
+            color: #00d4ff;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .team-panel.teamB h2 {
+            color: #ff6b6b;
+        }
+
+        .select-dragon {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        select {
+            flex: 1;
+            padding: 10px;
+            background: #1a2a4a;
+            border: 1px solid #0f3460;
+            color: #e0e0e0;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        button {
+            padding: 10px 15px;
+            background: #0f3460;
+            border: 1px solid #00d4ff;
+            color: #00d4ff;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        button:hover:not(:disabled) {
+            background: #00d4ff;
+            color: #0f1f3f;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .team-panel.teamB button {
+            border-color: #ff6b6b;
+            color: #ff6b6b;
+        }
+
+        .team-panel.teamB button:hover:not(:disabled) {
+            background: #ff6b6b;
+            color: #0f1f3f;
+        }
+
+        .team-list {
+            background: #0a1428;
+            border: 1px solid #0f3460;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            min-height: 100px;
+        }
+
+        .team-list select {
+            width: 100%;
+            height: 90px;
+            border: none;
+            background: #0a1428;
+        }
+
+        .remove-btn {
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .team-counter {
+            text-align: center;
+            font-size: 0.9em;
+            margin-top: 10px;
+            color: #00d4ff;
+        }
+
+        .team-panel.teamB .team-counter {
+            color: #ff6b6b;
+        }
+
+        .start-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        #btnStartBattle {
+            padding: 15px 40px;
+            font-size: 1.1em;
+            background: #e94560;
+            border-color: #e94560;
+            color: white;
+        }
+
+        #btnStartBattle:hover:not(:disabled) {
+            background: #ff6b6b;
+            border-color: #ff6b6b;
+        }
+
+        .battle-section {
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            gap: 20px;
+        }
+
+        .team-status {
+            background: #0f1f3f;
+            border: 2px solid #0f3460;
+            padding: 20px;
+            border-radius: 8px;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .team-status.teamB {
+            border-color: #4a2a3a;
+        }
+
+        .team-status h3 {
+            color: #00d4ff;
+            margin-bottom: 15px;
+        }
+
+        .team-status.teamB h3 {
+            color: #ff6b6b;
+        }
+
+        .character-status {
+            background: #1a2a4a;
+            border-left: 3px solid #00d4ff;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+
+        .team-status.teamB .character-status {
+            border-left-color: #ff6b6b;
+        }
+
+        .character-status.dead {
+            opacity: 0.5;
+            background: #2a1a1a;
+        }
+
+        .character-status .name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .character-status .health {
+            font-size: 0.85em;
+            margin-bottom: 3px;
+        }
+
+        .character-status .bar {
+            height: 8px;
+            background: #00d4ff;
+            border-radius: 2px;
+            margin-bottom: 5px;
+        }
+
+        .team-status.teamB .character-status .bar {
+            background: #ff6b6b;
+        }
+
+        .character-status .effects {
+            font-size: 0.75em;
+            color: #ffaa00;
+            margin-top: 3px;
+        }
+
+        #battleLog {
+            background: #0a1428;
+            border: 1px solid #0f3460;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85em;
+            line-height: 1.6;
+            max-height: 600px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        #btnNextRound, #btnReset {
+            padding: 10px 20px;
+        }
+
+        #error {
+            background: #4a2a2a;
+            border: 1px solid #ff6b6b;
+            color: #ff6b6b;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 1024px) {
+            .battle-section {
+                grid-template-columns: 1fr;
+            }
+
+            .setup-section {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⚔️ Simulador de Batalha 3v3</h1>
+            <p>Dragões - Teste suas composições</p>
+        </header>
+
+        <div id="error"></div>
+    <div id="debug" style="background: #1a2a4a; border: 1px solid #0f3460; padding: 10px; margin-bottom: 15px; border-radius: 4px; font-size: 0.85em; color: #00d4ff; max-height: 80px; overflow-y: auto; display: none;">
+        <strong>Debug Info:</strong>
+        <pre id="debugLog" style="margin: 0; font-family: monospace;"></pre>
+    </div>
+
+        <div class="setup-section">
+            <div class="team-panel">
+                <h2>🔵 Time A</h2>
+                <div class="select-dragon">
+                    <select id="dragonSelect"></select>
+                    <button id="btnAddTeamA">Adicionar</button>
+                </div>
+                <div class="team-list">
+                    <select id="teamAList" multiple></select>
+                </div>
+                <button class="remove-btn" id="btnRemoveTeamA">Remover Selecionado</button>
+                <div class="team-counter">Dragões: <span id="teamACount">0</span>/3</div>
+            </div>
+
+            <div class="team-panel teamB">
+                <h2>🔴 Time B</h2>
+                <div class="select-dragon">
+                    <select id="dragonSelectB"></select>
+                    <button id="btnAddTeamB">Adicionar</button>
+                </div>
+                <div class="team-list">
+                    <select id="teamBList" multiple></select>
+                </div>
+                <button class="remove-btn" id="btnRemoveTeamB">Remover Selecionado</button>
+                <div class="team-counter">Dragões: <span id="teamBCount">0</span>/3</div>
+            </div>
+        </div>
+
+        <div class="start-section">
+            <button id="btnStartBattle" disabled>Iniciar Batalha</button>
+        </div>
+
+        <div class="battle-section">
+            <div class="team-status">
+                <h3>🔵 Time A</h3>
+                <div id="teamAStatus"></div>
+            </div>
+
+            <div>
+                <h3 style="text-align: center; color: #e94560; margin-bottom: 15px;">Registro de Batalha</h3>
+                <div id="battleLog">Selecione 3 dragões para cada time e clique em "Iniciar Batalha"</div>
+                <div class="controls">
+                    <button id="btnNextRound" disabled>Próxima Rodada</button>
+                    <button id="btnReset" disabled>Reiniciar</button>
+                </div>
+            </div>
+
+            <div class="team-status teamB">
+                <h3>🔴 Time B</h3>
+                <div id="teamBStatus"></div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="./main.js"></script>
+    <script>
+        // Capturar logs do console para exibir na página
+        const debugLog = document.getElementById('debugLog');
+        const debugDiv = document.getElementById('debug');
+        
+        const originalLog = console.log;
+        const originalError = console.error;
+        
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            debugLog.textContent += args.join(' ') + '\n';
+            debugDiv.style.display = 'block';
+            debugLog.parentElement.parentElement.scrollTop = debugLog.parentElement.scrollHeight;
+        };
+        
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            debugLog.textContent += '❌ ' + args.join(' ') + '\n';
+            debugDiv.style.display = 'block';
+        };
+    </script>
+</body>
+</html>
