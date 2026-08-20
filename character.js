@@ -3,9 +3,13 @@
 const CORE_STATS = ['str', 'inst', 'int', 'init'];
 const DEALT_BY_TYPE = { PHYSICAL: 'physical_dealt', TACTICAL: 'tactical_dealt', FIRE: 'fire_dealt' };
 const RECEIVED_BY_TYPE = { PHYSICAL: 'physical_received', TACTICAL: 'tactical_received', FIRE: 'fire_received' };
+const DEFAULT_LEVEL = 16;
+const DEFAULT_STARS = 2;
+const DEFAULT_HABIT_RANK = 1;
+const SLOT_NAMES = { 0: 'Left Flank', 1: 'Vanguard', 2: 'Right Flank' };
 
 class Character {
-  constructor(dragonData, teamId, slotPosition) {
+  constructor(dragonData, teamId, slotPosition, options = {}) {
     this.id = dragonData.id;
     this.name = dragonData.name;
     this.breed = dragonData.breed;
@@ -19,6 +23,9 @@ class Character {
     this.troopType = dragonData.troopType || null;
     this.teamId = teamId;
     this.slotPosition = slotPosition;
+    this.positionName = SLOT_NAMES[slotPosition] || `Slot ${slotPosition}`;
+    this.level = options.level != null ? options.level : DEFAULT_LEVEL;
+    this.stars = options.stars != null ? options.stars : DEFAULT_STARS;
     this.maxHealth = this.calculateMaxHealth();
     this.currentHealth = this.maxHealth;
     this.isDead = false;
@@ -36,7 +43,7 @@ class Character {
     this.defenseBonus = 0;
     this.defensePenalty = 0;
     this.parsedHabits = [];
-    this.habitRank = 1;
+    this.habitRank = options.habitRank != null ? options.habitRank : DEFAULT_HABIT_RANK;
     this.commandKit = null;
     this.vanguardKit = null;
     this.commandUsedThisRound = null;
@@ -158,6 +165,14 @@ class Character {
     this.habitRank = Math.max(1, Math.min(5, rank));
   }
 
+  setStars(stars) {
+    this.stars = Math.max(1, Math.min(10, stars));
+  }
+
+  setLevel(level) {
+    this.level = Math.max(1, level);
+  }
+
   setTroopType(troopType) {
     this.troopType = troopType || null;
   }
@@ -171,7 +186,7 @@ class Character {
   }
 
   isHabitUnlocked(habit) {
-    return !(habit.unlockStar > this.habitRank * 2);
+    return (habit.unlockStar || 2) <= this.stars;
   }
 
   getHabitsForPhase(round, phase) {
@@ -183,6 +198,11 @@ class Character {
   getStatus() {
     return {
       name: this.name,
+      position: this.positionName,
+      slot: this.slotPosition,
+      level: this.level,
+      stars: this.stars,
+      habitRank: this.habitRank,
       health: this.currentHealth,
       maxHealth: this.maxHealth,
       healthPercent: this.getHealthPercentage(),
@@ -192,4 +212,13 @@ class Character {
   }
 }
 
-export { Character, CORE_STATS, DEALT_BY_TYPE, RECEIVED_BY_TYPE };
+export {
+  Character,
+  CORE_STATS,
+  DEALT_BY_TYPE,
+  RECEIVED_BY_TYPE,
+  SLOT_NAMES,
+  DEFAULT_LEVEL,
+  DEFAULT_STARS,
+  DEFAULT_HABIT_RANK
+};
