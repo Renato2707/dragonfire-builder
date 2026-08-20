@@ -1,13 +1,13 @@
 // main.js
 
 import { loadDragons, getDragon, getAllDragons } from './data.js';
-import { Character } from './character.js';
+import { Character, SLOT_NAMES, DEFAULT_LEVEL, DEFAULT_STARS, DEFAULT_HABIT_RANK } from './character.js';
 import { Battle } from './battle.js';
 import { loadDragonHabitsSync, loadCommandSync } from './habitParser.js';
 
+const SLOTS = [0, 1, 2];
+
 let dragonsData = [];
-let selectedTeamA = [];
-let selectedTeamB = [];
 let currentBattle = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -16,83 +16,66 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('error').textContent = 'Erro ao carregar dados dos dragões';
     return;
   }
-  populateDragonSelect();
-  document.getElementById('btnAddTeamA').addEventListener('click', addToTeamA);
-  document.getElementById('btnAddTeamB').addEventListener('click', addToTeamB);
-  document.getElementById('btnRemoveTeamA').addEventListener('click', removeFromTeamA);
-  document.getElementById('btnRemoveTeamB').addEventListener('click', removeFromTeamB);
+  populateSlotSelects();
+  SLOTS.forEach(slot => {
+    document.getElementById(`teamA-slot-${slot}`).addEventListener('change', onFormationChange);
+    document.getElementById(`teamB-slot-${slot}`).addEventListener('change', onFormationChange);
+  });
   document.getElementById('btnStartBattle').addEventListener('click', startBattle);
   document.getElementById('btnNextRound').addEventListener('click', nextRound);
   document.getElementById('btnReset').addEventListener('click', reset);
+  onFormationChange();
 });
 
-function populateDragonSelect() {
-  const selectA = document.getElementById('dragonSelect');
-  const selectB = document.getElementById('dragonSelectB');
-  selectA.innerHTML = '<option value="">-- Selecione um dragão --</option>';
-  selectB.innerHTML = '<option value="">-- Selecione um dragão --</option>';
+function fillSelect(select) {
+  select.innerHTML = '<option value="">—</option>';
   getAllDragons().forEach(dragon => {
-    const optionA = document.createElement('option');
-    optionA.value = dragon.id;
-    optionA.textContent = `${dragon.name} (${dragon.rarity} - ${dragon.breed})`;
-    selectA.appendChild(optionA);
-    const optionB = document.createElement('option');
-    optionB.value = dragon.id;
-    optionB.textContent = `${dragon.name} (${dragon.rarity} - ${dragon.breed})`;
-    selectB.appendChild(optionB);
-  });
-}
-
-function addToTeamA() {
-  const dragonId = document.getElementById('dragonSelect').value;
-  if (!dragonId || selectedTeamA.length >= 3 || selectedTeamA.some(d => d.id === dragonId)) return;
-  selectedTeamA.push(getDragon(dragonId));
-  updateTeamDisplay();
-}
-
-function addToTeamB() {
-  const dragonId = document.getElementById('dragonSelectB').value;
-  if (!dragonId || selectedTeamB.length >= 3 || selectedTeamB.some(d => d.id === dragonId)) return;
-  selectedTeamB.push(getDragon(dragonId));
-  updateTeamDisplay();
-}
-
-function removeFromTeamA() {
-  const index = document.getElementById('teamAList').selectedIndex;
-  if (index >= 0) {
-    selectedTeamA.splice(index, 1);
-    updateTeamDisplay();
-  }
-}
-
-function removeFromTeamB() {
-  const index = document.getElementById('teamBList').selectedIndex;
-  if (index >= 0) {
-    selectedTeamB.splice(index, 1);
-    updateTeamDisplay();
-  }
-}
-
-function updateTeamDisplay() {
-  const listA = document.getElementById('teamAList');
-  const listB = document.getElementById('teamBList');
-  listA.innerHTML = '';
-  selectedTeamA.forEach((dragon, index) => {
     const option = document.createElement('option');
-    option.value = index;
-    option.textContent = `${dragon.name} (${dragon.rarity})`;
-    listA.appendChild(option);
+    option.value = dragon.id;
+    option.textContent = dragon.name;
+    select.appendChild(option);
   });
-  listB.innerHTML = '';
-  selectedTeamB.forEach((dragon, index) => {
-    const option = document.createElement('option');
-    option.value = index;
-    option.textContent = `${dragon.name} (${dragon.rarity})`;
-    listB.appendChild(option);
+}
+
+function populateSlotSelects() {
+  SLOTS.forEach(slot => {
+    fillSelect(document.getElementById(`teamA-slot-${slot}`));
+    fillSelect(document.getElementById(`teamB-slot-${slot}`));
   });
-  document.getElementById('btnStartBattle').disabled = selectedTeamA.length !== 3 || selectedTeamB.length !== 3;
-  document.getElementById('teamACount').textContent = selectedTeamA.length;
-  document.getElementById('teamBCount').textContent = selectedTeamB.length;
+}
+
+function readTeam(prefix) {
+  return SLOTS.map(slot => {
+    const id = document.getElementById(`${prefix}-slot-${slot}`).value;
+    return id ? { dragon: getDragon(id), slot } : null;
+  });
+}
+
+function teamReady(entries) {
+  if (entries.some(entry => !entry)) return false;
+  const ids = entries.map(entry => entry.dragon.id);
+  return new Set(ids).size === 3;
+}
+
+function onFormationChange() {
+  const teamA = readTeam('teamA');
+  const teamB = readTeam('teamB');
+  const duplicateA = teamA.filter(Boolean).length === 3 && !teamReady(teamA);
+  const duplicateB = teamB.filter(Boolean).length === 3 && !teamReady(teamB);
+  const error = document.getElementById('error');
+  if (duplicateA || duplicateB) {
+    error.textContent = 'Cada time: um dragão por posição, sem repetir.';
+  } else {
+    error.textContent = '';
+  }
+  document.getElementById('btnStartBattle').disabled = !teamReady(teamA) || !teamReady(teamB);
+}
+
+function setSlotsDisabled(disabled) {
+  SLOTS.forEach(slot => {
+    document.getElementById(`teamA-slot-${slot}`).disabled = disabled;
+    document.getElementById(`teamB-slot-${slot}`).disabled = disabled;
+  });
 }
 
 async function loadKit(character) {
@@ -101,7 +84,7 @@ async function loadKit(character) {
     if (habitRes.ok) {
       const habitData = await habitRes.json();
       character.setHabits(loadDragonHabitsSync(habitData, character.id));
-      character.setHabitRank(3);
+      character.setHabitRank(DEFAULT_HABIT_RANK);
     }
   } catch (error) {
     console.warn(`Habits: ${character.name}`, error);
@@ -120,21 +103,24 @@ async function loadKit(character) {
   }
 }
 
+function buildTeam(prefix, teamId) {
+  return readTeam(prefix).map(entry => new Character(entry.dragon, teamId, entry.slot, {
+    level: DEFAULT_LEVEL,
+    stars: DEFAULT_STARS,
+    habitRank: DEFAULT_HABIT_RANK
+  }));
+}
+
 async function startBattle() {
-  if (selectedTeamA.length !== 3 || selectedTeamB.length !== 3) return;
-  const teamA = selectedTeamA.map((dragon, idx) => new Character(dragon, 0, idx));
-  const teamB = selectedTeamB.map((dragon, idx) => new Character(dragon, 1, idx));
+  const teamA = buildTeam('teamA', 0);
+  const teamB = buildTeam('teamB', 1);
+  if (teamA.length !== 3 || teamB.length !== 3) return;
   for (const character of [...teamA, ...teamB]) await loadKit(character);
   currentBattle = new Battle(teamA, teamB);
   currentBattle.start();
   currentBattle.runRound();
   updateBattleDisplay();
-  document.getElementById('dragonSelect').disabled = true;
-  document.getElementById('dragonSelectB').disabled = true;
-  document.getElementById('btnAddTeamA').disabled = true;
-  document.getElementById('btnAddTeamB').disabled = true;
-  document.getElementById('btnRemoveTeamA').disabled = true;
-  document.getElementById('btnRemoveTeamB').disabled = true;
+  setSlotsDisabled(true);
   document.getElementById('btnStartBattle').disabled = true;
   document.getElementById('btnNextRound').disabled = false;
   document.getElementById('btnReset').disabled = false;
@@ -147,44 +133,44 @@ function nextRound() {
   if (!continues) document.getElementById('btnNextRound').disabled = true;
 }
 
+function renderStatus(container, team) {
+  container.innerHTML = '';
+  SLOTS.forEach(slot => {
+    const char = team.find(c => c.slotPosition === slot);
+    const div = document.createElement('div');
+    if (!char) {
+      div.className = 'character-status';
+      div.innerHTML = `<div class="name">${SLOT_NAMES[slot]}</div><div class="health">—</div>`;
+      container.appendChild(div);
+      return;
+    }
+    div.className = `character-status ${char.isDead ? 'dead' : ''}`;
+    const percent = char.getHealthPercentage();
+    div.innerHTML = `<div class="name">${SLOT_NAMES[slot]} · ${char.name}</div><div class="health">Nv ${char.level} · ${char.stars}★ · H${char.habitRank} · ${Math.round(char.currentHealth)}/${Math.round(char.maxHealth)}</div><div class="bar" style="width: ${percent}%"></div>`;
+    container.appendChild(div);
+  });
+}
+
 function updateBattleDisplay() {
   const logElement = document.getElementById('battleLog');
   logElement.textContent = currentBattle.getLog();
   logElement.scrollTop = logElement.scrollHeight;
-  const teamAStatus = document.getElementById('teamAStatus');
-  const teamBStatus = document.getElementById('teamBStatus');
-  teamAStatus.innerHTML = '';
-  currentBattle.teamA.forEach(char => {
-    const div = document.createElement('div');
-    div.className = `character-status ${char.isDead ? 'dead' : ''}`;
-    const percent = char.getHealthPercentage();
-    div.innerHTML = `<div class="name">${char.name}</div><div class="health">${Math.round(char.currentHealth)}/${Math.round(char.maxHealth)}</div><div class="bar" style="width: ${percent}%"></div>`;
-    teamAStatus.appendChild(div);
-  });
-  teamBStatus.innerHTML = '';
-  currentBattle.teamB.forEach(char => {
-    const div = document.createElement('div');
-    div.className = `character-status ${char.isDead ? 'dead' : ''}`;
-    const percent = char.getHealthPercentage();
-    div.innerHTML = `<div class="name">${char.name}</div><div class="health">${Math.round(char.currentHealth)}/${Math.round(char.maxHealth)}</div><div class="bar" style="width: ${percent}%"></div>`;
-    teamBStatus.appendChild(div);
-  });
+  renderStatus(document.getElementById('teamAStatus'), currentBattle.teamA);
+  renderStatus(document.getElementById('teamBStatus'), currentBattle.teamB);
 }
 
 function reset() {
   currentBattle = null;
-  selectedTeamA = [];
-  selectedTeamB = [];
-  document.getElementById('battleLog').textContent = '';
+  document.getElementById('battleLog').textContent = 'Monte Left Flank, Vanguard e Right Flank em cada time.';
   document.getElementById('teamAStatus').innerHTML = '';
   document.getElementById('teamBStatus').innerHTML = '';
-  document.getElementById('dragonSelect').disabled = false;
-  document.getElementById('dragonSelectB').disabled = false;
-  document.getElementById('btnAddTeamA').disabled = false;
-  document.getElementById('btnAddTeamB').disabled = false;
-  document.getElementById('btnRemoveTeamA').disabled = false;
-  document.getElementById('btnRemoveTeamB').disabled = false;
+  SLOTS.forEach(slot => {
+    document.getElementById(`teamA-slot-${slot}`).value = '';
+    document.getElementById(`teamB-slot-${slot}`).value = '';
+  });
+  setSlotsDisabled(false);
   document.getElementById('btnStartBattle').disabled = true;
   document.getElementById('btnNextRound').disabled = true;
-  updateTeamDisplay();
+  document.getElementById('btnReset').disabled = true;
+  document.getElementById('error').textContent = '';
 }
