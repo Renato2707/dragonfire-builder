@@ -181,7 +181,7 @@ class Battle {
     const damageType = this.selectDamageType(attacker);
     const actualDamage = defender.takeDamage(calculateFinalDamage(attacker, defender, damageType, 0, { basic: true }));
     this.logAction(`${attacker.name} attacks ${defender.name} (${damageType}): -${actualDamage} HP`);
-    if (defender.isDead) this.logAction(`💀 ${defender.name} fell!`);
+    if (defender.isDead) this.logAction(`${defender.name} fell`);
   }
 
   selectDamageType(attacker) {
@@ -221,6 +221,12 @@ class Battle {
     });
   }
 
+  logChanceRoll(habit, target, chance, hit) {
+    const label = habit && habit.name ? habit.name : 'effect';
+    const who = target && target.name ? target.name : 'target';
+    this.logAction(`  [${hit ? 'hit' : 'miss'}] ${label} → ${who} (${chance}%)`);
+  }
+
   executeHabit(character, habit, phase, round) {
     const r = round || this.currentRound || 1;
     const blocks = (habit.getBlocksFor(r, phase) || []).filter(block => this.blockAllowed(character, block));
@@ -256,10 +262,10 @@ class Battle {
         if (target.isDead) continue;
         let chance = resolveChance(raw, rankIndex, character);
         if (raw.chanceIf && raw.chanceIf.taunt && hasEffect(target, 'taunt')) chance *= raw.chanceIf.taunt;
-        if (chance < 100 && !rollChance(chance)) {
-          this.logAction(`  ➜ ${habit.name} misses ${target.name} (${chance}%)`);
-          continue;
-        }
+        const rolled = chance < 100;
+        const hit = !rolled || rollChance(chance);
+        if (rolled) this.logChanceRoll(habit, target, chance, hit);
+        if (!hit) continue;
         const actionResult = executeHabitAction(habit, { type: raw.t, data: raw }, character, [target], character.habitRank, {
           skipChance: true,
           round
@@ -281,7 +287,10 @@ class Battle {
     const chance = resolveChance(raw, rankIndex, character);
     for (const target of this.resolveTargets(character, habit, raw)) {
       if (target.isDead) continue;
-      if (chance < 100 && !rollChance(chance)) continue;
+      const rolled = chance < 100;
+      const hit = !rolled || rollChance(chance);
+      if (rolled) this.logChanceRoll(habit, target, chance, hit);
+      if (!hit) continue;
       applyEffect(target, present[0].toUpperCase(), character.habitRank, character.name, { duration: raw.dur });
       this.logAction(`  ➜ copied ${present[0]} to ${target.name}`);
     }
@@ -302,7 +311,7 @@ class Battle {
       for (const dmg of actionResult.damages) {
         const actualDamage = target.takeDamage(dmg.amount);
         this.logAction(`  ➜ ${character.name} deals ${actualDamage} ${(raw.dt || '').toUpperCase()} to ${target.name}`);
-        if (target.isDead) this.logAction(`    💀 ${target.name} fell!`);
+        if (target.isDead) this.logAction(`    ${target.name} fell`);
       }
     } else if (actionType === 'heal') {
       for (const heal of actionResult.heals) {
@@ -326,7 +335,7 @@ class Battle {
     this.endReason = reason;
     this.logSeparator('BATTLE END');
     this.logInfo(`Round ${this.currentRound}/${this.maxRounds} — ${reason}`);
-    this.logInfo(winner === 'A' ? '🏆 TEAM A WINS!' : winner === 'B' ? '🏆 TEAM B WINS!' : '⚔️ DRAW');
+    this.logInfo(winner === 'A' ? 'TEAM A WINS' : winner === 'B' ? 'TEAM B WINS' : 'DRAW');
     this.logFinalStatus();
   }
 
@@ -350,7 +359,8 @@ class Battle {
   logTeamStatus(teamName, team) {
     this.logInfo(`${teamName}:`);
     for (const char of team) {
-      this.logAction(`${char.name}: ${char.isDead ? '💀 DEAD' : `${Math.round(char.currentHealth)}/${Math.round(char.maxHealth)} HP`}`);
+      const pos = char.positionName || getPositionName(char.slotPosition);
+      this.logAction(`${pos} · ${char.name}: ${char.isDead ? 'down' : `${Math.round(char.currentHealth)}/${Math.round(char.maxHealth)} HP`}`);
     }
   }
 
