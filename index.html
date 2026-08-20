@@ -30,19 +30,19 @@
         .team-panel h2 { color: #b0b0b0; margin-bottom: 14px; font-size: 1em; font-weight: normal; }
         .slot-row {
             display: grid;
-            grid-template-columns: 120px 1fr;
-            gap: 8px;
+            grid-template-columns: 110px 1fr 52px 48px;
+            gap: 6px;
             align-items: center;
             margin-bottom: 10px;
         }
-        .slot-row label { font-size: 0.85em; color: #8a8a8a; }
+        .slot-row label { font-size: 0.8em; color: #8a8a8a; }
         select {
             width: 100%;
-            padding: 8px;
+            padding: 7px;
             background: #111;
             border: 1px solid #333;
             color: #c8c8c8;
-            font-size: 0.9em;
+            font-size: 0.85em;
         }
         button {
             padding: 8px 14px;
@@ -109,14 +109,20 @@
                 <div class="slot-row">
                     <label for="teamA-slot-0">Left Flank</label>
                     <select id="teamA-slot-0"></select>
+                    <select id="teamA-stars-0" title="Estrelas"></select>
+                    <select id="teamA-habit-0" title="Rank de hábito"></select>
                 </div>
                 <div class="slot-row">
                     <label for="teamA-slot-1">Vanguard</label>
                     <select id="teamA-slot-1"></select>
+                    <select id="teamA-stars-1" title="Estrelas"></select>
+                    <select id="teamA-habit-1" title="Rank de hábito"></select>
                 </div>
                 <div class="slot-row">
                     <label for="teamA-slot-2">Right Flank</label>
                     <select id="teamA-slot-2"></select>
+                    <select id="teamA-stars-2" title="Estrelas"></select>
+                    <select id="teamA-habit-2" title="Rank de hábito"></select>
                 </div>
             </div>
             <div class="team-panel">
@@ -124,14 +130,20 @@
                 <div class="slot-row">
                     <label for="teamB-slot-0">Left Flank</label>
                     <select id="teamB-slot-0"></select>
+                    <select id="teamB-stars-0" title="Estrelas"></select>
+                    <select id="teamB-habit-0" title="Rank de hábito"></select>
                 </div>
                 <div class="slot-row">
                     <label for="teamB-slot-1">Vanguard</label>
                     <select id="teamB-slot-1"></select>
+                    <select id="teamB-stars-1" title="Estrelas"></select>
+                    <select id="teamB-habit-1" title="Rank de hábito"></select>
                 </div>
                 <div class="slot-row">
                     <label for="teamB-slot-2">Right Flank</label>
                     <select id="teamB-slot-2"></select>
+                    <select id="teamB-stars-2" title="Estrelas"></select>
+                    <select id="teamB-habit-2" title="Rank de hábito"></select>
                 </div>
             </div>
         </div>
@@ -144,7 +156,7 @@
                 <div id="teamAStatus"></div>
             </div>
             <div>
-                <div id="battleLog">Monte Left Flank, Vanguard e Right Flank em cada time.</div>
+                <div id="battleLog">Monte Left Flank, Vanguard e Right Flank. Estrelas desbloqueiam hábitos; H é o nível do hábito.</div>
                 <div class="controls">
                     <button id="btnNextRound" disabled>Próxima rodada</button>
                     <button id="btnReset" disabled>Reiniciar</button>
