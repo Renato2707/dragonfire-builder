@@ -18,8 +18,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
   populateSlotSelects();
   SLOTS.forEach(slot => {
-    document.getElementById(`teamA-slot-${slot}`).addEventListener('change', onFormationChange);
-    document.getElementById(`teamB-slot-${slot}`).addEventListener('change', onFormationChange);
+    ['teamA', 'teamB'].forEach(prefix => {
+      document.getElementById(`${prefix}-slot-${slot}`).addEventListener('change', onFormationChange);
+    });
   });
   document.getElementById('btnStartBattle').addEventListener('click', startBattle);
   document.getElementById('btnNextRound').addEventListener('click', nextRound);
@@ -27,7 +28,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   onFormationChange();
 });
 
-function fillSelect(select) {
+function fillDragonSelect(select) {
   select.innerHTML = '<option value="">—</option>';
   getAllDragons().forEach(dragon => {
     const option = document.createElement('option');
@@ -37,17 +38,53 @@ function fillSelect(select) {
   });
 }
 
+function fillStarSelect(select) {
+  select.innerHTML = '';
+  for (let stars = 1; stars <= 10; stars += 1) {
+    const option = document.createElement('option');
+    option.value = String(stars);
+    option.textContent = `${stars}★`;
+    if (stars === DEFAULT_STARS) option.selected = true;
+    select.appendChild(option);
+  }
+}
+
+function fillHabitSelect(select) {
+  select.innerHTML = '';
+  for (let rank = 1; rank <= 5; rank += 1) {
+    const option = document.createElement('option');
+    option.value = String(rank);
+    option.textContent = `H${rank}`;
+    if (rank === DEFAULT_HABIT_RANK) option.selected = true;
+    select.appendChild(option);
+  }
+}
+
 function populateSlotSelects() {
   SLOTS.forEach(slot => {
-    fillSelect(document.getElementById(`teamA-slot-${slot}`));
-    fillSelect(document.getElementById(`teamB-slot-${slot}`));
+    ['teamA', 'teamB'].forEach(prefix => {
+      fillDragonSelect(document.getElementById(`${prefix}-slot-${slot}`));
+      fillStarSelect(document.getElementById(`${prefix}-stars-${slot}`));
+      fillHabitSelect(document.getElementById(`${prefix}-habit-${slot}`));
+    });
   });
+}
+
+function readNumber(id, fallback) {
+  const value = Number(document.getElementById(id).value);
+  return Number.isFinite(value) ? value : fallback;
 }
 
 function readTeam(prefix) {
   return SLOTS.map(slot => {
     const id = document.getElementById(`${prefix}-slot-${slot}`).value;
-    return id ? { dragon: getDragon(id), slot } : null;
+    if (!id) return null;
+    return {
+      dragon: getDragon(id),
+      slot,
+      stars: readNumber(`${prefix}-stars-${slot}`, DEFAULT_STARS),
+      habitRank: readNumber(`${prefix}-habit-${slot}`, DEFAULT_HABIT_RANK)
+    };
   });
 }
 
@@ -73,8 +110,11 @@ function onFormationChange() {
 
 function setSlotsDisabled(disabled) {
   SLOTS.forEach(slot => {
-    document.getElementById(`teamA-slot-${slot}`).disabled = disabled;
-    document.getElementById(`teamB-slot-${slot}`).disabled = disabled;
+    ['teamA', 'teamB'].forEach(prefix => {
+      document.getElementById(`${prefix}-slot-${slot}`).disabled = disabled;
+      document.getElementById(`${prefix}-stars-${slot}`).disabled = disabled;
+      document.getElementById(`${prefix}-habit-${slot}`).disabled = disabled;
+    });
   });
 }
 
@@ -84,7 +124,6 @@ async function loadKit(character) {
     if (habitRes.ok) {
       const habitData = await habitRes.json();
       character.setHabits(loadDragonHabitsSync(habitData, character.id));
-      character.setHabitRank(DEFAULT_HABIT_RANK);
     }
   } catch (error) {
     console.warn(`Habits: ${character.name}`, error);
@@ -106,8 +145,8 @@ async function loadKit(character) {
 function buildTeam(prefix, teamId) {
   return readTeam(prefix).map(entry => new Character(entry.dragon, teamId, entry.slot, {
     level: DEFAULT_LEVEL,
-    stars: DEFAULT_STARS,
-    habitRank: DEFAULT_HABIT_RANK
+    stars: entry.stars,
+    habitRank: entry.habitRank
   }));
 }
 
@@ -159,15 +198,22 @@ function updateBattleDisplay() {
   renderStatus(document.getElementById('teamBStatus'), currentBattle.teamB);
 }
 
+function resetProgressSelects() {
+  SLOTS.forEach(slot => {
+    ['teamA', 'teamB'].forEach(prefix => {
+      document.getElementById(`${prefix}-slot-${slot}`).value = '';
+      document.getElementById(`${prefix}-stars-${slot}`).value = String(DEFAULT_STARS);
+      document.getElementById(`${prefix}-habit-${slot}`).value = String(DEFAULT_HABIT_RANK);
+    });
+  });
+}
+
 function reset() {
   currentBattle = null;
-  document.getElementById('battleLog').textContent = 'Monte Left Flank, Vanguard e Right Flank em cada time.';
+  document.getElementById('battleLog').textContent = 'Monte Left Flank, Vanguard e Right Flank. Estrelas desbloqueiam hábitos; H é o nível do hábito.';
   document.getElementById('teamAStatus').innerHTML = '';
   document.getElementById('teamBStatus').innerHTML = '';
-  SLOTS.forEach(slot => {
-    document.getElementById(`teamA-slot-${slot}`).value = '';
-    document.getElementById(`teamB-slot-${slot}`).value = '';
-  });
+  resetProgressSelects();
   setSlotsDisabled(false);
   document.getElementById('btnStartBattle').disabled = true;
   document.getElementById('btnNextRound').disabled = true;
