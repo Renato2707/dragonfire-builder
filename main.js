@@ -6,6 +6,12 @@ import { Battle } from './battle.js';
 import { loadDragonHabitsSync, loadCommandSync } from './habitParser.js';
 
 const SLOTS = [0, 1, 2];
+const TROOP_TYPES = [
+  { id: '', label: '—' },
+  { id: 'archers', label: 'Archers' },
+  { id: 'shieldbearers', label: 'Shieldbearers' },
+  { id: 'spearmen', label: 'Spearmen' }
+];
 
 let dragonsData = [];
 let currentBattle = null;
@@ -17,6 +23,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;
   }
   populateSlotSelects();
+  fillTroopSelect(document.getElementById('teamA-troop'));
+  fillTroopSelect(document.getElementById('teamB-troop'));
   SLOTS.forEach(slot => {
     ['teamA', 'teamB'].forEach(prefix => {
       document.getElementById(`${prefix}-slot-${slot}`).addEventListener('change', onFormationChange);
@@ -27,6 +35,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('btnReset').addEventListener('click', reset);
   onFormationChange();
 });
+
+function fillTroopSelect(select) {
+  select.innerHTML = '';
+  TROOP_TYPES.forEach(troop => {
+    const option = document.createElement('option');
+    option.value = troop.id;
+    option.textContent = troop.label;
+    select.appendChild(option);
+  });
+}
 
 function fillDragonSelect(select) {
   select.innerHTML = '<option value="">—</option>';
@@ -75,6 +93,15 @@ function readNumber(id, fallback) {
   return Number.isFinite(value) ? value : fallback;
 }
 
+function readTroop(prefix) {
+  return document.getElementById(`${prefix}-troop`).value || null;
+}
+
+function troopLabel(id) {
+  const found = TROOP_TYPES.find(troop => troop.id === id);
+  return found && found.id ? found.label : '—';
+}
+
 function readTeam(prefix) {
   return SLOTS.map(slot => {
     const id = document.getElementById(`${prefix}-slot-${slot}`).value;
@@ -109,6 +136,8 @@ function onFormationChange() {
 }
 
 function setSlotsDisabled(disabled) {
+  document.getElementById('teamA-troop').disabled = disabled;
+  document.getElementById('teamB-troop').disabled = disabled;
   SLOTS.forEach(slot => {
     ['teamA', 'teamB'].forEach(prefix => {
       document.getElementById(`${prefix}-slot-${slot}`).disabled = disabled;
@@ -143,11 +172,16 @@ async function loadKit(character) {
 }
 
 function buildTeam(prefix, teamId) {
-  return readTeam(prefix).map(entry => new Character(entry.dragon, teamId, entry.slot, {
-    level: DEFAULT_LEVEL,
-    stars: entry.stars,
-    habitRank: entry.habitRank
-  }));
+  const troop = readTroop(prefix);
+  return readTeam(prefix).map(entry => {
+    const character = new Character(entry.dragon, teamId, entry.slot, {
+      level: DEFAULT_LEVEL,
+      stars: entry.stars,
+      habitRank: entry.habitRank
+    });
+    character.setTroopType(troop);
+    return character;
+  });
 }
 
 async function startBattle() {
@@ -155,7 +189,9 @@ async function startBattle() {
   const teamB = buildTeam('teamB', 1);
   if (teamA.length !== 3 || teamB.length !== 3) return;
   for (const character of [...teamA, ...teamB]) await loadKit(character);
-  currentBattle = new Battle(teamA, teamB);
+  currentBattle = new Battle(teamA, teamB, {
+    teamTroop: [readTroop('teamA'), readTroop('teamB')]
+  });
   currentBattle.start();
   currentBattle.runRound();
   updateBattleDisplay();
@@ -174,6 +210,12 @@ function nextRound() {
 
 function renderStatus(container, team) {
   container.innerHTML = '';
+  const troop = team[0] ? troopLabel(team[0].troopType) : '—';
+  const header = document.createElement('div');
+  header.className = 'health';
+  header.textContent = `Tropa: ${troop}`;
+  header.style.marginBottom = '8px';
+  container.appendChild(header);
   SLOTS.forEach(slot => {
     const char = team.find(c => c.slotPosition === slot);
     const div = document.createElement('div');
@@ -199,6 +241,8 @@ function updateBattleDisplay() {
 }
 
 function resetProgressSelects() {
+  document.getElementById('teamA-troop').value = '';
+  document.getElementById('teamB-troop').value = '';
   SLOTS.forEach(slot => {
     ['teamA', 'teamB'].forEach(prefix => {
       document.getElementById(`${prefix}-slot-${slot}`).value = '';
@@ -210,7 +254,7 @@ function resetProgressSelects() {
 
 function reset() {
   currentBattle = null;
-  document.getElementById('battleLog').textContent = 'Monte Left Flank, Vanguard e Right Flank. Estrelas desbloqueiam hábitos; H é o nível do hábito.';
+  document.getElementById('battleLog').textContent = 'Monte a formação. Tropa do time liga hábitos como Adaptive Guard.';
   document.getElementById('teamAStatus').innerHTML = '';
   document.getElementById('teamBStatus').innerHTML = '';
   resetProgressSelects();
