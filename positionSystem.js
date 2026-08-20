@@ -1,8 +1,8 @@
 // positionSystem.js
 
-const POSITIONS = { LEFT: 0, CENTER: 1, RIGHT: 2 };
-const POSITION_NAMES = { 0: 'Left', 1: 'Center', 2: 'Right' };
-const FLANK_NAMES = { 0: 'Left Flank', 1: 'Center', 2: 'Right Flank' };
+const POSITIONS = { LEFT: 0, VANGUARD: 1, CENTER: 1, RIGHT: 2 };
+const POSITION_NAMES = { 0: 'Left Flank', 1: 'Vanguard', 2: 'Right Flank' };
+const FLANK_NAMES = { 0: 'Left Flank', 1: 'Vanguard', 2: 'Right Flank' };
 
 function getDistance(slot1, slot2) {
   return Math.abs(slot1 - slot2);
@@ -25,7 +25,7 @@ function getAdjacentSlots(slot) {
 
 function getCharacterAtSlot(team, slot) {
   if (!team || slot < 0 || slot > 2) return null;
-  return team[slot] || null;
+  return team.find(c => c && c.slotPosition === slot) || team[slot] || null;
 }
 
 function getCharactersAtSameLane(friendlyTeam, enemyTeam, characterSlot) {
@@ -50,7 +50,7 @@ function getCharactersInAdjacentLanes(team, slot) {
 function getCharactersInFlank(team, flankPosition) {
   let slot;
   if (flankPosition === 'left' || flankPosition === 'left_flank') slot = POSITIONS.LEFT;
-  else if (flankPosition === 'center') slot = POSITIONS.CENTER;
+  else if (flankPosition === 'center' || flankPosition === 'vanguard') slot = POSITIONS.VANGUARD;
   else if (flankPosition === 'right' || flankPosition === 'right_flank') slot = POSITIONS.RIGHT;
   else return [];
   const char = getCharacterAtSlot(team, slot);
@@ -110,7 +110,9 @@ function selectTargets(caster, friendlyTeam, enemyTeam, targetingParsed) {
   const select = tgt.select || 'any';
   const position = tgt.position || (select === 'adjacency' ? 'adjacent' : null);
 
-  if (position === 'same_lane' || select === 'same_lane') {
+  if (tgt.slot != null) {
+    candidates = candidates.filter(c => c.slotPosition === tgt.slot);
+  } else if (position === 'same_lane' || select === 'same_lane') {
     candidates = candidates.filter(c => c.slotPosition === casterSlot);
   } else if (position === 'adjacent' || select === 'adjacency') {
     const adjacentSlots = getAdjacentSlots(casterSlot);
@@ -125,6 +127,12 @@ function selectTargets(caster, friendlyTeam, enemyTeam, targetingParsed) {
     candidates.sort((a, b) => {
       const sa = a.slotPosition === POSITIONS.RIGHT ? 0 : 1;
       const sb = b.slotPosition === POSITIONS.RIGHT ? 0 : 1;
+      return sa - sb;
+    });
+  } else if (position === 'vanguard' || select === 'prefer_lane:V') {
+    candidates.sort((a, b) => {
+      const sa = a.slotPosition === POSITIONS.VANGUARD ? 0 : 1;
+      const sb = b.slotPosition === POSITIONS.VANGUARD ? 0 : 1;
       return sa - sb;
     });
   }
@@ -160,7 +168,7 @@ function selectTargets(caster, friendlyTeam, enemyTeam, targetingParsed) {
   } else if (select === 'prefer_dealer:physical' || select === 'dealer:physical') {
     candidates.sort((a, b) => (getDealerType(a) === 'physical' ? 0 : 1) - (getDealerType(b) === 'physical' ? 0 : 1));
   } else if (select === 'prefer_without:stun') {
-    candidates.sort((a, b) => (hasStatus(a, 'stun') ? 1 : 0) - (hasStatus(b, 'stun') ? 1 : 0));
+    candidates.sort((a, b) => (hasStatus(a, 'stun') ? 1 : 0) - (hasStatus(b, 'stun') ? 0 : 1));
   } else if (select === 'random') {
     candidates = shuffleArray(candidates);
   }
@@ -216,18 +224,19 @@ function getFlankName(slot) {
 }
 
 function formatPositionInfo(character) {
-  return `${character.name} (${getFlankName(character.slotPosition)}, Slot ${character.slotPosition})`;
+  return `${character.name} (${getFlankName(character.slotPosition)})`;
 }
 
 function visualizeTeamPositions(team) {
   const visual = [];
   for (let i = 0; i < 3; i++) {
-    const char = team[i];
-    if (!char) visual.push(`[${i}] <empty>`);
+    const char = getCharacterAtSlot(team, i);
+    const label = POSITION_NAMES[i];
+    if (!char) visual.push(`${label}: <empty>`);
     else {
-      const status = char.isDead ? '💀' : '';
+      const status = char.isDead ? ' down' : '';
       const hp = `${Math.round(char.currentHealth)}/${Math.round(char.maxHealth)}`;
-      visual.push(`[${i}] ${char.name.padEnd(12)} (HP: ${hp}) ${status}`);
+      visual.push(`${label}: ${char.name} (HP: ${hp})${status}`);
     }
   }
   return visual.join('\n');
@@ -235,18 +244,16 @@ function visualizeTeamPositions(team) {
 
 function visualizeBattle(teamA, teamB) {
   const lines = [];
-  lines.push('═'.repeat(55));
   lines.push('TIME A                          vs    TIME B');
   for (let i = 0; i < 3; i++) {
-    const charA = teamA[i];
-    const charB = teamB[i];
+    const charA = getCharacterAtSlot(teamA, i);
+    const charB = getCharacterAtSlot(teamB, i);
+    const label = POSITION_NAMES[i].padEnd(12);
     const nameA = charA ? charA.name.padEnd(15) : '<empty>'.padEnd(15);
     const nameB = charB ? charB.name.padEnd(15) : '<empty>'.padEnd(15);
-    const hpA = charA ? `${Math.round(charA.currentHealth)}/${Math.round(charA.maxHealth)}`.padEnd(10) : '<dead>'.padEnd(10);
-    const hpB = charB ? `${Math.round(charB.currentHealth)}/${Math.round(charB.maxHealth)}`.padEnd(10) : '<dead>'.padEnd(10);
-    const statusA = charA && charA.isDead ? '💀' : '●';
-    const statusB = charB && charB.isDead ? '💀' : '●';
-    lines.push(`[${i}] ${statusA} ${nameA} ${hpA}  ║  [${i}] ${statusB} ${nameB} ${hpB}`);
+    const hpA = charA ? `${Math.round(charA.currentHealth)}/${Math.round(charA.maxHealth)}`.padEnd(10) : '---'.padEnd(10);
+    const hpB = charB ? `${Math.round(charB.currentHealth)}/${Math.round(charB.maxHealth)}`.padEnd(10) : '---'.padEnd(10);
+    lines.push(`${label} ${nameA} ${hpA}  |  ${nameB} ${hpB}`);
   }
   return lines.join('\n');
 }
@@ -265,7 +272,8 @@ function validatePosition(slot) {
 }
 
 function validateTeamPositions(team) {
-  return team.every(char => validatePosition(char.slotPosition));
+  const slots = team.map(char => char.slotPosition);
+  return slots.length === 3 && new Set(slots).size === 3 && team.every(char => validatePosition(char.slotPosition));
 }
 
 export {
