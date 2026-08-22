@@ -6,101 +6,60 @@
       "slot": 1,
       "unlockStar": 2,
       "name": "Instill Fear",
-      "trigger": "Each Action / Round",
-      "targeting": "1 Enemy",
-      "effectType": "Stat Modifier (Debuff), Status Effect (Control/DoT)",
+      "targeting": "1 Enemy (Right Flank)",
+      "effectType": "Stat Modifier, Status Effect",
       "duration": "2 Rounds",
-      "scalingRaw": "Chance: 25% | 30% | 35% | 42.5% | 50% ; INT: -25% ; INST: -25% ; Chance: 25% | 30% | 35% | 42.5% | 50%",
+      "scalingRaw": "Chance: 25% | 30% | 35% | 42.5% | 50% ; INT: -25% ; INST: -25% ; Panic Rate: 20%",
       "scaling": [
         {
           "label": "Chance",
-          "values": [
-            25,
-            30,
-            35,
-            42.5,
-            50
-          ],
+          "values": [25, 30, 35, 42.5, 50],
           "unit": "%",
           "fixed": false
         },
         {
           "label": "INT",
-          "values": [
-            -25
-          ],
+          "values": [-25],
           "unit": "%",
           "fixed": true
         },
         {
           "label": "INST",
-          "values": [
-            -25
-          ],
+          "values": [-25],
           "unit": "%",
           "fixed": true
         },
         {
-          "label": "Chance",
-          "values": [
-            25,
-            30,
-            35,
-            42.5,
-            50
-          ],
+          "label": "Panic Rate",
+          "values": [20],
           "unit": "%",
-          "fixed": false
+          "fixed": true
         }
       ],
-      "description": "Each Action / Round: Apply Stat Modifier (Debuff), Status Effect (Control/DoT) to 1 Enemy (Chance: 25% | 30% | 35% | 42.5% | 50% ; INT: -25% ; INST: -25% ; Chance: 25% | 30% | 35% | 42.5% | 50%) for 2 Rounds.",
+      "description": "Each Round: chance to reduce Intelligence and Instinct (enhanced by Strength) and afflict Panic on 1 Enemy in any lane (prioritizes the Right Flank). One roll applies both. Each effect lasts 2 rounds. Panic deals Tactical Damage each round.",
       "structured": [
         {
-          "when": "each",
+          "phase": "turn",
+          "rounds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+          "chance": [25, 30, 35, 42.5, 50],
           "actions": [
             {
               "t": "mod",
               "mods": [
-                {
-                  "stat": "int",
-                  "pct": -25
-                },
-                {
-                  "stat": "inst",
-                  "pct": -25
-                }
+                { "stat": "int", "pct": -25 },
+                { "stat": "inst", "pct": -25 }
               ],
               "scaleStat": "str",
               "dur": 2,
-              "chance": [
-                25,
-                30,
-                35,
-                42.5,
-                50
-              ],
-              "tgt": {
-                "side": "enemy",
-                "count": 1,
-                "select": "any"
-              }
+              "tgt": { "side": "enemy", "count": 1, "select": "prefer_lane:R" }
             },
             {
               "t": "status",
               "st": "panic",
+              "dt": "tactical",
+              "val": 20,
               "dur": 2,
-              "chance": [
-                25,
-                30,
-                35,
-                42.5,
-                50
-              ],
-              "tgt": {
-                "side": "enemy",
-                "count": 1,
-                "select": "any"
-              }
+              "tgt": { "side": "enemy", "count": 1, "select": "prefer_lane:R" }
             }
           ]
         }
@@ -111,70 +70,38 @@
       "slot": 2,
       "unlockStar": 4,
       "name": "Powerful Reflexes",
-      "trigger": "Start of Combat",
       "targeting": "1 Self",
-      "effectType": "Stat Modifier (Buff)",
+      "effectType": "Stat Modifier",
       "duration": "Whole Combat",
       "scalingRaw": "STR: 16% | 19.2% | 22.4% | 27.2% | 32% ; INIT: 16% | 19.2% | 22.4% | 27.2% | 32%",
       "scaling": [
         {
           "label": "STR",
-          "values": [
-            16,
-            19.2,
-            22.4,
-            27.2,
-            32
-          ],
+          "values": [16, 19.2, 22.4, 27.2, 32],
           "unit": "%",
           "fixed": false
         },
         {
           "label": "INIT",
-          "values": [
-            16,
-            19.2,
-            22.4,
-            27.2,
-            32
-          ],
+          "values": [16, 19.2, 22.4, 27.2, 32],
           "unit": "%",
           "fixed": false
         }
       ],
-      "description": "Start of Combat: Apply Stat Modifier (Buff) to 1 Self (STR: 16% | 19.2% | 22.4% | 27.2% | 32% ; INIT: 16% | 19.2% | 22.4% | 27.2% | 32%) for Whole Combat.",
+      "description": "Start of Combat: Increase your Strength and Initiative until the end of combat.",
       "structured": [
         {
-          "when": "combat_start",
+          "phase": "combat_start",
+          "rounds": [1],
           "actions": [
             {
               "t": "mod",
               "mods": [
-                {
-                  "stat": "str",
-                  "pct": [
-                    16,
-                    19.2,
-                    22.4,
-                    27.2,
-                    32
-                  ]
-                },
-                {
-                  "stat": "init",
-                  "pct": [
-                    16,
-                    19.2,
-                    22.4,
-                    27.2,
-                    32
-                  ]
-                }
+                { "stat": "str", "pct": [16, 19.2, 22.4, 27.2, 32] },
+                { "stat": "init", "pct": [16, 19.2, 22.4, 27.2, 32] }
               ],
               "dur": "combat",
-              "tgt": {
-                "side": "self"
-              }
+              "tgt": { "side": "self" }
             }
           ]
         }
@@ -185,59 +112,31 @@
       "slot": 3,
       "unlockStar": 6,
       "name": "Shroud of Shadows",
-      "trigger": "Odd-Numbered Rounds",
-      "targeting": "1 Enemy (Adjacent Lane)",
-      "effectType": "Stat Modifier (Debuff)",
+      "targeting": "1 Enemy (Adjacent)",
+      "effectType": "Status Effect",
       "duration": "2 Rounds",
-      "scalingRaw": "Chance: 15% | 18% | 21% | 25.5% | 30% ; DMG_DEALT: -50%",
+      "scalingRaw": "Confusion Chance: 15% | 18% | 21% | 25.5% | 30%",
       "scaling": [
         {
-          "label": "Chance",
-          "values": [
-            15,
-            18,
-            21,
-            25.5,
-            30
-          ],
+          "label": "Confusion Chance",
+          "values": [15, 18, 21, 25.5, 30],
           "unit": "%",
           "fixed": false
-        },
-        {
-          "label": "DMG_DEALT",
-          "values": [
-            -50
-          ],
-          "unit": "%",
-          "fixed": true
         }
       ],
-      "description": "Odd-Numbered Rounds: Apply Stat Modifier (Debuff) to 1 Enemy (Adjacent Lane) (Chance: 15% | 18% | 21% | 25.5% | 30% ; DMG_DEALT: -50%) for 2 Rounds.",
+      "description": "Odd-numbered Rounds: chance to afflict Confusion on 1 Enemy within adjacency for 2 rounds. Confusion: 50% chance to mistake Allies for Enemies on Command, Habit or Basic Attack.",
       "structured": [
         {
-          "when": "odd",
+          "phase": "turn",
+          "rounds": [1, 3, 5, 7, 9],
           "actions": [
             {
-              "t": "mod",
-              "mods": [
-                {
-                  "stat": "dmg_dealt",
-                  "pct": -50
-                }
-              ],
+              "t": "status",
+              "st": "confusion",
+              "val": 50,
               "dur": 2,
-              "chance": [
-                15,
-                18,
-                21,
-                25.5,
-                30
-              ],
-              "tgt": {
-                "side": "enemy",
-                "count": 1,
-                "select": "adjacency"
-              }
+              "chance": [15, 18, 21, 25.5, 30],
+              "tgt": { "side": "enemy", "count": 1, "select": "adjacency" }
             }
           ]
         }
@@ -248,101 +147,60 @@
       "slot": 4,
       "unlockStar": 8,
       "name": "Darkening Fear",
-      "trigger": "Each Action / Round",
-      "targeting": "1 Enemy",
-      "effectType": "Stat Modifier (Debuff), Status Effect (Control/DoT)",
+      "targeting": "1 Enemy (Left Flank)",
+      "effectType": "Stat Modifier, Status Effect",
       "duration": "2 Rounds",
-      "scalingRaw": "Chance: 25% | 30% | 35% | 42.5% | 50% ; INT: -25% ; INST: -25% ; Chance: 25% | 30% | 35% | 42.5% | 50%",
+      "scalingRaw": "Chance: 25% | 30% | 35% | 42.5% | 50% ; INT: -25% ; INST: -25% ; Panic Rate: 20%",
       "scaling": [
         {
           "label": "Chance",
-          "values": [
-            25,
-            30,
-            35,
-            42.5,
-            50
-          ],
+          "values": [25, 30, 35, 42.5, 50],
           "unit": "%",
           "fixed": false
         },
         {
           "label": "INT",
-          "values": [
-            -25
-          ],
+          "values": [-25],
           "unit": "%",
           "fixed": true
         },
         {
           "label": "INST",
-          "values": [
-            -25
-          ],
+          "values": [-25],
           "unit": "%",
           "fixed": true
         },
         {
-          "label": "Chance",
-          "values": [
-            25,
-            30,
-            35,
-            42.5,
-            50
-          ],
+          "label": "Panic Rate",
+          "values": [20],
           "unit": "%",
-          "fixed": false
+          "fixed": true
         }
       ],
-      "description": "Each Action / Round: Apply Stat Modifier (Debuff), Status Effect (Control/DoT) to 1 Enemy (Chance: 25% | 30% | 35% | 42.5% | 50% ; INT: -25% ; INST: -25% ; Chance: 25% | 30% | 35% | 42.5% | 50%) for 2 Rounds.",
+      "description": "Each Round: chance to reduce Intelligence and Instinct (enhanced by Strength) and afflict Panic on 1 Enemy in any lane (prioritizes the Left Flank). One roll applies both. Each effect lasts 2 rounds.",
       "structured": [
         {
-          "when": "each",
+          "phase": "turn",
+          "rounds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+          "chance": [25, 30, 35, 42.5, 50],
           "actions": [
             {
               "t": "mod",
               "mods": [
-                {
-                  "stat": "int",
-                  "pct": -25
-                },
-                {
-                  "stat": "inst",
-                  "pct": -25
-                }
+                { "stat": "int", "pct": -25 },
+                { "stat": "inst", "pct": -25 }
               ],
               "scaleStat": "str",
               "dur": 2,
-              "chance": [
-                25,
-                30,
-                35,
-                42.5,
-                50
-              ],
-              "tgt": {
-                "side": "enemy",
-                "count": 1,
-                "select": "any"
-              }
+              "tgt": { "side": "enemy", "count": 1, "select": "prefer_lane:L" }
             },
             {
               "t": "status",
               "st": "panic",
+              "dt": "tactical",
+              "val": 20,
               "dur": 2,
-              "chance": [
-                25,
-                30,
-                35,
-                42.5,
-                50
-              ],
-              "tgt": {
-                "side": "enemy",
-                "count": 1,
-                "select": "any"
-              }
+              "tgt": { "side": "enemy", "count": 1, "select": "prefer_lane:L" }
             }
           ]
         }
@@ -353,48 +211,34 @@
       "slot": 5,
       "unlockStar": 10,
       "name": "Phantom's Veil",
-      "trigger": "Each Action / Round",
       "targeting": "1 Self",
-      "effectType": "Stat Modifier (Buff)",
+      "effectType": "Stat Modifier",
       "duration": "1 Round",
-      "scalingRaw": "DMG_RECEIVED: -15% | -19.5% | -24% | -30% | -37.5%",
+      "scalingRaw": "Damage Received: -15% | -19.5% | -24% | -30% | -37.5%",
       "scaling": [
         {
-          "label": "DMG_RECEIVED",
-          "values": [
-            -15,
-            -19.5,
-            -24,
-            -30,
-            -37.5
-          ],
+          "label": "Damage Received",
+          "values": [-15, -19.5, -24, -30, -37.5],
           "unit": "%",
           "fixed": false
         }
       ],
-      "description": "Each Action / Round: Apply Stat Modifier (Buff) to 1 Self (DMG_RECEIVED: -15% | -19.5% | -24% | -30% | -37.5%) for 1 Round.",
+      "description": "Start of Each Round: reduce either Physical, Tactical or Fire Damage Received (one type chosen at random) until the end of the round.",
       "structured": [
         {
-          "when": "each",
+          "phase": "round_start",
+          "rounds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
           "actions": [
             {
               "t": "mod",
+              "pick": "random",
               "mods": [
-                {
-                  "stat": "dmg_received",
-                  "pct": [
-                    -15,
-                    -19.5,
-                    -24,
-                    -30,
-                    -37.5
-                  ]
-                }
+                { "stat": "physical_received", "pct": [-15, -19.5, -24, -30, -37.5] },
+                { "stat": "tactical_received", "pct": [-15, -19.5, -24, -30, -37.5] },
+                { "stat": "fire_received", "pct": [-15, -19.5, -24, -30, -37.5] }
               ],
               "dur": 1,
-              "tgt": {
-                "side": "self"
-              }
+              "tgt": { "side": "self" }
             }
           ]
         }
