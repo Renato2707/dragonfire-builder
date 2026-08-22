@@ -58,6 +58,7 @@ class Habit {
         phase: timing.phase,
         rounds: timing.rounds,
         requires: item.requires || null,
+        chance: item.chance != null ? item.chance : null,
         actions: item.actions || []
       });
     }
@@ -70,9 +71,13 @@ class Habit {
   getScalingValue(action, rankIndex) {
     const data = action.data || action;
     if (data.mods) {
+      let mods = data.mods;
+      if (data.pick === 'random' && mods.length) {
+        mods = [mods[Math.floor(Math.random() * mods.length)]];
+      }
       const values = {};
       const flags = {};
-      for (const mod of data.mods) {
+      for (const mod of mods) {
         if (mod.fixed != null) {
           values[mod.stat] = Array.isArray(mod.fixed) ? mod.fixed[rankIndex] : mod.fixed;
           flags[mod.stat] = true;
