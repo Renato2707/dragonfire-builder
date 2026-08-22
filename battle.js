@@ -112,6 +112,18 @@ class Battle {
     return true;
   }
 
+  blockChanceHits(character, habit, block) {
+    if (block.chance == null) return true;
+    const rankIndex = Math.max(0, Math.min(4, (character.habitRank || 1) - 1));
+    const chance = resolveChance({ chance: block.chance }, rankIndex, character);
+    const first = (block.actions || [])[0];
+    const targets = first ? this.resolveTargets(character, habit, first) : [character];
+    const target = targets[0] || character;
+    const hit = rollChance(chance);
+    this.logChanceRoll(habit, target, chance, hit);
+    return hit;
+  }
+
   executeVanguard(character) {
     const kit = character.vanguardKit;
     if (!kit) return;
@@ -131,6 +143,7 @@ class Battle {
     if (!blocks.length) return false;
     this.logAction(`${character.name} uses ${label}`);
     for (const block of blocks) {
+      if (!this.blockChanceHits(character, habitLike, block)) continue;
       for (const action of block.actions || []) this.runAction(character, habitLike, action, round);
     }
     return true;
@@ -233,6 +246,7 @@ class Battle {
     if (!blocks.length) return;
     this.logAction(`${character.name} uses ${habit.name}`);
     for (const block of blocks) {
+      if (!this.blockChanceHits(character, habit, block)) continue;
       for (const action of block.actions || []) this.runAction(character, habit, action, r);
     }
   }
