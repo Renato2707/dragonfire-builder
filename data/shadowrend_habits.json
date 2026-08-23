@@ -6,79 +6,39 @@
       "slot": 1,
       "unlockStar": 2,
       "name": "Midnight Aura",
-      "trigger": "Rounds 7, 8, 9, 10",
       "targeting": "3 Allies",
-      "effectType": "Stat Modifier (Buff)",
+      "effectType": "Stat Modifier",
       "duration": "1 Round",
       "scalingRaw": "STR: 40% | 48% | 56% | 68% | 80% ; INST: 40% | 48% | 56% | 68% | 80%",
       "scaling": [
         {
           "label": "STR",
-          "values": [
-            40,
-            48,
-            56,
-            68,
-            80
-          ],
+          "values": [40, 48, 56, 68, 80],
           "unit": "%",
           "fixed": false
         },
         {
           "label": "INST",
-          "values": [
-            40,
-            48,
-            56,
-            68,
-            80
-          ],
+          "values": [40, 48, 56, 68, 80],
           "unit": "%",
           "fixed": false
         }
       ],
-      "description": "Rounds 7, 8, 9, 10: Apply Stat Modifier (Buff) to 3 Allies (STR: 40% | 48% | 56% | 68% | 80% ; INST: 40% | 48% | 56% | 68% | 80%) for 1 Round.",
+      "description": "Start of Rounds 7-10: Increase Strength and Instinct (enhanced by Initiative) of 3 Allies until the end of the round.",
       "structured": [
         {
-          "when": "rounds",
-          "rounds": [
-            7,
-            8,
-            9,
-            10
-          ],
+          "phase": "round_start",
+          "rounds": [7, 8, 9, 10],
           "actions": [
             {
               "t": "mod",
               "mods": [
-                {
-                  "stat": "str",
-                  "pct": [
-                    40,
-                    48,
-                    56,
-                    68,
-                    80
-                  ]
-                },
-                {
-                  "stat": "inst",
-                  "pct": [
-                    40,
-                    48,
-                    56,
-                    68,
-                    80
-                  ]
-                }
+                { "stat": "str", "pct": [40, 48, 56, 68, 80] },
+                { "stat": "inst", "pct": [40, 48, 56, 68, 80] }
               ],
               "scaleStat": "init",
               "dur": 1,
-              "tgt": {
-                "side": "ally",
-                "count": 3,
-                "select": "any"
-              }
+              "tgt": { "side": "ally", "count": 3, "select": "any" }
             }
           ]
         }
@@ -89,70 +49,38 @@
       "slot": 2,
       "unlockStar": 4,
       "name": "Nimble Resilience",
-      "trigger": "Start of Combat",
       "targeting": "1 Self",
-      "effectType": "Stat Modifier (Buff)",
+      "effectType": "Stat Modifier",
       "duration": "Whole Combat",
       "scalingRaw": "DMG_RECEIVED: -4% | -4.8% | -5.6% | -6.8% | -8% ; INIT: 5% | 6% | 7% | 8.5% | 10%",
       "scaling": [
         {
           "label": "DMG_RECEIVED",
-          "values": [
-            -4,
-            -4.8,
-            -5.6,
-            -6.8,
-            -8
-          ],
+          "values": [-4, -4.8, -5.6, -6.8, -8],
           "unit": "%",
           "fixed": false
         },
         {
           "label": "INIT",
-          "values": [
-            5,
-            6,
-            7,
-            8.5,
-            10
-          ],
+          "values": [5, 6, 7, 8.5, 10],
           "unit": "%",
           "fixed": false
         }
       ],
-      "description": "Start of Combat: Apply Stat Modifier (Buff) to 1 Self (DMG_RECEIVED: -4% | -4.8% | -5.6% | -6.8% | -8% ; INIT: 5% | 6% | 7% | 8.5% | 10%) for Whole Combat.",
+      "description": "Start of Combat: Reduce your Damage Received and increase your Initiative until the end of combat.",
       "structured": [
         {
-          "when": "combat_start",
+          "phase": "combat_start",
+          "rounds": [1],
           "actions": [
             {
               "t": "mod",
               "mods": [
-                {
-                  "stat": "dmg_received",
-                  "pct": [
-                    -4,
-                    -4.8,
-                    -5.6,
-                    -6.8,
-                    -8
-                  ]
-                },
-                {
-                  "stat": "init",
-                  "pct": [
-                    5,
-                    6,
-                    7,
-                    8.5,
-                    10
-                  ]
-                }
+                { "stat": "dmg_received", "pct": [-4, -4.8, -5.6, -6.8, -8] },
+                { "stat": "init", "pct": [5, 6, 7, 8.5, 10] }
               ],
               "dur": "combat",
-              "tgt": {
-                "side": "self"
-              }
+              "tgt": { "side": "self" }
             }
           ]
         }
@@ -163,47 +91,32 @@
       "slot": 3,
       "unlockStar": 6,
       "name": "Fueled by Darkness",
-      "trigger": "Each Action / Round",
       "targeting": "2 Allies",
-      "effectType": "Status Effect (Control/DoT)",
+      "effectType": "Status Effect",
       "duration": "2 Rounds",
-      "scalingRaw": "Chance: 10% | 12% | 14% | 17% | 20%",
+      "scalingRaw": "Advantage Chance: 10% | 12% | 14% | 17% | 20%",
       "scaling": [
         {
-          "label": "Chance",
-          "values": [
-            10,
-            12,
-            14,
-            17,
-            20
-          ],
+          "label": "Advantage Chance",
+          "values": [10, 12, 14, 17, 20],
           "unit": "%",
           "fixed": false
         }
       ],
-      "description": "Each Action / Round: Apply Status Effect (Control/DoT) to 2 Allies (Chance: 10% | 12% | 14% | 17% | 20%) for 2 Rounds.",
+      "description": "Each Round: chance to grant Advantage (+10%) to 2 Allies for 2 rounds. Chance doubled on Rounds 7-10 (Midnight Aura active).",
       "structured": [
         {
-          "when": "each",
+          "phase": "turn",
+          "rounds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
           "actions": [
             {
               "t": "status",
               "st": "advantage",
-              "dur": 2,
-              "chance": [
-                10,
-                12,
-                14,
-                17,
-                20
-              ],
               "val": 10,
-              "tgt": {
-                "side": "ally",
-                "count": 2,
-                "select": "any"
-              }
+              "dur": 2,
+              "chance": [10, 12, 14, 17, 20],
+              "chanceIf": { "rounds": [7, 8, 9, 10], "mult": 2 },
+              "tgt": { "side": "ally", "count": 2, "select": "any" }
             }
           ]
         }
@@ -214,78 +127,38 @@
       "slot": 4,
       "unlockStar": 8,
       "name": "Midnight Mastery",
-      "trigger": "Rounds 7, 8, 9, 10",
       "targeting": "3 Allies",
-      "effectType": "Stat Modifier (Buff)",
+      "effectType": "Stat Modifier",
       "duration": "1 Round",
       "scalingRaw": "PHYSICAL_DEALT: 7% | 8.4% | 9.8% | 11.9% | 14% ; TACTICAL_DEALT: 7% | 8.4% | 9.8% | 11.9% | 14%",
       "scaling": [
         {
           "label": "PHYSICAL_DEALT",
-          "values": [
-            7,
-            8.4,
-            9.8,
-            11.9,
-            14
-          ],
+          "values": [7, 8.4, 9.8, 11.9, 14],
           "unit": "%",
           "fixed": false
         },
         {
           "label": "TACTICAL_DEALT",
-          "values": [
-            7,
-            8.4,
-            9.8,
-            11.9,
-            14
-          ],
+          "values": [7, 8.4, 9.8, 11.9, 14],
           "unit": "%",
           "fixed": false
         }
       ],
-      "description": "Rounds 7, 8, 9, 10: Apply Stat Modifier (Buff) to 3 Allies (PHYSICAL_DEALT: 7% | 8.4% | 9.8% | 11.9% | 14% ; TACTICAL_DEALT: 7% | 8.4% | 9.8% | 11.9% | 14%) for 1 Round.",
+      "description": "Start of Rounds 7-10: Increase Physical and Tactical Damage Dealt of 3 Allies until the end of the round.",
       "structured": [
         {
-          "when": "rounds",
-          "rounds": [
-            7,
-            8,
-            9,
-            10
-          ],
+          "phase": "round_start",
+          "rounds": [7, 8, 9, 10],
           "actions": [
             {
               "t": "mod",
               "mods": [
-                {
-                  "stat": "physical_dealt",
-                  "pct": [
-                    7,
-                    8.4,
-                    9.8,
-                    11.9,
-                    14
-                  ]
-                },
-                {
-                  "stat": "tactical_dealt",
-                  "pct": [
-                    7,
-                    8.4,
-                    9.8,
-                    11.9,
-                    14
-                  ]
-                }
+                { "stat": "physical_dealt", "pct": [7, 8.4, 9.8, 11.9, 14] },
+                { "stat": "tactical_dealt", "pct": [7, 8.4, 9.8, 11.9, 14] }
               ],
               "dur": 1,
-              "tgt": {
-                "side": "ally",
-                "count": 3,
-                "select": "any"
-              }
+              "tgt": { "side": "ally", "count": 3, "select": "any" }
             }
           ]
         }
@@ -296,76 +169,36 @@
       "slot": 5,
       "unlockStar": 10,
       "name": "Event Horizon",
-      "trigger": "Rounds 9",
       "targeting": "3 Enemies",
-      "effectType": "Direct Damage (Nuke)",
-      "duration": "Whole Combat",
-      "scalingRaw": "Rate: 100% | 130% | 160% | 200% | 250% ; Rate: 100% | 130% | 160% | 200% | 250%",
+      "effectType": "Direct Damage",
+      "duration": "Instant",
+      "scalingRaw": "Rate: 100% | 130% | 160% | 200% | 250%",
       "scaling": [
         {
           "label": "Rate",
-          "values": [
-            100,
-            130,
-            160,
-            200,
-            250
-          ],
-          "unit": "%",
-          "fixed": false
-        },
-        {
-          "label": "Rate",
-          "values": [
-            100,
-            130,
-            160,
-            200,
-            250
-          ],
+          "values": [100, 130, 160, 200, 250],
           "unit": "%",
           "fixed": false
         }
       ],
-      "description": "Rounds 9: Apply Direct Damage (Nuke) to 3 Enemies (Rate: 100% | 130% | 160% | 200% | 250% ; Rate: 100% | 130% | 160% | 200% | 250%) for Whole Combat.",
+      "description": "Eclipse Fervor gains: Round 9 deal Physical and Tactical Damage to 3 Enemies (rate per type).",
       "structured": [
         {
-          "when": "rounds",
-          "rounds": [
-            9
-          ],
+          "phase": "turn",
+          "rounds": [9],
+          "requires": { "command": "Eclipse Fervor" },
           "actions": [
             {
               "t": "dmg",
               "dt": "physical",
-              "pct": [
-                100,
-                130,
-                160,
-                200,
-                250
-              ],
-              "tgt": {
-                "side": "enemy",
-                "count": 3,
-                "select": "any"
-              }
+              "pct": [100, 130, 160, 200, 250],
+              "tgt": { "side": "enemy", "count": 3, "select": "any" }
             },
             {
               "t": "dmg",
               "dt": "tactical",
-              "pct": [
-                100,
-                130,
-                160,
-                200,
-                250
-              ],
-              "tgt": {
-                "side": "enemy",
-                "count": 3,
-                "select": "any"
-              }
+              "pct": [100, 130, 160, 200, 250],
+              "tgt": { "side": "enemy", "count": 3, "select": "any" }
             }
           ]
         }
