@@ -6,73 +6,39 @@
       "slot": 1,
       "unlockStar": 2,
       "name": "Battle Dread",
-      "trigger": "Start of Combat",
       "targeting": "3 Enemies",
-      "effectType": "Stat Modifier (Buff)",
+      "effectType": "Stat Modifier",
       "duration": "Whole Combat",
       "scalingRaw": "STR: -4% | -4.8% | -5.6% | -6.8% | -8% ; INIT: -4% | -4.8% | -5.6% | -6.8% | -8%",
       "scaling": [
         {
           "label": "STR",
-          "values": [
-            -4,
-            -4.8,
-            -5.6,
-            -6.8,
-            -8
-          ],
+          "values": [-4, -4.8, -5.6, -6.8, -8],
           "unit": "%",
           "fixed": false
         },
         {
           "label": "INIT",
-          "values": [
-            -4,
-            -4.8,
-            -5.6,
-            -6.8,
-            -8
-          ],
+          "values": [-4, -4.8, -5.6, -6.8, -8],
           "unit": "%",
           "fixed": false
         }
       ],
-      "description": "Start of Combat: Apply Stat Modifier (Buff) to 3 Enemies (STR: -4% | -4.8% | -5.6% | -6.8% | -8% ; INIT: -4% | -4.8% | -5.6% | -6.8% | -8%) for Whole Combat.",
+      "description": "Start of Combat: Reduce Strength and Initiative (enhanced by Intelligence) of 3 Enemies until the end of combat.",
       "structured": [
         {
-          "when": "combat_start",
+          "phase": "combat_start",
+          "rounds": [1],
           "actions": [
             {
               "t": "mod",
               "mods": [
-                {
-                  "stat": "str",
-                  "pct": [
-                    -4,
-                    -4.8,
-                    -5.6,
-                    -6.8,
-                    -8
-                  ]
-                },
-                {
-                  "stat": "init",
-                  "pct": [
-                    -4,
-                    -4.8,
-                    -5.6,
-                    -6.8,
-                    -8
-                  ]
-                }
+                { "stat": "str", "pct": [-4, -4.8, -5.6, -6.8, -8] },
+                { "stat": "init", "pct": [-4, -4.8, -5.6, -6.8, -8] }
               ],
               "scaleStat": "int",
               "dur": "combat",
-              "tgt": {
-                "side": "enemy",
-                "count": 3,
-                "select": "any"
-              }
+              "tgt": { "side": "enemy", "count": 3, "select": "any" }
             }
           ]
         }
@@ -83,73 +49,39 @@
       "slot": 2,
       "unlockStar": 4,
       "name": "Mindful Synergy",
-      "trigger": "Start of Combat",
       "targeting": "3 Allies",
-      "effectType": "Stat Modifier (Buff)",
+      "effectType": "Stat Modifier",
       "duration": "Whole Combat",
       "scalingRaw": "INT: 4% | 4.8% | 5.6% | 6.8% | 8% ; INST: 4% | 4.8% | 5.6% | 6.8% | 8%",
       "scaling": [
         {
           "label": "INT",
-          "values": [
-            4,
-            4.8,
-            5.6,
-            6.8,
-            8
-          ],
+          "values": [4, 4.8, 5.6, 6.8, 8],
           "unit": "%",
           "fixed": false
         },
         {
           "label": "INST",
-          "values": [
-            4,
-            4.8,
-            5.6,
-            6.8,
-            8
-          ],
+          "values": [4, 4.8, 5.6, 6.8, 8],
           "unit": "%",
           "fixed": false
         }
       ],
-      "description": "Start of Combat: Apply Stat Modifier (Buff) to 3 Allies (INT: 4% | 4.8% | 5.6% | 6.8% | 8% ; INST: 4% | 4.8% | 5.6% | 6.8% | 8%) for Whole Combat.",
+      "description": "Start of Combat: Increase Intelligence and Instinct (enhanced by Initiative) of 3 Allies until the end of combat.",
       "structured": [
         {
-          "when": "combat_start",
+          "phase": "combat_start",
+          "rounds": [1],
           "actions": [
             {
               "t": "mod",
               "mods": [
-                {
-                  "stat": "int",
-                  "pct": [
-                    4,
-                    4.8,
-                    5.6,
-                    6.8,
-                    8
-                  ]
-                },
-                {
-                  "stat": "inst",
-                  "pct": [
-                    4,
-                    4.8,
-                    5.6,
-                    6.8,
-                    8
-                  ]
-                }
+                { "stat": "int", "pct": [4, 4.8, 5.6, 6.8, 8] },
+                { "stat": "inst", "pct": [4, 4.8, 5.6, 6.8, 8] }
               ],
               "scaleStat": "init",
               "dur": "combat",
-              "tgt": {
-                "side": "ally",
-                "count": 3,
-                "select": "any"
-              }
+              "tgt": { "side": "ally", "count": 3, "select": "any" }
             }
           ]
         }
@@ -160,82 +92,65 @@
       "slot": 3,
       "unlockStar": 6,
       "name": "Deepen the Breach",
-      "trigger": "Rounds 1, Rounds 6",
-      "targeting": "1 Self, 1 Ally (Adjacent Lane)",
-      "effectType": "Stat Modifier (Buff)",
+      "targeting": "1 Self; 1 other Ally (Adjacent)",
+      "effectType": "Stat Modifier",
       "duration": "5 Rounds",
-      "scalingRaw": "FIRE_DEALT: 8% | 9.6% | 11.2% | 13.6% | 16% ; FIRE_DEALT: 12%",
+      "scalingRaw": "Tile: 10% | 12% | 14% | 17% | 20% ; FIRE_DEALT self: 8% | 9.6% | 11.2% | 13.6% | 16% ; FIRE_DEALT ally: 12% | 14.4% | 16.8% | 20.4% | 24%",
       "scaling": [
         {
-          "label": "FIRE_DEALT",
-          "values": [
-            8,
-            9.6,
-            11.2,
-            13.6,
-            16
-          ],
+          "label": "Tile",
+          "values": [10, 12, 14, 17, 20],
           "unit": "%",
           "fixed": false
         },
         {
-          "label": "FIRE_DEALT",
-          "values": [
-            12
-          ],
+          "label": "FIRE_DEALT self",
+          "values": [8, 9.6, 11.2, 13.6, 16],
           "unit": "%",
-          "fixed": true
+          "fixed": false
+        },
+        {
+          "label": "FIRE_DEALT ally",
+          "values": [12, 14.4, 16.8, 20.4, 24],
+          "unit": "%",
+          "fixed": false
         }
       ],
-      "description": "Rounds 1, Rounds 6: Apply Stat Modifier (Buff) to 1 Self, 1 Ally (Adjacent Lane) (FIRE_DEALT: 8% | 9.6% | 11.2% | 13.6% | 16% ; FIRE_DEALT: 12%) for 5 Rounds.",
+      "description": "Start of Round 1: increase your Fire Damage Dealt for 5 rounds. Start of Round 6: increase Fire Damage Dealt of 1 other adjacent Ally for 5 rounds. After Combat: Tile Damage (out of 3v3 scope).",
       "structured": [
         {
-          "when": "rounds",
-          "rounds": [
-            1
-          ],
+          "phase": "round_start",
+          "rounds": [1],
           "actions": [
             {
               "t": "mod",
-              "mods": [
-                {
-                  "stat": "fire_dealt",
-                  "pct": [
-                    8,
-                    9.6,
-                    11.2,
-                    13.6,
-                    16
-                  ]
-                }
-              ],
+              "mods": [{ "stat": "fire_dealt", "pct": [8, 9.6, 11.2, 13.6, 16] }],
               "dur": 5,
-              "tgt": {
-                "side": "self"
-              }
+              "tgt": { "side": "self" }
             }
           ]
         },
         {
-          "when": "rounds",
-          "rounds": [
-            6
-          ],
+          "phase": "round_start",
+          "rounds": [6],
           "actions": [
             {
               "t": "mod",
-              "mods": [
-                {
-                  "stat": "fire_dealt",
-                  "pct": 12
-                }
-              ],
+              "mods": [{ "stat": "fire_dealt", "pct": [12, 14.4, 16.8, 20.4, 24] }],
               "dur": 5,
-              "tgt": {
-                "side": "ally",
-                "count": 1,
-                "select": "adjacency"
-              }
+              "tgt": { "side": "ally", "count": 1, "select": "adjacency", "excludeSelf": true }
+            }
+          ]
+        },
+        {
+          "phase": "after_combat",
+          "rounds": [1],
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [{ "stat": "tile_dealt", "pct": [10, 12, 14, 17, 20] }],
+              "dur": "combat",
+              "tgt": { "side": "self" }
             }
           ]
         }
@@ -246,70 +161,38 @@
       "slot": 4,
       "unlockStar": 8,
       "name": "Dragon's Ire",
-      "trigger": "Start of Combat",
       "targeting": "1 Self",
-      "effectType": "Stat Modifier (Buff)",
+      "effectType": "Stat Modifier",
       "duration": "Whole Combat",
       "scalingRaw": "TACTICAL_DEALT: 4% | 4.8% | 5.6% | 6.8% | 8% ; FIRE_DEALT: 4% | 4.8% | 5.6% | 6.8% | 8%",
       "scaling": [
         {
           "label": "TACTICAL_DEALT",
-          "values": [
-            4,
-            4.8,
-            5.6,
-            6.8,
-            8
-          ],
+          "values": [4, 4.8, 5.6, 6.8, 8],
           "unit": "%",
           "fixed": false
         },
         {
           "label": "FIRE_DEALT",
-          "values": [
-            4,
-            4.8,
-            5.6,
-            6.8,
-            8
-          ],
+          "values": [4, 4.8, 5.6, 6.8, 8],
           "unit": "%",
           "fixed": false
         }
       ],
-      "description": "Start of Combat: Apply Stat Modifier (Buff) to 1 Self (TACTICAL_DEALT: 4% | 4.8% | 5.6% | 6.8% | 8% ; FIRE_DEALT: 4% | 4.8% | 5.6% | 6.8% | 8%) for Whole Combat.",
+      "description": "Start of Combat: Increase your Tactical and Fire Damage Dealt until the end of combat.",
       "structured": [
         {
-          "when": "combat_start",
+          "phase": "combat_start",
+          "rounds": [1],
           "actions": [
             {
               "t": "mod",
               "mods": [
-                {
-                  "stat": "tactical_dealt",
-                  "pct": [
-                    4,
-                    4.8,
-                    5.6,
-                    6.8,
-                    8
-                  ]
-                },
-                {
-                  "stat": "fire_dealt",
-                  "pct": [
-                    4,
-                    4.8,
-                    5.6,
-                    6.8,
-                    8
-                  ]
-                }
+                { "stat": "tactical_dealt", "pct": [4, 4.8, 5.6, 6.8, 8] },
+                { "stat": "fire_dealt", "pct": [4, 4.8, 5.6, 6.8, 8] }
               ],
               "dur": "combat",
-              "tgt": {
-                "side": "self"
-              }
+              "tgt": { "side": "self" }
             }
           ]
         }
@@ -320,57 +203,30 @@
       "slot": 5,
       "unlockStar": 10,
       "name": "The Long Siege",
-      "trigger": "Rounds 6, 7, 8, 9, 10",
       "targeting": "3 Allies",
-      "effectType": "Stat Modifier (Buff)",
+      "effectType": "Stat Modifier",
       "duration": "1 Round",
       "scalingRaw": "PHYSICAL_RECEIVED: -5% | -6.5% | -8% | -10% | -12.5%",
       "scaling": [
         {
           "label": "PHYSICAL_RECEIVED",
-          "values": [
-            -5,
-            -6.5,
-            -8,
-            -10,
-            -12.5
-          ],
+          "values": [-5, -6.5, -8, -10, -12.5],
           "unit": "%",
           "fixed": false
         }
       ],
-      "description": "Rounds 6, 7, 8, 9, 10: Apply Stat Modifier (Buff) to 3 Allies (PHYSICAL_RECEIVED: -5% | -6.5% | -8% | -10% | -12.5%) for 1 Round.",
+      "description": "Start of Rounds 6-10: Reduce Physical Damage Received of 3 Allies until the end of the round. Doubled when Defending.",
       "structured": [
         {
-          "when": "rounds",
-          "rounds": [
-            6,
-            7,
-            8,
-            9,
-            10
-          ],
+          "phase": "round_start",
+          "rounds": [6, 7, 8, 9, 10],
           "actions": [
             {
               "t": "mod",
-              "mods": [
-                {
-                  "stat": "physical_received",
-                  "pct": [
-                    -5,
-                    -6.5,
-                    -8,
-                    -10,
-                    -12.5
-                  ]
-                }
-              ],
+              "mods": [{ "stat": "physical_received", "pct": [-5, -6.5, -8, -10, -12.5] }],
+              "ifBonus": { "defending": true, "mult": 2 },
               "dur": 1,
-              "tgt": {
-                "side": "ally",
-                "count": 3,
-                "select": "any"
-              }
+              "tgt": { "side": "ally", "count": 3, "select": "any" }
             }
           ]
         }
