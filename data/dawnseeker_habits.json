@@ -108,12 +108,11 @@
           "fixed": false
         }
       ],
-      "description": "Radiant Wings gains: Rounds 1-2, Tactical Damage Rate and Recovery Rate become the rank values.",
+      "description": "Radiant Wings gains: Rounds 1-2, Tactical Damage Rate and Recovery Rate become the rank values. Rates are written at round start so the Command can read them on turn.",
       "structured": [
         {
           "phase": "round_start",
           "rounds": [1, 2],
-          "requires": { "command": "Radiant Wings" },
           "actions": [
             {
               "t": "mod_command",
@@ -130,8 +129,7 @@
           ]
         }
       ]
-    }
-    ,
+    },
     {
       "dragonId": "dawnseeker",
       "slot": 4,
