@@ -6,58 +6,67 @@
       "slot": 1,
       "unlockStar": 2,
       "name": "Stolen Flock",
-      "trigger": "Each Action / Round",
       "targeting": "1 Self",
-      "effectType": "Ability Buff",
+      "effectType": "Stack",
       "duration": "Whole Combat",
-      "scalingRaw": "Chance: 0.5% ; FIRE_DEALT: 3% | 3.6% | 4.2% | 5.1% | 6%",
+      "scalingRaw": "FIRE_DEALT PvE: 10% | 12% | 14% | 17% | 20% ; per stack: 3% | 3.6% | 4.2% | 5.1% | 6%",
       "scaling": [
         {
-          "label": "Chance",
-          "values": [
-            0.5
-          ],
+          "label": "FIRE_DEALT PvE",
+          "values": [10, 12, 14, 17, 20],
           "unit": "%",
-          "fixed": true
+          "fixed": false
         },
         {
-          "label": "FIRE_DEALT",
-          "values": [
-            3,
-            3.6,
-            4.2,
-            5.1,
-            6
-          ],
+          "label": "per stack",
+          "values": [3, 3.6, 4.2, 5.1, 6],
           "unit": "%",
           "fixed": false
         }
       ],
-      "description": "Each Action / Round: Apply Ability Buff to 1 Self (Chance: 0.5% ; FIRE_DEALT: 3% | 3.6% | 4.2% | 5.1% | 6%) for Whole Combat.",
+      "description": "Start of Combat: Fire Damage Dealt vs PvE. Each round 50% chance for 1 Stolen Flock stack (max 10). Stack also on Prey Recovery. Each stack increases Fire Damage Dealt.",
       "structured": [
         {
-          "when": "each",
+          "phase": "combat_start",
+          "rounds": [1],
+          "requires": { "pve": true },
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [{ "stat": "fire_dealt", "pct": [10, 12, 14, 17, 20] }],
+              "dur": "combat",
+              "tgt": { "side": "self" }
+            }
+          ]
+        },
+        {
+          "phase": "round_start",
+          "rounds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
           "actions": [
             {
               "t": "stack",
               "id": "stolen_flock",
+              "stacks": 1,
+              "maxStacks": 10,
               "chance": 50,
-              "max": 10,
-              "mods": [
-                {
-                  "stat": "fire_dealt",
-                  "pct": [
-                    3,
-                    3.6,
-                    4.2,
-                    5.1,
-                    6
-                  ]
-                }
-              ],
-              "tgt": {
-                "side": "self"
-              }
+              "mods": [{ "stat": "fire_dealt", "pct": [3, 3.6, 4.2, 5.1, 6] }],
+              "dur": "combat",
+              "tgt": { "side": "self" }
+            }
+          ]
+        },
+        {
+          "phase": "on_prey_recovery",
+          "rounds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+          "actions": [
+            {
+              "t": "stack",
+              "id": "stolen_flock",
+              "stacks": 1,
+              "maxStacks": 10,
+              "mods": [{ "stat": "fire_dealt", "pct": [3, 3.6, 4.2, 5.1, 6] }],
+              "dur": "combat",
+              "tgt": { "side": "self" }
             }
           ]
         }
@@ -68,82 +77,42 @@
       "slot": 2,
       "unlockStar": 4,
       "name": "Dragon's Cunning",
-      "trigger": "Start of Combat",
-      "targeting": "2 Enemies (Adjacent Lane), 1 Self",
-      "effectType": "Stat Modifier (Buff)",
+      "targeting": "1 Self; 2 Enemies (Adjacent)",
+      "effectType": "Stat Modifier",
       "duration": "Whole Combat",
       "scalingRaw": "INT: 16% | 19.2% | 22.4% | 27.2% | 32% ; INST: -12% | -14.4% | -16.8% | -20.4% | -24%",
       "scaling": [
         {
           "label": "INT",
-          "values": [
-            16,
-            19.2,
-            22.4,
-            27.2,
-            32
-          ],
+          "values": [16, 19.2, 22.4, 27.2, 32],
           "unit": "%",
           "fixed": false
         },
         {
           "label": "INST",
-          "values": [
-            -12,
-            -14.4,
-            -16.8,
-            -20.4,
-            -24
-          ],
+          "values": [-12, -14.4, -16.8, -20.4, -24],
           "unit": "%",
           "fixed": false
         }
       ],
-      "description": "Start of Combat: Apply Stat Modifier (Buff) to 2 Enemies (Adjacent Lane), 1 Self (INT: 16% | 19.2% | 22.4% | 27.2% | 32% ; INST: -12% | -14.4% | -16.8% | -20.4% | -24%) for Whole Combat.",
+      "description": "Start of Combat: Increase your Intelligence and reduce Instinct (enhanced by Initiative) of 2 adjacent Enemies until the end of combat.",
       "structured": [
         {
-          "when": "combat_start",
+          "phase": "combat_start",
+          "rounds": [1],
           "actions": [
             {
               "t": "mod",
-              "mods": [
-                {
-                  "stat": "int",
-                  "pct": [
-                    16,
-                    19.2,
-                    22.4,
-                    27.2,
-                    32
-                  ]
-                }
-              ],
+              "mods": [{ "stat": "int", "pct": [16, 19.2, 22.4, 27.2, 32] }],
               "dur": "combat",
-              "tgt": {
-                "side": "self"
-              }
+              "tgt": { "side": "self" }
             },
             {
               "t": "mod",
-              "mods": [
-                {
-                  "stat": "inst",
-                  "pct": [
-                    -12,
-                    -14.4,
-                    -16.8,
-                    -20.4,
-                    -24
-                  ]
-                }
-              ],
+              "mods": [{ "stat": "inst", "pct": [-12, -14.4, -16.8, -20.4, -24] }],
               "scaleStat": "init",
               "dur": "combat",
-              "tgt": {
-                "side": "enemy",
-                "count": 2,
-                "select": "adjacency"
-              }
+              "tgt": { "side": "enemy", "count": 2, "select": "adjacency" }
             }
           ]
         }
@@ -154,57 +123,52 @@
       "slot": 3,
       "unlockStar": 6,
       "name": "Baited Kill",
-      "trigger": "Each Action / Round",
-      "targeting": "1 Enemy",
-      "effectType": "Status Effect (Control/DoT)",
-      "duration": "2 Rounds",
-      "scalingRaw": "Chance: 25% | 30% | 35% | 42.5% | 50%",
+      "targeting": "Prey; 1 Self",
+      "effectType": "Status Effect, Cleanse",
+      "duration": "2 Rounds / Instant",
+      "scalingRaw": "Vulnerable Chance: 25% | 30% | 35% | 42.5% | 50% ; Cleanse Chance: 50% | 60% | 70% | 85% | 100%",
       "scaling": [
         {
-          "label": "Chance",
-          "values": [
-            25,
-            30,
-            35,
-            42.5,
-            50
-          ],
+          "label": "Vulnerable Chance",
+          "values": [25, 30, 35, 42.5, 50],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "Cleanse Chance",
+          "values": [50, 60, 70, 85, 100],
           "unit": "%",
           "fixed": false
         }
       ],
-      "description": "Each Action / Round: Apply Status Effect (Control/DoT) to 1 Enemy (Chance: 25% | 30% | 35% | 42.5% | 50%) for 2 Rounds.",
+      "description": "Each Round: chance to afflict Prey with Vulnerable. Doubled if Prey recovered last round. If Prey is above 50% HP, chance to Cleanse 1 enemy Damage Dealt debuff from yourself.",
       "structured": [
         {
-          "when": "each",
+          "phase": "turn",
+          "rounds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
           "actions": [
             {
               "t": "status",
               "st": "vulnerable",
               "val": 20,
               "dur": 2,
-              "chance": [
-                25,
-                30,
-                35,
-                42.5,
-                50
-              ],
-              "bonusChance": {
-                "cond": "target:healed",
-                "chance": [
-                  50,
-                  60,
-                  70,
-                  85,
-                  100
-                ]
-              },
-              "tgt": {
-                "side": "enemy",
-                "count": 1,
-                "select": "prefer_status:prey"
-              }
+              "chance": [25, 30, 35, 42.5, 50],
+              "chanceIf": { "preyRecoveredLastRound": true, "mult": 2 },
+              "tgt": { "side": "enemy", "count": 1, "select": "prey" }
+            }
+          ]
+        },
+        {
+          "phase": "turn",
+          "rounds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+          "requires": { "preyHpAbove": 50 },
+          "chance": [50, 60, 70, 85, 100],
+          "actions": [
+            {
+              "t": "cleanse",
+              "count": 1,
+              "filter": { "source": "enemy", "stat": "dmg_dealt" },
+              "tgt": { "side": "self" }
             }
           ]
         }
@@ -215,50 +179,49 @@
       "slot": 4,
       "unlockStar": 8,
       "name": "Wary Beast",
-      "trigger": "Start of Combat",
-      "targeting": "3 Enemies",
-      "effectType": "Stat Modifier (Buff)",
-      "duration": "Whole Combat",
-      "scalingRaw": "RECOVERY_RECEIVED: -10% | -12% | -14% | -17% | -20%",
+      "targeting": "1 Self; 3 Enemies",
+      "effectType": "Status Effect, Stat Modifier",
+      "duration": "1 Round / Whole Combat",
+      "scalingRaw": "Evade Rate: 10% | 12% | 14% | 17% | 20% ; RECOVERY_RECEIVED: -10% | -12% | -14% | -17% | -20%",
       "scaling": [
         {
+          "label": "Evade Rate",
+          "values": [10, 12, 14, 17, 20],
+          "unit": "%",
+          "fixed": false
+        },
+        {
           "label": "RECOVERY_RECEIVED",
-          "values": [
-            -10,
-            -12,
-            -14,
-            -17,
-            -20
-          ],
+          "values": [-10, -12, -14, -17, -20],
           "unit": "%",
           "fixed": false
         }
       ],
-      "description": "Start of Combat: Apply Stat Modifier (Buff) to 3 Enemies (RECOVERY_RECEIVED: -10% | -12% | -14% | -17% | -20%) for Whole Combat.",
+      "description": "Start of each round: if Prey is above 50% HP, gain Evade until end of round. Start of Combat: reduce Recovery Received of 3 Enemies until the end of combat.",
       "structured": [
         {
-          "when": "combat_start",
+          "phase": "round_start",
+          "rounds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+          "requires": { "preyHpAbove": 50 },
+          "actions": [
+            {
+              "t": "status",
+              "st": "evade",
+              "val": [10, 12, 14, 17, 20],
+              "dur": 1,
+              "tgt": { "side": "self" }
+            }
+          ]
+        },
+        {
+          "phase": "combat_start",
+          "rounds": [1],
           "actions": [
             {
               "t": "mod",
-              "mods": [
-                {
-                  "stat": "recovery_received",
-                  "pct": [
-                    -10,
-                    -12,
-                    -14,
-                    -17,
-                    -20
-                  ]
-                }
-              ],
+              "mods": [{ "stat": "recovery_received", "pct": [-10, -12, -14, -17, -20] }],
               "dur": "combat",
-              "tgt": {
-                "side": "enemy",
-                "count": 3,
-                "select": "all"
-              }
+              "tgt": { "side": "enemy", "count": 3, "select": "any" }
             }
           ]
         }
@@ -269,93 +232,44 @@
       "slot": 5,
       "unlockStar": 10,
       "name": "Savage Claim",
-      "trigger": "Each Action / Round",
-      "targeting": "1 Enemy, 1 Self",
-      "effectType": "Troop Healing, Direct Damage (Nuke)",
-      "duration": "Whole Combat",
-      "scalingRaw": "Rate: 24% | 31.2% | 38.4% | 48% | 60% ; Rate: 10% | 13% | 16% | 20% | 25%",
+      "targeting": "Prey; 1 Self",
+      "effectType": "Direct Damage, Recovery",
+      "duration": "Instant",
+      "scalingRaw": "Damage Rate: 24% | 31.2% | 38.4% | 48% | 60% ; Recovery: 10% | 13% | 16% | 20% | 25%",
       "scaling": [
         {
-          "label": "Rate",
-          "values": [
-            24,
-            31.2,
-            38.4,
-            48,
-            60
-          ],
+          "label": "Damage Rate",
+          "values": [24, 31.2, 38.4, 48, 60],
           "unit": "%",
           "fixed": false
         },
         {
-          "label": "Rate",
-          "values": [
-            10,
-            13,
-            16,
-            20,
-            25
-          ],
+          "label": "Recovery",
+          "values": [10, 13, 16, 20, 25],
           "unit": "%",
           "fixed": false
         }
       ],
-      "description": "Each Action / Round: Apply Troop Healing, Direct Damage (Nuke) to 1 Enemy, 1 Self (Rate: 24% | 31.2% | 38.4% | 48% | 60% ; Rate: 10% | 13% | 16% | 20% | 25%) for Whole Combat.",
+      "description": "Wild Hunt gains: each round if you have a Prey, deal Fire Damage to them and Recovery to yourself. Both tripled if Prey recovered last round.",
       "structured": [
         {
-          "when": "each",
+          "phase": "turn",
+          "rounds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+          "requires": { "command": "Wild Hunt", "hasPrey": true },
           "actions": [
             {
               "t": "dmg",
               "dt": "fire",
-              "pct": [
-                24,
-                31.2,
-                38.4,
-                48,
-                60
-              ],
-              "bonus": {
-                "cond": "target:healed",
-                "pct": [
-                  72,
-                  93.6,
-                  115.2,
-                  144,
-                  180
-                ]
-              },
-              "onlyIf": "target:prey",
-              "tgt": {
-                "side": "enemy",
-                "count": 1,
-                "select": "prefer_status:prey"
-              }
+              "pct": [24, 31.2, 38.4, 48, 60],
+              "ifBonus": { "preyRecoveredLastRound": true, "mult": 3 },
+              "tgt": { "side": "enemy", "count": 1, "select": "prey" }
             },
             {
               "t": "heal",
-              "pct": [
-                10,
-                13,
-                16,
-                20,
-                25
-              ],
+              "pct": [10, 13, 16, 20, 25],
               "scaleStat": "int",
-              "bonus": {
-                "cond": "enemy:healed",
-                "pct": [
-                  30,
-                  39,
-                  48,
-                  60,
-                  75
-                ]
-              },
-              "onlyIf": "enemy:prey",
-              "tgt": {
-                "side": "self"
-              }
+              "ifBonus": { "preyRecoveredLastRound": true, "mult": 3 },
+              "tgt": { "side": "self" }
             }
           ]
         }
