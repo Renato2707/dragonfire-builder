@@ -6,73 +6,39 @@
       "slot": 1,
       "unlockStar": 2,
       "name": "Battle Mastery",
-      "trigger": "Start of Combat",
       "targeting": "3 Enemies",
-      "effectType": "Stat Modifier (Buff)",
+      "effectType": "Stat Modifier",
       "duration": "Whole Combat",
       "scalingRaw": "STR: -5% | -6% | -7% | -8.85% | -10.5% ; INST: -5% | -6% | -7% | -8.85% | -10.5%",
       "scaling": [
         {
           "label": "STR",
-          "values": [
-            -5,
-            -6,
-            -7,
-            -8.85,
-            -10.5
-          ],
+          "values": [-5, -6, -7, -8.85, -10.5],
           "unit": "%",
           "fixed": false
         },
         {
           "label": "INST",
-          "values": [
-            -5,
-            -6,
-            -7,
-            -8.85,
-            -10.5
-          ],
+          "values": [-5, -6, -7, -8.85, -10.5],
           "unit": "%",
           "fixed": false
         }
       ],
-      "description": "Start of Combat: Apply Stat Modifier (Buff) to 3 Enemies (STR: -5% | -6% | -7% | -8.85% | -10.5% ; INST: -5% | -6% | -7% | -8.85% | -10.5%) for Whole Combat.",
+      "description": "Start of Combat: Reduce Strength and Instinct (enhanced by Intelligence) of 3 Enemies until the end of combat.",
       "structured": [
         {
-          "when": "combat_start",
+          "phase": "combat_start",
+          "rounds": [1],
           "actions": [
             {
               "t": "mod",
               "mods": [
-                {
-                  "stat": "str",
-                  "pct": [
-                    -5,
-                    -6,
-                    -7,
-                    -8.85,
-                    -10.5
-                  ]
-                },
-                {
-                  "stat": "inst",
-                  "pct": [
-                    -5,
-                    -6,
-                    -7,
-                    -8.85,
-                    -10.5
-                  ]
-                }
+                { "stat": "str", "pct": [-5, -6, -7, -8.85, -10.5] },
+                { "stat": "inst", "pct": [-5, -6, -7, -8.85, -10.5] }
               ],
               "scaleStat": "int",
               "dur": "combat",
-              "tgt": {
-                "side": "enemy",
-                "count": 3,
-                "select": "any"
-              }
+              "tgt": { "side": "enemy", "count": 3, "select": "any" }
             }
           ]
         }
@@ -83,70 +49,38 @@
       "slot": 2,
       "unlockStar": 4,
       "name": "Keen Instinct",
-      "trigger": "Start of Combat",
       "targeting": "1 Self",
-      "effectType": "Stat Modifier (Buff)",
+      "effectType": "Stat Modifier",
       "duration": "Whole Combat",
       "scalingRaw": "INT: 16% | 19.2% | 22.4% | 27.2% | 32% ; INST: 16% | 19.2% | 22.4% | 27.2% | 32%",
       "scaling": [
         {
           "label": "INT",
-          "values": [
-            16,
-            19.2,
-            22.4,
-            27.2,
-            32
-          ],
+          "values": [16, 19.2, 22.4, 27.2, 32],
           "unit": "%",
           "fixed": false
         },
         {
           "label": "INST",
-          "values": [
-            16,
-            19.2,
-            22.4,
-            27.2,
-            32
-          ],
+          "values": [16, 19.2, 22.4, 27.2, 32],
           "unit": "%",
           "fixed": false
         }
       ],
-      "description": "Start of Combat: Apply Stat Modifier (Buff) to 1 Self (INT: 16% | 19.2% | 22.4% | 27.2% | 32% ; INST: 16% | 19.2% | 22.4% | 27.2% | 32%) for Whole Combat.",
+      "description": "Start of Combat: Increase your Intelligence and Instinct until the end of combat.",
       "structured": [
         {
-          "when": "combat_start",
+          "phase": "combat_start",
+          "rounds": [1],
           "actions": [
             {
               "t": "mod",
               "mods": [
-                {
-                  "stat": "int",
-                  "pct": [
-                    16,
-                    19.2,
-                    22.4,
-                    27.2,
-                    32
-                  ]
-                },
-                {
-                  "stat": "inst",
-                  "pct": [
-                    16,
-                    19.2,
-                    22.4,
-                    27.2,
-                    32
-                  ]
-                }
+                { "stat": "int", "pct": [16, 19.2, 22.4, 27.2, 32] },
+                { "stat": "inst", "pct": [16, 19.2, 22.4, 27.2, 32] }
               ],
               "dur": "combat",
-              "tgt": {
-                "side": "self"
-              }
+              "tgt": { "side": "self" }
             }
           ]
         }
@@ -157,89 +91,38 @@
       "slot": 3,
       "unlockStar": 6,
       "name": "Fearsome Reach",
-      "trigger": "Odd-Numbered Rounds",
       "targeting": "3 Enemies",
-      "effectType": "Stat Modifier (Debuff), Status Effect (Control/DoT)",
+      "effectType": "Stat Modifier, Status Effect",
       "duration": "2 Rounds",
-      "scalingRaw": "Chance: 30% | 36% | 42% | 51% | 60% ; INST: -15% ; Chance: 30% | 36% | 42% | 51% | 60%",
+      "scalingRaw": "Chance: 30% | 36% | 42% | 51% | 60%",
       "scaling": [
         {
           "label": "Chance",
-          "values": [
-            30,
-            36,
-            42,
-            51,
-            60
-          ],
-          "unit": "%",
-          "fixed": false
-        },
-        {
-          "label": "INST",
-          "values": [
-            -15
-          ],
-          "unit": "%",
-          "fixed": true
-        },
-        {
-          "label": "Chance",
-          "values": [
-            30,
-            36,
-            42,
-            51,
-            60
-          ],
+          "values": [30, 36, 42, 51, 60],
           "unit": "%",
           "fixed": false
         }
       ],
-      "description": "Odd-Numbered Rounds: Apply Stat Modifier (Debuff), Status Effect (Control/DoT) to 3 Enemies (Chance: 30% | 36% | 42% | 51% | 60% ; INST: -15% ; Chance: 30% | 36% | 42% | 51% | 60%) for 2 Rounds.",
+      "description": "Odd rounds: one roll to reduce Instinct (enhanced by Intelligence) by -15% and afflict Panic (rate +20%) on 3 Enemies for 2 rounds.",
       "structured": [
         {
-          "when": "odd",
+          "phase": "turn",
+          "rounds": [1, 3, 5, 7, 9],
+          "chance": [30, 36, 42, 51, 60],
           "actions": [
             {
               "t": "mod",
-              "mods": [
-                {
-                  "stat": "inst",
-                  "pct": -15
-                }
-              ],
+              "mods": [{ "stat": "inst", "pct": -15 }],
               "scaleStat": "int",
               "dur": 2,
-              "chance": [
-                30,
-                36,
-                42,
-                51,
-                60
-              ],
-              "tgt": {
-                "side": "enemy",
-                "count": 3,
-                "select": "any"
-              }
+              "tgt": { "side": "enemy", "count": 3, "select": "any" }
             },
             {
               "t": "status",
               "st": "panic",
+              "val": 20,
               "dur": 2,
-              "chance": [
-                30,
-                36,
-                42,
-                51,
-                60
-              ],
-              "tgt": {
-                "side": "enemy",
-                "count": 3,
-                "select": "any"
-              }
+              "tgt": { "side": "enemy", "count": 3, "select": "any" }
             }
           ]
         }
@@ -250,72 +133,39 @@
       "slot": 4,
       "unlockStar": 8,
       "name": "Steel Shroud",
-      "trigger": "Start of Combat",
-      "targeting": "2 Allies",
-      "effectType": "Stat Modifier (Buff)",
+      "targeting": "2 other Allies",
+      "effectType": "Stat Modifier",
       "duration": "Whole Combat",
       "scalingRaw": "PHYSICAL_RECEIVED: -3.5% | -4.2% | -4.9% | -5.95% | -7% ; TACTICAL_RECEIVED: -3.5% | -4.2% | -4.9% | -5.95% | -7%",
       "scaling": [
         {
           "label": "PHYSICAL_RECEIVED",
-          "values": [
-            -3.5,
-            -4.2,
-            -4.9,
-            -5.95,
-            -7
-          ],
+          "values": [-3.5, -4.2, -4.9, -5.95, -7],
           "unit": "%",
           "fixed": false
         },
         {
           "label": "TACTICAL_RECEIVED",
-          "values": [
-            -3.5,
-            -4.2,
-            -4.9,
-            -5.95,
-            -7
-          ],
+          "values": [-3.5, -4.2, -4.9, -5.95, -7],
           "unit": "%",
           "fixed": false
         }
       ],
-      "description": "Start of Combat: Apply Stat Modifier (Buff) to 2 Allies (PHYSICAL_RECEIVED: -3.5% | -4.2% | -4.9% | -5.95% | -7% ; TACTICAL_RECEIVED: -3.5% | -4.2% | -4.9% | -5.95% | -7%) for Whole Combat.",
+      "description": "Start of Combat: Reduce Physical Received (excluding Basic Attacks) and Tactical Received of 2 other Allies until the end of combat.",
       "structured": [
         {
-          "when": "combat_start",
+          "phase": "combat_start",
+          "rounds": [1],
           "actions": [
             {
               "t": "mod",
               "mods": [
-                {
-                  "stat": "physical_received",
-                  "pct": [
-                    -3.5,
-                    -4.2,
-                    -4.9,
-                    -5.95,
-                    -7
-                  ]
-                },
-                {
-                  "stat": "tactical_received",
-                  "pct": [
-                    -3.5,
-                    -4.2,
-                    -4.9,
-                    -5.95,
-                    -7
-                  ]
-                }
+                { "stat": "physical_received", "pct": [-3.5, -4.2, -4.9, -5.95, -7] },
+                { "stat": "tactical_received", "pct": [-3.5, -4.2, -4.9, -5.95, -7] }
               ],
+              "excludeBasic": true,
               "dur": "combat",
-              "tgt": {
-                "side": "ally",
-                "count": 2,
-                "select": "any"
-              }
+              "tgt": { "side": "ally", "count": 2, "select": "any", "excludeSelf": true }
             }
           ]
         }
@@ -326,46 +176,32 @@
       "slot": 5,
       "unlockStar": 10,
       "name": "Cloak of Terror",
-      "trigger": "Odd-Numbered Rounds",
-      "targeting": "2 Enemies (Adjacent Lane)",
-      "effectType": "Status Effect (Control/DoT)",
+      "targeting": "2 Enemies (Adjacent)",
+      "effectType": "Status Effect",
       "duration": "2 Rounds",
-      "scalingRaw": "Chance: 10% | 13% | 16% | 20% | 25%",
+      "scalingRaw": "Overwhelm Chance: 10% | 13% | 16% | 20% | 25%",
       "scaling": [
         {
-          "label": "Chance",
-          "values": [
-            10,
-            13,
-            16,
-            20,
-            25
-          ],
+          "label": "Overwhelm Chance",
+          "values": [10, 13, 16, 20, 25],
           "unit": "%",
           "fixed": false
         }
       ],
-      "description": "Odd-Numbered Rounds: Apply Status Effect (Control/DoT) to 2 Enemies (Adjacent Lane) (Chance: 10% | 13% | 16% | 20% | 25%) for 2 Rounds.",
+      "description": "Odd rounds: chance per target to Overwhelm 2 adjacent Enemies for 2 rounds. Doubled if the target has Vulnerable.",
       "structured": [
         {
-          "when": "odd",
+          "phase": "turn",
+          "rounds": [1, 3, 5, 7, 9],
           "actions": [
             {
               "t": "status",
               "st": "overwhelm",
               "dur": 2,
-              "chance": [
-                10,
-                13,
-                16,
-                20,
-                25
-              ],
-              "tgt": {
-                "side": "enemy",
-                "count": 2,
-                "select": "adjacency"
-              }
+              "chance": [10, 13, 16, 20, 25],
+              "chancePerTarget": true,
+              "chanceIf": { "on": "target", "status": "vulnerable", "mult": 2 },
+              "tgt": { "side": "enemy", "count": 2, "select": "adjacency" }
             }
           ]
         }
