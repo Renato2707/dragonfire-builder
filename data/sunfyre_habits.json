@@ -6,50 +6,56 @@
       "slot": 1,
       "unlockStar": 2,
       "name": "Radiant Majesty",
-      "trigger": "Start of Combat",
-      "targeting": "Self",
-      "effectType": "Ability Buff",
-      "duration": "Whole Combat",
-      "scalingRaw": "Rank 1: 5% | Rank 2: 6% | Rank 3: 7% | Rank 4: 8.50% | Rank 5: 10%",
+      "targeting": "Other ally with most troops (expands below HP thresholds)",
+      "effectType": "Stat Modifier",
+      "duration": "1 Round",
+      "scalingRaw": "DMG_DEALT: 5% | 6% | 7% | 8.5% | 10%",
       "scaling": [
         {
-          "label": "Rank 1",
-          "values": [
-            5,
-            "Rank 2: 6%",
-            "Rank 3: 7%",
-            "Rank 4: 8.50%",
-            "Rank 5: 10%"
-          ],
+          "label": "DMG_DEALT",
+          "values": [5, 6, 7, 8.5, 10],
           "unit": "%",
           "fixed": false
         }
       ],
-      "description": "Start of Each Round: Increase the Damage Dealt by +5% (depends on rank) of the other ally with the most troops until the end of the round. If you are below 75% Troop Capacity, apply this effect to both other allies instead. If you are below 50% Troop Capacity, also apply this effect to yourself.",
+      "description": "Start of each round: increase Damage Dealt of the other ally with the most troops until end of round. Below 75% HP: both other allies. Below 50% HP: also yourself.",
       "structured": [
         {
-          "when": "each",
+          "phase": "round_start",
+          "rounds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+          "requires": { "selfHpAtLeast": 75 },
           "actions": [
             {
               "t": "mod",
-              "mods": [
-                {
-                  "stat": "dmg_dealt",
-                  "pct": [
-                    5,
-                    6,
-                    7,
-                    8.5,
-                    10
-                  ]
-                }
-              ],
+              "mods": [{ "stat": "dmg_dealt", "pct": [5, 6, 7, 8.5, 10] }],
               "dur": 1,
-              "tgt": {
-                "side": "ally",
-                "count": 1,
-                "select": "most_troops"
-              }
+              "tgt": { "side": "ally", "count": 1, "select": "highest:troops", "excludeSelf": true }
+            }
+          ]
+        },
+        {
+          "phase": "round_start",
+          "rounds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+          "requires": { "selfHpBelow": 75 },
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [{ "stat": "dmg_dealt", "pct": [5, 6, 7, 8.5, 10] }],
+              "dur": 1,
+              "tgt": { "side": "ally", "count": 2, "select": "any", "excludeSelf": true }
+            }
+          ]
+        },
+        {
+          "phase": "round_start",
+          "rounds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+          "requires": { "selfHpBelow": 50 },
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [{ "stat": "dmg_dealt", "pct": [5, 6, 7, 8.5, 10] }],
+              "dur": 1,
+              "tgt": { "side": "self" }
             }
           ]
         }
@@ -60,50 +66,29 @@
       "slot": 2,
       "unlockStar": 4,
       "name": "Extinguish",
-      "trigger": "Start of Combat",
-      "targeting": "Self",
-      "effectType": "Ability Buff",
+      "targeting": "1 Enemy (Fire dealer)",
+      "effectType": "Stat Modifier",
       "duration": "Whole Combat",
-      "scalingRaw": "Rank 1: -13.50% | Rank 2: -16.20% | Rank 3: -18.90% | Rank 4: -22.95% | Rank 5: -27%",
+      "scalingRaw": "FIRE_DEALT: -13.5% | -16.2% | -18.9% | -22.95% | -27%",
       "scaling": [
         {
-          "label": "Rank 1",
-          "values": [
-            -13.5,
-            "Rank 2: -16.20%",
-            "Rank 3: -18.90%",
-            "Rank 4: -22.95%",
-            "Rank 5: -27%"
-          ],
+          "label": "FIRE_DEALT",
+          "values": [-13.5, -16.2, -18.9, -22.95, -27],
           "unit": "%",
           "fixed": false
         }
       ],
-      "description": "Start of Combat: Reduce Fire Damage Dealt by -13% (depends on rank) of 1 Enemy that deals Fire Damage until the end of combat.",
+      "description": "Start of Combat: Reduce Fire Damage Dealt of 1 Enemy that deals Fire Damage until the end of combat.",
       "structured": [
         {
-          "when": "combat_start",
+          "phase": "combat_start",
+          "rounds": [1],
           "actions": [
             {
               "t": "mod",
-              "mods": [
-                {
-                  "stat": "fire_dealt",
-                  "pct": [
-                    -13.5,
-                    -16.2,
-                    -18.9,
-                    -22.95,
-                    -27
-                  ]
-                }
-              ],
+              "mods": [{ "stat": "fire_dealt", "pct": [-13.5, -16.2, -18.9, -22.95, -27] }],
               "dur": "combat",
-              "tgt": {
-                "side": "enemy",
-                "count": 1,
-                "select": "dealer:fire"
-              }
+              "tgt": { "side": "enemy", "count": 1, "select": "dealer:fire" }
             }
           ]
         }
@@ -114,72 +99,43 @@
       "slot": 3,
       "unlockStar": 6,
       "name": "The King's Ire",
-      "trigger": "Start of Combat",
-      "targeting": "Self",
-      "effectType": "Ability Buff",
-      "duration": "Whole Combat",
-      "scalingRaw": "Rank 1: 50% | -15% | Rank 2: 60% | -18% | Rank 3: 70% | -21% | Rank 4: 85% | -25.5% | Rank 5: 100% | -30%",
+      "targeting": "1 Enemy (Fire dealer)",
+      "effectType": "Direct Damage, Stat Modifier",
+      "duration": "2 Rounds",
+      "scalingRaw": "Rate: 50% | 60% | 70% | 85% | 100% ; INT: -15% | -18% | -21% | -25.5% | -30%",
       "scaling": [
         {
-          "label": "Rank 1",
-          "values": [
-            50,
-            -15,
-            "Rank 2: 60%",
-            -18,
-            "Rank 3: 70%",
-            -21,
-            "Rank 4: 85%",
-            -25.5,
-            "Rank 5: 100%",
-            -30
-          ],
+          "label": "Rate",
+          "values": [50, 60, 70, 85, 100],
           "unit": "%",
-          "fixed": true
+          "fixed": false
+        },
+        {
+          "label": "INT",
+          "values": [-15, -18, -21, -25.5, -30],
+          "unit": "%",
+          "fixed": false
         }
       ],
-      "description": "Each Round: The first time any ally receives Fire Damage, deal Tactical Damange to 1 Enemy in any lane that deals Fire Damage, damage rate 50% (depends on rank). Additionally, reduce the target's Intelligence by -15% (depends on rank and enhanced by Instinct) for 2 rounds. This effect can only trigger once per round.",
+      "description": "Each round, the first time any ally receives Fire Damage: Tactical Damage to 1 Fire dealer and reduce their Intelligence (enhanced by Instinct) for 2 rounds. Once per round.",
       "structured": [
         {
-          "when": "each",
+          "phase": "on_ally_fire_damage",
+          "rounds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+          "oncePerRound": true,
           "actions": [
             {
               "t": "dmg",
               "dt": "tactical",
-              "pct": [
-                50,
-                60,
-                70,
-                85,
-                100
-              ],
-              "tgt": {
-                "side": "enemy",
-                "count": 1,
-                "select": "dealer:fire"
-              }
+              "pct": [50, 60, 70, 85, 100],
+              "tgt": { "side": "enemy", "count": 1, "select": "dealer:fire" }
             },
             {
               "t": "mod",
-              "mods": [
-                {
-                  "stat": "int",
-                  "pct": [
-                    -15,
-                    -18,
-                    -21,
-                    -25.5,
-                    -30
-                  ]
-                }
-              ],
+              "mods": [{ "stat": "int", "pct": [-15, -18, -21, -25.5, -30] }],
+              "scaleStat": "inst",
               "dur": 2,
-              "tgt": {
-                "side": "enemy",
-                "count": 1,
-                "select": "dealer:fire"
-              },
-              "scaleStat": "inst"
+              "tgt": { "side": "enemy", "count": 1, "select": "last_dmg" }
             }
           ]
         }
@@ -190,72 +146,56 @@
       "slot": 4,
       "unlockStar": 8,
       "name": "Unbroken Splendor",
-      "trigger": "Start of Combat",
-      "targeting": "Self",
-      "effectType": "Ability Buff",
-      "duration": "Whole Combat",
-      "scalingRaw": "Rank 1: -7.5% | 25% | Rank 2: -9% | 30% | Rank 3: -10.5% | 35% | Rank 4: -12.75% | 42.5% | Rank 5: -15% | 50%",
+      "targeting": "1 Self",
+      "effectType": "Stat Modifier, Cleanse",
+      "duration": "Combat / 1 Round",
+      "scalingRaw": "FIRE_RECEIVED: -7.5% | -9% | -10.5% | -12.75% | -15% ; Cleanse Chance: 25% | 30% | 35% | 42.5% | 50%",
       "scaling": [
         {
-          "label": "Rank 1",
-          "values": [
-            -7.5,
-            25,
-            "Rank 2: -9%",
-            30,
-            "Rank 3: -10.5%",
-            35,
-            "Rank 4: -12.75%",
-            42.5,
-            "Rank 5: -15%",
-            50
-          ],
+          "label": "FIRE_RECEIVED",
+          "values": [-7.5, -9, -10.5, -12.75, -15],
           "unit": "%",
-          "fixed": true
+          "fixed": false
+        },
+        {
+          "label": "Cleanse Chance",
+          "values": [25, 30, 35, 42.5, 50],
+          "unit": "%",
+          "fixed": false
         }
       ],
-      "description": "Start of Combat: Reduce your Fire Damage received by -7.5% (depends on rank) until the end of Combat. Start of Each Round: If you are below 50% Troop Capacity, reduce you Damange Received by -7.5% (depends on rank). Additionally, there is a 25% (depends on rank) chance to Cleanse 1 Negative effect that increased your Damage Received (prioritizes Vulnerable).",
+      "description": "Start of Combat: reduce Fire Damage Received until end of combat. Start of each round if below 50% HP: reduce Damage Received until end of round, with a chance to Cleanse 1 received-increasing effect (prioritizes Vulnerable).",
       "structured": [
         {
-          "when": "combat_start",
+          "phase": "combat_start",
+          "rounds": [1],
           "actions": [
             {
               "t": "mod",
-              "mods": [
-                {
-                  "stat": "fire_received",
-                  "pct": [
-                    -7.5,
-                    -9,
-                    -10.5,
-                    -12.75,
-                    -15
-                  ]
-                }
-              ],
+              "mods": [{ "stat": "fire_received", "pct": [-7.5, -9, -10.5, -12.75, -15] }],
               "dur": "combat",
-              "tgt": {
-                "side": "self"
-              }
+              "tgt": { "side": "self" }
             }
           ]
         },
         {
-          "when": "each",
+          "phase": "round_start",
+          "rounds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+          "requires": { "selfHpBelow": 50 },
           "actions": [
             {
+              "t": "mod",
+              "mods": [{ "stat": "dmg_received", "pct": [-7.5, -9, -10.5, -12.75, -15] }],
+              "dur": 1,
+              "tgt": { "side": "self" }
+            },
+            {
               "t": "cleanse",
-              "cleanse_negative": 1,
-              "chance": [
-                25,
-                30,
-                35,
-                42.5,
-                50
-              ],
-              "tgt": {
-                "side": "self"
-              }
+              "count": 1,
+              "chance": [25, 30, 35, 42.5, 50],
+              "filter": { "increases": "dmg_received" },
+              "prefer": "vulnerable",
+              "tgt": { "side": "self" }
             }
           ]
         }
@@ -266,138 +206,88 @@
       "slot": 5,
       "unlockStar": 10,
       "name": "Adaptive Glory",
-      "trigger": "Start of Combat",
-      "targeting": "Self",
-      "effectType": "Ability Buff",
-      "duration": "Whole Combat",
-      "scalingRaw": "Rank 1: 30% | 12% | -12% | 12% | 6% | Rank 2: 39% | 15.6% | -15.6% | 15.6% | 7.8% | Rank 3: 48% | 19.2% | -19.2% | 19.2% | 9.6% | Rank 4: 60% | 24% | -24%| 24% | 12% | Rank 5: 75% | 30% | -30% | 30% | 15%",
+      "targeting": "Varies by damage type",
+      "effectType": "Recovery, Stat Modifier",
+      "duration": "Instant / 1 Round",
+      "scalingRaw": "Recovery: 30% | 39% | 48% | 60% | 75% ; Dealt: 12% | 15.6% | 19.2% | 24% | 30% ; INIT: 6% | 7.8% | 9.6% | 12% | 15%",
       "scaling": [
         {
-          "label": "Rank 1",
-          "values": [
-            30,
-            12,
-            -12,
-            12,
-            6,
-            "Rank 2: 39%",
-            15.6,
-            -15.6,
-            15.6,
-            7.8,
-            "Rank 3: 48%",
-            19.2,
-            -19.2,
-            19.2,
-            9.6,
-            "Rank 4: 60%",
-            24,
-            -24,
-            24,
-            12,
-            "Rank 5: 75%",
-            30,
-            -30,
-            30,
-            15
-          ],
+          "label": "Recovery",
+          "values": [30, 39, 48, 60, 75],
           "unit": "%",
-          "fixed": true
+          "fixed": false
+        },
+        {
+          "label": "Dealt",
+          "values": [12, 15.6, 19.2, 24, 30],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "INIT",
+          "values": [6, 7.8, 9.6, 12, 15],
+          "unit": "%",
+          "fixed": false
         }
       ],
-      "description": "Each Round: the first time you Receive Damange, activate on the following effects based on the type of damage received. Fire Damage: Apply Recovery to yourself (Rate: +30% (depends on rank) enhanced by Instinct). Tactical Damage: Increase the Damage Dealth of the Ally with the Most troops by 12% (depends on rank) for 1 round. Physical Damage (excluding base attacks): Reduce the Damage Dealt of the Enemy with the most troops by 12% (depends on rank) for 1 round. Basic Attack: Increase your Instinct by +12% (depedns on rank) and Initiative by +6% (depends on rank) for 1 rounds",
+      "description": "Each round, the first time you receive damage: Fire heals you; Tactical buffs the ally with most troops; Physical (non-basic) debuffs the enemy with most troops; Basic Attack buffs your Instinct and Initiative.",
       "structured": [
         {
-          "when": "each",
+          "phase": "on_self_first_damage",
+          "rounds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+          "oncePerRound": true,
+          "requires": { "damageType": "fire" },
           "actions": [
             {
               "t": "heal",
-              "rate": [
-                30,
-                39,
-                48,
-                60,
-                75
-              ],
-              "branch": 4,
-              "tgt": {
-                "side": "self"
-              },
-              "scaleStat": "inst"
-            },
+              "pct": [30, 39, 48, 60, 75],
+              "scaleStat": "inst",
+              "tgt": { "side": "self" }
+            }
+          ]
+        },
+        {
+          "phase": "on_self_first_damage",
+          "rounds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+          "oncePerRound": true,
+          "requires": { "damageType": "tactical" },
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [{ "stat": "dmg_dealt", "pct": [12, 15.6, 19.2, 24, 30] }],
+              "dur": 1,
+              "tgt": { "side": "ally", "count": 1, "select": "highest:troops" }
+            }
+          ]
+        },
+        {
+          "phase": "on_self_first_damage",
+          "rounds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+          "oncePerRound": true,
+          "requires": { "damageType": "physical", "excludeBasic": true },
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [{ "stat": "dmg_dealt", "pct": [-12, -15.6, -19.2, -24, -30] }],
+              "dur": 1,
+              "tgt": { "side": "enemy", "count": 1, "select": "highest:troops" }
+            }
+          ]
+        },
+        {
+          "phase": "on_self_first_damage",
+          "rounds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+          "oncePerRound": true,
+          "requires": { "damageType": "basic" },
+          "actions": [
             {
               "t": "mod",
               "mods": [
-                {
-                  "stat": "dmg_dealt",
-                  "pct": [
-                    12,
-                    15.6,
-                    19.2,
-                    24,
-                    30
-                  ]
-                }
+                { "stat": "inst", "pct": [12, 15.6, 19.2, 24, 30] },
+                { "stat": "init", "pct": [6, 7.8, 9.6, 12, 15] }
               ],
               "dur": 1,
-              "branch": 4,
-              "tgt": {
-                "side": "ally",
-                "count": 1,
-                "select": "most_troops"
-              }
-            },
-            {
-              "t": "mod",
-              "mods": [
-                {
-                  "stat": "dmg_dealt",
-                  "pct": [
-                    -12,
-                    -15.6,
-                    -19.2,
-                    -24,
-                    -30
-                  ]
-                }
-              ],
-              "dur": 1,
-              "branch": 4,
-              "tgt": {
-                "side": "enemy",
-                "count": 1,
-                "select": "most_troops"
-              }
-            },
-            {
-              "t": "mod",
-              "mods": [
-                {
-                  "stat": "inst",
-                  "pct": [
-                    12,
-                    15.6,
-                    19.2,
-                    24,
-                    30
-                  ]
-                },
-                {
-                  "stat": "init",
-                  "pct": [
-                    6,
-                    7.8,
-                    9.6,
-                    12,
-                    15
-                  ]
-                }
-              ],
-              "dur": 1,
-              "branch": 4,
-              "tgt": {
-                "side": "self"
-              }
+              "tgt": { "side": "self" }
             }
           ]
         }
