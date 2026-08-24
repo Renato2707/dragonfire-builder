@@ -6,98 +6,39 @@
       "slot": 1,
       "unlockStar": 2,
       "name": "Sharpened Beauty",
-      "trigger": "Each Action / Round",
       "targeting": "1 Self",
-      "effectType": "Stat Modifier (Buff)",
+      "effectType": "Stat Modifier",
       "duration": "1 Round",
       "scalingRaw": "PHYSICAL_DEALT: 7% | 8.4% | 9.8% | 11.9% | 14% ; FIRE_DEALT: 7% | 8.4% | 9.8% | 11.9% | 14%",
       "scaling": [
         {
           "label": "PHYSICAL_DEALT",
-          "values": [
-            7,
-            8.4,
-            9.8,
-            11.9,
-            14
-          ],
+          "values": [7, 8.4, 9.8, 11.9, 14],
           "unit": "%",
           "fixed": false
         },
         {
           "label": "FIRE_DEALT",
-          "values": [
-            7,
-            8.4,
-            9.8,
-            11.9,
-            14
-          ],
+          "values": [7, 8.4, 9.8, 11.9, 14],
           "unit": "%",
           "fixed": false
         }
       ],
-      "description": "Each Action / Round: Apply Stat Modifier (Buff) to 1 Self (PHYSICAL_DEALT: 7% | 8.4% | 9.8% | 11.9% | 14% ; FIRE_DEALT: 7% | 8.4% | 9.8% | 11.9% | 14%) for 1 Round.",
+      "description": "Start of each round: increase your Physical and Fire Damage Dealt until the end of the round. Doubled if above 75% HP or you have Advantage.",
       "structured": [
         {
-          "when": "each",
+          "phase": "round_start",
+          "rounds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
           "actions": [
             {
               "t": "mod",
-              "dur": 1,
-              "tgt": {
-                "side": "self"
-              },
               "mods": [
-                {
-                  "stat": "physical_dealt",
-                  "pct": [
-                    7,
-                    8.4,
-                    9.8,
-                    11.9,
-                    14
-                  ]
-                },
-                {
-                  "stat": "fire_dealt",
-                  "pct": [
-                    7,
-                    8.4,
-                    9.8,
-                    11.9,
-                    14
-                  ]
-                }
+                { "stat": "physical_dealt", "pct": [7, 8.4, 9.8, 11.9, 14] },
+                { "stat": "fire_dealt", "pct": [7, 8.4, 9.8, 11.9, 14] }
               ],
-              "bonus": {
-                "cond": [
-                  "self:troops_above_75",
-                  "self:advantage"
-                ],
-                "mods": [
-                  {
-                    "stat": "physical_dealt",
-                    "pct": [
-                      14,
-                      16.8,
-                      19.6,
-                      23.8,
-                      28
-                    ]
-                  },
-                  {
-                    "stat": "fire_dealt",
-                    "pct": [
-                      14,
-                      16.8,
-                      19.6,
-                      23.8,
-                      28
-                    ]
-                  }
-                ]
-              }
+              "ifBonus": { "any": [{ "selfHpAbove": 75 }, { "selfStatus": "advantage" }], "mult": 2 },
+              "dur": 1,
+              "tgt": { "side": "self" }
             }
           ]
         }
@@ -108,50 +49,29 @@
       "slot": 2,
       "unlockStar": 4,
       "name": "Blazing Leader",
-      "trigger": "Start of Combat",
-      "targeting": "1 Ally (Left Lane)",
-      "effectType": "Stat Modifier (Buff)",
+      "targeting": "1 Ally (Left Flank)",
+      "effectType": "Stat Modifier",
       "duration": "Whole Combat",
       "scalingRaw": "FIRE_DEALT: 10% | 12% | 14% | 17% | 20%",
       "scaling": [
         {
           "label": "FIRE_DEALT",
-          "values": [
-            10,
-            12,
-            14,
-            17,
-            20
-          ],
+          "values": [10, 12, 14, 17, 20],
           "unit": "%",
           "fixed": false
         }
       ],
-      "description": "Start of Combat: Apply Stat Modifier (Buff) to 1 Ally (Left Lane) (FIRE_DEALT: 10% | 12% | 14% | 17% | 20%) for Whole Combat.",
+      "description": "Start of Combat: Increase Fire Damage Dealt of 1 Ally (prioritizes Left Flank) until the end of combat.",
       "structured": [
         {
-          "when": "combat_start",
+          "phase": "combat_start",
+          "rounds": [1],
           "actions": [
             {
               "t": "mod",
-              "mods": [
-                {
-                  "stat": "fire_dealt",
-                  "pct": [
-                    10,
-                    12,
-                    14,
-                    17,
-                    20
-                  ]
-                }
-              ],
+              "mods": [{ "stat": "fire_dealt", "pct": [10, 12, 14, 17, 20] }],
               "dur": "combat",
-              "tgt": {
-                "side": "ally",
-                "count": 1,
-                "select": "prefer_lane:L"
-              }
+              "tgt": { "side": "ally", "count": 1, "select": "prefer_lane:L" }
             }
           ]
         }
@@ -162,81 +82,40 @@
       "slot": 3,
       "unlockStar": 6,
       "name": "Molten Armor",
-      "trigger": "Odd-Numbered Rounds",
-      "targeting": "1 Self, 2 Allies",
-      "effectType": "Stat Modifier (Buff), Stat Modifier (Debuff)",
+      "targeting": "2 other Allies; Self if Panic",
+      "effectType": "Stat Modifier",
       "duration": "2 Rounds",
-      "scalingRaw": "Chance: 25% | 30% | 35% | 42.5% | 50% ; FIRE_DEALT: 12% ; PHYSICAL_RECEIVED: -12%",
+      "scalingRaw": "Chance: 25% | 30% | 35% | 42.5% | 50%",
       "scaling": [
         {
           "label": "Chance",
-          "values": [
-            25,
-            30,
-            35,
-            42.5,
-            50
-          ],
+          "values": [25, 30, 35, 42.5, 50],
           "unit": "%",
           "fixed": false
-        },
-        {
-          "label": "FIRE_DEALT",
-          "values": [
-            12
-          ],
-          "unit": "%",
-          "fixed": true
-        },
-        {
-          "label": "PHYSICAL_RECEIVED",
-          "values": [
-            -12
-          ],
-          "unit": "%",
-          "fixed": true
         }
       ],
-      "description": "Odd-Numbered Rounds: Apply Stat Modifier (Buff), Stat Modifier (Debuff) to 1 Self, 2 Allies (Chance: 25% | 30% | 35% | 42.5% | 50% ; FIRE_DEALT: 12% ; PHYSICAL_RECEIVED: -12%) for 2 Rounds.",
+      "description": "Start of odd rounds: chance to increase Fire Dealt and reduce Physical Received of 2 other Allies for 2 rounds. If you have Panic, also reduce your Physical Received.",
       "structured": [
         {
-          "when": "odd",
+          "phase": "round_start",
+          "rounds": [1, 3, 5, 7, 9],
+          "chance": [25, 30, 35, 42.5, 50],
           "actions": [
             {
               "t": "mod",
               "mods": [
-                {
-                  "stat": "fire_dealt",
-                  "pct": 12
-                }
+                { "stat": "fire_dealt", "pct": 12 },
+                { "stat": "physical_received", "pct": -12 }
               ],
               "dur": 2,
-              "chance": [
-                25,
-                30,
-                35,
-                42.5,
-                50
-              ],
-              "tgt": {
-                "side": "self"
-              },
-              "linkNext": true
+              "tgt": { "side": "ally", "count": 2, "select": "any", "excludeSelf": true }
             },
             {
               "t": "mod",
-              "mods": [
-                {
-                  "stat": "physical_received",
-                  "pct": -12
-                }
-              ],
+              "mods": [{ "stat": "physical_received", "pct": -12 }],
               "dur": 2,
-              "tgt": {
-                "side": "ally",
-                "count": 2,
-                "select": "any"
-              }
+              "requires": { "selfStatus": "panic" },
+              "tgt": { "side": "self" }
             }
           ]
         }
@@ -247,72 +126,39 @@
       "slot": 4,
       "unlockStar": 8,
       "name": "Clever Maneuver",
-      "trigger": "Start of Combat",
-      "targeting": "1 Ally",
-      "effectType": "Stat Modifier (Buff)",
+      "targeting": "Ally with highest Intelligence",
+      "effectType": "Stat Modifier",
       "duration": "Whole Combat",
       "scalingRaw": "INT: 18% | 21.6% | 25.2% | 30.6% | 36% ; INIT: 9% | 10.8% | 12.6% | 15.3% | 18%",
       "scaling": [
         {
           "label": "INT",
-          "values": [
-            18,
-            21.6,
-            25.2,
-            30.6,
-            36
-          ],
+          "values": [18, 21.6, 25.2, 30.6, 36],
           "unit": "%",
           "fixed": false
         },
         {
           "label": "INIT",
-          "values": [
-            9,
-            10.8,
-            12.6,
-            15.3,
-            18
-          ],
+          "values": [9, 10.8, 12.6, 15.3, 18],
           "unit": "%",
           "fixed": false
         }
       ],
-      "description": "Start of Combat: Apply Stat Modifier (Buff) to 1 Ally (INT: 18% | 21.6% | 25.2% | 30.6% | 36% ; INIT: 9% | 10.8% | 12.6% | 15.3% | 18%) for Whole Combat.",
+      "description": "Start of Combat: Increase Intelligence and Initiative of the Ally with the highest Intelligence (both enhanced by Instinct) until the end of combat.",
       "structured": [
         {
-          "when": "combat_start",
+          "phase": "combat_start",
+          "rounds": [1],
           "actions": [
             {
               "t": "mod",
-              "dur": "combat",
-              "tgt": {
-                "side": "ally",
-                "count": 1,
-                "select": "highest:int"
-              },
               "mods": [
-                {
-                  "stat": "int",
-                  "pct": [
-                    18,
-                    21.6,
-                    25.2,
-                    30.6,
-                    36
-                  ]
-                },
-                {
-                  "stat": "init",
-                  "pct": [
-                    9,
-                    10.8,
-                    12.6,
-                    15.3,
-                    18
-                  ]
-                }
-              ]
+                { "stat": "int", "pct": [18, 21.6, 25.2, 30.6, 36] },
+                { "stat": "init", "pct": [9, 10.8, 12.6, 15.3, 18] }
+              ],
+              "scaleStat": "inst",
+              "dur": "combat",
+              "tgt": { "side": "ally", "count": 1, "select": "highest:int" }
             }
           ]
         }
@@ -323,85 +169,35 @@
       "slot": 5,
       "unlockStar": 10,
       "name": "The Blue Queen",
-      "trigger": "Odd-Numbered Rounds",
-      "targeting": "1 Ally",
-      "effectType": "Stat Modifier (Debuff)",
+      "targeting": "1 other Ally (Fire dealer)",
+      "effectType": "Stat Modifier",
       "duration": "2 Rounds",
-      "scalingRaw": "Chance: 40% | 52% | 64% | 80% | 100% ; DMG_RECEIVED: -10% ; INT: 15%",
+      "scalingRaw": "Chance: 40% | 52% | 64% | 80% | 100%",
       "scaling": [
         {
           "label": "Chance",
-          "values": [
-            40,
-            52,
-            64,
-            80,
-            100
-          ],
+          "values": [40, 52, 64, 80, 100],
           "unit": "%",
           "fixed": false
-        },
-        {
-          "label": "DMG_RECEIVED",
-          "values": [
-            -10
-          ],
-          "unit": "%",
-          "fixed": true
-        },
-        {
-          "label": "INT",
-          "values": [
-            15
-          ],
-          "unit": "%",
-          "fixed": true
         }
       ],
-      "description": "Odd-Numbered Rounds: Apply Stat Modifier (Debuff) to 1 Ally (Chance: 40% | 52% | 64% | 80% | 100% ; DMG_RECEIVED: -10% ; INT: 15%) for 2 Rounds.",
+      "description": "Start of odd rounds: chance to reduce Damage Received and increase Intelligence (enhanced by Intelligence) of 1 other Fire-dealing Ally for 2 rounds. Doubled if you are above 75% HP.",
       "structured": [
         {
-          "when": "odd",
+          "phase": "round_start",
+          "rounds": [1, 3, 5, 7, 9],
+          "chance": [40, 52, 64, 80, 100],
           "actions": [
             {
               "t": "mod",
-              "scaleStat": "int",
-              "dur": 2,
-              "chance": [
-                40,
-                52,
-                64,
-                80,
-                100
-              ],
-              "tgt": {
-                "side": "ally",
-                "count": 1,
-                "select": "dealer:fire"
-              },
               "mods": [
-                {
-                  "stat": "dmg_received",
-                  "pct": -10
-                },
-                {
-                  "stat": "int",
-                  "pct": 15
-                }
+                { "stat": "dmg_received", "pct": -10 },
+                { "stat": "int", "pct": 15 }
               ],
-              "bonus": {
-                "cond": "self:troops_above_75",
-                "mods": [
-                  {
-                    "stat": "dmg_received",
-                    "pct": -20
-                  },
-                  {
-                    "stat": "int",
-                    "pct": 30
-                  }
-                ]
-              }
+              "scaleStat": "int",
+              "ifBonus": { "selfHpAbove": 75, "mult": 2 },
+              "dur": 2,
+              "tgt": { "side": "ally", "count": 1, "select": "dealer:fire", "excludeSelf": true }
             }
           ]
         }
