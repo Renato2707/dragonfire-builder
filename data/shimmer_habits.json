@@ -6,86 +6,41 @@
       "slot": 1,
       "unlockStar": 2,
       "name": "Crushing Force",
-      "trigger": "Rounds 1",
-      "targeting": "1 Ally (Right Lane), 1 Ally (Left Lane)",
-      "effectType": "Stat Modifier (Buff)",
+      "targeting": "1 Ally (Left Flank), 1 Ally (Right Flank)",
+      "effectType": "Stat Modifier",
       "duration": "3 Rounds",
       "scalingRaw": "PHYSICAL_DEALT: 9% | 10.8% | 12.6% | 15.3% | 18% ; TACTICAL_DEALT: 9% | 10.8% | 12.6% | 15.3% | 18%",
       "scaling": [
         {
           "label": "PHYSICAL_DEALT",
-          "values": [
-            9,
-            10.8,
-            12.6,
-            15.3,
-            18
-          ],
+          "values": [9, 10.8, 12.6, 15.3, 18],
           "unit": "%",
           "fixed": false
         },
         {
           "label": "TACTICAL_DEALT",
-          "values": [
-            9,
-            10.8,
-            12.6,
-            15.3,
-            18
-          ],
+          "values": [9, 10.8, 12.6, 15.3, 18],
           "unit": "%",
           "fixed": false
         }
       ],
-      "description": "Rounds 1: Apply Stat Modifier (Buff) to 1 Ally (Right Lane), 1 Ally (Left Lane) (PHYSICAL_DEALT: 9% | 10.8% | 12.6% | 15.3% | 18% ; TACTICAL_DEALT: 9% | 10.8% | 12.6% | 15.3% | 18%) for 3 Rounds.",
+      "description": "Start of Round 1: Increase Physical Damage Dealt of 1 Ally (prioritizes Left Flank) and Tactical Damage Dealt of 1 Ally (prioritizes Right Flank) for 3 rounds.",
       "structured": [
         {
-          "when": "rounds",
-          "rounds": [
-            1
-          ],
+          "phase": "round_start",
+          "rounds": [1],
           "actions": [
             {
               "t": "mod",
-              "mods": [
-                {
-                  "stat": "physical_dealt",
-                  "pct": [
-                    9,
-                    10.8,
-                    12.6,
-                    15.3,
-                    18
-                  ]
-                }
-              ],
+              "mods": [{ "stat": "physical_dealt", "pct": [9, 10.8, 12.6, 15.3, 18] }],
               "dur": 3,
-              "tgt": {
-                "side": "ally",
-                "count": 1,
-                "select": "prefer_lane:L"
-              }
+              "tgt": { "side": "ally", "count": 1, "select": "prefer_lane:L" }
             },
             {
               "t": "mod",
-              "mods": [
-                {
-                  "stat": "tactical_dealt",
-                  "pct": [
-                    9,
-                    10.8,
-                    12.6,
-                    15.3,
-                    18
-                  ]
-                }
-              ],
+              "mods": [{ "stat": "tactical_dealt", "pct": [9, 10.8, 12.6, 15.3, 18] }],
               "dur": 3,
-              "tgt": {
-                "side": "ally",
-                "count": 1,
-                "select": "prefer_lane:R"
-              }
+              "tgt": { "side": "ally", "count": 1, "select": "prefer_lane:R" }
             }
           ]
         }
@@ -96,70 +51,38 @@
       "slot": 2,
       "unlockStar": 4,
       "name": "Dragon's Insight",
-      "trigger": "Start of Combat",
       "targeting": "1 Self",
-      "effectType": "Stat Modifier (Buff)",
+      "effectType": "Stat Modifier",
       "duration": "Whole Combat",
       "scalingRaw": "DMG_RECEIVED: -4% | -4.8% | -5.6% | -6.8% | -8% ; INST: 5% | 6% | 7% | 8.5% | 10%",
       "scaling": [
         {
           "label": "DMG_RECEIVED",
-          "values": [
-            -4,
-            -4.8,
-            -5.6,
-            -6.8,
-            -8
-          ],
+          "values": [-4, -4.8, -5.6, -6.8, -8],
           "unit": "%",
           "fixed": false
         },
         {
           "label": "INST",
-          "values": [
-            5,
-            6,
-            7,
-            8.5,
-            10
-          ],
+          "values": [5, 6, 7, 8.5, 10],
           "unit": "%",
           "fixed": false
         }
       ],
-      "description": "Start of Combat: Apply Stat Modifier (Buff) to 1 Self (DMG_RECEIVED: -4% | -4.8% | -5.6% | -6.8% | -8% ; INST: 5% | 6% | 7% | 8.5% | 10%) for Whole Combat.",
+      "description": "Start of Combat: Reduce your Damage Received and increase your Instinct until the end of combat.",
       "structured": [
         {
-          "when": "combat_start",
+          "phase": "combat_start",
+          "rounds": [1],
           "actions": [
             {
               "t": "mod",
               "mods": [
-                {
-                  "stat": "dmg_received",
-                  "pct": [
-                    -4,
-                    -4.8,
-                    -5.6,
-                    -6.8,
-                    -8
-                  ]
-                },
-                {
-                  "stat": "inst",
-                  "pct": [
-                    5,
-                    6,
-                    7,
-                    8.5,
-                    10
-                  ]
-                }
+                { "stat": "dmg_received", "pct": [-4, -4.8, -5.6, -6.8, -8] },
+                { "stat": "inst", "pct": [5, 6, 7, 8.5, 10] }
               ],
               "dur": "combat",
-              "tgt": {
-                "side": "self"
-              }
+              "tgt": { "side": "self" }
             }
           ]
         }
@@ -170,50 +93,31 @@
       "slot": 3,
       "unlockStar": 6,
       "name": "Loyal Shield",
-      "trigger": "Rounds 2, 4, 7, 9",
-      "targeting": "2 Allies",
-      "effectType": "Troop Healing",
-      "duration": "Whole Combat",
+      "targeting": "2 other Allies",
+      "effectType": "Recovery",
+      "duration": "Instant",
       "scalingRaw": "Rate: 30% | 36% | 42% | 51% | 60%",
       "scaling": [
         {
           "label": "Rate",
-          "values": [
-            30,
-            36,
-            42,
-            51,
-            60
-          ],
+          "values": [30, 36, 42, 51, 60],
           "unit": "%",
           "fixed": false
         }
       ],
-      "description": "Rounds 2, 4, 7, 9: Apply Troop Healing to 2 Allies (Rate: 30% | 36% | 42% | 51% | 60%) for Whole Combat.",
+      "description": "Unbreakable Loyalty gains: Rounds 2, 4, 7, 9 apply Recovery (enhanced by Instinct) to 2 other Allies, doubled if the target has Resistance.",
       "structured": [
         {
-          "when": "rounds",
-          "rounds": [
-            2,
-            4,
-            7,
-            9
-          ],
+          "phase": "turn",
+          "rounds": [2, 4, 7, 9],
+          "requires": { "command": "Unbreakable Loyalty" },
           "actions": [
             {
               "t": "heal",
-              "pct": [
-                30,
-                36,
-                42,
-                51,
-                60
-              ],
-              "tgt": {
-                "side": "ally",
-                "count": 2,
-                "select": "any"
-              }
+              "pct": [30, 36, 42, 51, 60],
+              "scaleStat": "inst",
+              "ifBonus": { "on": "target", "status": "resistance", "mult": 2 },
+              "tgt": { "side": "ally", "count": 2, "select": "any", "excludeSelf": true }
             }
           ]
         }
@@ -224,50 +128,29 @@
       "slot": 4,
       "unlockStar": 8,
       "name": "Unbroken Devotion",
-      "trigger": "Start of Combat",
-      "targeting": "2 Allies",
-      "effectType": "Stat Modifier (Buff)",
+      "targeting": "2 other Allies",
+      "effectType": "Stat Modifier",
       "duration": "Whole Combat",
       "scalingRaw": "RECOVERY_RECEIVED: 15% | 18% | 21% | 25.5% | 30%",
       "scaling": [
         {
           "label": "RECOVERY_RECEIVED",
-          "values": [
-            15,
-            18,
-            21,
-            25.5,
-            30
-          ],
+          "values": [15, 18, 21, 25.5, 30],
           "unit": "%",
           "fixed": false
         }
       ],
-      "description": "Start of Combat: Apply Stat Modifier (Buff) to 2 Allies (RECOVERY_RECEIVED: 15% | 18% | 21% | 25.5% | 30%) for Whole Combat.",
+      "description": "Start of Combat: Increase Recovery Received of 2 other Allies until the end of combat.",
       "structured": [
         {
-          "when": "combat_start",
+          "phase": "combat_start",
+          "rounds": [1],
           "actions": [
             {
               "t": "mod",
-              "mods": [
-                {
-                  "stat": "recovery_received",
-                  "pct": [
-                    15,
-                    18,
-                    21,
-                    25.5,
-                    30
-                  ]
-                }
-              ],
+              "mods": [{ "stat": "recovery_received", "pct": [15, 18, 21, 25.5, 30] }],
               "dur": "combat",
-              "tgt": {
-                "side": "ally",
-                "count": 2,
-                "select": "any"
-              }
+              "tgt": { "side": "ally", "count": 2, "select": "any", "excludeSelf": true }
             }
           ]
         }
@@ -278,51 +161,42 @@
       "slot": 5,
       "unlockStar": 10,
       "name": "Sneak Attack",
-      "trigger": "Each Action / Round",
-      "targeting": "1 Ally",
-      "effectType": "Stat Modifier (Buff), Status Effect (Control/DoT)",
+      "targeting": "Other Ally with highest Strength",
+      "effectType": "Stat Modifier, Status Effect",
       "duration": "2 Rounds",
-      "scalingRaw": "PHYSICAL_DEALT: 10%",
+      "scalingRaw": "Chance: 14% | 18.2% | 22.4% | 28% | 35% ; PHYSICAL_DEALT: 10%",
       "scaling": [
         {
+          "label": "Chance",
+          "values": [14, 18.2, 22.4, 28, 35],
+          "unit": "%",
+          "fixed": false
+        },
+        {
           "label": "PHYSICAL_DEALT",
-          "values": [
-            10
-          ],
+          "values": [10],
           "unit": "%",
           "fixed": true
         }
       ],
-      "description": "Each Action / Round: Apply Stat Modifier (Buff), Status Effect (Control/DoT) to 1 Ally (PHYSICAL_DEALT: 10%) for 2 Rounds.",
+      "description": "Each Round: chance to increase Physical Damage Dealt and grant First-Strike to the other Ally with the highest Strength for 2 rounds. One roll applies both.",
       "structured": [
         {
-          "when": "each",
-          "chance": 14,
+          "phase": "turn",
+          "rounds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+          "chance": [14, 18.2, 22.4, 28, 35],
           "actions": [
             {
               "t": "mod",
-              "mods": [
-                {
-                  "stat": "physical_dealt",
-                  "pct": 10
-                }
-              ],
+              "mods": [{ "stat": "physical_dealt", "pct": 10 }],
               "dur": 2,
-              "tgt": {
-                "side": "ally",
-                "count": 1,
-                "select": "highest_str"
-              }
+              "tgt": { "side": "ally", "count": 1, "select": "highest:str", "excludeSelf": true }
             },
             {
               "t": "status",
               "st": "first_strike",
               "dur": 2,
-              "tgt": {
-                "side": "ally",
-                "count": 1,
-                "select": "highest_str"
-              }
+              "tgt": { "side": "ally", "count": 1, "select": "highest:str", "excludeSelf": true }
             }
           ]
         }
