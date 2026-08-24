@@ -6,73 +6,39 @@
       "slot": 1,
       "unlockStar": 2,
       "name": "Mindful Synergy",
-      "trigger": "Start of Combat",
       "targeting": "3 Allies",
-      "effectType": "Stat Modifier (Buff)",
+      "effectType": "Stat Modifier",
       "duration": "Whole Combat",
       "scalingRaw": "INT: 6.5% | 7.8% | 9.1% | 11.05% | 13% ; INST: 6.5% | 7.8% | 9.1% | 11.05% | 13%",
       "scaling": [
         {
           "label": "INT",
-          "values": [
-            6.5,
-            7.8,
-            9.1,
-            11.05,
-            13
-          ],
+          "values": [6.5, 7.8, 9.1, 11.05, 13],
           "unit": "%",
           "fixed": false
         },
         {
           "label": "INST",
-          "values": [
-            6.5,
-            7.8,
-            9.1,
-            11.05,
-            13
-          ],
+          "values": [6.5, 7.8, 9.1, 11.05, 13],
           "unit": "%",
           "fixed": false
         }
       ],
-      "description": "Start of Combat: Apply Stat Modifier (Buff) to 3 Allies (INT: 6.5% | 7.8% | 9.1% | 11.05% | 13% ; INST: 6.5% | 7.8% | 9.1% | 11.05% | 13%) for Whole Combat.",
+      "description": "Start of Combat: Increase Intelligence and Instinct (enhanced by Initiative) of 3 Allies until the end of combat.",
       "structured": [
         {
-          "when": "combat_start",
+          "phase": "combat_start",
+          "rounds": [1],
           "actions": [
             {
               "t": "mod",
+              "mods": [
+                { "stat": "int", "pct": [6.5, 7.8, 9.1, 11.05, 13] },
+                { "stat": "inst", "pct": [6.5, 7.8, 9.1, 11.05, 13] }
+              ],
               "scaleStat": "init",
               "dur": "combat",
-              "tgt": {
-                "side": "ally",
-                "count": 3,
-                "select": "all"
-              },
-              "mods": [
-                {
-                  "stat": "int",
-                  "pct": [
-                    6.5,
-                    7.8,
-                    9.1,
-                    11.05,
-                    13
-                  ]
-                },
-                {
-                  "stat": "inst",
-                  "pct": [
-                    6.5,
-                    7.8,
-                    9.1,
-                    11.05,
-                    13
-                  ]
-                }
-              ]
+              "tgt": { "side": "ally", "count": 3, "select": "any" }
             }
           ]
         }
@@ -83,85 +49,43 @@
       "slot": 2,
       "unlockStar": 4,
       "name": "Flight Mastery",
-      "trigger": "Start of Combat",
-      "targeting": "3 Enemies, 3 Allies",
-      "effectType": "Stat Modifier (Buff)",
+      "targeting": "3 Allies; 3 Enemies",
+      "effectType": "Stat Modifier",
       "duration": "Whole Combat",
-      "scalingRaw": "INIT: 6% | 7.2% | 8.4% | 10.2% | 12% ; INIT: -6% | -7.2% | -8.4% | -10.2% | -12%",
+      "scalingRaw": "INIT ally: 6% | 7.2% | 8.4% | 10.2% | 12% ; INIT enemy: -6% | -7.2% | -8.4% | -10.2% | -12%",
       "scaling": [
         {
-          "label": "INIT",
-          "values": [
-            6,
-            7.2,
-            8.4,
-            10.2,
-            12
-          ],
+          "label": "INIT ally",
+          "values": [6, 7.2, 8.4, 10.2, 12],
           "unit": "%",
           "fixed": false
         },
         {
-          "label": "INIT",
-          "values": [
-            -6,
-            -7.2,
-            -8.4,
-            -10.2,
-            -12
-          ],
+          "label": "INIT enemy",
+          "values": [-6, -7.2, -8.4, -10.2, -12],
           "unit": "%",
           "fixed": false
         }
       ],
-      "description": "Start of Combat: Apply Stat Modifier (Buff) to 3 Enemies, 3 Allies (INIT: 6% | 7.2% | 8.4% | 10.2% | 12% ; INIT: -6% | -7.2% | -8.4% | -10.2% | -12%) for Whole Combat.",
+      "description": "Start of Combat: Increase Initiative of 3 Allies and reduce Initiative of 3 Enemies (both enhanced by Instinct) until the end of combat.",
       "structured": [
         {
-          "when": "combat_start",
+          "phase": "combat_start",
+          "rounds": [1],
           "actions": [
             {
               "t": "mod",
-              "mods": [
-                {
-                  "stat": "init",
-                  "pct": [
-                    6,
-                    7.2,
-                    8.4,
-                    10.2,
-                    12
-                  ]
-                }
-              ],
+              "mods": [{ "stat": "init", "pct": [6, 7.2, 8.4, 10.2, 12] }],
               "scaleStat": "inst",
               "dur": "combat",
-              "tgt": {
-                "side": "ally",
-                "count": 3,
-                "select": "all"
-              }
+              "tgt": { "side": "ally", "count": 3, "select": "any" }
             },
             {
               "t": "mod",
-              "mods": [
-                {
-                  "stat": "init",
-                  "pct": [
-                    -6,
-                    -7.2,
-                    -8.4,
-                    -10.2,
-                    -12
-                  ]
-                }
-              ],
+              "mods": [{ "stat": "init", "pct": [-6, -7.2, -8.4, -10.2, -12] }],
               "scaleStat": "inst",
               "dur": "combat",
-              "tgt": {
-                "side": "enemy",
-                "count": 3,
-                "select": "all"
-              }
+              "tgt": { "side": "enemy", "count": 3, "select": "any" }
             }
           ]
         }
@@ -172,103 +96,45 @@
       "slot": 3,
       "unlockStar": 6,
       "name": "Strategic Revival",
-      "trigger": "Rounds 2, 5, 8",
-      "targeting": "1 Ally (Lowest Troops), 1 Ally",
-      "effectType": "Stat Modifier (Debuff), Troop Healing",
-      "duration": "2 Rounds, Whole Combat",
-      "scalingRaw": "Rate: 50% | 60% | 70% | 85% | 100% ; Chance: 40% | 52% | 64% | 80% | 100% ; DMG_RECEIVED: -20%",
+      "targeting": "Ally with least troops",
+      "effectType": "Recovery, Status Effect",
+      "duration": "2 Rounds",
+      "scalingRaw": "Rate: 50% | 60% | 70% | 85% | 100% ; Resistance Chance: 25% | 30% | 35% | 42.5% | 50%",
       "scaling": [
         {
           "label": "Rate",
-          "values": [
-            50,
-            60,
-            70,
-            85,
-            100
-          ],
+          "values": [50, 60, 70, 85, 100],
           "unit": "%",
           "fixed": false
         },
         {
-          "label": "Chance",
-          "values": [
-            40,
-            52,
-            64,
-            80,
-            100
-          ],
+          "label": "Resistance Chance",
+          "values": [25, 30, 35, 42.5, 50],
           "unit": "%",
           "fixed": false
-        },
-        {
-          "label": "DMG_RECEIVED",
-          "values": [
-            -20
-          ],
-          "unit": "%",
-          "fixed": true
         }
       ],
-      "description": "Rounds 2, 5, 8: Apply Stat Modifier (Debuff), Troop Healing to 1 Ally (Lowest Troops), 1 Ally (Rate: 50% | 60% | 70% | 85% | 100% ; Chance: 40% | 52% | 64% | 80% | 100% ; DMG_RECEIVED: -20%) for 2 Rounds, Whole Combat.",
+      "description": "Blazing Fury gains: Rounds 2, 5, 8 Recovery (enhanced by Initiative) to the Ally with the least troops, 1.5x if any Enemy has Slow, plus a chance to grant Resistance.",
       "structured": [
         {
-          "when": "rounds",
-          "rounds": [
-            2,
-            5,
-            8
-          ],
+          "phase": "turn",
+          "rounds": [2, 5, 8],
+          "requires": { "command": "Blazing Fury" },
           "actions": [
             {
               "t": "heal",
-              "pct": [
-                50,
-                60,
-                70,
-                85,
-                100
-              ],
+              "pct": [50, 60, 70, 85, 100],
               "scaleStat": "init",
-              "bonus": {
-                "cond": "enemy:slow",
-                "pct": [
-                  75,
-                  90,
-                  105,
-                  127.5,
-                  150
-                ]
-              },
-              "tgt": {
-                "side": "ally",
-                "count": 1,
-                "select": "least_troops"
-              },
-              "linkNext": true
+              "ifBonus": { "anyEnemyStatus": "slow", "mult": 1.5 },
+              "tgt": { "side": "ally", "count": 1, "select": "lowest:troops" }
             },
             {
-              "t": "mod",
-              "mods": [
-                {
-                  "stat": "dmg_received",
-                  "pct": -20
-                }
-              ],
+              "t": "status",
+              "st": "resistance",
+              "val": 20,
               "dur": 2,
-              "chance": [
-                40,
-                52,
-                64,
-                80,
-                100
-              ],
-              "tgt": {
-                "side": "ally",
-                "count": 1,
-                "select": "linked"
-              }
+              "chance": [25, 30, 35, 42.5, 50],
+              "tgt": { "side": "ally", "count": 1, "select": "lowest:troops" }
             }
           ]
         }
@@ -279,86 +145,41 @@
       "slot": 4,
       "unlockStar": 8,
       "name": "Tactical Inferno",
-      "trigger": "Rounds 1",
-      "targeting": "1 Ally (Right Lane), 1 Ally (Left Lane)",
-      "effectType": "Stat Modifier (Buff)",
+      "targeting": "1 Ally (Left Flank), 1 Ally (Right Flank)",
+      "effectType": "Stat Modifier",
       "duration": "3 Rounds",
       "scalingRaw": "TACTICAL_DEALT: 18% | 21.6% | 25.2% | 30.6% | 36% ; FIRE_DEALT: 18% | 21.6% | 25.2% | 30.6% | 36%",
       "scaling": [
         {
           "label": "TACTICAL_DEALT",
-          "values": [
-            18,
-            21.6,
-            25.2,
-            30.6,
-            36
-          ],
+          "values": [18, 21.6, 25.2, 30.6, 36],
           "unit": "%",
           "fixed": false
         },
         {
           "label": "FIRE_DEALT",
-          "values": [
-            18,
-            21.6,
-            25.2,
-            30.6,
-            36
-          ],
+          "values": [18, 21.6, 25.2, 30.6, 36],
           "unit": "%",
           "fixed": false
         }
       ],
-      "description": "Rounds 1: Apply Stat Modifier (Buff) to 1 Ally (Right Lane), 1 Ally (Left Lane) (TACTICAL_DEALT: 18% | 21.6% | 25.2% | 30.6% | 36% ; FIRE_DEALT: 18% | 21.6% | 25.2% | 30.6% | 36%) for 3 Rounds.",
+      "description": "Start of Round 1: Increase Tactical Damage Dealt of 1 Ally (prioritizes Left Flank) and Fire Damage Dealt of 1 Ally (prioritizes Right Flank) for 3 rounds.",
       "structured": [
         {
-          "when": "rounds",
-          "rounds": [
-            1
-          ],
+          "phase": "round_start",
+          "rounds": [1],
           "actions": [
             {
               "t": "mod",
-              "mods": [
-                {
-                  "stat": "tactical_dealt",
-                  "pct": [
-                    18,
-                    21.6,
-                    25.2,
-                    30.6,
-                    36
-                  ]
-                }
-              ],
+              "mods": [{ "stat": "tactical_dealt", "pct": [18, 21.6, 25.2, 30.6, 36] }],
               "dur": 3,
-              "tgt": {
-                "side": "ally",
-                "count": 1,
-                "select": "prefer_lane:L"
-              }
+              "tgt": { "side": "ally", "count": 1, "select": "prefer_lane:L" }
             },
             {
               "t": "mod",
-              "mods": [
-                {
-                  "stat": "fire_dealt",
-                  "pct": [
-                    18,
-                    21.6,
-                    25.2,
-                    30.6,
-                    36
-                  ]
-                }
-              ],
+              "mods": [{ "stat": "fire_dealt", "pct": [18, 21.6, 25.2, 30.6, 36] }],
               "dur": 3,
-              "tgt": {
-                "side": "ally",
-                "count": 1,
-                "select": "prefer_lane:R"
-              }
+              "tgt": { "side": "ally", "count": 1, "select": "prefer_lane:R" }
             }
           ]
         }
@@ -369,52 +190,31 @@
       "slot": 5,
       "unlockStar": 10,
       "name": "Mother's Mercy",
-      "trigger": "Each Action / Round",
-      "targeting": "1 Ally (Afflicted with Control)",
-      "effectType": "Cleanse (Debuff Removal)",
-      "duration": "Whole Combat",
-      "scalingRaw": "Chance: 14% | 18.2% | 22.4% | 28% | 35%",
+      "targeting": "1 Ally (prioritizes Control)",
+      "effectType": "Cleanse",
+      "duration": "Instant",
+      "scalingRaw": "Cleanse Chance: 14% | 18.2% | 22.4% | 28% | 35%",
       "scaling": [
         {
-          "label": "Chance",
-          "values": [
-            14,
-            18.2,
-            22.4,
-            28,
-            35
-          ],
+          "label": "Cleanse Chance",
+          "values": [14, 18.2, 22.4, 28, 35],
           "unit": "%",
           "fixed": false
         }
       ],
-      "description": "Cleanse 2 negative and 1 control effects from 1 ally in any lane (prioritizes allies afflicted with a control effect). Control effects include stun, stagger, overwhelm and confusion.",
+      "description": "Each Round: chance to Cleanse 2 Negative and 1 Control effect from 1 Ally (prioritizes allies with Control). Control: Stun, Stagger, Overwhelm, Confusion.",
       "structured": [
         {
-          "when": "each",
+          "phase": "turn",
+          "rounds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
           "actions": [
             {
               "t": "cleanse",
-              "cleanse_negative": 2,
-              "cleanse_control": 1,
-              "control_types": [
-                "stun",
-                "stagger",
-                "overwhelm",
-                "confusion"
-              ],
-              "chance": [
-                14,
-                18.2,
-                22.4,
-                28,
-                35
-              ],
-              "tgt": {
-                "side": "ally",
-                "count": 1,
-                "select": "prioritize_afflicted_control"
-              }
+              "negative": 2,
+              "control": 1,
+              "controlTypes": ["stun", "stagger", "overwhelm", "confusion"],
+              "chance": [14, 18.2, 22.4, 28, 35],
+              "tgt": { "side": "ally", "count": 1, "select": "prefer_control" }
             }
           ]
         }
