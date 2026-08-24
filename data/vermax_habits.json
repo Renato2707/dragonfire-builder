@@ -6,116 +6,53 @@
       "slot": 1,
       "unlockStar": 2,
       "name": "Trial by Flame",
-      "trigger": "Each Action / Round",
-      "targeting": "All Allies",
-      "effectType": "Stat Modifier (Buff)",
+      "targeting": "Allies below HP thresholds",
+      "effectType": "Stat Modifier",
       "duration": "1 Round",
-      "scalingRaw": "FIRE_RECEIVED: -5% | -6% | -7% | -8.5% | -10% ; FIRE_RECEIVED: -5% | -6% | -7% | -8.5% | -10% ; FIRE_RECEIVED: -5% | -6% | -7% | -8.5% | -10%",
+      "scalingRaw": "<75%: -5% | -6% | -7% | -8.5% | -10% ; <50%: -10% | -12% | -14% | -17% | -20% ; <25%: -15% | -18% | -21% | -25.5% | -30%",
       "scaling": [
         {
-          "label": "FIRE_RECEIVED",
-          "values": [
-            -5,
-            -6,
-            -7,
-            -8.5,
-            -10
-          ],
+          "label": "<75%",
+          "values": [-5, -6, -7, -8.5, -10],
           "unit": "%",
           "fixed": false
         },
         {
-          "label": "FIRE_RECEIVED",
-          "values": [
-            -5,
-            -6,
-            -7,
-            -8.5,
-            -10
-          ],
+          "label": "<50%",
+          "values": [-10, -12, -14, -17, -20],
           "unit": "%",
           "fixed": false
         },
         {
-          "label": "FIRE_RECEIVED",
-          "values": [
-            -5,
-            -6,
-            -7,
-            -8.5,
-            -10
-          ],
+          "label": "<25%",
+          "values": [-15, -18, -21, -25.5, -30],
           "unit": "%",
           "fixed": false
         }
       ],
-      "description": "Each Action / Round: Apply Stat Modifier (Buff) to All Allies (FIRE_RECEIVED: -5% | -6% | -7% | -8.5% | -10% ; FIRE_RECEIVED: -5% | -6% | -7% | -8.5% | -10% ; FIRE_RECEIVED: -5% | -6% | -7% | -8.5% | -10%) for 1 Round.",
+      "description": "Start of each round: reduce Fire Damage Received of allies below 75% HP until end of round. Doubled below 50%, tripled below 25%. Bands are exclusive.",
       "structured": [
         {
-          "when": "each",
+          "phase": "round_start",
+          "rounds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
           "actions": [
             {
               "t": "mod",
-              "mods": [
-                {
-                  "stat": "fire_received",
-                  "pct": [
-                    -5,
-                    -6,
-                    -7,
-                    -8.5,
-                    -10
-                  ]
-                }
-              ],
+              "mods": [{ "stat": "fire_received", "pct": [-5, -6, -7, -8.5, -10] }],
               "dur": 1,
-              "onlyIf": "target:troops_below_75",
-              "tgt": {
-                "side": "ally",
-                "count": "all"
-              }
+              "tgt": { "side": "ally", "count": "all", "select": "any", "hpBelow": 75, "hpAtLeast": 50 }
             },
             {
               "t": "mod",
-              "mods": [
-                {
-                  "stat": "fire_received",
-                  "pct": [
-                    -5,
-                    -6,
-                    -7,
-                    -8.5,
-                    -10
-                  ]
-                }
-              ],
+              "mods": [{ "stat": "fire_received", "pct": [-10, -12, -14, -17, -20] }],
               "dur": 1,
-              "onlyIf": "target:troops_below_50",
-              "tgt": {
-                "side": "ally",
-                "count": "all"
-              }
+              "tgt": { "side": "ally", "count": "all", "select": "any", "hpBelow": 50, "hpAtLeast": 25 }
             },
             {
               "t": "mod",
-              "mods": [
-                {
-                  "stat": "fire_received",
-                  "pct": [
-                    -5,
-                    -6,
-                    -7,
-                    -8.5,
-                    -10
-                  ]
-                }
-              ],
+              "mods": [{ "stat": "fire_received", "pct": [-15, -18, -21, -25.5, -30] }],
               "dur": 1,
-              "onlyIf": "target:troops_below_25",
-              "tgt": {
-                "side": "ally",
-                "count": "all"
-              }
+              "tgt": { "side": "ally", "count": "all", "select": "any", "hpBelow": 25 }
             }
           ]
         }
@@ -126,73 +63,39 @@
       "slot": 2,
       "unlockStar": 4,
       "name": "Reactive Instincts",
-      "trigger": "Start of Combat",
-      "targeting": "1 Ally",
-      "effectType": "Stat Modifier (Buff)",
+      "targeting": "Ally with highest Instinct",
+      "effectType": "Stat Modifier",
       "duration": "Whole Combat",
       "scalingRaw": "INST: 18% | 21.6% | 25.2% | 30.6% | 36% ; INIT: 9% | 10.8% | 12.6% | 15.3% | 18%",
       "scaling": [
         {
           "label": "INST",
-          "values": [
-            18,
-            21.6,
-            25.2,
-            30.6,
-            36
-          ],
+          "values": [18, 21.6, 25.2, 30.6, 36],
           "unit": "%",
           "fixed": false
         },
         {
           "label": "INIT",
-          "values": [
-            9,
-            10.8,
-            12.6,
-            15.3,
-            18
-          ],
+          "values": [9, 10.8, 12.6, 15.3, 18],
           "unit": "%",
           "fixed": false
         }
       ],
-      "description": "Start of Combat: Apply Stat Modifier (Buff) to 1 Ally (INST: 18% | 21.6% | 25.2% | 30.6% | 36% ; INIT: 9% | 10.8% | 12.6% | 15.3% | 18%) for Whole Combat.",
+      "description": "Start of Combat: Increase Instinct and Initiative of the Ally with the highest Instinct (both enhanced by Strength) until the end of combat.",
       "structured": [
         {
-          "when": "combat_start",
+          "phase": "combat_start",
+          "rounds": [1],
           "actions": [
             {
               "t": "mod",
+              "mods": [
+                { "stat": "inst", "pct": [18, 21.6, 25.2, 30.6, 36] },
+                { "stat": "init", "pct": [9, 10.8, 12.6, 15.3, 18] }
+              ],
               "scaleStat": "str",
               "dur": "combat",
-              "tgt": {
-                "side": "ally",
-                "count": 1,
-                "select": "highest:inst"
-              },
-              "mods": [
-                {
-                  "stat": "inst",
-                  "pct": [
-                    18,
-                    21.6,
-                    25.2,
-                    30.6,
-                    36
-                  ]
-                },
-                {
-                  "stat": "init",
-                  "pct": [
-                    9,
-                    10.8,
-                    12.6,
-                    15.3,
-                    18
-                  ]
-                }
-              ]
+              "tgt": { "side": "ally", "count": 1, "select": "highest:inst" }
             }
           ]
         }
@@ -203,101 +106,44 @@
       "slot": 3,
       "unlockStar": 6,
       "name": "Rallying Flame",
-      "trigger": "Start of Combat",
-      "targeting": "1 Self, 1 Ally",
-      "effectType": "Ability Buff",
+      "targeting": "1 Self; 1 Ally (Tactical dealer)",
+      "effectType": "Stack",
       "duration": "Whole Combat",
-      "scalingRaw": "Chance: 50% | 60% | 70% | 85% | 100% ; PHYSICAL_DEALT: 5% ; Chance: 50% | 60% | 70% | 85% | 100% ; TACTICAL_DEALT: 2.5%",
+      "scalingRaw": "Chance: 50% | 60% | 70% | 85% | 100%",
       "scaling": [
         {
           "label": "Chance",
-          "values": [
-            50,
-            60,
-            70,
-            85,
-            100
-          ],
+          "values": [50, 60, 70, 85, 100],
           "unit": "%",
           "fixed": false
-        },
-        {
-          "label": "PHYSICAL_DEALT",
-          "values": [
-            5
-          ],
-          "unit": "%",
-          "fixed": true
-        },
-        {
-          "label": "Chance",
-          "values": [
-            50,
-            60,
-            70,
-            85,
-            100
-          ],
-          "unit": "%",
-          "fixed": false
-        },
-        {
-          "label": "TACTICAL_DEALT",
-          "values": [
-            2.5
-          ],
-          "unit": "%",
-          "fixed": true
         }
       ],
-      "description": "Start of Combat: Apply Ability Buff to 1 Self, 1 Ally (Chance: 50% | 60% | 70% | 85% | 100% ; PHYSICAL_DEALT: 5% ; Chance: 50% | 60% | 70% | 85% | 100% ; TACTICAL_DEALT: 2.5%) for Whole Combat.",
+      "description": "Start of Combat: for each enemy Fire dealer, chance to gain 1 Rallying Flame (max 4, +5% Physical Dealt) and chance to grant 1 Spreading Blaze to 1 Tactical ally (max 10, +2.5% Tactical Dealt).",
       "structured": [
         {
-          "when": "combat_start",
+          "phase": "combat_start",
+          "rounds": [1],
+          "repeatPer": { "side": "enemy", "dealer": "fire" },
           "actions": [
             {
               "t": "stack",
-              "id": "unifying_flame",
-              "chance": [
-                50,
-                60,
-                70,
-                85,
-                100
-              ],
-              "max": 4,
-              "mods": [
-                {
-                  "stat": "physical_dealt",
-                  "pct": 5
-                }
-              ],
-              "tgt": {
-                "side": "self"
-              }
+              "id": "rallying_flame",
+              "stacks": 1,
+              "maxStacks": 4,
+              "chance": [50, 60, 70, 85, 100],
+              "mods": [{ "stat": "physical_dealt", "pct": 5 }],
+              "dur": "combat",
+              "tgt": { "side": "self" }
             },
             {
               "t": "stack",
-              "id": "rallying",
-              "chance": [
-                50,
-                60,
-                70,
-                85,
-                100
-              ],
-              "max": 10,
-              "mods": [
-                {
-                  "stat": "tactical_dealt",
-                  "pct": 2.5
-                }
-              ],
-              "tgt": {
-                "side": "ally",
-                "count": 1,
-                "select": "dealer:tactical"
-              }
+              "id": "spreading_blaze",
+              "stacks": 1,
+              "maxStacks": 10,
+              "chance": [50, 60, 70, 85, 100],
+              "mods": [{ "stat": "tactical_dealt", "pct": 2.5 }],
+              "dur": "combat",
+              "tgt": { "side": "ally", "count": 1, "select": "dealer:tactical" }
             }
           ]
         }
@@ -308,70 +154,38 @@
       "slot": 4,
       "unlockStar": 8,
       "name": "Dragon's Valor",
-      "trigger": "Start of Combat",
       "targeting": "1 Self",
-      "effectType": "Stat Modifier (Buff)",
+      "effectType": "Stat Modifier",
       "duration": "Whole Combat",
       "scalingRaw": "DMG_RECEIVED: -5% | -6% | -7% | -8.5% | -10% ; STR: 8.5% | 10.2% | 11.9% | 14.45% | 17%",
       "scaling": [
         {
           "label": "DMG_RECEIVED",
-          "values": [
-            -5,
-            -6,
-            -7,
-            -8.5,
-            -10
-          ],
+          "values": [-5, -6, -7, -8.5, -10],
           "unit": "%",
           "fixed": false
         },
         {
           "label": "STR",
-          "values": [
-            8.5,
-            10.2,
-            11.9,
-            14.45,
-            17
-          ],
+          "values": [8.5, 10.2, 11.9, 14.45, 17],
           "unit": "%",
           "fixed": false
         }
       ],
-      "description": "Start of Combat: Apply Stat Modifier (Buff) to 1 Self (DMG_RECEIVED: -5% | -6% | -7% | -8.5% | -10% ; STR: 8.5% | 10.2% | 11.9% | 14.45% | 17%) for Whole Combat.",
+      "description": "Start of Combat: Reduce your Damage Received and increase your Strength until the end of combat.",
       "structured": [
         {
-          "when": "combat_start",
+          "phase": "combat_start",
+          "rounds": [1],
           "actions": [
             {
               "t": "mod",
-              "dur": "combat",
-              "tgt": {
-                "side": "self"
-              },
               "mods": [
-                {
-                  "stat": "dmg_received",
-                  "pct": [
-                    -5,
-                    -6,
-                    -7,
-                    -8.5,
-                    -10
-                  ]
-                },
-                {
-                  "stat": "str",
-                  "pct": [
-                    8.5,
-                    10.2,
-                    11.9,
-                    14.45,
-                    17
-                  ]
-                }
-              ]
+                { "stat": "dmg_received", "pct": [-5, -6, -7, -8.5, -10] },
+                { "stat": "str", "pct": [8.5, 10.2, 11.9, 14.45, 17] }
+              ],
+              "dur": "combat",
+              "tgt": { "side": "self" }
             }
           ]
         }
@@ -382,55 +196,33 @@
       "slot": 5,
       "unlockStar": 10,
       "name": "Unyielding Resolve",
-      "trigger": "Each Action / Round",
       "targeting": "1 Self",
-      "effectType": "Status Effect (Control/DoT)",
+      "effectType": "Status Effect, Cleanse",
       "duration": "2 Rounds",
-      "scalingRaw": "Chance: 20% | 26% | 32% | 40% | 50%",
+      "scalingRaw": "Advantage Chance: 20% | 26% | 32% | 40% | 50%",
       "scaling": [
         {
-          "label": "Chance",
-          "values": [
-            20,
-            26,
-            32,
-            40,
-            50
-          ],
+          "label": "Advantage Chance",
+          "values": [20, 26, 32, 40, 50],
           "unit": "%",
           "fixed": false
         }
       ],
-      "description": "Each Action / Round: Apply Status Effect (Control/DoT) to 1 Self (Chance: 20% | 26% | 32% | 40% | 50%) for 2 Rounds.",
+      "description": "Start of each round: chance to grant yourself Advantage (+15%) for 2 rounds. Chance 1.5x if Weakened; on hit, remove Weakened.",
       "structured": [
         {
-          "when": "each",
+          "phase": "round_start",
+          "rounds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
           "actions": [
             {
               "t": "status",
               "st": "advantage",
               "val": 15,
               "dur": 2,
-              "chance": [
-                20,
-                26,
-                32,
-                40,
-                50
-              ],
-              "bonusChance": {
-                "cond": "self:weakened",
-                "chance": [
-                  30,
-                  39,
-                  48,
-                  60,
-                  75
-                ]
-              },
-              "tgt": {
-                "side": "self"
-              }
+              "chance": [20, 26, 32, 40, 50],
+              "chanceIf": { "selfStatus": "weakened", "mult": 1.5 },
+              "onHit": { "t": "cleanse", "types": ["weakened"], "count": 1 },
+              "tgt": { "side": "self" }
             }
           ]
         }
