@@ -6,105 +6,54 @@
       "slot": 1,
       "unlockStar": 2,
       "name": "Whisper of Ash",
-      "trigger": "Start of Combat",
-      "targeting": "Self",
-      "effectType": "Ability Buff",
-      "duration": "Whole Combat",
-      "scalingRaw": "Rank 1: 16% | -16% | Rank 2: 19.2% | -19.2% | Rank 3: 22.4% | -22.4% | Rank 4: 27.2% | -27.2% | Rank 5: 32% | -32%",
+      "targeting": "1 Enemy (Same Lane); 1 Self",
+      "effectType": "Stat Modifier",
+      "duration": "5 Rounds",
+      "scalingRaw": "STR/INIT: -16% | -19.2% | -22.4% | -27.2% | -32% ; INT/INIT: 16% | 19.2% | 22.4% | 27.2% | 32%",
       "scaling": [
         {
-          "label": "Rank 1",
-          "values": [
-            16,
-            -16,
-            "Rank 2: 19.2%",
-            -19.2,
-            "Rank 3: 22.4%",
-            -22.4,
-            "Rank 4: 27.2%",
-            -27.2,
-            "Rank 5: 32%",
-            -32
-          ],
+          "label": "Debuff",
+          "values": [-16, -19.2, -22.4, -27.2, -32],
           "unit": "%",
-          "fixed": true
+          "fixed": false
+        },
+        {
+          "label": "Buff",
+          "values": [16, 19.2, 22.4, 27.2, 32],
+          "unit": "%",
+          "fixed": false
         }
       ],
-      "description": "Start of Round 1: Reduce the Strength and Initiative by -16% (depends on rank) of 1 Enemy in the same lane for 5 rounds. Start of Round 6: Increase your Intelligence and Initiative by +16% for 5 rounds.",
+      "description": "Start of Round 1: Reduce Strength and Initiative (enhanced by Intelligence) of 1 same-lane Enemy for 5 rounds. Start of Round 6: Increase your Intelligence and Initiative for 5 rounds.",
       "structured": [
         {
-          "when": "rounds",
-          "rounds": [
-            1
-          ],
+          "phase": "round_start",
+          "rounds": [1],
           "actions": [
             {
               "t": "mod",
               "mods": [
-                {
-                  "stat": "str",
-                  "pct": [
-                    -16,
-                    -19.2,
-                    -22.4,
-                    -27.2,
-                    -32
-                  ]
-                },
-                {
-                  "stat": "init",
-                  "pct": [
-                    -16,
-                    -19.2,
-                    -22.4,
-                    -27.2,
-                    -32
-                  ]
-                }
+                { "stat": "str", "pct": [-16, -19.2, -22.4, -27.2, -32] },
+                { "stat": "init", "pct": [-16, -19.2, -22.4, -27.2, -32] }
               ],
+              "scaleStat": "int",
               "dur": 5,
-              "tgt": {
-                "side": "enemy",
-                "count": 1,
-                "select": "same_lane"
-              }
+              "tgt": { "side": "enemy", "count": 1, "select": "same_lane" }
             }
           ]
         },
         {
-          "when": "rounds",
-          "rounds": [
-            6
-          ],
+          "phase": "round_start",
+          "rounds": [6],
           "actions": [
             {
               "t": "mod",
               "mods": [
-                {
-                  "stat": "int",
-                  "pct": [
-                    16,
-                    19.2,
-                    22.4,
-                    27.2,
-                    32
-                  ]
-                },
-                {
-                  "stat": "init",
-                  "pct": [
-                    16,
-                    19.2,
-                    22.4,
-                    27.2,
-                    32
-                  ]
-                }
+                { "stat": "int", "pct": [16, 19.2, 22.4, 27.2, 32] },
+                { "stat": "init", "pct": [16, 19.2, 22.4, 27.2, 32] }
               ],
               "dur": 5,
-              "tgt": {
-                "side": "self"
-              }
+              "tgt": { "side": "self" }
             }
           ]
         }
@@ -115,49 +64,33 @@
       "slot": 2,
       "unlockStar": 4,
       "name": "Sunder",
-      "trigger": "Start of Combat",
-      "targeting": "Self",
-      "effectType": "Ability Buff",
-      "duration": "Whole Combat",
-      "scalingRaw": "Rank 1: 7.50% | Rank 2: 9% | Rank 3: 10.50% | Rank 4: 12.75% | Rank 5: 15%",
+      "targeting": "All Enemies with Control",
+      "effectType": "Stat Modifier",
+      "duration": "1 Round",
+      "scalingRaw": "DMG_RECEIVED: 7.5% | 9% | 10.5% | 12.75% | 15%",
       "scaling": [
         {
-          "label": "Rank 1",
-          "values": [
-            7.5,
-            "Rank 2: 9%",
-            "Rank 3: 10.50%",
-            "Rank 4: 12.75%",
-            "Rank 5: 15%"
-          ],
+          "label": "DMG_RECEIVED",
+          "values": [7.5, 9, 10.5, 12.75, 15],
           "unit": "%",
           "fixed": false
         }
       ],
-      "description": "Start of Each Round: Increase the Damage Received by 7.5% (depends on rank) of all enemies afflicted with a Control effect until the end of the round. Control effects include Stun, Stagger, Overwhelm, Confusion.",
+      "description": "Start of each round: Increase Damage Received of all Enemies afflicted with Control until the end of the round.",
       "structured": [
         {
-          "when": "each",
+          "phase": "round_start",
+          "rounds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
           "actions": [
             {
               "t": "mod",
-              "mods": [
-                {
-                  "stat": "dmg_received",
-                  "pct": [
-                    7.5,
-                    9,
-                    10.5,
-                    12.75,
-                    15
-                  ]
-                }
-              ],
+              "mods": [{ "stat": "dmg_received", "pct": [7.5, 9, 10.5, 12.75, 15] }],
               "dur": 1,
               "tgt": {
                 "side": "enemy",
                 "count": "all",
-                "select": "prioritize_afflicted_control"
+                "select": "has_control",
+                "controlTypes": ["stun", "stagger", "overwhelm", "confusion"]
               }
             }
           ]
@@ -169,70 +102,52 @@
       "slot": 3,
       "unlockStar": 6,
       "name": "Gleamstrike",
-      "trigger": "Start of Combat",
-      "targeting": "Self",
-      "effectType": "Ability Buff",
-      "duration": "Whole Combat",
-      "scalingRaw": "Rank 1: 37.5% | 20% | Rank 2: 40% | 24% | Rank 3: 42.5% | 28% | Rank 4: 46.25% | 34% | Rank 5: 50% | 40%",
+      "targeting": "Burning Ward; All Enemies with Control",
+      "effectType": "Command Modifier, Direct Damage",
+      "duration": "Instant",
+      "scalingRaw": "Stagger Chance: 37.5% | 40% | 42.5% | 46.25% | 50% ; Rate: 20% | 24% | 28% | 34% | 40%",
       "scaling": [
         {
-          "label": "Rank 1",
-          "values": [
-            37.5,
-            20,
-            "Rank 2: 40%",
-            24,
-            "Rank 3: 42.5%",
-            28,
-            "Rank 4: 46.25%",
-            34,
-            "Rank 5: 50%",
-            40
-          ],
+          "label": "Stagger Chance",
+          "values": [37.5, 40, 42.5, 46.25, 50],
           "unit": "%",
-          "fixed": true
+          "fixed": false
+        },
+        {
+          "label": "Rate",
+          "values": [20, 24, 28, 34, 40],
+          "unit": "%",
+          "fixed": false
         }
       ],
-      "description": "Burning Ward gains: Odd-numbered Rounds: Increase chance the afflict Stagger to 37.5% (depends on rank). Stagger prevents the target from using Attack Modifier Commands or launching Basic Attacks. Each round: Deal Fire Damage to all enemies afflicted with a Control effect, damage rate 20% (depends on rank). Control effects include Stun, STagger, OVerwhelm and Confusion.",
+      "description": "Burning Ward gains: odd rounds Stagger chance becomes the rank value. Each round deal Fire Damage to all Enemies with Control.",
       "structured": [
         {
-          "when": "odd",
+          "phase": "round_start",
+          "rounds": [1, 3, 5, 7, 9],
           "actions": [
             {
-              "t": "status",
-              "st": "stagger",
-              "dur": 2,
-              "chance": [
-                37.5,
-                40,
-                42.5,
-                46.25,
-                50
-              ],
-              "tgt": {
-                "side": "enemy",
-                "count": 1
-              }
+              "t": "mod_command",
+              "command": "Burning Ward",
+              "field": "staggerChance",
+              "pct": [37.5, 40, 42.5, 46.25, 50]
             }
           ]
         },
         {
-          "when": "each",
+          "phase": "turn",
+          "rounds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+          "requires": { "command": "Burning Ward" },
           "actions": [
             {
               "t": "dmg",
               "dt": "fire",
-              "pct": [
-                20,
-                24,
-                28,
-                34,
-                40
-              ],
+              "pct": [20, 24, 28, 34, 40],
               "tgt": {
                 "side": "enemy",
                 "count": "all",
-                "select": "prioritize_afflicted_control"
+                "select": "has_control",
+                "controlTypes": ["stun", "stagger", "overwhelm", "confusion"]
               }
             }
           ]
@@ -244,51 +159,32 @@
       "slot": 4,
       "unlockStar": 8,
       "name": "Gift of Fire",
-      "trigger": "Start of Combat",
-      "targeting": "Self",
-      "effectType": "Ability Buff",
-      "duration": "Whole Combat",
-      "scalingRaw": "Rank 1: 17.50% | Rank 2: 21% | Rank 3: 24.50% | Rank 4: 29.75% | Rank 5: 35%",
+      "targeting": "1 Ally (no Resistance)",
+      "effectType": "Status Effect",
+      "duration": "2 Rounds",
+      "scalingRaw": "Resistance Chance: 17.5% | 21% | 24.5% | 29.75% | 35%",
       "scaling": [
         {
-          "label": "Rank 1",
-          "values": [
-            17.5,
-            "Rank 2: 21%",
-            "Rank 3: 24.50%",
-            "Rank 4: 29.75%",
-            "Rank 5: 35%"
-          ],
+          "label": "Resistance Chance",
+          "values": [17.5, 21, 24.5, 29.75, 35],
           "unit": "%",
           "fixed": false
         }
       ],
-      "description": "Start of each Round: For each enemy afflicted with Burn, 17.5% (depends on rank) chance to apply Resistance -15% to 1 ally in any lane for 2 rounds (prioritizes targets not already affected by Resistance). Resistance reduced the target's damange received.",
+      "description": "Start of each round: for each Enemy with Burn, chance to grant Resistance to 1 Ally (prioritizes allies without Resistance).",
       "structured": [
         {
-          "when": "each",
+          "phase": "round_start",
+          "rounds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+          "repeatPer": { "side": "enemy", "status": "burn" },
           "actions": [
             {
-              "t": "mod",
-              "mods": [
-                {
-                  "stat": "dmg_received",
-                  "pct": -15
-                }
-              ],
+              "t": "status",
+              "st": "resistance",
+              "val": 15,
               "dur": 2,
-              "chance": [
-                17.5,
-                21,
-                24.5,
-                29.75,
-                35
-              ],
-              "tgt": {
-                "side": "ally",
-                "count": 1,
-                "select": "any"
-              }
+              "chance": [17.5, 21, 24.5, 29.75, 35],
+              "tgt": { "side": "ally", "count": 1, "select": "prefer_without:resistance" }
             }
           ]
         }
@@ -299,79 +195,48 @@
       "slot": 5,
       "unlockStar": 10,
       "name": "Moonlit Hunt",
-      "trigger": "Start of Combat",
-      "targeting": "Self",
-      "effectType": "Ability Buff",
-      "duration": "Whole Combat",
-      "scalingRaw": "Rank 1: 5% | 12% | Rank 2: 6.5% | 15.6% | Rank 3: 8% | 19.2% | Rank 4: 10% | 24% | Rank 5: 12.5% | 30%",
+      "targeting": "1 Self",
+      "effectType": "Status Effect, Stat Modifier",
+      "duration": "5 Rounds",
+      "scalingRaw": "Evade Rate: 5% | 6.5% | 8% | 10% | 12.5% ; FIRE_DEALT: 12% | 15.6% | 19.2% | 24% | 30%",
       "scaling": [
         {
-          "label": "Rank 1",
-          "values": [
-            5,
-            12,
-            "Rank 2: 6.5%",
-            15.6,
-            "Rank 3: 8%",
-            19.2,
-            "Rank 4: 10%",
-            24,
-            "Rank 5: 12.5%",
-            30
-          ],
+          "label": "Evade Rate",
+          "values": [5, 6.5, 8, 10, 12.5],
           "unit": "%",
-          "fixed": true
+          "fixed": false
+        },
+        {
+          "label": "FIRE_DEALT",
+          "values": [12, 15.6, 19.2, 24, 30],
+          "unit": "%",
+          "fixed": false
         }
       ],
-      "description": "Start of Round 1: Grant yourself Evade 5% (depends on rank) for 5 rounds. Evade causes each instance of damange against the target to have a chance to be ignored. Start of Round 6: Increase your Fire damage dealt by 12% (depends on rank for 5 rounds.",
+      "description": "Start of Round 1: Evade for 5 rounds. Start of Round 6: increase Fire Damage Dealt for 5 rounds.",
       "structured": [
         {
-          "when": "rounds",
-          "rounds": [
-            1
-          ],
+          "phase": "round_start",
+          "rounds": [1],
           "actions": [
             {
               "t": "status",
               "st": "evade",
+              "val": [5, 6.5, 8, 10, 12.5],
               "dur": 5,
-              "val": [
-                5,
-                6.5,
-                8,
-                10,
-                12.5
-              ],
-              "tgt": {
-                "side": "self"
-              }
+              "tgt": { "side": "self" }
             }
           ]
         },
         {
-          "when": "rounds",
-          "rounds": [
-            6
-          ],
+          "phase": "round_start",
+          "rounds": [6],
           "actions": [
             {
               "t": "mod",
-              "mods": [
-                {
-                  "stat": "fire_dealt",
-                  "pct": [
-                    12,
-                    15.6,
-                    19.2,
-                    24,
-                    30
-                  ]
-                }
-              ],
+              "mods": [{ "stat": "fire_dealt", "pct": [12, 15.6, 19.2, 24, 30] }],
               "dur": 5,
-              "tgt": {
-                "side": "self"
-              }
+              "tgt": { "side": "self" }
             }
           ]
         }
