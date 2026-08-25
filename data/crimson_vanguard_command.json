@@ -36,7 +36,10 @@
       "actions": [
         {
           "t": "mod",
-          "mods": [{ "stat": "recovery_dealt", "pct": 20 }, { "stat": "int", "fixed": 25 }],
+          "mods": [
+            { "stat": "recovery_received", "pct": 20 },
+            { "stat": "int", "fixed": 25 }
+          ],
           "dur": "combat",
           "tgt": { "side": "self" }
         },
