@@ -1,0 +1,89 @@
+{
+  "dragonId": "sunfyre",
+  "name": "Golden Wrath",
+  "command": [
+    {
+      "phase": "turn",
+      "rounds": [1, 4, 7, 10],
+      "actions": [
+        {
+          "t": "dmg",
+          "dt": "tactical",
+          "pct": 110,
+          "tgt": { "side": "enemy", "count": 1, "select": "same_lane" }
+        }
+      ]
+    },
+    {
+      "phase": "turn",
+      "rounds": [1, 4, 7, 10],
+      "requires": { "troopsBelow": 75 },
+      "actions": [
+        {
+          "t": "dmg",
+          "dt": "tactical",
+          "pct": 110,
+          "tgt": { "side": "enemy", "count": 1, "select": "adjacency" }
+        }
+      ]
+    },
+    {
+      "phase": "turn",
+      "rounds": [1, 4, 7, 10],
+      "requires": { "troopsBelow": 50 },
+      "actions": [
+        {
+          "t": "dmg",
+          "dt": "fire",
+          "pct": 55,
+          "tgt": { "side": "enemy", "count": 1, "select": "same_lane" }
+        },
+        {
+          "t": "status",
+          "st": "burn",
+          "rate": 20,
+          "dur": 2,
+          "chance": 50,
+          "tgt": { "side": "enemy", "count": 1, "select": "same_lane" }
+        },
+        {
+          "t": "dmg",
+          "dt": "fire",
+          "pct": 55,
+          "tgt": { "side": "enemy", "count": 1, "select": "adjacency" }
+        },
+        {
+          "t": "status",
+          "st": "burn",
+          "rate": 20,
+          "dur": 2,
+          "chance": 50,
+          "tgt": { "side": "enemy", "count": 1, "select": "adjacency" }
+        }
+      ]
+    }
+  ],
+  "vanguard": [
+    {
+      "phase": "combat_start",
+      "rounds": [1],
+      "actions": [
+        {
+          "t": "mod",
+          "mods": [{ "stat": "tactical_dealt", "pct": 16 }],
+          "dur": "combat",
+          "tgt": { "side": "self" }
+        },
+        {
+          "t": "mod",
+          "mods": [
+            { "stat": "inst", "fixed": 20 },
+            { "stat": "init", "fixed": 20 }
+          ],
+          "dur": "combat",
+          "tgt": { "side": "ally", "count": 1, "slot": 0, "excludeSelf": true }
+        }
+      ]
+    }
+  ]
+}
