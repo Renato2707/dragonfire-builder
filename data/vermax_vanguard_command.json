@@ -1,0 +1,68 @@
+{
+  "dragonId": "vermax",
+  "name": "Spreading Blaze",
+  "command": [
+    {
+      "phase": "after_basic_attack",
+      "rounds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+      "actions": [
+        {
+          "t": "dmg",
+          "dt": "physical",
+          "pct": 50,
+          "tgt": { "side": "enemy", "count": 1, "select": "same_lane" }
+        },
+        {
+          "t": "stack",
+          "id": "spreading_blaze",
+          "stacks": 1,
+          "maxStacks": 10,
+          "mods": [{ "stat": "tactical_dealt", "pct": 2.5 }],
+          "dur": "combat",
+          "chance": 20,
+          "tgt": { "side": "ally", "count": 1, "select": "dealer:tactical" }
+        }
+      ]
+    },
+    {
+      "phase": "after_basic_attack",
+      "rounds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+      "requires": { "anyEnemyDealerFire": true },
+      "actions": [
+        {
+          "t": "stack",
+          "id": "spreading_blaze",
+          "stacks": 1,
+          "maxStacks": 10,
+          "mods": [{ "stat": "tactical_dealt", "pct": 2.5 }],
+          "dur": "combat",
+          "chance": 20,
+          "tgt": { "side": "ally", "count": 1, "select": "dealer:tactical" }
+        }
+      ]
+    }
+  ],
+  "vanguard": [
+    {
+      "phase": "combat_start",
+      "rounds": [1],
+      "actions": [
+        {
+          "t": "mod",
+          "mods": [{ "stat": "physical_dealt", "pct": 16 }],
+          "dur": "combat",
+          "tgt": { "side": "self" }
+        },
+        {
+          "t": "mod",
+          "mods": [
+            { "stat": "inst", "fixed": 20 },
+            { "stat": "init", "fixed": 20 }
+          ],
+          "dur": "combat",
+          "tgt": { "side": "ally", "count": 1, "slot": 0, "excludeSelf": true }
+        }
+      ]
+    }
+  ]
+}
