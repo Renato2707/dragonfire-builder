@@ -7,7 +7,7 @@ import {
 } from './utils.js';
 import {
   updateEffects, processDamageEffects, processHealingEffects,
-  canAct, canAttack, canUseAbilities, applyEffect, hasEffect, tryEvade
+  canAct, canAttack, canUseAbilities, applyEffect, hasEffect, tryEvade, getEffect
 } from './effects.js';
 import { selectTargets, getPositionName, POSITIONS } from './positionSystem.js';
 import { executeHabitAction, resolveChance, PHASES } from './habitParser.js';
@@ -327,6 +327,12 @@ class Battle {
           round
         });
         this.logActionResult(character, habit, raw, target, actionResult);
+        if (actionResult.onReachActions && actionResult.onReachActions.length) {
+          for (const item of actionResult.onReachActions) {
+            this.logAction(`${character.name} reaches stack threshold`);
+            this.runAction(character, habit, item.action, round);
+          }
+        }
       }
     }
   }
@@ -334,11 +340,21 @@ class Battle {
   executeCopyStatus(character, habit, raw) {
     const sourceSide = raw.from && raw.from.side === 'enemy' ? this.enemiesOf(character) : this.alliesOf(character);
     const statuses = (raw.from && raw.from.status) || [];
-    const present = [];
+    let chosen = null;
+    let magnitude = null;
     for (const src of sourceSide) {
-      for (const st of statuses) if (hasEffect(src, st)) present.push(st);
+      for (const st of statuses) {
+        if (!hasEffect(src, st)) continue;
+        chosen = st;
+        const fx = getEffect(src, st);
+        if (fx) {
+          magnitude = fx.damageBonus || fx.damagePenalty || fx.defenseBonus || fx.defensePenalty || null;
+        }
+        break;
+      }
+      if (chosen) break;
     }
-    if (!present.length) return;
+    if (!chosen) return;
     const rankIndex = Math.max(0, Math.min(4, (character.habitRank || 1) - 1));
     const chance = resolveChance(raw, rankIndex, character);
     for (const target of this.resolveTargets(character, habit, raw)) {
@@ -347,10 +363,14 @@ class Battle {
       const hit = !rolled || rollChance(chance);
       if (rolled) this.logChanceRoll(habit, target, chance, hit);
       if (!hit) continue;
-      applyEffect(target, present[0].toUpperCase(), character.habitRank, character.name, { duration: raw.dur });
-      const statusName = formatStatusName(present[0]);
-      const verb = isGrantedStatus(present[0]) ? 'Grants' : 'Afflicts';
-      this.logAction(`${verb} ${statusName} to ${target.name} ${formatDuration(raw.dur)}`);
+      applyEffect(target, chosen.toUpperCase(), character.habitRank, character.name, {
+        duration: raw.dur,
+        magnitude
+      });
+      const statusName = formatStatusName(chosen);
+      const verb = isGrantedStatus(chosen) ? 'Grants' : 'Afflicts';
+      const magText = magnitude != null ? ` (${formatSignedPercent(magnitude)})` : '';
+      this.logAction(`${verb} ${statusName}${magText} to ${target.name} ${formatDuration(raw.dur)}`);
     }
   }
 
