@@ -525,7 +525,7 @@ class Battle {
         if (raw.tgt && raw.tgt.linkAs) character.links[raw.tgt.linkAs] = target;
         if (actionResult.onReachActions && actionResult.onReachActions.length) {
           for (const item of actionResult.onReachActions) {
-            this.logAction(`${character.name} reaches stack threshold`);
+            this.logAction(`${character.name} reaches ${item.threshold} stack(s) of ${formatStackName(item.stackId)}`);
             this.runAction(character, habit, item.action, round);
           }
         }

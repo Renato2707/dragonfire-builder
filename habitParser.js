@@ -215,10 +215,10 @@ function executeHabitAction(habit, actionData, attacker, targets, rank = 1, opti
 function executeModAction(habit, actionData, attacker, targets, scalingValue, rank = 1) {
   const effects = [];
   const onReachActions = [];
-  if (!scalingValue) return { effects, onReachActions };
   const raw = actionData.data || actionData;
+  if (raw.t !== 'stack' && !scalingValue) return { effects, onReachActions };
   const duration = raw.dur == null ? 'combat' : raw.dur;
-  const flags = scalingValue.__fixed || {};
+  const flags = (scalingValue && scalingValue.__fixed) || {};
   const options = {
     excludeBasic: !!raw.excludeBasic,
     stackId: raw.id || null,
@@ -227,8 +227,8 @@ function executeModAction(habit, actionData, attacker, targets, scalingValue, ra
   for (const target of targets) {
     if (!target || target.isDead) continue;
     const value = ifBonusApplies(raw.ifBonus, attacker, target)
-      ? applyIfBonusValue(scalingValue, raw.ifBonus, attacker)
-      : scalingValue;
+      ? applyIfBonusValue(scalingValue || {}, raw.ifBonus, attacker)
+      : (scalingValue || {});
     const valueFlags = value.__fixed || flags;
     if (raw.t === 'stack' && typeof target.addStack === 'function') {
       const wantAdd = raw.stacks || 1;
@@ -251,15 +251,22 @@ function executeModAction(habit, actionData, attacker, targets, scalingValue, ra
           enhancedBy: raw.scaleStat || null
         });
       }
-      if (raw.onReach && count >= raw.onReach.stacks) {
+      const threshold = raw.onReach && raw.onReach.stacks;
+      if (raw.onReach && added > 0 && before < threshold && count >= threshold) {
         const once = raw.onReach.once !== false;
-        const threshold = raw.onReach.stacks;
         const canFire = once
           ? (typeof target.markStackReached === 'function' ? target.markStackReached(raw.id || 'stack', threshold) : true)
           : true;
-        if (canFire && before < threshold && count >= threshold) {
+        if (canFire) {
           for (const reachAction of raw.onReach.actions || []) {
-            onReachActions.push({ caster: attacker, target, action: reachAction, rank });
+            onReachActions.push({
+              caster: attacker,
+              target,
+              action: reachAction,
+              rank,
+              stackId: raw.id || 'stack',
+              threshold
+            });
           }
         }
       }
@@ -324,5 +331,6 @@ export {
   Habit,
   loadDragonHabitsSync,
   loadCommandSync,
-  executeHabitAction
+  executeHabitAction,
+  executeModAction
 };

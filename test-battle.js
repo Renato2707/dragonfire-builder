@@ -3,10 +3,10 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { Character } from './character.js';
 import { Battle } from './battle.js';
-import { loadDragonHabitsSync, loadCommandSync, ifBonusApplies } from './habitParser.js';
-import { applyChanceIf, statusConditionMet, sortByInitiative } from './utils.js';
+import { loadDragonHabitsSync, loadCommandSync, ifBonusApplies, executeModAction } from './habitParser.js';
 import { applyEffect, hasEffect, cleanseCharacter, getEffect, isImmuneTo, processHealingEffects } from './effects.js';
 import { selectTargets } from './positionSystem.js';
+import { applyChanceIf, statusConditionMet, sortByInitiative } from './utils.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -336,6 +336,46 @@ function mockFx(ids) {
     throw new Error('should not copy Advantage when no enemy has it');
   }
   console.log('✓ copy_status Mimicry copies Weakened, skips missing Advantage\n');
+}
+
+{
+  const d = (id, team, slot) => new Character({
+    id, name: id, breed: 'Warrior', rarity: 'Legendary', stats: { str: 80, inst: 10, int: 10, init: 10 }
+  }, team, slot);
+  const vhagar = d('vhagar', 0, 1);
+  const foe = d('foe', 1, 1);
+  const habit = { getScalingValue: (action, rankIndex) => {
+    const data = action.data || action;
+    const values = {};
+    for (const mod of data.mods || []) values[mod.stat] = Array.isArray(mod.pct) ? mod.pct[rankIndex] : mod.pct;
+    return values;
+  } };
+  const raw = {
+    t: 'stack',
+    id: 'bulwark',
+    stacks: 1,
+    maxStacks: 5,
+    mods: [
+      { stat: 'str', pct: [5, 6.5, 8, 10, 12.5] },
+      { stat: 'physical_received', pct: [-2.5, -3.25, -4, -5, -6.25] }
+    ],
+    dur: 'combat',
+    onReach: {
+      stacks: 3,
+      once: true,
+      actions: [{ t: 'dmg', dt: 'physical', pct: [100] }]
+    },
+    tgt: { side: 'self' }
+  };
+  let reaches = 0;
+  for (let i = 0; i < 5; i += 1) {
+    const result = executeModAction(habit, raw, vhagar, [vhagar], habit.getScalingValue(raw, 0), 1);
+    reaches += result.onReachActions.length;
+  }
+  if (vhagar.getStackCount('bulwark') !== 5) throw new Error(`expected 5 stacks, got ${vhagar.getStackCount('bulwark')}`);
+  if (reaches !== 1) throw new Error(`onReach should fire once, fired ${reaches}`);
+  if (!(vhagar.getModifiedStat('str') > 80)) throw new Error('Bulwark should raise Strength');
+  console.log('✓ stack onReach Bulwark fires once at 3 stacks\n');
 }
 
 try {

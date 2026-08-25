@@ -180,7 +180,7 @@
             "once": { "type": "boolean", "default": true },
             "actions": "Action[]"
           },
-          "desc": "Fires when crossing threshold; once via markStackReached"
+          "desc": "Fires once when stacks cross the threshold (before < n <= after). Stack without mods still counts."
         },
         "tgt": { "type": "Targeting", "note": "tgt.linkAs stores target on attacker.links" }
       },
