@@ -1,7 +1,6 @@
 // habitParser.js
 
-import { rollChance, calculateFinalDamage } from './utils.js';
-import { hasActiveId } from './utils.js';
+import { rollChance, calculateFinalDamage, hasActiveId, scaleByStat } from './utils.js';
 
 const ALL_ROUNDS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 const PHASES = {
@@ -112,7 +111,7 @@ function loadCommandSync(data, dragonId) {
 }
 
 function executeHabitAction(habit, actionData, attacker, targets, rank = 1, options = {}) {
-  const result = { success: true, missed: false, chance: 100, executed: 0, log: [], damages: [], heals: [], effects: [] };
+  const result = { success: true, missed: false, chance: 100, executed: 0, log: [], damages: [], heals: [], effects: [], magnitude: null };
   const rankIndex = Math.max(0, Math.min(4, rank - 1));
   const raw = actionData.data || actionData;
   result.chance = resolveChance(raw, rankIndex, attacker);
@@ -121,7 +120,8 @@ function executeHabitAction(habit, actionData, attacker, targets, rank = 1, opti
     result.missed = true;
     return result;
   }
-  const scalingValue = habit.getScalingValue(actionData, rankIndex);
+  const scalingValue = scaleByStat(habit.getScalingValue(actionData, rankIndex), attacker, raw.scaleStat);
+  result.magnitude = scaleByStat(raw.val, attacker, raw.scaleStat);
   const actionType = raw.t || actionData.type;
   if (actionType === 'mod' || actionType === 'stack') {
     result.effects = executeModAction(habit, actionData, attacker, targets, scalingValue);
@@ -158,7 +158,8 @@ function executeModAction(habit, actionData, attacker, targets, scalingValue) {
         stackId: raw.id || 'stack',
         stacks: count,
         added,
-        duration
+        duration,
+        enhancedBy: raw.scaleStat || null
       });
     } else {
       for (const stat in scalingValue) {
@@ -170,7 +171,8 @@ function executeModAction(habit, actionData, attacker, targets, scalingValue) {
           stat,
           value: scalingValue[stat],
           duration,
-          excludeBasic: !!raw.excludeBasic
+          excludeBasic: !!raw.excludeBasic,
+          enhancedBy: raw.scaleStat || null
         });
       }
     }
@@ -184,7 +186,7 @@ function executeDamageAction(habit, actionData, attacker, targets, scalingValue,
   const damageType = (raw.dt || 'physical').toUpperCase();
   let rate = typeof scalingValue === 'number' ? scalingValue : 0;
   if (raw.ifBonus && raw.ifBonus.status && hasActiveId(attacker, raw.ifBonus.status)) {
-    rate = raw.ifBonus.pct;
+    rate = scaleByStat(raw.ifBonus.pct, attacker, raw.scaleStat);
   }
   if (raw.roundBonus && round != null) {
     const bonus = raw.roundBonus[String(round)] ?? raw.roundBonus[round];
