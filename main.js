@@ -140,6 +140,7 @@ function onFormationChange() {
 function setSlotsDisabled(disabled) {
   document.getElementById('teamA-troop').disabled = disabled;
   document.getElementById('teamB-troop').disabled = disabled;
+  document.getElementById('defending-team').disabled = disabled;
   SLOTS.forEach(slot => {
     ['teamA', 'teamB'].forEach(prefix => {
       document.getElementById(`${prefix}-slot-${slot}`).disabled = disabled;
@@ -192,7 +193,8 @@ async function startBattle() {
   if (teamA.length !== 3 || teamB.length !== 3) return;
   for (const character of [...teamA, ...teamB]) await loadKit(character);
   currentBattle = new Battle(teamA, teamB, {
-    teamTroop: [readTroop('teamA'), readTroop('teamB')]
+    teamTroop: [readTroop('teamA'), readTroop('teamB')],
+    defendingTeam: Number(document.getElementById('defending-team').value)
   });
   currentBattle.start();
   currentBattle.runRound();
@@ -245,6 +247,7 @@ function updateBattleDisplay() {
 function resetProgressSelects() {
   document.getElementById('teamA-troop').value = '';
   document.getElementById('teamB-troop').value = '';
+  document.getElementById('defending-team').value = '1';
   SLOTS.forEach(slot => {
     ['teamA', 'teamB'].forEach(prefix => {
       document.getElementById(`${prefix}-slot-${slot}`).value = '';

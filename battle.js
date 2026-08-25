@@ -27,6 +27,7 @@ class Battle {
     this.verbose = options.verbose !== false;
     this.teamTroop = options.teamTroop || [null, null];
     this.pve = !!options.pve;
+    this.defendingTeam = options.defendingTeam != null ? Number(options.defendingTeam) : 1;
     this.currentRound = 0;
     this.isActive = false;
     this.isFinished = false;
@@ -125,6 +126,10 @@ class Battle {
     for (const character of this.allCharacters) {
       if (typeof character.advanceRetreatFlags === 'function') character.advanceRetreatFlags();
     }
+  }
+
+  isDefending(character) {
+    return character && character.teamId === this.defendingTeam;
   }
 
   troopOf(character) {
@@ -512,7 +517,8 @@ class Battle {
         let chance = resolveChance(raw, rankIndex, character);
         const extras = {
           prey: this.getPrey(character),
-          allies: this.alliesOf(character)
+          allies: this.alliesOf(character),
+          defending: this.isDefending(character)
         };
         chance = applyChanceIf(chance, raw.chanceIf, target, extras);
         const rolled = chance < 100;
@@ -523,7 +529,8 @@ class Battle {
           skipChance: true,
           round,
           prey: extras.prey,
-          allies: extras.allies
+          allies: extras.allies,
+          defending: extras.defending
         });
         this.logActionResult(character, habit, raw, target, actionResult);
         if (raw.tgt && raw.tgt.linkAs) character.links[raw.tgt.linkAs] = target;

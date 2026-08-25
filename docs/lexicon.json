@@ -247,8 +247,16 @@
         },
         "ifBonus": {
           "type": "object",
-          "fields": { "status": "string", "pct": "number", "dealer": "physical|tactical|fire" },
-          "desc": "If condition met, replace dmg rate or mod magnitude with ifBonus.pct (per target). status: met if TARGET or ATTACKER has it (control = Stun|Stagger|Overwhelm|Confusion). dealer: met if TARGET dealer type matches."
+          "fields": {
+            "status": "string",
+            "pct": "number",
+            "mult": "number",
+            "dealer": "physical|tactical|fire",
+            "defending": "boolean",
+            "stacks": "{ id, min }",
+            "preyRecoveredLastRound": "boolean"
+          },
+          "desc": "If condition met: mult scales the current value; pct replaces it. defending = caster's team is the Defending side (The Long Siege ×2)."
         },
         "scaleStat": { "type": "core_stat" },
         "chance": { "type": ["number", "number[5]"] },

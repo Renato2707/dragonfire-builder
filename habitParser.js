@@ -1,6 +1,6 @@
 // habitParser.js
 
-import { rollChance, calculateFinalDamage, scaleByStat, statusConditionMet } from './utils.js';
+import { rollChance, calculateFinalDamage, scaleByStat, statusConditionMet, roundScaled } from './utils.js';
 import { getDealerType } from './positionSystem.js';
 
 const ALL_ROUNDS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
@@ -53,6 +53,7 @@ function resolveChance(actionRaw, rankIndex, character) {
 
 function ifBonusApplies(ifBonus, attacker, target, extras = {}) {
   if (!ifBonus) return false;
+  if (ifBonus.defending) return !!extras.defending;
   if (ifBonus.preyRecoveredLastRound) {
     const prey = extras.prey;
     return !!(prey && prey.receivedRecoveryLastRound);
@@ -83,7 +84,21 @@ function resolveIfBonusRate(rate, ifBonus, attacker, target, extras = {}) {
 }
 
 function applyIfBonusValue(baseValue, ifBonus, attacker) {
-  if (!ifBonus || ifBonus.pct == null) return baseValue;
+  if (!ifBonus) return baseValue;
+  if (ifBonus.mult != null) {
+    const factor = Number(ifBonus.mult);
+    if (typeof baseValue === 'number') return roundScaled(baseValue * factor);
+    if (baseValue && typeof baseValue === 'object') {
+      const out = { ...baseValue };
+      for (const key of Object.keys(out)) {
+        if (key === '__fixed') continue;
+        if (typeof out[key] === 'number') out[key] = roundScaled(out[key] * factor);
+      }
+      return out;
+    }
+    return baseValue;
+  }
+  if (ifBonus.pct == null) return baseValue;
   const bonus = scaleByStat(ifBonus.pct, attacker, ifBonus.scaleStat);
   if (typeof baseValue === 'number') return bonus;
   if (baseValue && typeof baseValue === 'object') {
@@ -199,7 +214,7 @@ function executeHabitAction(habit, actionData, attacker, targets, rank = 1, opti
   if (result.magnitude == null && typeof scalingValue === 'number') result.magnitude = scalingValue;
   const actionType = raw.t || actionData.type;
   if (actionType === 'mod' || actionType === 'stack') {
-    const modResult = executeModAction(habit, actionData, attacker, targets, scalingValue, rank);
+    const modResult = executeModAction(habit, actionData, attacker, targets, scalingValue, rank, options);
     result.effects = modResult.effects;
     result.onReachActions = modResult.onReachActions;
     result.executed = result.effects.length;
@@ -227,7 +242,7 @@ function executeHabitAction(habit, actionData, attacker, targets, rank = 1, opti
   return result;
 }
 
-function executeModAction(habit, actionData, attacker, targets, scalingValue, rank = 1) {
+function executeModAction(habit, actionData, attacker, targets, scalingValue, rank = 1, extras = {}) {
   const effects = [];
   const onReachActions = [];
   const raw = actionData.data || actionData;
@@ -241,7 +256,7 @@ function executeModAction(habit, actionData, attacker, targets, scalingValue, ra
   };
   for (const target of targets) {
     if (!target || target.isDead) continue;
-    const value = ifBonusApplies(raw.ifBonus, attacker, target)
+    const value = ifBonusApplies(raw.ifBonus, attacker, target, extras)
       ? applyIfBonusValue(scalingValue || {}, raw.ifBonus, attacker)
       : (scalingValue || {});
     const valueFlags = value.__fixed || flags;

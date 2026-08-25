@@ -33,6 +33,8 @@ function mockFx(ids) {
   if (!ifBonusApplies({ status: 'panic', pct: 150 }, clean, targetPanic)) throw new Error('ifBonus panic on target failed');
   if (!ifBonusApplies({ status: 'control', pct: 30 }, clean, mockFx(['stagger']))) throw new Error('ifBonus control failed');
   if (ifBonusApplies({ status: 'panic', pct: 150 }, clean, clean)) throw new Error('ifBonus panic miss should be false');
+  if (!ifBonusApplies({ defending: true, mult: 2 }, clean, clean, { defending: true })) throw new Error('ifBonus defending should apply');
+  if (ifBonusApplies({ defending: true, mult: 2 }, clean, clean, { defending: false })) throw new Error('ifBonus defending miss should be false');
   console.log('✓ chanceIf / ifBonus / control\n');
 }
 
@@ -469,6 +471,39 @@ function mockFx(ids) {
   }
   if (seen.size !== 3) throw new Error(`expected all 3 types over 60 rolls, got ${[...seen]}`);
   console.log('✓ pick:random Phantom\'s Veil one damage type per round\n');
+}
+
+{
+  const nyrena = new Character({
+    id: 'nyrena', name: 'Nyrena', breed: 'Champion', rarity: 'Rare', stats: { str: 10, inst: 10, int: 10, init: 10 }
+  }, 1, 1);
+  const ally = new Character({
+    id: 'ally', name: 'Ally', breed: 'Warrior', rarity: 'Rare', stats: { str: 10, inst: 10, int: 10, init: 10 }
+  }, 1, 0);
+  const attacker = new Character({
+    id: 'atk', name: 'Atk', breed: 'Hunter', rarity: 'Rare', stats: { str: 10, inst: 10, int: 10, init: 10 }
+  }, 0, 1);
+  const habit = new Habit({ name: 'The Long Siege', structured: [] }, 'nyrena');
+  const raw = {
+    t: 'mod',
+    mods: [{ stat: 'physical_received', pct: [-5, -6.5, -8, -10, -12.5] }],
+    ifBonus: { defending: true, mult: 2 },
+    dur: 1
+  };
+  executeHabitAction(habit, raw, nyrena, [ally], 1, { skipChance: true, defending: true });
+  if (ally.getPercentTotal('physical_received') !== -10) {
+    throw new Error(`Defending should double -5 to -10, got ${ally.getPercentTotal('physical_received')}`);
+  }
+  const open = new Character({
+    id: 'open', name: 'Open', breed: 'Warrior', rarity: 'Rare', stats: { str: 10, inst: 10, int: 10, init: 10 }
+  }, 0, 0);
+  executeHabitAction(habit, raw, attacker, [open], 1, { skipChance: true, defending: false });
+  if (open.getPercentTotal('physical_received') !== -5) {
+    throw new Error('Attacking should keep -5 Physical Received');
+  }
+  const btl = new Battle([attacker], [nyrena], { verbose: false, defendingTeam: 1 });
+  if (!btl.isDefending(nyrena) || btl.isDefending(attacker)) throw new Error('Team B should be Defending by default');
+  console.log('✓ When Defending doubles The Long Siege\n');
 }
 
 try {
