@@ -253,10 +253,15 @@
             "mult": "number",
             "dealer": "physical|tactical|fire",
             "defending": "boolean",
+            "selfHpAbove": "number (caster Troop Capacity % > n)",
+            "selfHpBelow": "number (caster Troop Capacity % < n)",
+            "selfStatus": "string (caster has status)",
+            "any": "Condition[] OR",
+            "all": "Condition[] AND",
             "stacks": "{ id, min }",
             "preyRecoveredLastRound": "boolean"
           },
-          "desc": "If condition met: mult scales the current value; pct replaces it. defending = caster's team is the Defending side (The Long Siege ×2)."
+          "desc": "If condition met: mult scales the current value; pct replaces it. any = OR (Sharpened Beauty: above 75% HP or Advantage). selfHpAbove doubles The Blue Queen."
         },
         "scaleStat": { "type": "core_stat" },
         "chance": { "type": ["number", "number[5]"] },

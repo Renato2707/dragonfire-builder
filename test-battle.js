@@ -506,6 +506,57 @@ function mockFx(ids) {
   console.log('✓ When Defending doubles The Long Siege\n');
 }
 
+{
+  const mk = (id, hp) => {
+    const c = new Character({
+      id, name: id, breed: 'Champion', rarity: 'Rare', stats: { str: 10, inst: 10, int: 10, init: 10 }
+    }, 0, 1);
+    c.maxHealth = 100;
+    c.currentHealth = hp;
+    return c;
+  };
+  const habit = new Habit({ name: 'Sharpened Beauty', structured: [] }, 'tessarion');
+  const raw = {
+    t: 'mod',
+    mods: [
+      { stat: 'physical_dealt', pct: [7, 8.4, 9.8, 11.9, 14] },
+      { stat: 'fire_dealt', pct: [7, 8.4, 9.8, 11.9, 14] }
+    ],
+    ifBonus: { any: [{ selfHpAbove: 75 }, { selfStatus: 'advantage' }], mult: 2 },
+    dur: 1
+  };
+  const high = mk('high', 80);
+  executeHabitAction(habit, raw, high, [high], 1, { skipChance: true });
+  if (high.getPercentTotal('physical_dealt') !== 14 || high.getPercentTotal('fire_dealt') !== 14) {
+    throw new Error('above 75% should double Sharpened Beauty to 14');
+  }
+  const edge = mk('edge', 75);
+  executeHabitAction(habit, raw, edge, [edge], 1, { skipChance: true });
+  if (edge.getPercentTotal('physical_dealt') !== 7) throw new Error('exactly 75% is not above 75%');
+  const low = mk('low', 50);
+  executeHabitAction(habit, raw, low, [low], 1, { skipChance: true });
+  if (low.getPercentTotal('physical_dealt') !== 7) throw new Error('below 75% without Advantage stays 7');
+  applyEffect(low, 'ADVANTAGE', 1, 'self', { duration: 2, magnitude: 20 });
+  low.percentMods = [];
+  executeHabitAction(habit, raw, low, [low], 1, { skipChance: true });
+  if (low.getPercentTotal('fire_dealt') !== 14) throw new Error('Advantage should double Sharpened Beauty at 50% HP');
+  const queen = mk('queen', 90);
+  const ally = mk('fireally', 100);
+  ally.stats = { str: 10, inst: 10, int: 80, init: 10 };
+  executeHabitAction(habit, {
+    t: 'mod',
+    mods: [
+      { stat: 'dmg_received', pct: -10 },
+      { stat: 'int', pct: 15 }
+    ],
+    ifBonus: { selfHpAbove: 75, mult: 2 },
+    dur: 2
+  }, queen, [ally], 1, { skipChance: true });
+  if (ally.getPercentTotal('dmg_received') !== -20) throw new Error('The Blue Queen should double to -20 when above 75%');
+  if (ally.getPercentTotal('int') !== 30) throw new Error('The Blue Queen should double Intelligence to +30');
+  console.log('✓ ifBonus.any / selfHpAbove / selfStatus Tessarion\n');
+}
+
 try {
   // Passo 1: Carregar dragões
   console.log('1️⃣  Carregando dragões...');

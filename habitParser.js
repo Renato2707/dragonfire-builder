@@ -51,29 +51,45 @@ function resolveChance(actionRaw, rankIndex, character) {
   return actionRaw.chance;
 }
 
+function casterHpPct(character) {
+  if (!character) return 0;
+  if (typeof character.getHealthPercentage === 'function') return character.getHealthPercentage();
+  const max = Number(character.maxHealth) || 0;
+  if (!max) return 0;
+  return (Number(character.currentHealth) / max) * 100;
+}
+
 function ifBonusApplies(ifBonus, attacker, target, extras = {}) {
   if (!ifBonus) return false;
-  if (ifBonus.defending) return !!extras.defending;
-  if (ifBonus.preyRecoveredLastRound) {
-    const prey = extras.prey;
-    return !!(prey && prey.receivedRecoveryLastRound);
+  if (Array.isArray(ifBonus.any) && ifBonus.any.length) {
+    return ifBonus.any.some(cond => ifBonusApplies(cond, attacker, target, extras));
   }
-  if (ifBonus.dealer && target) {
-    return getDealerType(target) === String(ifBonus.dealer).toLowerCase();
+  if (Array.isArray(ifBonus.all) && ifBonus.all.length) {
+    return ifBonus.all.every(cond => ifBonusApplies(cond, attacker, target, extras));
+  }
+  const checks = [];
+  if (ifBonus.defending != null) checks.push(!!extras.defending === !!ifBonus.defending);
+  if (ifBonus.preyRecoveredLastRound) {
+    checks.push(!!(extras.prey && extras.prey.receivedRecoveryLastRound));
+  }
+  if (ifBonus.dealer) {
+    checks.push(!!target && getDealerType(target) === String(ifBonus.dealer).toLowerCase());
   }
   if (ifBonus.status) {
     const who = ifBonus.on === 'self' ? attacker : null;
-    if (who) return statusConditionMet(who, ifBonus.status);
-    if (statusConditionMet(target, ifBonus.status)) return true;
-    if (statusConditionMet(attacker, ifBonus.status)) return true;
+    if (who) checks.push(statusConditionMet(who, ifBonus.status));
+    else checks.push(statusConditionMet(target, ifBonus.status) || statusConditionMet(attacker, ifBonus.status));
   }
+  if (ifBonus.selfStatus) checks.push(statusConditionMet(attacker, ifBonus.selfStatus));
+  if (ifBonus.selfHpAbove != null) checks.push(casterHpPct(attacker) > Number(ifBonus.selfHpAbove));
+  if (ifBonus.selfHpBelow != null) checks.push(casterHpPct(attacker) < Number(ifBonus.selfHpBelow));
   if (ifBonus.stacks && attacker && typeof attacker.getStackCount === 'function') {
     const spec = ifBonus.stacks;
     const id = spec.id || spec;
     const min = spec.min != null ? Number(spec.min) : 1;
-    return attacker.getStackCount(id) >= min;
+    checks.push(attacker.getStackCount(id) >= min);
   }
-  return false;
+  return checks.length > 0 && checks.every(Boolean);
 }
 
 function resolveIfBonusRate(rate, ifBonus, attacker, target, extras = {}) {
