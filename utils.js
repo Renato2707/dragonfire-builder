@@ -115,14 +115,17 @@ function hasActiveId(character, id) {
 }
 
 function sortByInitiative(characters) {
+  const band = c => {
+    if (hasActiveId(c, 'slow')) return 2;
+    if (hasActiveId(c, 'first_strike')) return 0;
+    return 1;
+  };
   return [...characters].sort((a, b) => {
-    const fa = hasActiveId(a, 'first_strike') ? 1 : 0;
-    const fb = hasActiveId(b, 'first_strike') ? 1 : 0;
-    if (fa !== fb) return fb - fa;
-    const sa = hasActiveId(a, 'slow') ? 1 : 0;
-    const sb = hasActiveId(b, 'slow') ? 1 : 0;
-    if (sa !== sb) return sa - sb;
-    return b.getInitiative() - a.getInitiative();
+    const diff = band(a) - band(b);
+    if (diff) return diff;
+    const ia = typeof a.getInitiative === 'function' ? a.getInitiative() : 0;
+    const ib = typeof b.getInitiative === 'function' ? b.getInitiative() : 0;
+    return ib - ia;
   });
 }
 

@@ -382,7 +382,7 @@
     "first_strike": {
       "id": "first_strike",
       "category": "positive",
-      "effect": "sort before others",
+      "effect": "sortByInitiative band 0 (acts before others this round). Does not inflate Initiative for Fire mitigation. Slow overrides if both are present.",
       "stackable": false
     },
     "double_strike": {
@@ -416,7 +416,7 @@
     "slow": {
       "id": "slow",
       "category": "negative",
-      "effect": "sort after others",
+      "effect": "sortByInitiative band 2 (acts after all others this round), even if also First-Strike",
       "stackable": false
     },
     "weakened": {

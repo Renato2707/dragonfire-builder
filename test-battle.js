@@ -4,7 +4,7 @@ import { fileURLToPath } from 'url';
 import { Character } from './character.js';
 import { Battle } from './battle.js';
 import { loadDragonHabitsSync, loadCommandSync, ifBonusApplies } from './habitParser.js';
-import { applyChanceIf, statusConditionMet } from './utils.js';
+import { applyChanceIf, statusConditionMet, sortByInitiative } from './utils.js';
 import { applyEffect, hasEffect, cleanseCharacter, getEffect, isImmuneTo, processHealingEffects } from './effects.js';
 import { selectTargets } from './positionSystem.js';
 
@@ -244,6 +244,28 @@ function mockFx(ids) {
   applyEffect(unit, 'RECOVERY', 1, 'self', { duration: 2 });
   if (processHealingEffects(unit) !== 0) throw new Error('HoT should be blocked');
   console.log('✓ Nullify Recovery blocks heal and HoT\n');
+}
+
+{
+  const d = (id, init) => {
+    const c = new Character({
+      id, name: id, breed: 'Warrior', rarity: 'Rare', stats: { str: 10, inst: 10, int: 10, init }
+    }, 0, 1);
+    return c;
+  };
+  const fs = d('fs', 1);
+  const mid = d('mid', 50);
+  const slow = d('slow', 99);
+  applyEffect(fs, 'FIRST_STRIKE', 1, 'x', { duration: 2 });
+  applyEffect(slow, 'SLOW', 1, 'x', { duration: 2 });
+  const order = sortByInitiative([slow, mid, fs]).map(c => c.name);
+  if (order.join(',') !== 'fs,mid,slow') throw new Error(`order ${order.join('→')} expected fs→mid→slow`);
+  const both = d('both', 1);
+  applyEffect(both, 'FIRST_STRIKE', 1, 'x', { duration: 2 });
+  applyEffect(both, 'SLOW', 1, 'x', { duration: 2 });
+  const order2 = sortByInitiative([both, mid]).map(c => c.name);
+  if (order2[order2.length - 1] !== 'both') throw new Error('Slow overrides First-Strike');
+  console.log('✓ First-Strike / Slow initiative order\n');
 }
 
 try {

@@ -91,7 +91,9 @@ class Battle {
   }
 
   phaseCalculateInitiative() {
-    return sortByInitiative(this.allCharacters.filter(c => !c.isDead));
+    const order = sortByInitiative(this.allCharacters.filter(c => !c.isDead));
+    this.logAction(`Turn order: ${order.map(c => c.name).join(' → ')}`);
+    return order;
   }
 
   phaseEndOfRound() {
