@@ -59,6 +59,8 @@ const GRANTED_STATUSES = new Set([
   'first_strike', 'double_strike', 'advantage', 'resistance', 'evade', 'immunity', 'recovery'
 ]);
 
+const CONTROL_STATUSES = ['stun', 'stagger', 'overwhelm', 'confusion'];
+
 function getDamageTypeConfig(damageType) {
   const type = DAMAGE_TYPES[String(damageType || '').toUpperCase()];
   if (!type) return DAMAGE_TYPES.PHYSICAL;
@@ -200,6 +202,29 @@ function scaleByStat(value, character, scaleStat) {
   return value;
 }
 
+function hasControl(character) {
+  return CONTROL_STATUSES.some(id => hasActiveId(character, id));
+}
+
+function statusConditionMet(character, key) {
+  if (!character || key == null) return false;
+  const id = statusId(key);
+  if (id === 'control') return hasControl(character);
+  return hasActiveId(character, id);
+}
+
+function applyChanceIf(chance, chanceIf, target) {
+  if (chance == null || !chanceIf || typeof chanceIf !== 'object') return chance;
+  let result = Number(chance);
+  for (const key of Object.keys(chanceIf)) {
+    if (statusConditionMet(target, key)) {
+      const mult = Number(chanceIf[key]);
+      if (!Number.isNaN(mult)) result *= mult;
+    }
+  }
+  return result;
+}
+
 export {
   getRandomInt,
   rollChance,
@@ -212,6 +237,9 @@ export {
   applyDamageMultipliers,
   calculateFinalDamage,
   hasActiveId,
+  hasControl,
+  statusConditionMet,
+  applyChanceIf,
   isTeamAlive,
   sortByInitiative,
   formatStatName,

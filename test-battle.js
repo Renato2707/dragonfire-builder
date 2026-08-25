@@ -3,12 +3,36 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { Character } from './character.js';
 import { Battle } from './battle.js';
-import { loadDragonHabitsSync, loadCommandSync } from './habitParser.js';
+import { loadDragonHabitsSync, loadCommandSync, ifBonusApplies } from './habitParser.js';
+import { applyChanceIf, statusConditionMet } from './utils.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 console.log('🧪 TESTE DE INTEGRAÇÃO - SIMULADOR NÍVEL 5');
 console.log('═══════════════════════════════════════════════════════\n');
+
+function mockFx(ids) {
+  return { activeEffects: ids.map(id => ({ id, duration: 2, isExpired: () => false })) };
+}
+
+{
+  const bleed = mockFx(['bleed']);
+  const clean = mockFx([]);
+  if (applyChanceIf(25, { bleed: 2 }, bleed) !== 50) throw new Error('chanceIf bleed ×2 failed');
+  if (applyChanceIf(25, { bleed: 2 }, clean) !== 25) throw new Error('chanceIf bleed miss failed');
+  if (applyChanceIf(25, { burn: 2 }, mockFx(['burn'])) !== 50) throw new Error('chanceIf burn ×2 failed');
+  if (applyChanceIf(25, { taunt: 2 }, mockFx(['taunt'])) !== 50) throw new Error('chanceIf taunt ×2 failed');
+  if (!statusConditionMet(mockFx(['stun']), 'control')) throw new Error('control stun failed');
+  if (!statusConditionMet(mockFx(['confusion']), 'control')) throw new Error('control confusion failed');
+  if (statusConditionMet(mockFx(['burn']), 'control')) throw new Error('burn is not control');
+  const attacker = mockFx(['first_strike']);
+  const targetPanic = mockFx(['panic']);
+  if (!ifBonusApplies({ status: 'first_strike', pct: 150 }, attacker, clean)) throw new Error('ifBonus first_strike on attacker failed');
+  if (!ifBonusApplies({ status: 'panic', pct: 150 }, clean, targetPanic)) throw new Error('ifBonus panic on target failed');
+  if (!ifBonusApplies({ status: 'control', pct: 30 }, clean, mockFx(['stagger']))) throw new Error('ifBonus control failed');
+  if (ifBonusApplies({ status: 'panic', pct: 150 }, clean, clean)) throw new Error('ifBonus panic miss should be false');
+  console.log('✓ chanceIf / ifBonus / control\n');
+}
 
 try {
   // Passo 1: Carregar dragões

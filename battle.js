@@ -3,7 +3,8 @@
 import {
   calculateFinalDamage, sortByInitiative, isTeamAlive, rollChance,
   formatStatName, formatDamageTypeName, formatStatusName, formatDuration,
-  formatSignedPercent, formatTroopCapacity, isGrantedStatus, formatStackName
+  formatSignedPercent, formatTroopCapacity, isGrantedStatus, formatStackName,
+  applyChanceIf
 } from './utils.js';
 import {
   updateEffects, processDamageEffects, processHealingEffects,
@@ -317,7 +318,7 @@ class Battle {
       for (const target of targets) {
         if (target.isDead) continue;
         let chance = resolveChance(raw, rankIndex, character);
-        if (raw.chanceIf && raw.chanceIf.taunt && hasEffect(target, 'taunt')) chance *= raw.chanceIf.taunt;
+        chance = applyChanceIf(chance, raw.chanceIf, target);
         const rolled = chance < 100;
         const hit = !rolled || rollChance(chance);
         if (rolled) this.logChanceRoll(habit, target, chance, hit);

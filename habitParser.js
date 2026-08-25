@@ -1,6 +1,7 @@
 // habitParser.js
 
-import { rollChance, calculateFinalDamage, hasActiveId, scaleByStat } from './utils.js';
+import { rollChance, calculateFinalDamage, scaleByStat, statusConditionMet } from './utils.js';
+import { getDealerType } from './positionSystem.js';
 
 const ALL_ROUNDS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 const PHASES = {
@@ -35,6 +36,33 @@ function resolveChance(actionRaw, rankIndex, character) {
   if (!actionRaw || actionRaw.chance == null) return 100;
   if (Array.isArray(actionRaw.chance)) return actionRaw.chance[rankIndex] ?? actionRaw.chance[0] ?? 100;
   return actionRaw.chance;
+}
+
+function ifBonusApplies(ifBonus, attacker, target) {
+  if (!ifBonus) return false;
+  if (ifBonus.dealer && target) {
+    return getDealerType(target) === String(ifBonus.dealer).toLowerCase();
+  }
+  if (ifBonus.status) {
+    if (statusConditionMet(target, ifBonus.status)) return true;
+    if (statusConditionMet(attacker, ifBonus.status)) return true;
+  }
+  return false;
+}
+
+function applyIfBonusValue(baseValue, ifBonus, attacker) {
+  if (!ifBonus || ifBonus.pct == null) return baseValue;
+  const bonus = scaleByStat(ifBonus.pct, attacker, ifBonus.scaleStat);
+  if (typeof baseValue === 'number') return bonus;
+  if (baseValue && typeof baseValue === 'object') {
+    const out = { ...baseValue };
+    for (const key of Object.keys(out)) {
+      if (key === '__fixed') continue;
+      if (typeof out[key] === 'number') out[key] = bonus;
+    }
+    return out;
+  }
+  return bonus;
 }
 
 class Habit {
@@ -177,10 +205,14 @@ function executeModAction(habit, actionData, attacker, targets, scalingValue, ra
   };
   for (const target of targets) {
     if (!target || target.isDead) continue;
+    const value = ifBonusApplies(raw.ifBonus, attacker, target)
+      ? applyIfBonusValue(scalingValue, raw.ifBonus, attacker)
+      : scalingValue;
+    const valueFlags = value.__fixed || flags;
     if (raw.t === 'stack' && typeof target.addStack === 'function') {
       const wantAdd = raw.stacks || 1;
       const before = typeof target.getStackCount === 'function' ? target.getStackCount(raw.id || 'stack') : 0;
-      const stackResult = target.addStack(raw.id || 'stack', scalingValue, duration, {
+      const stackResult = target.addStack(raw.id || 'stack', value, duration, {
         ...options,
         stacks: wantAdd
       });
@@ -211,14 +243,14 @@ function executeModAction(habit, actionData, attacker, targets, scalingValue, ra
         }
       }
     } else {
-      for (const stat in scalingValue) {
+      for (const stat in value) {
         if (stat === '__fixed') continue;
-        target.addStatModifier(stat, scalingValue[stat], duration, { ...options, fixed: !!flags[stat] });
+        target.addStatModifier(stat, value[stat], duration, { ...options, fixed: !!valueFlags[stat] });
         effects.push({
           target: target.name,
           kind: 'mod',
           stat,
-          value: scalingValue[stat],
+          value: value[stat],
           duration,
           excludeBasic: !!raw.excludeBasic,
           enhancedBy: raw.scaleStat || null
@@ -233,16 +265,21 @@ function executeDamageAction(habit, actionData, attacker, targets, scalingValue,
   const damages = [];
   const raw = actionData.data || actionData;
   const damageType = (raw.dt || 'physical').toUpperCase();
-  let rate = typeof scalingValue === 'number' ? scalingValue : 0;
-  if (raw.ifBonus && raw.ifBonus.status && hasActiveId(attacker, raw.ifBonus.status)) {
-    rate = scaleByStat(raw.ifBonus.pct, attacker, raw.scaleStat);
-  }
+  let baseRate = typeof scalingValue === 'number' ? scalingValue : 0;
   if (raw.roundBonus && round != null) {
     const bonus = raw.roundBonus[String(round)] ?? raw.roundBonus[round];
-    if (bonus) rate *= bonus;
+    if (bonus) baseRate *= bonus;
   }
   for (const target of targets) {
     if (!target || target.isDead) continue;
+    let rate = baseRate;
+    if (ifBonusApplies(raw.ifBonus, attacker, target)) {
+      rate = scaleByStat(raw.ifBonus.pct, attacker, raw.scaleStat);
+      if (raw.roundBonus && round != null) {
+        const bonus = raw.roundBonus[String(round)] ?? raw.roundBonus[round];
+        if (bonus) rate *= bonus;
+      }
+    }
     damages.push({ target: target.name, amount: calculateFinalDamage(attacker, target, damageType, rate) });
   }
   return damages;
@@ -267,6 +304,7 @@ export {
   normalizeTiming,
   parseTargeting,
   resolveChance,
+  ifBonusApplies,
   Habit,
   loadDragonHabitsSync,
   loadCommandSync,

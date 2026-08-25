@@ -116,7 +116,7 @@
         "scaleStat": { "type": "core_stat", "desc": "value *= 1 + getModifiedStat(scaleStat)/100" },
         "pick": { "type": "string", "value": "random", "desc": "If set, one random entry from mods[]" },
         "chance": { "type": ["number", "number[5]"] },
-        "chanceIf": { "type": "object", "example": { "taunt": 2 }, "desc": "chance *= multiplier if target has status" },
+        "chanceIf": { "type": "object", "example": { "bleed": 2, "burn": 2, "taunt": 2, "control": 2 }, "desc": "For each key (status id or control): if TARGET has that status, chance *= multiplier. control = Stun|Stagger|Overwhelm|Confusion." },
         "perTarget": { "type": "object", "desc": "Repeats action N times = matching pool size" },
         "tgt": { "type": "Targeting" }
       },
@@ -210,8 +210,8 @@
         },
         "ifBonus": {
           "type": "object",
-          "fields": { "status": "string", "pct": "number" },
-          "desc": "If attacker has status, use ifBonus.pct as rate"
+          "fields": { "status": "string", "pct": "number", "dealer": "physical|tactical|fire" },
+          "desc": "If condition met, replace dmg rate or mod magnitude with ifBonus.pct (per target). status: met if TARGET or ATTACKER has it (control = Stun|Stagger|Overwhelm|Confusion). dealer: met if TARGET dealer type matches."
         },
         "scaleStat": { "type": "core_stat" },
         "chance": { "type": ["number", "number[5]"] },
@@ -641,7 +641,7 @@
       "default 100"
     ],
     "per_target": "runAction rolls per target when chance < 100; logs [hit]/[miss]",
-    "chanceIf.taunt": "multiplies chance if target has taunt"
+    "chanceIf": "each key is a status id or control; chance *= multiplier when TARGET matches"
   },
 
   "aliases_and_fallbacks": {
