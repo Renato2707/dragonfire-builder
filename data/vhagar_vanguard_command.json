@@ -1,0 +1,52 @@
+{
+  "dragonId": "vhagar",
+  "name": "Fiery Bonds",
+  "command": [
+    {
+      "phase": "turn",
+      "rounds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+      "actions": [
+        {
+          "t": "status",
+          "st": "taunt",
+          "dur": 2,
+          "chance": 25,
+          "chanceIf": { "burn": 2 },
+          "tgt": { "side": "enemy", "count": 3, "select": "any" }
+        }
+      ]
+    },
+    {
+      "phase": "turn",
+      "rounds": [2, 4, 6, 8, 10],
+      "actions": [
+        {
+          "t": "dmg",
+          "dt": "physical",
+          "pct": 120,
+          "tgt": { "side": "enemy", "count": 1, "select": "adjacency" }
+        }
+      ]
+    }
+  ],
+  "vanguard": [
+    {
+      "phase": "combat_start",
+      "rounds": [1],
+      "actions": [
+        {
+          "t": "mod",
+          "mods": [{ "stat": "dmg_received", "pct": -8 }],
+          "dur": "combat",
+          "tgt": { "side": "self" }
+        },
+        {
+          "t": "mod",
+          "mods": [{ "stat": "tactical_dealt", "pct": 16 }],
+          "dur": "combat",
+          "tgt": { "side": "ally", "count": 1, "slot": 0, "excludeSelf": true }
+        }
+      ]
+    }
+  ]
+}
