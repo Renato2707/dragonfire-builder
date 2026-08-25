@@ -1,0 +1,60 @@
+{
+  "dragonId": "velar",
+  "name": "Whirlwind",
+  "command": [
+    {
+      "phase": "turn",
+      "rounds": [2, 4, 6, 8],
+      "actions": [
+        {
+          "t": "status",
+          "st": "advantage",
+          "val": 15,
+          "dur": 2,
+          "chance": 20,
+          "tgt": {
+            "side": "ally",
+            "count": 2,
+            "select": "any",
+            "excludeSelf": true
+          }
+        }
+      ]
+    },
+    {
+      "phase": "turn",
+      "rounds": [3, 5, 7, 9],
+      "actions": [
+        {
+          "t": "dmg",
+          "dt": "tactical",
+          "pct": 45,
+          "tgt": { "side": "enemy", "count": 3, "select": "any" }
+        }
+      ]
+    }
+  ],
+  "vanguard": [
+    {
+      "phase": "combat_start",
+      "rounds": [1],
+      "actions": [
+        {
+          "t": "mod",
+          "mods": [{ "stat": "tactical_dealt", "pct": 16 }],
+          "dur": "combat",
+          "tgt": { "side": "self" }
+        },
+        {
+          "t": "mod",
+          "mods": [
+            { "stat": "inst", "fixed": 20 },
+            { "stat": "init", "fixed": 20 }
+          ],
+          "dur": "combat",
+          "tgt": { "side": "ally", "count": 1, "slot": 0, "excludeSelf": true }
+        }
+      ]
+    }
+  ]
+}
