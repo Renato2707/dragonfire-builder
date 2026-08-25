@@ -450,10 +450,10 @@
     "evade": {
       "id": "evade",
       "category": "control",
-      "evasionChance": 10,
+      "evasionChance": "from val (habit rank); default 10",
       "stackable": true,
       "stackCap": 3,
-      "magnitude_via": "val"
+      "effect": "Each damage instance (Basic, Command/Habit, Bleed/Panic/Burn) rolls evasionChance. On hit, dealDamage returns 0 and first-damage hooks do not fire. Refresh keeps the higher rate."
     },
     "cleanse": {
       "id": "cleanse",

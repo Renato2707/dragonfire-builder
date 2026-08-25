@@ -196,7 +196,9 @@ function updateEffects(character) {
 function tryEvade(character) {
   const evade = getEffect(character, 'evade');
   if (!evade) return false;
-  return rollChance(evade.evasionChance);
+  const chance = Number(evade.evasionChance);
+  if (!chance || chance <= 0) return false;
+  return rollChance(chance);
 }
 
 function getDotTicks(character) {

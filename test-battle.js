@@ -285,6 +285,29 @@ function mockFx(ids) {
   console.log('✓ Taunt forces Basic Attack onto appliedBy\n');
 }
 
+{
+  const dummy = { id: 't', name: 'Tairax', breed: 'Hunter', rarity: 'Rare', stats: { str: 10, inst: 10, int: 10, init: 10 } };
+  const unit = new Character(dummy, 0, 0);
+  const foe = new Character({ ...dummy, id: 'f', name: 'Foe' }, 1, 1);
+  unit.maxHealth = 500;
+  unit.currentHealth = 500;
+  applyEffect(unit, 'EVADE', 1, 'self', { duration: 5, magnitude: 100 });
+  if (getEffect(unit, 'evade').evasionChance !== 100) throw new Error('evade rate from val');
+  const btl = new Battle([unit], [foe], { verbose: false });
+  const dealt = btl.dealDamage(unit, 80, { type: 'fire', basic: false });
+  if (dealt !== 0) throw new Error('100% Evade should ignore damage');
+  if (unit.currentHealth !== 500) throw new Error('health should be unchanged');
+  if (unit.receivedDamageThisRound) throw new Error('evaded hit is not first damage');
+  const open = new Character({ ...dummy, id: 'o', name: 'Open' }, 0, 2);
+  open.maxHealth = 500;
+  open.currentHealth = 500;
+  applyEffect(open, 'EVADE', 1, 'self', { duration: 1, magnitude: 0 });
+  const btl2 = new Battle([open], [foe], { verbose: false });
+  const dmg = btl2.dealDamage(open, 10, { type: 'physical', basic: true });
+  if (!(dmg > 0) || open.currentHealth >= 500) throw new Error('0% Evade should take damage');
+  console.log('✓ Evade ignores each damage instance\n');
+}
+
 try {
   // Passo 1: Carregar dragões
   console.log('1️⃣  Carregando dragões...');

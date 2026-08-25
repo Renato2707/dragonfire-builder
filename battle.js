@@ -102,11 +102,12 @@ class Battle {
         const ticks = processDamageEffects(character, name => this.allCharacters.find(c => c.name === name));
         for (const tick of ticks) {
           if (character.isDead) break;
-          if (tryEvade(character)) {
-            this.logAction(`${character.name} Evades the ${formatDamageTypeName(tick.damageType)} from ${tick.name}`);
-            continue;
-          }
-          const actual = this.dealDamage(character, tick.amount, { type: tick.damageType, basic: false });
+          const actual = this.dealDamage(character, tick.amount, {
+            type: tick.damageType,
+            basic: false,
+            sourceName: tick.name
+          });
+          if (!actual) continue;
           this.logAction(`${character.name} takes ${actual} ${formatDamageTypeName(tick.damageType)} from ${tick.name}`);
           if (character.isDead) this.logAction(`${character.name} retreated`);
         }
@@ -155,6 +156,12 @@ class Battle {
   }
 
   dealDamage(target, amount, info = {}) {
+    if (!target || amount <= 0) return 0;
+    if (tryEvade(target)) {
+      const from = info.sourceName ? ` from ${info.sourceName}` : '';
+      this.logAction(`${target.name} Evades the ${formatDamageTypeName(info.type)}${from}`);
+      return 0;
+    }
     const actual = target.takeDamage(amount);
     if (actual > 0) this.notifyDamage(target, info);
     return actual;
@@ -375,11 +382,8 @@ class Battle {
     this.logAction(extra
       ? `${attacker.name} launches a 2nd Basic Attack (Double-Strike)`
       : `${attacker.name} launches a Basic Attack`);
-    if (tryEvade(defender)) {
-      this.logAction(`${defender.name} Evades the ${formatDamageTypeName(damageType)}`);
-      return;
-    }
     const actualDamage = this.dealDamage(defender, rawDamage, { type: damageType, basic: true });
+    if (!actualDamage) return;
     this.logAction(`Deals ${actualDamage} ${formatDamageTypeName(damageType)} to ${defender.name}`);
     if (defender.isDead) this.logAction(`${defender.name} retreated`);
   }
@@ -630,11 +634,8 @@ class Battle {
       }
     } else if (actionType === 'dmg') {
       for (const dmg of actionResult.damages) {
-        if (tryEvade(target)) {
-          this.logAction(`${target.name} Evades the ${formatDamageTypeName(raw.dt)}`);
-          continue;
-        }
         const actualDamage = this.dealDamage(target, dmg.amount, { type: raw.dt, basic: false });
+        if (!actualDamage) continue;
         character.lastDamageTarget = target;
         this.logAction(`Deals ${actualDamage} ${formatDamageTypeName(raw.dt)} to ${target.name}${enhancedNote(raw.scaleStat)}`);
         if (target.isDead) this.logAction(`${target.name} retreated`);

@@ -134,7 +134,8 @@ class Habit {
     }
     if (Array.isArray(data.pct)) return data.pct[rankIndex];
     if (typeof data.pct === 'number') return data.pct;
-    if (data.val) return data.val;
+    if (Array.isArray(data.val)) return data.val[rankIndex];
+    if (typeof data.val === 'number') return data.val;
     return null;
   }
 
@@ -178,7 +179,9 @@ function executeHabitAction(habit, actionData, attacker, targets, rank = 1, opti
     return result;
   }
   const scalingValue = scaleByStat(habit.getScalingValue(actionData, rankIndex), attacker, raw.scaleStat);
-  result.magnitude = scaleByStat(raw.val, attacker, raw.scaleStat);
+  const rawVal = Array.isArray(raw.val) ? raw.val[rankIndex] : raw.val;
+  result.magnitude = scaleByStat(rawVal, attacker, raw.scaleStat);
+  if (result.magnitude == null && typeof scalingValue === 'number') result.magnitude = scalingValue;
   const actionType = raw.t || actionData.type;
   if (actionType === 'mod' || actionType === 'stack') {
     const modResult = executeModAction(habit, actionData, attacker, targets, scalingValue, rank);
