@@ -12,6 +12,10 @@ import {
 import { selectTargets, getPositionName } from './positionSystem.js';
 import { executeHabitAction, resolveChance, PHASES } from './habitParser.js';
 
+function enhancedNote(stat) {
+  return stat ? ` (enhanced by ${formatStatName(stat)})` : '';
+}
+
 class Battle {
   constructor(teamA, teamB, options = {}) {
     this.teamA = teamA;
@@ -323,34 +327,37 @@ class Battle {
     if (actionType === 'mod' || actionType === 'stack') {
       for (const effect of actionResult.effects) {
         if (effect.kind === 'stack') {
-          this.logAction(`${effect.target} gains ${effect.added || 1} stack of ${formatStackName(effect.stackId)} (now ${effect.stacks}) ${formatDuration(effect.duration)}`);
+          this.logAction(`${effect.target} gains ${effect.added || 1} stack of ${formatStackName(effect.stackId)} (now ${effect.stacks}) ${formatDuration(effect.duration)}${enhancedNote(effect.enhancedBy)}`);
         } else {
           const verb = Number(effect.value) < 0 ? 'Reduces' : 'Increases';
           const basic = effect.excludeBasic ? ' (excluding Basic Attacks)' : '';
-          this.logAction(`${verb} ${formatStatName(effect.stat)}${basic} of ${effect.target} by ${formatSignedPercent(effect.value)} ${formatDuration(effect.duration)}`);
+          this.logAction(`${verb} ${formatStatName(effect.stat)}${basic} of ${effect.target} by ${formatSignedPercent(effect.value)} ${formatDuration(effect.duration)}${enhancedNote(effect.enhancedBy)}`);
         }
       }
     } else if (actionType === 'status') {
+      const magnitude = actionResult.magnitude != null ? actionResult.magnitude : raw.val;
       applyEffect(target, (raw.st || '').toUpperCase(), character.habitRank, character.name, {
         duration: raw.dur,
-        magnitude: raw.val,
+        magnitude,
         immunities: raw.immunities
       });
       const statusName = formatStatusName(raw.st);
+      const mag = magnitude != null ? ` (${formatSignedPercent(Math.abs(Number(magnitude)) || magnitude)})`.replace('+-', '-') : '';
+      const magText = magnitude != null ? ` (${formatSignedPercent(magnitude)})` : '';
       if (isGrantedStatus(raw.st)) {
-        this.logAction(`Grants ${statusName} to ${target.name} ${formatDuration(raw.dur)}`);
+        this.logAction(`Grants ${statusName}${magText} to ${target.name} ${formatDuration(raw.dur)}${enhancedNote(raw.scaleStat)}`);
       } else {
-        this.logAction(`Afflicts ${target.name} with ${statusName} ${formatDuration(raw.dur)}`);
+        this.logAction(`Afflicts ${target.name} with ${statusName}${magText} ${formatDuration(raw.dur)}${enhancedNote(raw.scaleStat)}`);
       }
     } else if (actionType === 'dmg') {
       for (const dmg of actionResult.damages) {
         const actualDamage = target.takeDamage(dmg.amount);
-        this.logAction(`Deals ${actualDamage} ${formatDamageTypeName(raw.dt)} to ${target.name}`);
+        this.logAction(`Deals ${actualDamage} ${formatDamageTypeName(raw.dt)} to ${target.name}${enhancedNote(raw.scaleStat)}`);
         if (target.isDead) this.logAction(`${target.name} retreated`);
       }
     } else if (actionType === 'heal') {
       for (const heal of actionResult.heals) {
-        this.logAction(`Applies Recovery to ${target.name} (+${target.heal(heal.amount)} Troop Capacity)`);
+        this.logAction(`Applies Recovery to ${target.name} (+${target.heal(heal.amount)} Troop Capacity)${enhancedNote(raw.scaleStat)}`);
       }
     }
   }
