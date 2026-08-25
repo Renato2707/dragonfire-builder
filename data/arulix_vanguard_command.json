@@ -1,6 +1,6 @@
 {
   "dragonId": "arulix",
-  "name": "Twisting Coil",
+  "name": "Gleaming Spiral",
   "command": [
     {
       "phase": "turn",
@@ -35,7 +35,11 @@
       "actions": [
         {
           "t": "mod",
-          "mods": [{ "stat": "str", "fixed": 15 }, { "stat": "int", "fixed": 15 }, { "stat": "inst", "fixed": 15 }],
+          "mods": [
+            { "stat": "str", "fixed": 15 },
+            { "stat": "int", "fixed": 15 },
+            { "stat": "inst", "fixed": 15 }
+          ],
           "dur": "combat",
           "tgt": { "side": "self" }
         },
