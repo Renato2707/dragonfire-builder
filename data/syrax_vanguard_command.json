@@ -1,0 +1,61 @@
+{
+  "dragonId": "syrax",
+  "name": "Blazing Fury",
+  "command": [
+    {
+      "phase": "turn",
+      "rounds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+      "actions": [
+        {
+          "t": "mod",
+          "mods": [{ "stat": "fire_dealt", "pct": 10 }],
+          "dur": 2,
+          "chance": 20,
+          "tgt": { "side": "ally", "count": 1, "select": "dealer:fire" }
+        },
+        {
+          "t": "status",
+          "st": "first_strike",
+          "dur": 2,
+          "chance": 20,
+          "tgt": { "side": "ally", "count": 1, "select": "dealer:fire" }
+        }
+      ]
+    },
+    {
+      "phase": "turn",
+      "rounds": [1, 4, 6, 9],
+      "actions": [
+        {
+          "t": "dmg",
+          "dt": "tactical",
+          "pct": 110,
+          "tgt": { "side": "enemy", "count": 1, "select": "adjacency" }
+        }
+      ]
+    }
+  ],
+  "vanguard": [
+    {
+      "phase": "combat_start",
+      "rounds": [1],
+      "actions": [
+        {
+          "t": "mod",
+          "mods": [{ "stat": "tactical_dealt", "pct": 16 }],
+          "dur": "combat",
+          "tgt": { "side": "self" }
+        },
+        {
+          "t": "mod",
+          "mods": [
+            { "stat": "inst", "fixed": 20 },
+            { "stat": "init", "fixed": 20 }
+          ],
+          "dur": "combat",
+          "tgt": { "side": "ally", "count": 1, "slot": 0, "excludeSelf": true }
+        }
+      ]
+    }
+  ]
+}
