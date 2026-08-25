@@ -464,7 +464,8 @@
     "confusion": {
       "id": "confusion",
       "category": "control",
-      "confusionChance": 50
+      "confusionChance": 50,
+      "effect": "Each Command, Habit, or Basic Attack rolls 50%: on hit, ally targeting and enemy targeting swap (self stays self). Basic Attack may hit an ally."
     },
     "immunity": {
       "id": "immunity",

@@ -5,7 +5,7 @@ import { Character } from './character.js';
 import { Battle } from './battle.js';
 import { loadDragonHabitsSync, loadCommandSync, ifBonusApplies } from './habitParser.js';
 import { applyChanceIf, statusConditionMet } from './utils.js';
-import { applyEffect, hasEffect, cleanseCharacter } from './effects.js';
+import { applyEffect, hasEffect, cleanseCharacter, getEffect } from './effects.js';
 import { selectTargets } from './positionSystem.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -164,6 +164,30 @@ function mockFx(ids) {
   const one = btl2.battleLog.filter(line => /launches a Basic Attack/.test(line));
   if (one.length !== 1) throw new Error(`plain dragon should launch 1 basic, got ${one.length}`);
   console.log('✓ Double-Strike 2nd Basic Attack\n');
+}
+
+{
+  const d = (id, team, slot) => new Character({
+    id, name: id, breed: 'Warrior', rarity: 'Rare', stats: { str: 80, inst: 10, int: 10, init: 10 }
+  }, team, slot);
+  const confused = d('confused', 0, 1);
+  const ally = d('ally', 0, 0);
+  const enemy = d('enemy', 1, 1);
+  ally.maxHealth = 10000;
+  ally.currentHealth = 10000;
+  enemy.maxHealth = 10000;
+  enemy.currentHealth = 10000;
+  applyEffect(confused, 'CONFUSION', 1, 'x', { duration: 2 });
+  getEffect(confused, 'confusion').confusionChance = 100;
+  const btl = new Battle([confused, ally], [enemy], { verbose: false });
+  confused.confusedThisActivation = true;
+  const hit = btl.selectBasicAttackTarget(confused);
+  if (hit !== ally) throw new Error(`confused basic should pick ally, got ${hit && hit.name}`);
+  const tgt = btl.resolveTargets(confused, { targetingParsed: { side: 'enemy' } }, { tgt: { side: 'enemy', count: 1, select: 'any' } });
+  if (!tgt.includes(ally) || tgt.includes(enemy)) throw new Error('confused enemy targeting should resolve to allies');
+  const self = btl.resolveTargets(confused, {}, { tgt: { side: 'self' } });
+  if (self[0] !== confused) throw new Error('self targeting must not swap');
+  console.log('✓ Confusion swaps ally/enemy targeting\n');
 }
 
 try {
