@@ -3,7 +3,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { Character } from './character.js';
 import { Battle } from './battle.js';
-import { loadDragonHabitsSync, loadCommandSync, ifBonusApplies, executeModAction, executeHabitAction, resolveChance } from './habitParser.js';
+import { loadDragonHabitsSync, loadCommandSync, ifBonusApplies, executeModAction, executeHabitAction, resolveChance, Habit } from './habitParser.js';
 import { applyEffect, hasEffect, cleanseCharacter, getEffect, isImmuneTo, processHealingEffects } from './effects.js';
 import { selectTargets } from './positionSystem.js';
 import { applyChanceIf, statusConditionMet, sortByInitiative } from './utils.js';
@@ -426,6 +426,49 @@ function mockFx(ids) {
     throw new Error('chanceField override failed');
   }
   console.log('✓ mod_command rateField / chanceField / duration\n');
+}
+
+{
+  const unit = new Character({
+    id: 'daemoros', name: 'Daemoros', breed: 'Warrior', rarity: 'Legendary',
+    stats: { str: 10, inst: 10, int: 10, init: 10 }
+  }, 0, 1);
+  const habit = new Habit({ name: "Phantom's Veil", structured: [] }, 'daemoros');
+  const raw = {
+    t: 'mod',
+    pick: 'random',
+    mods: [
+      { stat: 'physical_received', pct: [-15, -19.5, -24, -30, -37.5] },
+      { stat: 'tactical_received', pct: [-15, -19.5, -24, -30, -37.5] },
+      { stat: 'fire_received', pct: [-15, -19.5, -24, -30, -37.5] }
+    ],
+    dur: 1
+  };
+  const orig = Math.random;
+  Math.random = () => 0;
+  executeHabitAction(habit, raw, unit, [unit], 1, { skipChance: true });
+  if (unit.getPercentTotal('physical_received') !== -15) throw new Error('pick 0 should be Physical');
+  if (unit.getPercentTotal('tactical_received') !== 0 || unit.getPercentTotal('fire_received') !== 0) {
+    throw new Error('Phantom\'s Veil must apply only one damage type');
+  }
+  unit.percentMods = [];
+  Math.random = () => 0.99;
+  executeHabitAction(habit, raw, unit, [unit], 1, { skipChance: true });
+  if (unit.getPercentTotal('fire_received') !== -15) throw new Error('pick last should be Fire');
+  if (unit.getPercentTotal('physical_received') !== 0) throw new Error('should not stack previous pick');
+  Math.random = orig;
+  const seen = new Set();
+  for (let i = 0; i < 60; i += 1) {
+    const u = new Character({
+      id: 'd', name: 'D', breed: 'Warrior', rarity: 'Rare', stats: { str: 10, inst: 10, int: 10, init: 10 }
+    }, 0, 0);
+    executeHabitAction(habit, raw, u, [u], 1, { skipChance: true });
+    for (const stat of ['physical_received', 'tactical_received', 'fire_received']) {
+      if (u.getPercentTotal(stat) === -15) seen.add(stat);
+    }
+  }
+  if (seen.size !== 3) throw new Error(`expected all 3 types over 60 rolls, got ${[...seen]}`);
+  console.log('✓ pick:random Phantom\'s Veil one damage type per round\n');
 }
 
 try {
