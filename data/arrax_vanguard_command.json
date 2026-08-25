@@ -1,6 +1,6 @@
 {
   "dragonId": "arrax",
-  "name": "Hold the Line",
+  "name": "Sudden Strike",
   "command": [
     {
       "phase": "turn",
@@ -9,10 +9,11 @@
         {
           "t": "status",
           "st": "weakened",
-          "val": -20,
+          "val": 10,
           "dur": 2,
           "chance": 25,
-          "tgt": { "side": "enemy", "count": 1, "select": "any" }
+          "chanceIf": { "bleed": 2 },
+          "tgt": { "side": "enemy", "count": 1, "select": "adjacency" }
         }
       ]
     },
