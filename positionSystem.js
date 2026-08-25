@@ -262,8 +262,9 @@ function selectTargets(caster, friendlyTeam, enemyTeam, targetingParsed) {
   } else if (select === 'dealer:tactical' || select === 'dealer:fire' || select === 'dealer:physical') {
     const want = select.split(':')[1];
     candidates = candidates.filter(c => getDealerType(c) === want);
-  } else if (select === 'prefer_without:stun') {
-    candidates.sort((a, b) => (hasStatus(a, 'stun') ? 1 : 0) - (hasStatus(b, 'stun') ? 1 : 0));
+  } else if (select.startsWith('prefer_without:')) {
+    const status = select.split(':')[1];
+    candidates.sort((a, b) => (hasStatus(a, status) ? 1 : 0) - (hasStatus(b, status) ? 1 : 0));
   } else if (select === 'prefer_control') {
     const control = ['stun', 'stagger', 'overwhelm', 'confusion'];
     const score = c => control.some(id => hasStatus(c, id)) ? 0 : 1;

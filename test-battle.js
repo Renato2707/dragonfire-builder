@@ -185,6 +185,37 @@ function mockFx(ids) {
 }
 
 {
+  const d = (id, slot) => new Character({
+    id, name: id, breed: 'Hunter', rarity: 'Rare', stats: { str: 10, inst: 10, int: 10, init: 10 }
+  }, 1, slot);
+  const caster = new Character({
+    id: 'crimson', name: 'Crimson', breed: 'Hunter', rarity: 'Rare', stats: { str: 10, inst: 10, int: 10, init: 10 }
+  }, 0, 1);
+  const stunned = d('stunned', 0);
+  const clean = d('clean', 1);
+  const alsoStunned = d('also', 2);
+  applyEffect(stunned, 'STUN', 1, 'x', { duration: 2 });
+  applyEffect(alsoStunned, 'STUN', 1, 'x', { duration: 2 });
+  const pick = selectTargets(caster, [caster], [stunned, clean, alsoStunned], {
+    side: 'enemy', count: 1, select: 'prefer_without:stun'
+  });
+  if (pick[0] !== clean) throw new Error('prefer_without:stun should pick the non-stunned enemy');
+  applyEffect(clean, 'STUN', 1, 'x', { duration: 2 });
+  const fallback = selectTargets(caster, [caster], [stunned, clean, alsoStunned], {
+    side: 'enemy', count: 1, select: 'prefer_without:stun'
+  });
+  if (!fallback.length) throw new Error('prefer_without:stun must still pick if all are stunned');
+  const resist = d('resist', 0);
+  const open = d('open', 1);
+  applyEffect(resist, 'RESISTANCE', 1, 'x', { duration: 2, magnitude: 15 });
+  const gift = selectTargets(caster, [resist, open], [], {
+    side: 'ally', count: 1, select: 'prefer_without:resistance'
+  });
+  if (gift[0] !== open) throw new Error('prefer_without:resistance should pick ally without Resistance');
+  console.log('✓ prefer_without:stun / prefer_without:resistance\n');
+}
+
+{
   const d = (id, team, slot) => new Character({
     id, name: id, breed: 'Warrior', rarity: 'Rare', stats: { str: 80, inst: 10, int: 10, init: 10 }
   }, team, slot);
