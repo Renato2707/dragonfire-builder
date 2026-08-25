@@ -1,0 +1,62 @@
+{
+  "dragonId": "moondancer",
+  "name": "Crescent Blade",
+  "command": [
+    {
+      "phase": "turn",
+      "rounds": [1],
+      "actions": [
+        {
+          "t": "stack",
+          "id": "crescent_blade",
+          "stacks": 1,
+          "maxStacks": 1,
+          "mods": [],
+          "dur": "combat",
+          "tgt": {
+            "side": "ally",
+            "count": 1,
+            "select": "any",
+            "excludeSelf": true,
+            "linkAs": "crescent_blade_ally"
+          }
+        }
+      ]
+    },
+    {
+      "phase": "turn",
+      "rounds": [2, 4, 6, 8, 10],
+      "actions": [
+        {
+          "t": "dmg",
+          "dt": "physical",
+          "pct": 75,
+          "tgt": { "side": "enemy", "count": 2, "select": "adjacency" }
+        }
+      ]
+    }
+  ],
+  "vanguard": [
+    {
+      "phase": "combat_start",
+      "rounds": [1],
+      "actions": [
+        {
+          "t": "mod",
+          "mods": [{ "stat": "physical_dealt", "pct": 16 }],
+          "dur": "combat",
+          "tgt": { "side": "self" }
+        },
+        {
+          "t": "mod",
+          "mods": [
+            { "stat": "inst", "fixed": 20 },
+            { "stat": "init", "fixed": 20 }
+          ],
+          "dur": "combat",
+          "tgt": { "side": "ally", "count": 1, "slot": 0, "excludeSelf": true }
+        }
+      ]
+    }
+  ]
+}
