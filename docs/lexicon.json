@@ -1,0 +1,667 @@
+{
+  "meta": {
+    "id": "dragonfire-builder-lexicon",
+    "version": "1.0.0",
+    "source": "Renato2707/dragonfire-builder",
+    "derived_from": [
+      "habitParser.js",
+      "effects.js",
+      "utils.js",
+      "positionSystem.js",
+      "character.js",
+      "battle.js",
+      "data/*_habits.json",
+      "data/*_vanguard_command.json",
+      "data/dragons.json"
+    ],
+    "scope": "Declarative surface consumed by parser + combat engine. Metadata fields (scalingRaw, description, effectType, targeting string) are human-facing only; the engine executes structured[] / command[] / vanguard[].",
+    "note": "Do not invent terms. Only keys and values the motor actually reads are listed."
+  },
+
+  "phases": {
+    "combat_start": {
+      "canonical": "combat_start",
+      "type": "string",
+      "when": "Once at battle init, before round 1. Also fires Vanguard kits when slotPosition === 1.",
+      "rounds_convention": [1],
+      "example": { "phase": "combat_start", "rounds": [1], "actions": [] }
+    },
+    "round_start": {
+      "canonical": "round_start",
+      "type": "string",
+      "when": "Start of each round.",
+      "example": { "phase": "round_start", "rounds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], "actions": [] }
+    },
+    "turn": {
+      "canonical": "turn",
+      "type": "string",
+      "when": "On character turn, after Command, before Basic Attack.",
+      "fallback": "normalizeTiming: missing phase → turn; missing rounds → [1..10]",
+      "example": { "phase": "turn", "rounds": [3, 6, 9], "actions": [] }
+    },
+    "after_basic_attack": {
+      "canonical": "after_basic_attack",
+      "type": "string",
+      "when": "Immediately after Basic Attack resolves, if caster still able.",
+      "example": { "phase": "after_basic_attack", "rounds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], "actions": [] }
+    },
+    "low_health": {
+      "canonical": "low_health",
+      "type": "string",
+      "when": "On turn when getHealthPercentage() < 50 and canUseAbilities.",
+      "example": { "phase": "low_health", "rounds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], "actions": [] }
+    }
+  },
+
+  "habit_file": {
+    "path": "data/{dragonId}_habits.json",
+    "schema": {
+      "dragonId": { "type": "string", "desc": "Must match dragons.json id" },
+      "habits": { "type": "array", "desc": "Typically 5 habits, slots 1–5" }
+    }
+  },
+
+  "habit_fields": {
+    "dragonId": { "type": "string" },
+    "slot": { "type": "integer", "range": [1, 5], "desc": "Habit order; unlock ladder ★2/4/6/8/10" },
+    "unlockStar": { "type": "integer", "default": 0, "gate": "isHabitUnlocked: unlockStar <= character.stars" },
+    "name": { "type": "string", "desc": "Log label" },
+    "targeting": { "type": "string", "engine": "parsed by parseTargeting for side only; structured.tgt overrides" },
+    "effectType": { "type": "string", "engine": "ignored" },
+    "duration": { "type": "string", "engine": "ignored; use action.dur" },
+    "scalingRaw": { "type": "string", "engine": "ignored" },
+    "scaling": { "type": "array", "engine": "ignored; rank values live inside action.pct / mods[].pct arrays" },
+    "description": { "type": "string", "engine": "ignored" },
+    "structured": { "type": "array", "item": "Block", "desc": "Executable blocks" }
+  },
+
+  "block": {
+    "phase": { "type": "phase", "required": true },
+    "rounds": { "type": "integer[]", "domain": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], "required": true },
+    "chance": {
+      "type": ["number", "number[5]"],
+      "desc": "Block-level roll before actions. Array indexes habitRank-1. Omit = 100%.",
+      "example": [17.5, 21, 24.5, 29.8, 35]
+    },
+    "requires": {
+      "type": ["object", "null"],
+      "fields": {
+        "command": { "type": "string", "desc": "hasCommand(character, name) — kit present, not used-this-round" },
+        "troop": {
+          "type": "string",
+          "values": ["archers", "shieldbearers", "spearmen", "cavalry", "siege"],
+          "desc": "troopOf(character) === troop"
+        },
+        "linkedRetreated": {
+          "type": "string",
+          "desc": "character.links[key] retreatedLastRound || isDead"
+        }
+      },
+      "example": { "troop": "archers" }
+    },
+    "actions": { "type": "array", "item": "Action", "required": true }
+  },
+
+  "action_types": {
+    "mod": {
+      "t": "mod",
+      "fields": {
+        "mods": {
+          "type": "array",
+          "item": { "stat": "string", "pct": "number|number[5]", "fixed": "number|number[5] optional" },
+          "desc": "stat keys under stats.*; pct = percent; fixed = flat CORE_STATS only"
+        },
+        "dur": { "type": ["number", "string"], "default": "combat", "values": ["combat", 1, 2, 3, 4, 5] },
+        "excludeBasic": { "type": "boolean", "default": false, "desc": "Skipped when damage options.basic === true" },
+        "scaleStat": { "type": "core_stat", "desc": "value *= 1 + getModifiedStat(scaleStat)/100" },
+        "pick": { "type": "string", "value": "random", "desc": "If set, one random entry from mods[]" },
+        "chance": { "type": ["number", "number[5]"] },
+        "chanceIf": { "type": "object", "example": { "taunt": 2 }, "desc": "chance *= multiplier if target has status" },
+        "perTarget": { "type": "object", "desc": "Repeats action N times = matching pool size" },
+        "tgt": { "type": "Targeting" }
+      },
+      "example": {
+        "t": "mod",
+        "mods": [{ "stat": "physical_dealt", "pct": [12.5, 15, 17.5, 21.25, 25] }],
+        "excludeBasic": true,
+        "dur": "combat",
+        "tgt": { "side": "ally", "count": 1, "select": "prefer_lane:R" }
+      }
+    },
+    "stack": {
+      "t": "stack",
+      "fields": {
+        "id": { "type": "string", "desc": "stackId on character.stacks" },
+        "stacks": { "type": "integer", "default": 1 },
+        "maxStacks": { "type": ["integer", "null"] },
+        "mods": { "type": "same as mod.mods", "desc": "Applied per added stack" },
+        "dur": { "type": ["number", "string"] },
+        "onReach": {
+          "type": "object",
+          "fields": {
+            "stacks": "integer threshold",
+            "once": { "type": "boolean", "default": true },
+            "actions": "Action[]"
+          },
+          "desc": "Fires when crossing threshold; once via markStackReached"
+        },
+        "tgt": { "type": "Targeting", "note": "tgt.linkAs stores target on attacker.links" }
+      },
+      "example": {
+        "t": "stack",
+        "id": "bulwark",
+        "stacks": 1,
+        "maxStacks": 5,
+        "chance": 30,
+        "mods": [
+          { "stat": "str", "pct": [5, 6.5, 8, 10, 12.5] },
+          { "stat": "physical_received", "pct": [-2.5, -3.25, -4, -5, -6.25] }
+        ],
+        "dur": "combat",
+        "onReach": {
+          "stacks": 3,
+          "once": true,
+          "actions": [
+            {
+              "t": "dmg",
+              "dt": "physical",
+              "pct": [100, 130, 160, 200, 250],
+              "tgt": { "side": "enemy", "count": 1, "select": "same_lane" }
+            }
+          ]
+        },
+        "tgt": { "side": "self" }
+      }
+    },
+    "status": {
+      "t": "status",
+      "fields": {
+        "st": { "type": "status_id", "desc": "EFFECTS_CATALOG key; normalized lower + underscore" },
+        "val": { "type": "number", "desc": "Magnitude for advantage/weakened/vulnerable/resistance/evade" },
+        "rate": { "type": "number", "desc": "DoT damageRate for burn/panic/bleed; default 20" },
+        "dur": { "type": ["number", "string"] },
+        "scaleStat": { "type": "core_stat" },
+        "immunities": { "type": "string[]", "desc": "For immunity status" },
+        "chance": { "type": ["number", "number[5]"] },
+        "tgt": { "type": "Targeting" }
+      },
+      "example": {
+        "t": "status",
+        "st": "advantage",
+        "val": 20,
+        "dur": 2,
+        "tgt": { "side": "ally", "count": 1, "select": "highest:troops" }
+      }
+    },
+    "dmg": {
+      "t": "dmg",
+      "fields": {
+        "dt": {
+          "type": "string",
+          "values": ["physical", "tactical", "fire"],
+          "default": "physical",
+          "normalized": "toUpperCase"
+        },
+        "pct": { "type": ["number", "number[5]"], "desc": "Damage Rate %" },
+        "roundBonus": {
+          "type": "object",
+          "desc": "rate *= bonus for current round key",
+          "example": { "5": 1.5, "8": 2 }
+        },
+        "ifBonus": {
+          "type": "object",
+          "fields": { "status": "string", "pct": "number" },
+          "desc": "If attacker has status, use ifBonus.pct as rate"
+        },
+        "scaleStat": { "type": "core_stat" },
+        "chance": { "type": ["number", "number[5]"] },
+        "tgt": { "type": "Targeting" }
+      },
+      "example": {
+        "t": "dmg",
+        "dt": "physical",
+        "pct": [20, 24, 28, 34, 40],
+        "roundBonus": { "5": 1.5, "8": 2 },
+        "tgt": { "side": "enemy", "count": 2, "select": "any" }
+      }
+    },
+    "heal": {
+      "t": "heal",
+      "fields": {
+        "pct": { "type": ["number", "number[5]"], "desc": "Recovery Rate % of target.maxHealth" },
+        "scaleStat": { "type": "core_stat" },
+        "tgt": { "type": "Targeting" }
+      },
+      "multipliers": [
+        "attacker.getRecoveryDealtMultiplier()",
+        "target.getRecoveryReceivedMultiplier()"
+      ],
+      "example": {
+        "t": "heal",
+        "pct": [60, 72, 84, 102, 120],
+        "scaleStat": "int",
+        "tgt": { "side": "ally", "count": 2, "select": "any", "excludeSelf": true }
+      }
+    },
+    "copy_status": {
+      "t": "copy_status",
+      "fields": {
+        "from": {
+          "type": "object",
+          "fields": {
+            "side": ["ally", "enemy"],
+            "status": "string[]"
+          },
+          "desc": "First matching status on pool"
+        },
+        "dur": { "type": "number" },
+        "chance": { "type": ["number", "number[5]"] },
+        "tgt": { "type": "Targeting" }
+      },
+      "example": {
+        "t": "copy_status",
+        "from": { "side": "ally", "status": ["weakened", "vulnerable"] },
+        "dur": 2,
+        "chance": [25, 32.5, 40, 50, 62.5],
+        "tgt": { "side": "enemy", "count": 1, "select": "any" }
+      }
+    },
+    "mod_command": {
+      "t": "mod_command",
+      "fields": {
+        "command": { "type": "string" },
+        "field": { "type": "string", "desc": "Key written to character.commandMods" },
+        "pct": { "type": ["number", "number[5]"] }
+      },
+      "desc": "Command gains: injects value for resolveChance via chanceField",
+      "example": {
+        "t": "mod_command",
+        "command": "Bloodscale Terror",
+        "field": "stunChance",
+        "pct": [40, 52, 64, 80, 100]
+      }
+    }
+  },
+
+  "stats": {
+    "core": {
+      "str": { "name": "Strength", "role": "Physical causedBy" },
+      "inst": { "name": "Instinct", "role": "Tactical causedBy; Physical mitigatedBy" },
+      "int": { "name": "Intelligence", "role": "Fire causedBy; Tactical mitigatedBy" },
+      "init": { "name": "Initiative", "role": "Fire mitigatedBy; turn order" }
+    },
+    "modifiers": {
+      "dmg_dealt": "generic Damage Dealt %",
+      "dmg_received": "generic Damage Received %",
+      "physical_dealt": "Physical Damage Dealt %",
+      "physical_received": "Physical Damage Received %",
+      "tactical_dealt": "Tactical Damage Dealt %",
+      "tactical_received": "Tactical Damage Received %",
+      "fire_dealt": "Fire Damage Dealt %",
+      "fire_received": "Fire Damage Received %",
+      "recovery_dealt": "Recovery Dealt %",
+      "recovery_received": "Recovery Received %"
+    },
+    "damage_triangle": {
+      "PHYSICAL": { "causedBy": "str", "mitigatedBy": "inst" },
+      "TACTICAL": { "causedBy": "inst", "mitigatedBy": "int" },
+      "FIRE": { "causedBy": "int", "mitigatedBy": "init" }
+    }
+  },
+
+  "statuses": {
+    "bleed": {
+      "id": "bleed",
+      "category": "damage",
+      "damageType": "physical",
+      "defaultRate": 20,
+      "stackable": false
+    },
+    "panic": {
+      "id": "panic",
+      "category": "damage",
+      "damageType": "tactical",
+      "defaultRate": 20,
+      "stackable": false
+    },
+    "burn": {
+      "id": "burn",
+      "category": "damage",
+      "damageType": "fire",
+      "defaultRate": 20,
+      "stackable": false
+    },
+    "first_strike": {
+      "id": "first_strike",
+      "category": "positive",
+      "effect": "sort before others",
+      "stackable": false
+    },
+    "double_strike": {
+      "id": "double_strike",
+      "category": "positive",
+      "effect": "extraActions = 1",
+      "stackable": false
+    },
+    "recovery": {
+      "id": "recovery",
+      "category": "positive",
+      "healPerRound": 15,
+      "stackable": false
+    },
+    "advantage": {
+      "id": "advantage",
+      "category": "positive",
+      "damageBonus": 20,
+      "stackable": true,
+      "stackCap": 5,
+      "magnitude_via": "val"
+    },
+    "resistance": {
+      "id": "resistance",
+      "category": "positive",
+      "defenseBonus": 20,
+      "stackable": true,
+      "stackCap": 5,
+      "magnitude_via": "val"
+    },
+    "slow": {
+      "id": "slow",
+      "category": "negative",
+      "effect": "sort after others",
+      "stackable": false
+    },
+    "weakened": {
+      "id": "weakened",
+      "category": "negative",
+      "damagePenalty": 20,
+      "stackable": true,
+      "stackCap": 3,
+      "magnitude_via": "val"
+    },
+    "vulnerable": {
+      "id": "vulnerable",
+      "category": "negative",
+      "defensePenalty": 20,
+      "stackable": true,
+      "stackCap": 3,
+      "magnitude_via": "val"
+    },
+    "prey": {
+      "id": "prey",
+      "category": "negative",
+      "recoveryPenalty": 50,
+      "stackable": false
+    },
+    "evade": {
+      "id": "evade",
+      "category": "control",
+      "evasionChance": 10,
+      "stackable": true,
+      "stackCap": 3,
+      "magnitude_via": "val"
+    },
+    "cleanse": {
+      "id": "cleanse",
+      "category": "control",
+      "removesNegative": true,
+      "isInstant": true
+    },
+    "taunt": {
+      "id": "taunt",
+      "category": "control",
+      "forcedTarget": true
+    },
+    "stun": {
+      "id": "stun",
+      "category": "control",
+      "preventsAllActions": true
+    },
+    "overwhelm": {
+      "id": "overwhelm",
+      "category": "control",
+      "preventsAbilities": true
+    },
+    "stagger": {
+      "id": "stagger",
+      "category": "control",
+      "preventsAttacks": true
+    },
+    "confusion": {
+      "id": "confusion",
+      "category": "control",
+      "confusionChance": 50
+    },
+    "immunity": {
+      "id": "immunity",
+      "category": "positive",
+      "immunities": "from options.immunities"
+    },
+    "normalization": "st lowercased; '-' → '_'; catalog key UPPER_SNAKE",
+    "granted_statuses": [
+      "first_strike",
+      "double_strike",
+      "advantage",
+      "resistance",
+      "evade",
+      "immunity",
+      "recovery"
+    ]
+  },
+
+  "targeting": {
+    "side": { "values": ["self", "ally", "enemy"] },
+    "count": { "type": ["integer", "string"], "default": 1, "all": "all" },
+    "excludeSelf": { "type": "boolean" },
+    "slot": { "type": "integer", "values": [0, 1, 2], "desc": "Exact slot filter" },
+    "linkAs": { "type": "string", "desc": "attacker.links[key] = target" },
+    "select": {
+      "canonical": [
+        "any",
+        "same_lane",
+        "adjacency",
+        "prefer_lane:L",
+        "prefer_lane:R",
+        "prefer_lane:V",
+        "highest_troops",
+        "lowest_troops",
+        "highest_str",
+        "highest_int",
+        "highest_inst",
+        "highest_init",
+        "dealer:fire",
+        "dealer:tactical",
+        "dealer:physical",
+        "prefer_without:stun",
+        "random"
+      ],
+      "aliases": {
+        "highest:troops": "highest_troops",
+        "lowest:troops": "lowest_troops",
+        "highest:str": "highest_str",
+        "highest:int": "highest_int",
+        "highest:inst": "highest_inst",
+        "highest:init": "highest_init",
+        "prefer_lane:l": "prefer_lane:L",
+        "prefer_lane:left": "prefer_lane:L",
+        "prefer_lane:left_flank": "prefer_lane:L",
+        "prefer_lane:r": "prefer_lane:R",
+        "prefer_lane:right": "prefer_lane:R",
+        "prefer_lane:right_flank": "prefer_lane:R",
+        "prefer_lane:v": "prefer_lane:V",
+        "prefer_lane:vanguard": "prefer_lane:V",
+        "prefer_lane:center": "prefer_lane:V",
+        "prefer_dealer:fire": "dealer:fire",
+        "prefer_dealer:tactical": "dealer:tactical",
+        "prefer_dealer:physical": "dealer:physical",
+        "adjacent": "adjacency",
+        "adjacent_lane": "adjacency"
+      }
+    },
+    "filter": {
+      "status": "string",
+      "withoutStatus": "string",
+      "troopsAbove": "number percent",
+      "troopsBelow": "number percent",
+      "dealer": ["physical", "tactical", "fire"]
+    },
+    "example": {
+      "tgt": {
+        "side": "enemy",
+        "count": 1,
+        "select": "prefer_lane:L",
+        "filter": { "troopsBelow": 50 }
+      }
+    }
+  },
+
+  "positions": {
+    "0": "Left Flank",
+    "1": "Vanguard",
+    "2": "Right Flank",
+    "code": { "LEFT": 0, "VANGUARD": 1, "CENTER": 1, "RIGHT": 2 },
+    "adjacency": "distance <= 1",
+    "same_lane": "slot equality",
+    "vanguard_gate": "executeVanguard only if slotPosition === 1"
+  },
+
+  "troops": {
+    "types": ["archers", "shieldbearers", "spearmen", "cavalry", "siege"],
+    "source": "character.troopType || battle.teamTroop[teamId]",
+    "requires_field": "requires.troop",
+    "affinity_data": {
+      "dragons.json": {
+        "affinity": "string[] positive",
+        "weaknesses": "string[] negative"
+      },
+      "engine_note": "Affinity % not applied in combat engine yet; troop only gates requires.troop"
+    }
+  },
+
+  "command_file": {
+    "path": "data/{id}_vanguard_command.json",
+    "schema": {
+      "dragonId": "string",
+      "name": "string → character.commandName",
+      "command": "Block[] typically phase turn",
+      "vanguard": "Block[] typically phase combat_start"
+    },
+    "load": "loadCommandSync → { name, command: Habit, vanguard: Habit }",
+    "example": {
+      "dragonId": "caraxes",
+      "name": "Blood and Fire",
+      "command": [
+        {
+          "phase": "turn",
+          "rounds": [3, 6, 9],
+          "actions": [
+            {
+              "t": "dmg",
+              "dt": "fire",
+              "pct": 100,
+              "ifBonus": { "status": "first_strike", "pct": 150 },
+              "tgt": { "side": "enemy", "count": 3, "select": "any" }
+            }
+          ]
+        }
+      ],
+      "vanguard": [
+        {
+          "phase": "combat_start",
+          "rounds": [1],
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [{ "stat": "fire_dealt", "pct": 16 }],
+              "dur": "combat",
+              "tgt": { "side": "self" }
+            },
+            {
+              "t": "mod",
+              "mods": [
+                { "stat": "str", "fixed": 20 },
+                { "stat": "init", "fixed": 20 }
+              ],
+              "dur": "combat",
+              "tgt": { "side": "ally", "count": 1, "slot": 2, "excludeSelf": true }
+            }
+          ]
+        }
+      ]
+    }
+  },
+
+  "dragon_identity": {
+    "id": "string",
+    "name": "string",
+    "rarity": { "values": ["Rare", "Epic", "Legendary"] },
+    "breed": { "values": ["Champion", "Hunter", "Sentinel", "Warrior"] },
+    "stats": { "str": "number", "inst": "number", "int": "number", "init": "number" },
+    "affinity": "string[]",
+    "weaknesses": "string[]",
+    "defaults": {
+      "level": 16,
+      "stars": 2,
+      "habitRank": 1
+    },
+    "gates": {
+      "stars": "1..10 unlocks habits by unlockStar",
+      "habitRank": "1..5 → index 0..4 into pct arrays"
+    }
+  },
+
+  "runtime_flags": {
+    "retreatedLastRound": "set from diedThisRound at end of round",
+    "commandUsedThisRound": "set when Command kit fires; cleared end of round",
+    "links": "map from tgt.linkAs",
+    "stacks": "map stackId → count",
+    "stackReached": "map 'id:threshold' for onReach once",
+    "commandMods": "map field → value from mod_command",
+    "percentMods": "list {stat,pct,duration,excludeBasic,stackId}",
+    "flatMods": "core stats only when fixed:true"
+  },
+
+  "duration": {
+    "number": "rounds remaining; tickPercentMods decrements; filter > 0",
+    "combat": "persists until battle end",
+    "default_mod": "combat",
+    "log": {
+      "combat_or_null": "until the end of combat",
+      "1": "until the end of the round",
+      "N": "for N round(s)"
+    }
+  },
+
+  "chance_resolution": {
+    "order": [
+      "action.chanceField → character.commandMods[field]",
+      "action.chance array[habitRank-1]",
+      "action.chance number",
+      "block.chance",
+      "default 100"
+    ],
+    "per_target": "runAction rolls per target when chance < 100; logs [hit]/[miss]",
+    "chanceIf.taunt": "multiplies chance if target has taunt"
+  },
+
+  "aliases_and_fallbacks": {
+    "missing_phase_or_rounds": "turn + [1..10]",
+    "st_hyphen": "toLowerCase; '-' → '_'",
+    "dt": "toUpperCase; default PHYSICAL",
+    "select": "see targeting.select.aliases",
+    "POSITIONS.CENTER": "alias of VANGUARD (1)",
+    "pct_short_array": "uses available index / [0]",
+    "fixed_mods": "flat on CORE_STATS only",
+    "dur_omitted_mod_stack": "combat",
+    "dot_rate_omitted": 20,
+    "onReach.once_omitted": true
+  },
+
+  "out_of_scope": [
+    "Affinity % combat boost (data only in dragons.json)",
+    "Troop Type Advantage",
+    "Tile / Durability damage",
+    "nullify_recovery as cataloged status",
+    "Common rarity"
+  ]
+}
