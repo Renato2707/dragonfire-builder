@@ -1,0 +1,54 @@
+{
+  "dragonId": "rhysarion",
+  "name": "Dawnsong",
+  "command": [
+    {
+      "phase": "turn",
+      "rounds": [1, 4, 7],
+      "actions": [
+        {
+          "t": "dmg",
+          "dt": "physical",
+          "pct": 70,
+          "tgt": { "side": "enemy", "count": 2, "select": "adjacency" }
+        }
+      ]
+    },
+    {
+      "phase": "turn",
+      "rounds": [2, 5, 8],
+      "actions": [
+        {
+          "t": "dmg",
+          "dt": "fire",
+          "pct": 20,
+          "ifBonus": { "status": "control", "pct": 30 },
+          "tgt": { "side": "enemy", "count": 3, "select": "any" }
+        }
+      ]
+    }
+  ],
+  "vanguard": [
+    {
+      "phase": "combat_start",
+      "rounds": [1],
+      "actions": [
+        {
+          "t": "mod",
+          "mods": [
+            { "stat": "recovery_dealt", "pct": 15 },
+            { "stat": "init", "fixed": 25 }
+          ],
+          "dur": "combat",
+          "tgt": { "side": "self" }
+        },
+        {
+          "t": "mod",
+          "mods": [{ "stat": "dmg_dealt", "pct": 8 }],
+          "dur": "combat",
+          "tgt": { "side": "ally", "count": 1, "slot": 2, "excludeSelf": true }
+        }
+      ]
+    }
+  ]
+}
