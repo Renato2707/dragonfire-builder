@@ -22,7 +22,8 @@ const EFFECTS_CATALOG = {
   OVERWHELM: { id: 'overwhelm', name: 'Overwhelm', category: 'control', description: 'No habits/commands', duration: 2, preventsAbilities: true, stackable: false, stackCap: 1 },
   STAGGER: { id: 'stagger', name: 'Stagger', category: 'control', description: 'No basic', duration: 2, preventsAttacks: true, stackable: false, stackCap: 1 },
   CONFUSION: { id: 'confusion', name: 'Confusion', category: 'control', description: 'Friendly fire', duration: 2, confusionChance: 50, stackable: false, stackCap: 1 },
-  IMMUNITY: { id: 'immunity', name: 'Immunity', category: 'positive', description: 'Immune to listed statuses', duration: 2, stackable: false, stackCap: 1 }
+  IMMUNITY: { id: 'immunity', name: 'Immunity', category: 'positive', description: 'Immune to listed statuses', duration: 2, stackable: false, stackCap: 1 },
+  NULLIFY_RECOVERY: { id: 'nullify_recovery', name: 'Nullify Recovery', category: 'negative', description: 'Cannot receive Recovery', duration: 99, stackable: false, stackCap: 1, combatLong: true }
 };
 
 class Effect {
@@ -58,15 +59,18 @@ class Effect {
     this.forcedTarget = template.forcedTarget || false;
     this.removesNegative = template.removesNegative || false;
     this.immunities = [];
+    this.combatLong = !!template.combatLong;
     this.isActive = true;
   }
 
   tick() {
+    if (this.combatLong) return true;
     if (this.duration > 0) this.duration -= 1;
     return this.duration > 0;
   }
 
   isExpired() {
+    if (this.combatLong) return false;
     return this.duration <= 0;
   }
 
@@ -97,8 +101,14 @@ function applyEffect(character, effectId, rank = 1, appliedBy = null, options = 
   const effect = new Effect(effectId, rank, appliedBy);
   if (isImmuneTo(character, effect.id)) return null;
   if (options.duration != null) {
-    effect.duration = options.duration;
-    effect.maxDuration = options.duration;
+    if (options.duration === 'combat' || options.duration === 0) {
+      effect.combatLong = true;
+      effect.duration = 99;
+      effect.maxDuration = 99;
+    } else {
+      effect.duration = options.duration;
+      effect.maxDuration = options.duration;
+    }
   }
   if (options.magnitude != null) {
     const mag = Math.abs(Number(options.magnitude));
@@ -211,6 +221,7 @@ function processDamageEffects(character, resolveAttacker) {
 }
 
 function processHealingEffects(character) {
+  if ((character.activeEffects || []).some(e => e.id === 'nullify_recovery' && !e.isExpired())) return 0;
   let totalHealing = 0;
   for (const effect of character.activeEffects) {
     if (effect.id !== 'recovery' || effect.isExpired()) continue;

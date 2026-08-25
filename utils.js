@@ -52,7 +52,8 @@ const STATUS_NAMES = {
   overwhelm: 'Overwhelm',
   stagger: 'Stagger',
   confusion: 'Confusion',
-  immunity: 'Immunity'
+  immunity: 'Immunity',
+  nullify_recovery: 'Nullify Recovery'
 };
 
 const GRANTED_STATUSES = new Set([

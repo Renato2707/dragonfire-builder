@@ -183,6 +183,10 @@ class Character {
 
   heal(amount) {
     if (this.isDead) return 0;
+    const blocked = (this.activeEffects || []).some(e =>
+      e.id === 'nullify_recovery' && (typeof e.isExpired === 'function' ? !e.isExpired() : e.duration > 0)
+    );
+    if (blocked) return 0;
     const actualHeal = Math.max(0, Math.min(amount, this.maxHealth - this.currentHealth));
     this.currentHealth += actualHeal;
     if (actualHeal > 0) this.receivedRecoveryThisRound = true;

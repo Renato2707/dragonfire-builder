@@ -487,6 +487,12 @@
       "immunities": "from action.immunities; default [vulnerable, weakened]",
       "effect": "applyEffect returns null for listed statuses; applying Immunity purges them if already present"
     },
+    "nullify_recovery": {
+      "id": "nullify_recovery",
+      "category": "negative",
+      "combatLong": true,
+      "effect": "heal() and Recovery HoT return 0. Second Wind applies Recovery first, then this status until end of combat."
+    },
     "normalization": "st lowercased; '-' → '_'; catalog key UPPER_SNAKE",
     "granted_statuses": [
       "first_strike",

@@ -5,7 +5,7 @@ import { Character } from './character.js';
 import { Battle } from './battle.js';
 import { loadDragonHabitsSync, loadCommandSync, ifBonusApplies } from './habitParser.js';
 import { applyChanceIf, statusConditionMet } from './utils.js';
-import { applyEffect, hasEffect, cleanseCharacter, getEffect, isImmuneTo } from './effects.js';
+import { applyEffect, hasEffect, cleanseCharacter, getEffect, isImmuneTo, processHealingEffects } from './effects.js';
 import { selectTargets } from './positionSystem.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -229,6 +229,21 @@ function mockFx(ids) {
   if (applyEffect(unit, 'WEAKENED', 1, 'e') != null) throw new Error('Weakened should be blocked');
   if (applyEffect(unit, 'STUN', 1, 'e') == null) throw new Error('Stun should still apply');
   console.log('✓ Immunity blocks and purges Vulnerable/Weakened\n');
+}
+
+{
+  const dummy = { id: 'j', name: 'Jag', breed: 'Hunter', rarity: 'Rare', stats: { str: 10, inst: 10, int: 10, init: 10 } };
+  const unit = new Character(dummy, 0, 0);
+  unit.currentHealth = 10;
+  const healed = unit.heal(20);
+  if (!(healed > 0)) throw new Error('heal should work before Nullify');
+  applyEffect(unit, 'NULLIFY_RECOVERY', 1, 'self', { duration: 'combat' });
+  if (!hasEffect(unit, 'nullify_recovery')) throw new Error('Nullify Recovery missing');
+  unit.currentHealth = 10;
+  if (unit.heal(50) !== 0) throw new Error('heal should be 0 under Nullify Recovery');
+  applyEffect(unit, 'RECOVERY', 1, 'self', { duration: 2 });
+  if (processHealingEffects(unit) !== 0) throw new Error('HoT should be blocked');
+  console.log('✓ Nullify Recovery blocks heal and HoT\n');
 }
 
 try {

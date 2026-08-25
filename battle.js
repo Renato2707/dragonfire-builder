@@ -112,6 +112,9 @@ class Battle {
         if (recovery > 0) {
           this.logAction(`Applies Recovery to ${character.name} (+${recovery} Troop Capacity)`);
           this.notifyPreyRecovery(character);
+        } else if (hasEffect(character, 'nullify_recovery')) {
+          const hasHot = (character.activeEffects || []).some(e => e.id === 'recovery' && !e.isExpired());
+          if (hasHot) this.logAction(`${character.name} cannot receive Recovery (Nullify Recovery)`);
         }
         if (typeof character.tickPercentMods === 'function') character.tickPercentMods();
       }
@@ -622,8 +625,13 @@ class Battle {
       }
     } else if (actionType === 'heal') {
       for (const heal of actionResult.heals) {
-        this.logAction(`Applies Recovery to ${target.name} (+${target.heal(heal.amount)} Troop Capacity)${enhancedNote(raw.scaleStat)}`);
-        this.notifyPreyRecovery(target);
+        const healed = target.heal(heal.amount);
+        if (!healed && hasEffect(target, 'nullify_recovery')) {
+          this.logAction(`${target.name} cannot receive Recovery (Nullify Recovery)`);
+        } else {
+          this.logAction(`Applies Recovery to ${target.name} (+${healed} Troop Capacity)${enhancedNote(raw.scaleStat)}`);
+          this.notifyPreyRecovery(target);
+        }
       }
     }
   }
