@@ -4,6 +4,29 @@ const POSITIONS = { LEFT: 0, VANGUARD: 1, CENTER: 1, RIGHT: 2 };
 const POSITION_NAMES = { 0: 'Left Flank', 1: 'Vanguard', 2: 'Right Flank' };
 const FLANK_NAMES = { 0: 'Left Flank', 1: 'Vanguard', 2: 'Right Flank' };
 
+const SELECT_ALIASES = {
+  'highest:troops': 'highest_troops',
+  'lowest:troops': 'lowest_troops',
+  'highest:str': 'highest_str',
+  'highest:int': 'highest_int',
+  'highest:inst': 'highest_inst',
+  'highest:init': 'highest_init',
+  'prefer_lane:l': 'prefer_lane:L',
+  'prefer_lane:left': 'prefer_lane:L',
+  'prefer_lane:left_flank': 'prefer_lane:L',
+  'prefer_lane:r': 'prefer_lane:R',
+  'prefer_lane:right': 'prefer_lane:R',
+  'prefer_lane:right_flank': 'prefer_lane:R',
+  'prefer_lane:v': 'prefer_lane:V',
+  'prefer_lane:vanguard': 'prefer_lane:V',
+  'prefer_lane:center': 'prefer_lane:V',
+  'prefer_dealer:fire': 'dealer:fire',
+  'prefer_dealer:tactical': 'dealer:tactical',
+  'prefer_dealer:physical': 'dealer:physical',
+  'adjacent': 'adjacency',
+  'adjacent_lane': 'adjacency'
+};
+
 function getDistance(slot1, slot2) {
   return Math.abs(slot1 - slot2);
 }
@@ -14,6 +37,10 @@ function isInSameLane(slot1, slot2) {
 
 function isAdjacent(slot1, slot2) {
   return getDistance(slot1, slot2) === 1;
+}
+
+function isWithinAdjacency(slot1, slot2) {
+  return getDistance(slot1, slot2) <= 1;
 }
 
 function getAdjacentSlots(slot) {
@@ -85,19 +112,36 @@ function getStat(character, stat) {
   return (character.stats && character.stats[stat]) || 0;
 }
 
+function normalizeSelect(select) {
+  if (!select) return 'any';
+  const raw = String(select);
+  const aliased = SELECT_ALIASES[raw] || SELECT_ALIASES[raw.toLowerCase()];
+  if (aliased) return aliased;
+  if (raw === 'prefer_lane:L' || raw === 'prefer_lane:R' || raw === 'prefer_lane:V') return raw;
+  return raw;
+}
+
+function preferSlot(candidates, slot) {
+  candidates.sort((a, b) => {
+    const sa = a.slotPosition === slot ? 0 : 1;
+    const sb = b.slotPosition === slot ? 0 : 1;
+    if (sa !== sb) return sa - sb;
+    return getDistance(a.slotPosition, slot) - getDistance(b.slotPosition, slot);
+  });
+}
+
 function selectTargets(caster, friendlyTeam, enemyTeam, targetingParsed) {
   if (!targetingParsed) return [];
 
   const tgt = targetingParsed;
   const casterSlot = caster.slotPosition;
+  const select = normalizeSelect(tgt.select || 'any');
 
   let targetTeam;
   if (tgt.side === 'self') {
     targetTeam = [caster];
   } else if (tgt.side === 'ally') {
-    targetTeam = tgt.excludeSelf === false
-      ? [...friendlyTeam]
-      : friendlyTeam.filter(c => c !== caster);
+    targetTeam = tgt.excludeSelf ? friendlyTeam.filter(c => c !== caster) : [...friendlyTeam];
   } else if (tgt.side === 'enemy') {
     targetTeam = [...enemyTeam];
   } else {
@@ -107,39 +151,20 @@ function selectTargets(caster, friendlyTeam, enemyTeam, targetingParsed) {
   let candidates = targetTeam.filter(c => c && !c.isDead);
   if (candidates.length === 0) return [];
 
-  const select = tgt.select || 'any';
-  const position = tgt.position || (select === 'adjacency' ? 'adjacent' : null);
-
   if (tgt.slot != null) {
-    candidates = candidates.filter(c => c.slotPosition === tgt.slot);
-  } else if (position === 'same_lane' || select === 'same_lane') {
+    candidates = candidates.filter(c => c.slotPosition === Number(tgt.slot));
+  } else if (select === 'same_lane' || tgt.position === 'same_lane') {
     candidates = candidates.filter(c => c.slotPosition === casterSlot);
-  } else if (position === 'adjacent' || select === 'adjacency') {
-    const adjacentSlots = getAdjacentSlots(casterSlot);
-    candidates = candidates.filter(c => adjacentSlots.includes(c.slotPosition));
-  } else if (position === 'left' || position === 'left_flank' || select === 'prefer_lane:L') {
-    candidates.sort((a, b) => {
-      const sa = a.slotPosition === POSITIONS.LEFT ? 0 : 1;
-      const sb = b.slotPosition === POSITIONS.LEFT ? 0 : 1;
-      return sa - sb;
-    });
-  } else if (position === 'right' || position === 'right_flank' || select === 'prefer_lane:R') {
-    candidates.sort((a, b) => {
-      const sa = a.slotPosition === POSITIONS.RIGHT ? 0 : 1;
-      const sb = b.slotPosition === POSITIONS.RIGHT ? 0 : 1;
-      return sa - sb;
-    });
-  } else if (position === 'vanguard' || select === 'prefer_lane:V') {
-    candidates.sort((a, b) => {
-      const sa = a.slotPosition === POSITIONS.VANGUARD ? 0 : 1;
-      const sb = b.slotPosition === POSITIONS.VANGUARD ? 0 : 1;
-      return sa - sb;
-    });
+  } else if (select === 'adjacency' || tgt.position === 'adjacent') {
+    candidates = candidates.filter(c => isWithinAdjacency(c.slotPosition, casterSlot));
   }
 
   if (tgt.filter) {
     if (tgt.filter.status) {
       candidates = candidates.filter(c => hasStatus(c, tgt.filter.status));
+    }
+    if (tgt.filter.withoutStatus) {
+      candidates = candidates.filter(c => !hasStatus(c, tgt.filter.withoutStatus));
     }
     if (tgt.filter.troopsAbove != null) {
       candidates = candidates.filter(c => c.getHealthPercentage() > tgt.filter.troopsAbove);
@@ -147,9 +172,16 @@ function selectTargets(caster, friendlyTeam, enemyTeam, targetingParsed) {
     if (tgt.filter.troopsBelow != null) {
       candidates = candidates.filter(c => c.getHealthPercentage() < tgt.filter.troopsBelow);
     }
+    if (tgt.filter.dealer) {
+      const want = String(tgt.filter.dealer).toLowerCase();
+      candidates = candidates.filter(c => getDealerType(c) === want);
+    }
   }
 
-  if (select === 'lowest_troops') {
+  if (select === 'prefer_lane:L') preferSlot(candidates, POSITIONS.LEFT);
+  else if (select === 'prefer_lane:R') preferSlot(candidates, POSITIONS.RIGHT);
+  else if (select === 'prefer_lane:V') preferSlot(candidates, POSITIONS.VANGUARD);
+  else if (select === 'lowest_troops') {
     candidates.sort((a, b) => a.currentHealth - b.currentHealth);
   } else if (select === 'highest_troops') {
     candidates.sort((a, b) => b.currentHealth - a.currentHealth);
@@ -161,14 +193,14 @@ function selectTargets(caster, friendlyTeam, enemyTeam, targetingParsed) {
     candidates.sort((a, b) => getStat(b, 'inst') - getStat(a, 'inst'));
   } else if (select === 'highest_init') {
     candidates.sort((a, b) => getStat(b, 'init') - getStat(a, 'init'));
-  } else if (select === 'dealer:tactical' || select === 'prefer_dealer:tactical') {
+  } else if (select === 'dealer:tactical') {
     candidates.sort((a, b) => (getDealerType(a) === 'tactical' ? 0 : 1) - (getDealerType(b) === 'tactical' ? 0 : 1));
-  } else if (select === 'prefer_dealer:fire' || select === 'dealer:fire') {
+  } else if (select === 'dealer:fire') {
     candidates.sort((a, b) => (getDealerType(a) === 'fire' ? 0 : 1) - (getDealerType(b) === 'fire' ? 0 : 1));
-  } else if (select === 'prefer_dealer:physical' || select === 'dealer:physical') {
+  } else if (select === 'dealer:physical') {
     candidates.sort((a, b) => (getDealerType(a) === 'physical' ? 0 : 1) - (getDealerType(b) === 'physical' ? 0 : 1));
   } else if (select === 'prefer_without:stun') {
-    candidates.sort((a, b) => (hasStatus(a, 'stun') ? 1 : 0) - (hasStatus(b, 'stun') ? 0 : 1));
+    candidates.sort((a, b) => (hasStatus(a, 'stun') ? 1 : 0) - (hasStatus(b, 'stun') ? 1 : 0));
   } else if (select === 'random') {
     candidates = shuffleArray(candidates);
   }
@@ -234,9 +266,9 @@ function visualizeTeamPositions(team) {
     const label = POSITION_NAMES[i];
     if (!char) visual.push(`${label}: <empty>`);
     else {
-      const status = char.isDead ? ' down' : '';
-      const hp = `${Math.round(char.currentHealth)}/${Math.round(char.maxHealth)}`;
-      visual.push(`${label}: ${char.name} (HP: ${hp})${status}`);
+      const status = char.isDead ? ' retreated' : '';
+      const troops = `${Math.round(char.currentHealth)}/${Math.round(char.maxHealth)}`;
+      visual.push(`${label}: ${char.name} (${troops} Troop Capacity)${status}`);
     }
   }
   return visual.join('\n');
@@ -244,7 +276,7 @@ function visualizeTeamPositions(team) {
 
 function visualizeBattle(teamA, teamB) {
   const lines = [];
-  lines.push('TIME A                          vs    TIME B');
+  lines.push('TEAM A                          vs    TEAM B');
   for (let i = 0; i < 3; i++) {
     const charA = getCharacterAtSlot(teamA, i);
     const charB = getCharacterAtSlot(teamB, i);
@@ -283,6 +315,7 @@ export {
   getDistance,
   isInSameLane,
   isAdjacent,
+  isWithinAdjacency,
   getAdjacentSlots,
   getCharacterAtSlot,
   getCharactersAtSameLane,
