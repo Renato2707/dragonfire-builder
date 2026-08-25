@@ -24,7 +24,16 @@ const SELECT_ALIASES = {
   'prefer_dealer:tactical': 'dealer:tactical',
   'prefer_dealer:physical': 'dealer:physical',
   'adjacent': 'adjacency',
-  'adjacent_lane': 'adjacency'
+  'adjacent_lane': 'adjacency',
+  'prefer_class:hunter': 'prefer_class:hunter',
+  'prefer_class:warrior': 'prefer_class:warrior',
+  'prefer_class:sentinel': 'prefer_class:sentinel',
+  'prefer_class:champion': 'prefer_class:champion',
+  'prefer_breed:hunter': 'prefer_class:hunter',
+  'prefer_breed:warrior': 'prefer_class:warrior',
+  'prefer_breed:sentinel': 'prefer_class:sentinel',
+  'prefer_breed:champion': 'prefer_class:champion',
+  'last_damage': 'last_dmg'
 };
 
 function getDistance(slot1, slot2) {
@@ -121,6 +130,15 @@ function normalizeSelect(select) {
   return raw;
 }
 
+function preferClass(candidates, klass) {
+  const want = String(klass || '').toLowerCase();
+  candidates.sort((a, b) => {
+    const sa = String(a.breed || '').toLowerCase() === want ? 0 : 1;
+    const sb = String(b.breed || '').toLowerCase() === want ? 0 : 1;
+    return sa - sb;
+  });
+}
+
 function preferSlot(candidates, slot) {
   candidates.sort((a, b) => {
     const sa = a.slotPosition === slot ? 0 : 1;
@@ -149,6 +167,9 @@ function selectTargets(caster, friendlyTeam, enemyTeam, targetingParsed) {
   }
 
   let candidates = targetTeam.filter(c => c && !c.isDead);
+  if (tgt.excludeLastBasic && caster.lastBasicTarget) {
+    candidates = candidates.filter(c => c !== caster.lastBasicTarget);
+  }
   if (candidates.length === 0) return [];
 
   if (tgt.slot != null) {
@@ -176,9 +197,19 @@ function selectTargets(caster, friendlyTeam, enemyTeam, targetingParsed) {
       const want = String(tgt.filter.dealer).toLowerCase();
       candidates = candidates.filter(c => getDealerType(c) === want);
     }
+    if (tgt.filter.breed || tgt.filter.class) {
+      const want = String(tgt.filter.breed || tgt.filter.class).toLowerCase();
+      candidates = candidates.filter(c => String(c.breed || '').toLowerCase() === want);
+    }
     if (tgt.filter.receivedRecoveryLastRound) {
       candidates.sort((a, b) => (b.receivedRecoveryLastRound ? 1 : 0) - (a.receivedRecoveryLastRound ? 1 : 0));
     }
+  }
+
+  if (select === 'last_dmg' || select === 'last_damage') {
+    const last = caster.lastDamageTarget;
+    if (!last || last.isDead) return [];
+    return [last];
   }
 
   if (select === 'prey') {
@@ -218,6 +249,11 @@ function selectTargets(caster, friendlyTeam, enemyTeam, targetingParsed) {
     const control = ['stun', 'stagger', 'overwhelm', 'confusion'];
     const score = c => control.some(id => hasStatus(c, id)) ? 0 : 1;
     candidates.sort((a, b) => score(a) - score(b));
+  } else if (select.startsWith('prefer_class:') || select.startsWith('prefer_breed:')) {
+    preferClass(candidates, select.split(':')[1]);
+  } else if (select.startsWith('class:') || select.startsWith('breed:')) {
+    const want = String(select.split(':')[1] || '').toLowerCase();
+    candidates = candidates.filter(c => String(c.breed || '').toLowerCase() === want);
   } else if (select === 'random') {
     candidates = shuffleArray(candidates);
   }

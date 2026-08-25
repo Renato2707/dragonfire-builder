@@ -263,8 +263,13 @@ class Battle {
     }
     const defender = this.selectBasicAttackTarget(character);
     if (!defender) return;
+    character.lastBasicTarget = defender;
     this.executeBasicAttack(character, defender);
+    character.lastDamageTarget = defender;
     if (!character.isDead && canUseAbilities(character)) {
+      const kit = character.commandKit;
+      const label = character.commandName || (kit && kit.name) || 'Command';
+      this.executeKit(character, kit, PHASES.AFTER_BASIC_ATTACK, this.currentRound, label);
       this.executeHabitsForPhase(PHASES.AFTER_BASIC_ATTACK, [character], this.currentRound);
     }
   }
@@ -483,6 +488,7 @@ class Battle {
           continue;
         }
         const actualDamage = target.takeDamage(dmg.amount);
+        character.lastDamageTarget = target;
         this.logAction(`Deals ${actualDamage} ${formatDamageTypeName(raw.dt)} to ${target.name}${enhancedNote(raw.scaleStat)}`);
         if (target.isDead) this.logAction(`${target.name} retreated`);
       }

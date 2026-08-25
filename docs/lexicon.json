@@ -487,6 +487,7 @@
     "side": { "values": ["self", "ally", "enemy"] },
     "count": { "type": ["integer", "string"], "default": 1, "all": "all" },
     "excludeSelf": { "type": "boolean" },
+    "excludeLastBasic": { "type": "boolean", "desc": "Drop caster.lastBasicTarget (Kalspire splash)" },
     "slot": { "type": "integer", "values": [0, 1, 2], "desc": "Exact slot filter" },
     "linkAs": { "type": "string", "desc": "attacker.links[key] = target" },
     "select": {
@@ -507,7 +508,16 @@
         "dealer:tactical",
         "dealer:physical",
         "prefer_control",
+        "prefer_class:hunter",
+        "prefer_class:warrior",
+        "prefer_class:sentinel",
+        "prefer_class:champion",
+        "class:hunter",
+        "class:warrior",
+        "class:sentinel",
+        "class:champion",
         "last_cleanse",
+        "last_dmg",
         "prey",
         "random"
       ],
@@ -531,7 +541,12 @@
         "prefer_dealer:tactical": "dealer:tactical",
         "prefer_dealer:physical": "dealer:physical",
         "adjacent": "adjacency",
-        "adjacent_lane": "adjacency"
+        "adjacent_lane": "adjacency",
+        "prefer_breed:hunter": "prefer_class:hunter",
+        "prefer_breed:warrior": "prefer_class:warrior",
+        "prefer_breed:sentinel": "prefer_class:sentinel",
+        "prefer_breed:champion": "prefer_class:champion",
+        "last_damage": "last_dmg"
       }
     },
     "filter": {

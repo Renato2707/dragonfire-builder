@@ -6,6 +6,7 @@ import { Battle } from './battle.js';
 import { loadDragonHabitsSync, loadCommandSync, ifBonusApplies } from './habitParser.js';
 import { applyChanceIf, statusConditionMet } from './utils.js';
 import { applyEffect, hasEffect, cleanseCharacter } from './effects.js';
+import { selectTargets } from './positionSystem.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -109,6 +110,33 @@ function mockFx(ids) {
   const doubled = applyChanceIf(25, { preyRecoveredLastRound: true, mult: 2 }, prey, extras);
   if (doubled !== 50) throw new Error(`chanceIf prey recovered expected 50 got ${doubled}`);
   console.log('✓ prey link / recovery penalty / recovered-last-round\n');
+}
+
+{
+  const d = (id, breed, slot, team) => new Character({
+    id, name: id, breed, rarity: 'Rare', stats: { str: 10, inst: 10, int: 10, init: 10 }
+  }, team, slot);
+  const caster = d('caster', 'Champion', 1, 0);
+  const hunter = d('hunter', 'Hunter', 0, 1);
+  const warrior = d('warrior', 'Warrior', 1, 1);
+  const sentinel = d('sentinel', 'Sentinel', 2, 1);
+  const allies = [caster];
+  const enemies = [hunter, warrior, sentinel];
+  caster.lastBasicTarget = hunter;
+  const splash = selectTargets(caster, allies, enemies, {
+    side: 'enemy', count: 3, select: 'adjacency', excludeLastBasic: true
+  });
+  if (splash.some(c => c === hunter)) throw new Error('excludeLastBasic dropped hunter failed');
+  if (!splash.includes(warrior) || !splash.includes(sentinel)) throw new Error('excludeLastBasic should keep adjacent others');
+  const prefer = selectTargets(caster, allies, enemies, {
+    side: 'enemy', count: 1, select: 'prefer_class:hunter'
+  });
+  if (prefer[0] !== hunter) throw new Error('prefer_class:hunter should pick Hunter');
+  const exact = selectTargets(caster, allies, enemies, {
+    side: 'enemy', count: 2, select: 'class:sentinel'
+  });
+  if (exact.length !== 1 || exact[0] !== sentinel) throw new Error('class:sentinel should hard-filter');
+  console.log('✓ lastBasicTarget exclude + breed/class targeting\n');
 }
 
 try {
