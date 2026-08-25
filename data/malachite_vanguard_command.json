@@ -1,0 +1,53 @@
+{
+  "dragonId": "malachite",
+  "name": "Warden's Rally",
+  "command": [
+    {
+      "phase": "turn",
+      "rounds": [2, 4, 7, 9],
+      "actions": [
+        {
+          "t": "dmg",
+          "dt": "tactical",
+          "pct": 100,
+          "tgt": { "side": "enemy", "count": 1, "select": "same_lane" }
+        }
+      ]
+    },
+    {
+      "phase": "turn",
+      "rounds": [3, 6, 9],
+      "actions": [
+        {
+          "t": "heal",
+          "pct": 70,
+          "scaleStat": "inst",
+          "tgt": { "side": "ally", "count": 3, "select": "any" }
+        }
+      ]
+    }
+  ],
+  "vanguard": [
+    {
+      "phase": "combat_start",
+      "rounds": [1],
+      "actions": [
+        {
+          "t": "mod",
+          "mods": [
+            { "stat": "recovery_dealt", "pct": 15 },
+            { "stat": "inst", "fixed": 25 }
+          ],
+          "dur": "combat",
+          "tgt": { "side": "self" }
+        },
+        {
+          "t": "mod",
+          "mods": [{ "stat": "fire_dealt", "pct": 16 }],
+          "dur": "combat",
+          "tgt": { "side": "ally", "count": 1, "slot": 0, "excludeSelf": true }
+        }
+      ]
+    }
+  ]
+}
