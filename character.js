@@ -46,6 +46,7 @@ class Character {
     this.habitRank = options.habitRank != null ? options.habitRank : DEFAULT_HABIT_RANK;
     this.commandKit = null;
     this.vanguardKit = null;
+    this.commandName = null;
     this.commandUsedThisRound = null;
     this.commandMods = {};
   }
@@ -179,6 +180,7 @@ class Character {
 
   setCommandKit(kit) {
     this.commandKit = kit;
+    if (kit && kit.name) this.commandName = kit.name;
   }
 
   setVanguardKit(kit) {
