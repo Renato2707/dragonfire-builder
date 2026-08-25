@@ -149,14 +149,29 @@ function executeModAction(habit, actionData, attacker, targets, scalingValue) {
   for (const target of targets) {
     if (!target || target.isDead) continue;
     if (raw.t === 'stack' && typeof target.addStack === 'function') {
-      const count = target.addStack(raw.id || 'stack', scalingValue, duration, { ...options, stacks: raw.stacks || 1 });
+      const added = raw.stacks || 1;
+      const count = target.addStack(raw.id || 'stack', scalingValue, duration, { ...options, stacks: added });
       if (raw.tgt && raw.tgt.linkAs && attacker) attacker.links[raw.tgt.linkAs] = target;
-      effects.push({ target: target.name, log: `${target.name}: stack ${raw.id || ''} x${count}` });
+      effects.push({
+        target: target.name,
+        kind: 'stack',
+        stackId: raw.id || 'stack',
+        stacks: count,
+        added,
+        duration
+      });
     } else {
       for (const stat in scalingValue) {
         if (stat === '__fixed') continue;
         target.addStatModifier(stat, scalingValue[stat], duration, { ...options, fixed: !!flags[stat] });
-        effects.push({ target: target.name, log: `${target.name}: ${stat} ${flags[stat] ? '+' : ''}${scalingValue[stat]}${flags[stat] ? '' : '%'}` });
+        effects.push({
+          target: target.name,
+          kind: 'mod',
+          stat,
+          value: scalingValue[stat],
+          duration,
+          excludeBasic: !!raw.excludeBasic
+        });
       }
     }
   }
