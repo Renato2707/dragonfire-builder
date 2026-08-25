@@ -33,6 +33,7 @@ class Battle {
     this.winner = null;
     this.endReason = '';
     this.battleLog = [];
+    this.damageContext = null;
   }
 
   initialize() {
@@ -103,7 +104,7 @@ class Battle {
             this.logAction(`${character.name} Evades the ${formatDamageTypeName(tick.damageType)} from ${tick.name}`);
             continue;
           }
-          const actual = character.takeDamage(tick.amount);
+          const actual = this.dealDamage(character, tick.amount, { type: tick.damageType, basic: false });
           this.logAction(`${character.name} takes ${actual} ${formatDamageTypeName(tick.damageType)} from ${tick.name}`);
           if (character.isDead) this.logAction(`${character.name} retreated`);
         }
@@ -148,6 +149,33 @@ class Battle {
     return this.enemiesOf(character).find(c => c && !c.isDead && hasEffect(c, 'prey')) || null;
   }
 
+  dealDamage(target, amount, info = {}) {
+    const actual = target.takeDamage(amount);
+    if (actual > 0) this.notifyDamage(target, info);
+    return actual;
+  }
+
+  notifyDamage(target, info = {}) {
+    if (!target) return;
+    const type = String(info.type || '').toLowerCase();
+    const basic = !!info.basic;
+    const firstSelf = !target.receivedDamageThisRound;
+    target.receivedDamageThisRound = true;
+    const prev = this.damageContext;
+    this.damageContext = { type, basic, victim: target };
+    try {
+      if (firstSelf && !target.isDead) {
+        this.executeHabitsForPhase(PHASES.ON_SELF_FIRST_DAMAGE, [target], this.currentRound);
+      }
+      if (type === 'fire') {
+        const allies = this.alliesOf(target).filter(c => c && !c.isDead);
+        this.executeHabitsForPhase(PHASES.ON_ALLY_FIRE_DAMAGE, allies, this.currentRound);
+      }
+    } finally {
+      this.damageContext = prev || null;
+    }
+  }
+
   hasLeastTroops(character) {
     const hp = character.currentHealth;
     return this.allCharacters.filter(c => c && !c.isDead).every(c => c.currentHealth >= hp);
@@ -185,7 +213,23 @@ class Battle {
     }
     if (req.leastTroops && !this.hasLeastTroops(character)) return false;
     if (req.selfStatus && !hasEffect(character, req.selfStatus)) return false;
+    if (req.damageType) {
+      const ctx = this.damageContext;
+      if (!ctx) return false;
+      const want = String(req.damageType).toLowerCase();
+      if (want === 'basic') {
+        if (!ctx.basic) return false;
+      } else {
+        if (String(ctx.type || '').toLowerCase() !== want) return false;
+        if (req.excludeBasic && ctx.basic) return false;
+      }
+    }
     return true;
+  }
+
+  onceKey(habit, block) {
+    const req = block.requires ? JSON.stringify(block.requires) : '';
+    return `${(habit && habit.name) || 'kit'}:${block.phase}:${req}`;
   }
 
   blockChanceHits(character, habit, block) {
@@ -225,8 +269,13 @@ class Battle {
     return this.withConfusion(character, () => {
       this.logAction(`${character.name} activates ${label}`);
       for (const block of blocks) {
+        if (block.oncePerRound) {
+          const key = this.onceKey(habitLike, block);
+          if (character.oncePerRoundFired[key]) continue;
+        }
         if (!this.blockChanceHits(character, habitLike, block)) continue;
         for (const action of block.actions || []) this.runAction(character, habitLike, action, round);
+        if (block.oncePerRound) character.oncePerRoundFired[this.onceKey(habitLike, block)] = true;
       }
       return true;
     });
@@ -236,7 +285,10 @@ class Battle {
     const r = round || (phase === PHASES.COMBAT_START ? 1 : this.currentRound);
     for (const character of characters) {
       if (!character || character.isDead) continue;
-      if (phase !== PHASES.COMBAT_START && !canUseAbilities(character)) continue;
+      const free = phase === PHASES.COMBAT_START
+        || phase === PHASES.ON_SELF_FIRST_DAMAGE
+        || phase === PHASES.ON_ALLY_FIRE_DAMAGE;
+      if (!free && !canUseAbilities(character)) continue;
       for (const habit of character.getHabitsForPhase(r, phase)) {
         this.executeHabit(character, habit, phase, r);
       }
@@ -317,7 +369,7 @@ class Battle {
       this.logAction(`${defender.name} Evades the ${formatDamageTypeName(damageType)}`);
       return;
     }
-    const actualDamage = defender.takeDamage(rawDamage);
+    const actualDamage = this.dealDamage(defender, rawDamage, { type: damageType, basic: true });
     this.logAction(`Deals ${actualDamage} ${formatDamageTypeName(damageType)} to ${defender.name}`);
     if (defender.isDead) this.logAction(`${defender.name} retreated`);
   }
@@ -404,8 +456,13 @@ class Battle {
     this.withConfusion(character, () => {
       this.logAction(`${character.name} activates ${habit.name}`);
       for (const block of blocks) {
+        if (block.oncePerRound) {
+          const key = this.onceKey(habit, block);
+          if (character.oncePerRoundFired[key]) continue;
+        }
         if (!this.blockChanceHits(character, habit, block)) continue;
         for (const action of block.actions || []) this.runAction(character, habit, action, r);
+        if (block.oncePerRound) character.oncePerRoundFired[this.onceKey(habit, block)] = true;
       }
     });
   }
@@ -550,7 +607,7 @@ class Battle {
           this.logAction(`${target.name} Evades the ${formatDamageTypeName(raw.dt)}`);
           continue;
         }
-        const actualDamage = target.takeDamage(dmg.amount);
+        const actualDamage = this.dealDamage(target, dmg.amount, { type: raw.dt, basic: false });
         character.lastDamageTarget = target;
         this.logAction(`Deals ${actualDamage} ${formatDamageTypeName(raw.dt)} to ${target.name}${enhancedNote(raw.scaleStat)}`);
         if (target.isDead) this.logAction(`${target.name} retreated`);

@@ -51,6 +51,18 @@
       "when": "When a hunter's Prey receives Recovery (direct or HoT).",
       "example": { "phase": "on_prey_recovery", "rounds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], "actions": [] }
     },
+    "on_self_first_damage": {
+      "canonical": "on_self_first_damage",
+      "type": "string",
+      "when": "First time this character actually receives damage this round (after Evade). Branch with requires.damageType / excludeBasic. oncePerRound.",
+      "example": { "phase": "on_self_first_damage", "oncePerRound": true, "requires": { "damageType": "fire" }, "rounds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], "actions": [] }
+    },
+    "on_ally_fire_damage": {
+      "canonical": "on_ally_fire_damage",
+      "type": "string",
+      "when": "Any ally (including self) receives Fire Damage. Use oncePerRound for The King's Ire.",
+      "example": { "phase": "on_ally_fire_damage", "oncePerRound": true, "rounds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], "actions": [] }
+    },
     "low_health": {
       "canonical": "low_health",
       "type": "string",
@@ -111,6 +123,8 @@
         "anyEnemyDealerFire": { "type": "boolean", "desc": "any living enemy getDealerType === fire" },
         "stacks": { "type": "object", "fields": { "id": "string", "min": "integer" } },
         "leastTroops": { "type": "boolean", "desc": "caster has lowest currentHealth among living combatants" },
+        "damageType": { "type": "string", "values": ["physical", "tactical", "fire", "basic"], "desc": "Matches Battle.damageContext on on_self_first_damage" },
+        "excludeBasic": { "type": "boolean", "desc": "Fail if the hit was a Basic Attack" },
         "selfStatus": { "type": "string", "desc": "hasEffect(caster, status)" },
         "pve": { "type": "boolean", "desc": "must match battle.pve (default false)" }
       },

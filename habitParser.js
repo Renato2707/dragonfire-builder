@@ -10,7 +10,9 @@ const PHASES = {
   TURN: 'turn',
   AFTER_BASIC_ATTACK: 'after_basic_attack',
   LOW_HEALTH: 'low_health',
-  ON_PREY_RECOVERY: 'on_prey_recovery'
+  ON_PREY_RECOVERY: 'on_prey_recovery',
+  ON_SELF_FIRST_DAMAGE: 'on_self_first_damage',
+  ON_ALLY_FIRE_DAMAGE: 'on_ally_fire_damage'
 };
 
 function normalizeTiming(item) {
@@ -100,6 +102,7 @@ class Habit {
         rounds: timing.rounds,
         requires: item.requires || null,
         chance: item.chance != null ? item.chance : null,
+        oncePerRound: !!item.oncePerRound,
         actions: item.actions || []
       });
     }

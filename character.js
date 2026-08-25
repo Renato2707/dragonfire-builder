@@ -33,6 +33,8 @@ class Character {
     this.diedThisRound = false;
     this.receivedRecoveryThisRound = false;
     this.receivedRecoveryLastRound = false;
+    this.receivedDamageThisRound = false;
+    this.oncePerRoundFired = {};
     this.activeEffects = [];
     this.actionLog = [];
     this.percentMods = [];
@@ -163,6 +165,8 @@ class Character {
     this.diedThisRound = false;
     this.receivedRecoveryLastRound = this.receivedRecoveryThisRound;
     this.receivedRecoveryThisRound = false;
+    this.receivedDamageThisRound = false;
+    this.oncePerRoundFired = {};
     this.commandUsedThisRound = null;
   }
 

@@ -190,6 +190,32 @@ function mockFx(ids) {
   console.log('✓ Confusion swaps ally/enemy targeting\n');
 }
 
+{
+  const d = (id, team, slot) => new Character({
+    id, name: id, breed: 'Hunter', rarity: 'Rare', stats: { str: 10, inst: 10, int: 80, init: 10 }
+  }, team, slot);
+  const sun = d('sun', 0, 1);
+  const foe = d('foe', 1, 1);
+  sun.maxHealth = 1000;
+  sun.currentHealth = 1000;
+  const btl = new Battle([sun], [foe], { verbose: false });
+  btl.currentRound = 1;
+  btl.damageContext = { type: 'fire', basic: false, victim: sun };
+  if (!btl.blockAllowed(sun, { requires: { damageType: 'fire' } })) throw new Error('fire require failed');
+  if (btl.blockAllowed(sun, { requires: { damageType: 'tactical' } })) throw new Error('tactical should not match fire');
+  btl.damageContext = { type: 'physical', basic: true, victim: sun };
+  if (btl.blockAllowed(sun, { requires: { damageType: 'physical', excludeBasic: true } })) {
+    throw new Error('excludeBasic should reject Basic Attack physical');
+  }
+  if (!btl.blockAllowed(sun, { requires: { damageType: 'basic' } })) throw new Error('damageType basic failed');
+  const first = btl.dealDamage(sun, 10, { type: 'fire', basic: false });
+  if (first !== 10) throw new Error('dealDamage amount');
+  if (!sun.receivedDamageThisRound) throw new Error('first damage flag');
+  btl.dealDamage(sun, 10, { type: 'tactical', basic: false });
+  if (!sun.receivedDamageThisRound) throw new Error('flag should stay');
+  console.log('✓ first-damage requires / notify flags\n');
+}
+
 try {
   // Passo 1: Carregar dragões
   console.log('1️⃣  Carregando dragões...');
