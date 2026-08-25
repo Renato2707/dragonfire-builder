@@ -1,0 +1,55 @@
+{
+  "dragonId": "shadowrend",
+  "name": "Eclipse Fervor",
+  "command": [
+    {
+      "phase": "turn",
+      "rounds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+      "actions": [
+        {
+          "t": "status",
+          "st": "panic",
+          "rate": 20,
+          "dur": 2,
+          "chance": 25,
+          "tgt": { "side": "enemy", "count": 1, "select": "adjacency" }
+        }
+      ]
+    },
+    {
+      "phase": "turn",
+      "rounds": [4, 7, 9, 10],
+      "actions": [
+        {
+          "t": "dmg",
+          "dt": "physical",
+          "pct": 80,
+          "tgt": { "side": "enemy", "count": 2, "select": "adjacency" }
+        }
+      ]
+    }
+  ],
+  "vanguard": [
+    {
+      "phase": "combat_start",
+      "rounds": [1],
+      "actions": [
+        {
+          "t": "mod",
+          "mods": [{ "stat": "physical_dealt", "pct": 16 }],
+          "dur": "combat",
+          "tgt": { "side": "self" }
+        },
+        {
+          "t": "mod",
+          "mods": [
+            { "stat": "inst", "fixed": 20 },
+            { "stat": "init", "fixed": 20 }
+          ],
+          "dur": "combat",
+          "tgt": { "side": "ally", "count": 1, "slot": 0, "excludeSelf": true }
+        }
+      ]
+    }
+  ]
+}
