@@ -9,7 +9,7 @@ import {
   updateEffects, processDamageEffects, processHealingEffects,
   canAct, canAttack, canUseAbilities, applyEffect, hasEffect
 } from './effects.js';
-import { selectTargets, getPositionName } from './positionSystem.js';
+import { selectTargets, getPositionName, POSITIONS } from './positionSystem.js';
 import { executeHabitAction, resolveChance, PHASES } from './habitParser.js';
 
 function enhancedNote(stat) {
@@ -109,10 +109,19 @@ class Battle {
     return character.troopType || this.teamTroop[character.teamId] || null;
   }
 
+  hasCommand(character, name) {
+    if (!name) return false;
+    const want = String(name).toLowerCase();
+    const kitName = character.commandKit && character.commandKit.name;
+    const named = character.commandName;
+    return (named && String(named).toLowerCase() === want)
+      || (kitName && String(kitName).toLowerCase() === want);
+  }
+
   blockAllowed(character, block) {
     const req = block.requires;
     if (!req) return true;
-    if (req.command && character.commandUsedThisRound !== req.command) return false;
+    if (req.command && !this.hasCommand(character, req.command)) return false;
     if (req.troop && this.troopOf(character) !== req.troop) return false;
     if (req.linkedRetreated) {
       const linked = character.links && character.links[req.linkedRetreated];
@@ -134,16 +143,21 @@ class Battle {
   }
 
   executeVanguard(character) {
+    if (character.slotPosition !== POSITIONS.VANGUARD) return;
     const kit = character.vanguardKit;
     if (!kit) return;
-    this.executeKit(character, kit, PHASES.COMBAT_START, 1, kit.name || 'Vanguard Command');
+    const label = character.commandName
+      ? `${character.commandName} (Vanguard)`
+      : (kit.name || 'Vanguard');
+    this.executeKit(character, kit, PHASES.COMBAT_START, 1, label);
   }
 
   executeCommand(character) {
     const kit = character.commandKit;
     if (!kit || !canUseAbilities(character)) return;
-    const fired = this.executeKit(character, kit, PHASES.TURN, this.currentRound, kit.name || 'Command');
-    if (fired) character.commandUsedThisRound = kit.name;
+    const label = character.commandName || kit.name || 'Command';
+    const fired = this.executeKit(character, kit, PHASES.TURN, this.currentRound, label);
+    if (fired) character.commandUsedThisRound = label;
   }
 
   executeKit(character, habitLike, phase, round, label) {
@@ -342,7 +356,6 @@ class Battle {
         immunities: raw.immunities
       });
       const statusName = formatStatusName(raw.st);
-      const mag = magnitude != null ? ` (${formatSignedPercent(Math.abs(Number(magnitude)) || magnitude)})`.replace('+-', '-') : '';
       const magText = magnitude != null ? ` (${formatSignedPercent(magnitude)})` : '';
       if (isGrantedStatus(raw.st)) {
         this.logAction(`Grants ${statusName}${magText} to ${target.name} ${formatDuration(raw.dur)}${enhancedNote(raw.scaleStat)}`);

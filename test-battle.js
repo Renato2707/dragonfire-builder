@@ -3,7 +3,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { Character } from './character.js';
 import { Battle } from './battle.js';
-import { loadDragonHabitsSync } from './habitParser.js';
+import { loadDragonHabitsSync, loadCommandSync } from './habitParser.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -57,6 +57,18 @@ try {
       }
     } catch (error) {
       console.log(`   ⚠ ${character.name}: sem habits`);
+    }
+    try {
+      const cmdPath = path.join(__dirname, 'data', `${character.id}_vanguard_command.json`);
+      if (fs.existsSync(cmdPath)) {
+        const cmdData = JSON.parse(fs.readFileSync(cmdPath, 'utf-8'));
+        const kit = loadCommandSync(cmdData, character.id);
+        character.setCommandKit(kit.command);
+        character.setVanguardKit(kit.vanguard);
+        console.log(`   ✓ ${character.name}: Command ${kit.name}`);
+      }
+    } catch (error) {
+      console.log(`   ⚠ ${character.name}: sem command`);
     }
   }
   console.log(`   ✓ ${habitsLoaded}/6 dragões com habits\n`);
