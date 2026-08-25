@@ -45,6 +45,12 @@
       "when": "Immediately after Basic Attack resolves, if caster still able.",
       "example": { "phase": "after_basic_attack", "rounds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], "actions": [] }
     },
+    "on_prey_recovery": {
+      "canonical": "on_prey_recovery",
+      "type": "string",
+      "when": "When a hunter's Prey receives Recovery (direct or HoT).",
+      "example": { "phase": "on_prey_recovery", "rounds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], "actions": [] }
+    },
     "low_health": {
       "canonical": "low_health",
       "type": "string",
@@ -500,7 +506,9 @@
         "dealer:fire",
         "dealer:tactical",
         "dealer:physical",
-        "prefer_without:stun",
+        "prefer_control",
+        "last_cleanse",
+        "prey",
         "random"
       ],
       "aliases": {
@@ -531,6 +539,7 @@
       "withoutStatus": "string",
       "troopsAbove": "number percent",
       "troopsBelow": "number percent",
+      "receivedRecoveryLastRound": "boolean — prefer (sort first) characters who received Recovery last round",
       "dealer": ["physical", "tactical", "fire"]
     },
     "example": {

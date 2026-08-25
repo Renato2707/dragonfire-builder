@@ -31,6 +31,8 @@ class Character {
     this.isDead = false;
     this.retreatedLastRound = false;
     this.diedThisRound = false;
+    this.receivedRecoveryThisRound = false;
+    this.receivedRecoveryLastRound = false;
     this.activeEffects = [];
     this.actionLog = [];
     this.percentMods = [];
@@ -136,7 +138,10 @@ class Character {
   }
 
   getRecoveryReceivedMultiplier() {
-    return 1 + this.getPercentTotal('recovery_received') / 100;
+    let m = 1 + this.getPercentTotal('recovery_received') / 100;
+    const prey = (this.activeEffects || []).find(e => e.id === 'prey' && (typeof e.isExpired === 'function' ? !e.isExpired() : e.duration > 0));
+    if (prey && prey.recoveryPenalty) m *= (1 - Number(prey.recoveryPenalty) / 100);
+    return m;
   }
 
   tickPercentMods() {
@@ -156,6 +161,8 @@ class Character {
   advanceRetreatFlags() {
     this.retreatedLastRound = this.diedThisRound;
     this.diedThisRound = false;
+    this.receivedRecoveryLastRound = this.receivedRecoveryThisRound;
+    this.receivedRecoveryThisRound = false;
     this.commandUsedThisRound = null;
   }
 
@@ -172,8 +179,9 @@ class Character {
 
   heal(amount) {
     if (this.isDead) return 0;
-    const actualHeal = Math.min(amount, this.maxHealth - this.currentHealth);
+    const actualHeal = Math.max(0, Math.min(amount, this.maxHealth - this.currentHealth));
     this.currentHealth += actualHeal;
+    if (actualHeal > 0) this.receivedRecoveryThisRound = true;
     return actualHeal;
   }
 

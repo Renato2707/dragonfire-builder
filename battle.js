@@ -108,7 +108,10 @@ class Battle {
           if (character.isDead) this.logAction(`${character.name} retreated`);
         }
         const recovery = processHealingEffects(character);
-        if (recovery > 0) this.logAction(`Applies Recovery to ${character.name} (+${recovery} Troop Capacity)`);
+        if (recovery > 0) {
+          this.logAction(`Applies Recovery to ${character.name} (+${recovery} Troop Capacity)`);
+          this.notifyPreyRecovery(character);
+        }
         if (typeof character.tickPercentMods === 'function') character.tickPercentMods();
       }
     }
@@ -128,6 +131,15 @@ class Battle {
     const named = character.commandName;
     return (named && String(named).toLowerCase() === want)
       || (kitName && String(kitName).toLowerCase() === want);
+  }
+
+  notifyPreyRecovery(recovered) {
+    if (!recovered) return;
+    for (const hunter of this.allCharacters) {
+      if (!hunter || hunter.isDead) continue;
+      if (this.getPrey(hunter) !== recovered) continue;
+      this.executeHabitsForPhase(PHASES.ON_PREY_RECOVERY, [hunter], this.currentRound);
+    }
   }
 
   getPrey(character) {
@@ -356,14 +368,20 @@ class Battle {
       for (const target of targets) {
         if (target.isDead) continue;
         let chance = resolveChance(raw, rankIndex, character);
-        chance = applyChanceIf(chance, raw.chanceIf, target);
+        const extras = {
+          prey: this.getPrey(character),
+          allies: this.alliesOf(character)
+        };
+        chance = applyChanceIf(chance, raw.chanceIf, target, extras);
         const rolled = chance < 100;
         const hit = !rolled || rollChance(chance);
         if (rolled) this.logChanceRoll(habit, target, chance, hit);
         if (!hit) continue;
         const actionResult = executeHabitAction(habit, { type: raw.t, data: raw }, character, [target], character.habitRank, {
           skipChance: true,
-          round
+          round,
+          prey: extras.prey,
+          allies: extras.allies
         });
         this.logActionResult(character, habit, raw, target, actionResult);
         if (raw.tgt && raw.tgt.linkAs) character.links[raw.tgt.linkAs] = target;
@@ -471,6 +489,7 @@ class Battle {
     } else if (actionType === 'heal') {
       for (const heal of actionResult.heals) {
         this.logAction(`Applies Recovery to ${target.name} (+${target.heal(heal.amount)} Troop Capacity)${enhancedNote(raw.scaleStat)}`);
+        this.notifyPreyRecovery(target);
       }
     }
   }

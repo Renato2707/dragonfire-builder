@@ -88,6 +88,7 @@ function applyEffect(character, effectId, rank = 1, appliedBy = null, options = 
     if (effect.id === 'advantage') effect.damageBonus = mag;
     if (effect.id === 'resistance') effect.defenseBonus = mag;
     if (effect.id === 'evade') effect.evasionChance = mag;
+    if (effect.id === 'prey') effect.recoveryPenalty = mag;
   }
   if (options.damageRate != null) effect.damageRate = Number(options.damageRate);
   if (options.immunities) effect.immunities = options.immunities;
@@ -102,6 +103,7 @@ function applyEffect(character, effectId, rank = 1, appliedBy = null, options = 
     if (effect.damageRate) existing.damageRate = effect.damageRate;
     if (effect.damageBonus) existing.damageBonus = effect.damageBonus;
     if (effect.damagePenalty) existing.damagePenalty = effect.damagePenalty;
+    if (effect.recoveryPenalty) existing.recoveryPenalty = effect.recoveryPenalty;
   } else {
     character.activeEffects.push(effect);
     applyEffectModifiers(character, effect);
@@ -181,8 +183,12 @@ function processHealingEffects(character) {
   for (const effect of character.activeEffects) {
     if (effect.id !== 'recovery' || effect.isExpired()) continue;
     let healing = effect.healPerRound;
-    const preyEffect = getEffect(character, 'prey');
-    if (preyEffect) healing *= (1 - preyEffect.recoveryPenalty / 100);
+    if (typeof character.getRecoveryReceivedMultiplier === 'function') {
+      healing *= character.getRecoveryReceivedMultiplier();
+    } else {
+      const preyEffect = getEffect(character, 'prey');
+      if (preyEffect) healing *= (1 - preyEffect.recoveryPenalty / 100);
+    }
     totalHealing += character.heal(Math.round(healing));
   }
   return totalHealing;

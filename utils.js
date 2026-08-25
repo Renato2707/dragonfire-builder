@@ -213,10 +213,21 @@ function statusConditionMet(character, key) {
   return hasActiveId(character, id);
 }
 
-function applyChanceIf(chance, chanceIf, target) {
+function applyChanceIf(chance, chanceIf, target, extras = {}) {
   if (chance == null || !chanceIf || typeof chanceIf !== 'object') return chance;
   let result = Number(chance);
+  const skip = new Set(['mult', 'allyStatus', 'preyRecoveredLastRound']);
+  if (chanceIf.preyRecoveredLastRound && extras.prey && extras.prey.receivedRecoveryLastRound) {
+    const mult = chanceIf.mult != null ? chanceIf.mult : chanceIf.preyRecoveredLastRound;
+    result *= Number(mult) || 1;
+  }
+  if (chanceIf.allyStatus && Array.isArray(extras.allies)) {
+    if (extras.allies.some(ally => ally && statusConditionMet(ally, chanceIf.allyStatus))) {
+      result *= Number(chanceIf.mult) || 1;
+    }
+  }
   for (const key of Object.keys(chanceIf)) {
+    if (skip.has(key)) continue;
     if (statusConditionMet(target, key)) {
       const mult = Number(chanceIf[key]);
       if (!Number.isNaN(mult)) result *= mult;

@@ -85,6 +85,32 @@ function mockFx(ids) {
   console.log('✓ cleanse positive / types / negative+control\n');
 }
 
+{
+  const dummy = (id) => ({ id, name: id, breed: 'Hunter', rarity: 'Rare', stats: { str: 10, inst: 10, int: 10, init: 10 } });
+  const hunter = new Character(dummy('hunter'), 0, 0);
+  const prey = new Character(dummy('prey'), 1, 0);
+  applyEffect(prey, 'PREY', 1, hunter.name, { magnitude: 30, duration: 3 });
+  hunter.links.prey = prey;
+  const fx = prey.activeEffects.find(e => e.id === 'prey');
+  if (!fx || fx.recoveryPenalty !== 30) throw new Error('prey recoveryPenalty from val failed');
+  const before = prey.getRecoveryReceivedMultiplier();
+  if (Math.abs(before - 0.7) > 0.001) throw new Error(`prey recovery received should be 0.7, got ${before}`);
+  prey.currentHealth = Math.max(1, Math.floor(prey.maxHealth * 0.4));
+  prey.heal(10);
+  if (!prey.receivedRecoveryThisRound) throw new Error('heal should flag receivedRecoveryThisRound');
+  prey.advanceRetreatFlags();
+  if (!prey.receivedRecoveryLastRound) throw new Error('flag should move to last round');
+  const btl = new Battle([hunter], [prey], { verbose: false });
+  if (btl.getPrey(hunter) !== prey) throw new Error('getPrey should return linked prey');
+  const extras = { prey };
+  if (!ifBonusApplies({ preyRecoveredLastRound: true, mult: 3 }, hunter, prey, extras)) {
+    throw new Error('ifBonus preyRecoveredLastRound should apply');
+  }
+  const doubled = applyChanceIf(25, { preyRecoveredLastRound: true, mult: 2 }, prey, extras);
+  if (doubled !== 50) throw new Error(`chanceIf prey recovered expected 50 got ${doubled}`);
+  console.log('✓ prey link / recovery penalty / recovered-last-round\n');
+}
+
 try {
   // Passo 1: Carregar dragões
   console.log('1️⃣  Carregando dragões...');

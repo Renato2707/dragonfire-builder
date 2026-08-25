@@ -9,7 +9,8 @@ const PHASES = {
   ROUND_START: 'round_start',
   TURN: 'turn',
   AFTER_BASIC_ATTACK: 'after_basic_attack',
-  LOW_HEALTH: 'low_health'
+  LOW_HEALTH: 'low_health',
+  ON_PREY_RECOVERY: 'on_prey_recovery'
 };
 
 function normalizeTiming(item) {
@@ -38,16 +39,29 @@ function resolveChance(actionRaw, rankIndex, character) {
   return actionRaw.chance;
 }
 
-function ifBonusApplies(ifBonus, attacker, target) {
+function ifBonusApplies(ifBonus, attacker, target, extras = {}) {
   if (!ifBonus) return false;
+  if (ifBonus.preyRecoveredLastRound) {
+    const prey = extras.prey;
+    return !!(prey && prey.receivedRecoveryLastRound);
+  }
   if (ifBonus.dealer && target) {
     return getDealerType(target) === String(ifBonus.dealer).toLowerCase();
   }
   if (ifBonus.status) {
+    const who = ifBonus.on === 'self' ? attacker : null;
+    if (who) return statusConditionMet(who, ifBonus.status);
     if (statusConditionMet(target, ifBonus.status)) return true;
     if (statusConditionMet(attacker, ifBonus.status)) return true;
   }
   return false;
+}
+
+function resolveIfBonusRate(rate, ifBonus, attacker, target, extras = {}) {
+  if (!ifBonusApplies(ifBonus, attacker, target, extras)) return rate;
+  if (ifBonus.mult != null) return Number(rate) * Number(ifBonus.mult);
+  if (ifBonus.pct != null) return scaleByStat(ifBonus.pct, attacker, ifBonus.scaleStat);
+  return rate;
 }
 
 function applyIfBonusValue(baseValue, ifBonus, attacker) {
@@ -182,10 +196,10 @@ function executeHabitAction(habit, actionData, attacker, targets, rank = 1, opti
       result.magnitude = scalingValue;
     }
   } else if (actionType === 'dmg') {
-    result.damages = executeDamageAction(habit, actionData, attacker, targets, scalingValue, options.round);
+    result.damages = executeDamageAction(habit, actionData, attacker, targets, scalingValue, options.round, options);
     result.executed = result.damages.length;
   } else if (actionType === 'heal') {
-    result.heals = executeHealAction(habit, actionData, attacker, targets, scalingValue);
+    result.heals = executeHealAction(habit, actionData, attacker, targets, scalingValue, options);
     result.executed = result.heals.length;
   }
   return result;
@@ -261,7 +275,7 @@ function executeModAction(habit, actionData, attacker, targets, scalingValue, ra
   return { effects, onReachActions };
 }
 
-function executeDamageAction(habit, actionData, attacker, targets, scalingValue, round) {
+function executeDamageAction(habit, actionData, attacker, targets, scalingValue, round, extras = {}) {
   const damages = [];
   const raw = actionData.data || actionData;
   const damageType = (raw.dt || 'physical').toUpperCase();
@@ -272,25 +286,20 @@ function executeDamageAction(habit, actionData, attacker, targets, scalingValue,
   }
   for (const target of targets) {
     if (!target || target.isDead) continue;
-    let rate = baseRate;
-    if (ifBonusApplies(raw.ifBonus, attacker, target)) {
-      rate = scaleByStat(raw.ifBonus.pct, attacker, raw.scaleStat);
-      if (raw.roundBonus && round != null) {
-        const bonus = raw.roundBonus[String(round)] ?? raw.roundBonus[round];
-        if (bonus) rate *= bonus;
-      }
-    }
+    const rate = resolveIfBonusRate(baseRate, raw.ifBonus, attacker, target, extras);
     damages.push({ target: target.name, amount: calculateFinalDamage(attacker, target, damageType, rate) });
   }
   return damages;
 }
 
-function executeHealAction(habit, actionData, attacker, targets, scalingValue) {
+function executeHealAction(habit, actionData, attacker, targets, scalingValue, extras = {}) {
   const heals = [];
-  const rate = typeof scalingValue === 'number' ? scalingValue : 0;
+  const raw = actionData.data || actionData;
+  let rate = typeof scalingValue === 'number' ? scalingValue : 0;
   for (const target of targets) {
     if (!target || target.isDead) continue;
-    let amount = target.maxHealth * (rate / 100);
+    const usedRate = resolveIfBonusRate(rate, raw.ifBonus, attacker, target, extras);
+    let amount = target.maxHealth * (usedRate / 100);
     if (typeof attacker.getRecoveryDealtMultiplier === 'function') amount *= attacker.getRecoveryDealtMultiplier();
     if (typeof target.getRecoveryReceivedMultiplier === 'function') amount *= target.getRecoveryReceivedMultiplier();
     heals.push({ target: target.name, amount: Math.max(1, Math.round(amount)) });

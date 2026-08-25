@@ -176,6 +176,16 @@ function selectTargets(caster, friendlyTeam, enemyTeam, targetingParsed) {
       const want = String(tgt.filter.dealer).toLowerCase();
       candidates = candidates.filter(c => getDealerType(c) === want);
     }
+    if (tgt.filter.receivedRecoveryLastRound) {
+      candidates.sort((a, b) => (b.receivedRecoveryLastRound ? 1 : 0) - (a.receivedRecoveryLastRound ? 1 : 0));
+    }
+  }
+
+  if (select === 'prey') {
+    const linked = caster.links && caster.links.prey;
+    if (linked && !linked.isDead && candidates.includes(linked)) return [linked];
+    const marked = candidates.filter(c => hasStatus(c, 'prey'));
+    return marked.slice(0, 1);
   }
 
   if (select === 'last_cleanse') {
