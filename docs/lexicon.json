@@ -598,7 +598,8 @@
         "prefer_breed:sentinel": "prefer_class:sentinel",
         "prefer_breed:champion": "prefer_class:champion",
         "last_damage": "last_dmg"
-      }
+      },
+      "desc": "lowest_troops / highest_troops = remaining troop count (currentHealth). Ties break by slot (Left → Vanguard → Right). Dead excluded. Includes self unless excludeSelf."
     },
     "filter": {
       "status": "string",

@@ -121,6 +121,19 @@ function getStat(character, stat) {
   return (character.stats && character.stats[stat]) || 0;
 }
 
+function troopCount(character) {
+  return Number(character && character.currentHealth) || 0;
+}
+
+function sortByTroops(candidates, lowestFirst) {
+  const dir = lowestFirst ? 1 : -1;
+  candidates.sort((a, b) => {
+    const diff = (troopCount(a) - troopCount(b)) * dir;
+    if (diff !== 0) return diff;
+    return (a.slotPosition || 0) - (b.slotPosition || 0);
+  });
+}
+
 function normalizeSelect(select) {
   if (!select) return 'any';
   const raw = String(select);
@@ -235,9 +248,9 @@ function selectTargets(caster, friendlyTeam, enemyTeam, targetingParsed) {
   else if (select === 'prefer_lane:R') preferSlot(candidates, POSITIONS.RIGHT);
   else if (select === 'prefer_lane:V') preferSlot(candidates, POSITIONS.VANGUARD);
   else if (select === 'lowest_troops') {
-    candidates.sort((a, b) => a.currentHealth - b.currentHealth);
+    sortByTroops(candidates, true);
   } else if (select === 'highest_troops') {
-    candidates.sort((a, b) => b.currentHealth - a.currentHealth);
+    sortByTroops(candidates, false);
   } else if (select === 'highest_str') {
     candidates.sort((a, b) => getStat(b, 'str') - getStat(a, 'str'));
   } else if (select === 'highest_int') {

@@ -149,7 +149,39 @@ function mockFx(ids) {
     side: 'enemy', count: 2, select: 'class:sentinel'
   });
   if (exact.length !== 1 || exact[0] !== sentinel) throw new Error('class:sentinel should hard-filter');
-  console.log('✓ lastBasicTarget exclude + breed/class targeting\n');
+  const weak = d('weak', 'Sentinel', 0, 0);
+  const mid = d('mid', 'Warrior', 2, 0);
+  caster.currentHealth = 80;
+  weak.currentHealth = 20;
+  mid.currentHealth = 50;
+  hunter.currentHealth = 15;
+  warrior.currentHealth = 90;
+  sentinel.currentHealth = 40;
+  const lowestAlly = selectTargets(caster, [weak, caster, mid], enemies, {
+    side: 'ally', count: 1, select: 'lowest:troops'
+  });
+  if (lowestAlly[0] !== weak) throw new Error('lowest:troops should pick the ally with 20 troops');
+  const highestAlly = selectTargets(caster, [weak, caster, mid], enemies, {
+    side: 'ally', count: 1, select: 'highest:troops'
+  });
+  if (highestAlly[0] !== caster) throw new Error('highest:troops should pick the ally with 80 troops');
+  const lowestEnemy = selectTargets(caster, [weak, caster, mid], enemies, {
+    side: 'enemy', count: 1, select: 'lowest:troops'
+  });
+  if (lowestEnemy[0] !== hunter) throw new Error('lowest:troops enemy should be hunter at 15');
+  weak.isDead = true;
+  const afterDeath = selectTargets(caster, [weak, caster, mid], enemies, {
+    side: 'ally', count: 1, select: 'lowest:troops'
+  });
+  if (afterDeath[0] !== mid) throw new Error('lowest:troops must skip retreated allies');
+  caster.currentHealth = 50;
+  mid.currentHealth = 50;
+  const tie = selectTargets(caster, [caster, mid], enemies, {
+    side: 'ally', count: 1, select: 'lowest:troops'
+  });
+  if (tie[0] !== caster) throw new Error('troop ties break toward lower slot');
+  console.log('✓ lastBasicTarget exclude + breed/class targeting');
+  console.log('✓ lowest:troops / highest:troops remaining troop count\n');
 }
 
 {
