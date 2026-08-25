@@ -1,0 +1,41 @@
+{
+  "dragonId": "thunderstrike",
+  "name": "Tail Whip",
+  "command": [
+    {
+      "phase": "turn",
+      "rounds": [1, 3, 5, 7, 9],
+      "actions": [
+        {
+          "t": "dmg",
+          "dt": "physical",
+          "pct": 100,
+          "tgt": { "side": "enemy", "count": 1, "select": "same_lane" }
+        }
+      ]
+    }
+  ],
+  "vanguard": [
+    {
+      "phase": "combat_start",
+      "rounds": [1],
+      "actions": [
+        {
+          "t": "mod",
+          "mods": [{ "stat": "physical_dealt", "pct": 16 }],
+          "dur": "combat",
+          "tgt": { "side": "self" }
+        },
+        {
+          "t": "mod",
+          "mods": [
+            { "stat": "inst", "fixed": 20 },
+            { "stat": "init", "fixed": 20 }
+          ],
+          "dur": "combat",
+          "tgt": { "side": "ally", "count": 1, "slot": 0, "excludeSelf": true }
+        }
+      ]
+    }
+  ]
+}
