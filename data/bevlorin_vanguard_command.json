@@ -33,7 +33,7 @@
       "actions": [
         {
           "t": "dmg",
-          "dt": "physical",
+          "dt": "fire",
           "pct": 90,
           "tgt": { "side": "enemy", "count": 1, "select": "same_lane" }
         }
@@ -47,15 +47,18 @@
       "actions": [
         {
           "t": "mod",
-          "mods": [{ "stat": "dmg_received", "pct": -8 }],
+          "mods": [
+            { "stat": "recovery_dealt", "pct": 15 },
+            { "stat": "init", "fixed": 25 }
+          ],
           "dur": "combat",
           "tgt": { "side": "self" }
         },
         {
           "t": "mod",
-          "mods": [{ "stat": "tactical_dealt", "pct": 16 }],
+          "mods": [{ "stat": "dmg_dealt", "pct": 8 }],
           "dur": "combat",
-          "tgt": { "side": "ally", "count": 1, "slot": 0, "excludeSelf": true }
+          "tgt": { "side": "ally", "count": 1, "slot": 2, "excludeSelf": true }
         }
       ]
     }
