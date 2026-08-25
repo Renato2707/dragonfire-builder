@@ -306,12 +306,13 @@
             "side": ["ally", "enemy"],
             "status": "string[]"
           },
-          "desc": "First matching status on pool"
+          "desc": "First matching living unit on that side"
         },
         "dur": { "type": "number" },
         "chance": { "type": ["number", "number[5]"] },
         "tgt": { "type": "Targeting" }
       },
+      "desc": "If any living unit on from.side has one of from.status, copy that status and magnitude onto tgt. Skips the source. Prefers targets without the status. Silent if no source. Log: Copies {status} from A to B.",
       "example": {
         "t": "copy_status",
         "from": { "side": "ally", "status": ["weakened", "vulnerable"] },

@@ -308,6 +308,36 @@ function mockFx(ids) {
   console.log('✓ Evade ignores each damage instance\n');
 }
 
+{
+  const d = (id, team, slot) => new Character({
+    id, name: id, breed: 'Champion', rarity: 'Rare', stats: { str: 10, inst: 10, int: 10, init: 10 }
+  }, team, slot);
+  const arulix = d('arulix', 0, 1);
+  const ally = d('ally', 0, 0);
+  const foe = d('foe', 1, 1);
+  applyEffect(ally, 'WEAKENED', 1, 'x', { magnitude: 20, duration: 2 });
+  const btl = new Battle([arulix, ally], [foe], { verbose: false });
+  btl.currentRound = 1;
+  btl.executeCopyStatus(arulix, { name: 'Mimicry' }, {
+    from: { side: 'ally', status: ['weakened', 'vulnerable'] },
+    dur: 2,
+    chance: 100,
+    tgt: { side: 'enemy', count: 1, select: 'any' }
+  });
+  if (!hasEffect(foe, 'weakened')) throw new Error('Mimicry should copy Weakened onto enemy');
+  if (getEffect(foe, 'weakened').damagePenalty !== 20) throw new Error('copied magnitude');
+  btl.executeCopyStatus(arulix, { name: 'Mimicry' }, {
+    from: { side: 'enemy', status: ['advantage', 'resistance'] },
+    dur: 2,
+    chance: 100,
+    tgt: { side: 'ally', count: 1, select: 'any' }
+  });
+  if (hasEffect(arulix, 'advantage') || hasEffect(ally, 'advantage')) {
+    throw new Error('should not copy Advantage when no enemy has it');
+  }
+  console.log('✓ copy_status Mimicry copies Weakened, skips missing Advantage\n');
+}
+
 try {
   // Passo 1: Carregar dragões
   console.log('1️⃣  Carregando dragões...');

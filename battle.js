@@ -535,27 +535,35 @@ class Battle {
 
   executeCopyStatus(character, habit, raw) {
     const pools = this.teamPools(character);
-    const sourceSide = raw.from && raw.from.side === 'enemy' ? pools.enemies : pools.allies;
-    const statuses = (raw.from && raw.from.status) || [];
+    const sourceSide = ((raw.from && raw.from.side === 'enemy') ? pools.enemies : pools.allies)
+      .filter(c => c && !c.isDead);
+    const statuses = [].concat((raw.from && raw.from.status) || [])
+      .map(s => String(s).toLowerCase().replace(/-/g, '_'));
     let chosen = null;
+    let source = null;
     let magnitude = null;
     for (const src of sourceSide) {
       for (const st of statuses) {
         if (!hasEffect(src, st)) continue;
         chosen = st;
+        source = src;
         const fx = getEffect(src, st);
         if (fx) {
-          magnitude = fx.damageBonus || fx.damagePenalty || fx.defenseBonus || fx.defensePenalty || null;
+          const mag = fx.damageBonus || fx.damagePenalty || fx.defenseBonus || fx.defensePenalty;
+          magnitude = mag || mag === 0 ? mag : null;
         }
         break;
       }
       if (chosen) break;
     }
-    if (!chosen) return;
+    if (!chosen || !source) return;
     const rankIndex = Math.max(0, Math.min(4, (character.habitRank || 1) - 1));
     const chance = resolveChance(raw, rankIndex, character);
-    for (const target of this.resolveTargets(character, habit, raw)) {
-      if (target.isDead) continue;
+    const targets = this.resolveTargets(character, habit, raw)
+      .filter(t => t && !t.isDead && t !== source)
+      .sort((a, b) => (hasEffect(a, chosen) ? 1 : 0) - (hasEffect(b, chosen) ? 1 : 0));
+    if (!targets.length) return;
+    for (const target of targets) {
       const rolled = chance < 100;
       const hit = !rolled || rollChance(chance);
       if (rolled) this.logChanceRoll(habit, target, chance, hit);
@@ -569,9 +577,8 @@ class Battle {
         this.logAction(`${target.name} is Immune to ${statusName}`);
         continue;
       }
-      const verb = isGrantedStatus(chosen) ? 'Grants' : 'Afflicts';
       const magText = magnitude != null ? ` (${formatSignedPercent(magnitude)})` : '';
-      this.logAction(`${verb} ${statusName}${magText} to ${target.name} ${formatDuration(raw.dur)}`);
+      this.logAction(`Copies ${statusName}${magText} from ${source.name} to ${target.name} ${formatDuration(raw.dur)}`);
     }
   }
 
