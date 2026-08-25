@@ -37,6 +37,7 @@ class Character {
     this.flatMods = { str: 0, inst: 0, int: 0, init: 0 };
     this.links = {};
     this.stacks = {};
+    this.stackReached = {};
     this.statModifiers = { str: 0, inst: 0, int: 0, init: 0 };
     this.damageBonus = 0;
     this.damagePenalty = 0;
@@ -57,7 +58,7 @@ class Character {
 
   addStatModifier(statName, amount, duration = 'combat', options = {}) {
     const stat = String(statName || '').toLowerCase();
-    if (!stat || amount == null || Number.isNaN(Number(amount))) return;
+    if (!stat || stat === '__fixed' || amount == null || Number.isNaN(Number(amount))) return;
     if (options.fixed && CORE_STATS.includes(stat)) {
       this.flatMods[stat] = (this.flatMods[stat] || 0) + Number(amount);
       return;
@@ -73,9 +74,35 @@ class Character {
   }
 
   addStack(stackId, mods, duration, options = {}) {
-    this.stacks[stackId] = (this.stacks[stackId] || 0) + (options.stacks || 1);
-    for (const stat in mods) this.addStatModifier(stat, mods[stat], duration, { ...options, stackId });
-    return this.stacks[stackId];
+    const id = stackId || 'stack';
+    const max = options.maxStacks != null ? Number(options.maxStacks) : null;
+    const before = this.stacks[id] || 0;
+    if (max != null && before >= max) {
+      return { stacks: before, added: 0, reached: false };
+    }
+    let added = options.stacks || 1;
+    if (max != null) added = Math.min(added, max - before);
+    if (added <= 0) return { stacks: before, added: 0, reached: false };
+
+    this.stacks[id] = before + added;
+    for (let i = 0; i < added; i += 1) {
+      for (const stat in mods) {
+        if (stat === '__fixed') continue;
+        this.addStatModifier(stat, mods[stat], duration, { ...options, stackId: id });
+      }
+    }
+    return { stacks: this.stacks[id], added, reached: true };
+  }
+
+  markStackReached(stackId, threshold) {
+    const key = `${stackId}:${threshold}`;
+    if (this.stackReached[key]) return false;
+    this.stackReached[key] = true;
+    return true;
+  }
+
+  getStackCount(stackId) {
+    return this.stacks[stackId] || 0;
   }
 
   getPercentTotal(statName, options = {}) {
