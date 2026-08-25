@@ -616,6 +616,38 @@ function mockFx(ids) {
   console.log('✓ ifBonus.dur Staggering Assault Advantage\n');
 }
 
+{
+  const vaeldra = new Character({
+    id: 'vaeldra', name: 'Vaeldra', breed: 'Warrior', rarity: 'Rare',
+    stats: { str: 10, inst: 10, int: 10, init: 10 }
+  }, 0, 1);
+  const fresh = new Character({
+    id: 'fresh', name: 'Fresh', breed: 'Hunter', rarity: 'Rare',
+    stats: { str: 10, inst: 10, int: 10, init: 10 }
+  }, 1, 0);
+  const marked = new Character({
+    id: 'marked', name: 'Marked', breed: 'Hunter', rarity: 'Rare',
+    stats: { str: 10, inst: 10, int: 10, init: 10 }
+  }, 1, 1);
+  applyEffect(marked, 'TAUNT', 1, 'other', { duration: 2 });
+  const habit = new Habit({ name: "Siren's Call", structured: [] }, 'vaeldra');
+  const raw = { t: 'status', st: 'taunt', dur: 1, ifAlready: { st: 'stagger', dur: 1 } };
+  const hit = executeHabitAction(habit, raw, vaeldra, [fresh], 1, { skipChance: true });
+  if (hit.statusType !== 'taunt' || hit.converted) throw new Error('clean target should receive Taunt');
+  const swap = executeHabitAction(habit, raw, vaeldra, [marked], 1, { skipChance: true });
+  if (swap.statusType !== 'stagger' || !swap.converted) throw new Error('already-Taunted should convert to Stagger');
+  const btl = new Battle([vaeldra], [fresh, marked], { verbose: false });
+  btl.logActionResult(vaeldra, habit, raw, marked, swap);
+  if (!hasEffect(marked, 'stagger')) throw new Error('Stagger should apply');
+  if (!hasEffect(marked, 'taunt')) throw new Error('existing Taunt should remain');
+  if (vaeldra.lastTauntTarget === marked) throw new Error('ifAlready Stagger must not fire on_taunt');
+  btl.logActionResult(vaeldra, habit, raw, fresh, hit);
+  if (!hasEffect(fresh, 'taunt')) throw new Error('clean enemy should be Taunted');
+  if (hasEffect(fresh, 'stagger')) throw new Error('clean enemy should not be Staggered');
+  if (vaeldra.lastTauntTarget !== fresh) throw new Error('fresh Taunt should set lastTauntTarget');
+  console.log('✓ ifAlready Taunt → Stagger Siren\'s Call\n');
+}
+
 try {
   // Passo 1: Carregar dragões
   console.log('1️⃣  Carregando dragões...');

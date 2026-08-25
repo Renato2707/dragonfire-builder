@@ -620,12 +620,13 @@ class Battle {
       }
     } else if (actionType === 'status') {
       const magnitude = actionResult.magnitude != null ? actionResult.magnitude : raw.val;
-      let st = String(raw.st || '').toLowerCase().replace(/-/g, '_');
+      let st = actionResult.statusType || String(raw.st || '').toLowerCase().replace(/-/g, '_');
       let dur = actionResult.duration != null ? actionResult.duration : raw.dur;
-      if (raw.ifAlready && raw.ifAlready.st && hasEffect(target, st)) {
+      if (!actionResult.statusType && raw.ifAlready && raw.ifAlready.st && hasEffect(target, st)) {
         st = String(raw.ifAlready.st).toLowerCase().replace(/-/g, '_');
         if (raw.ifAlready.dur != null) dur = raw.ifAlready.dur;
       }
+      const converted = !!actionResult.converted || st !== String(raw.st || '').toLowerCase().replace(/-/g, '_');
       const applied = applyEffect(target, st.toUpperCase(), character.habitRank, character.name, {
         duration: dur,
         magnitude,
@@ -648,7 +649,7 @@ class Battle {
       } else {
         this.logAction(`Afflicts ${target.name} with ${statusName}${magText} ${formatDuration(dur)}${enhancedNote(raw.scaleStat)}`);
       }
-      if (st === 'taunt') {
+      if (st === 'taunt' && !converted) {
         character.lastTauntTarget = target;
         this.executeHabitsForPhase(PHASES.ON_TAUNT, [character], this.currentRound);
       }

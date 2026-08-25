@@ -220,6 +220,11 @@
         "scaleStat": { "type": "core_stat" },
         "immunities": { "type": "string[]", "desc": "For immunity status" },
         "chance": { "type": ["number", "number[5]"] },
+        "ifAlready": {
+          "type": "object",
+          "fields": { "st": "status_id", "dur": "number|combat" },
+          "desc": "If TARGET already has action.st, apply ifAlready.st instead (Siren's Call: Taunt → Stagger). Does not fire on_taunt."
+        },
         "tgt": { "type": "Targeting" }
       },
       "example": {

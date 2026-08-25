@@ -2,6 +2,7 @@
 
 import { rollChance, calculateFinalDamage, scaleByStat, statusConditionMet, roundScaled } from './utils.js';
 import { getDealerType } from './positionSystem.js';
+import { hasEffect } from './effects.js';
 
 const ALL_ROUNDS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 const PHASES = {
@@ -102,6 +103,18 @@ function resolveDuration(raw, attacker, target, extras = {}) {
     dur = raw.ifBonus.dur;
   }
   return dur;
+}
+
+function resolveIfAlready(raw, target, dur) {
+  let st = String(raw.st || '').toLowerCase().replace(/-/g, '_');
+  let duration = dur;
+  let converted = false;
+  if (raw.ifAlready && raw.ifAlready.st && target && hasEffect(target, st)) {
+    st = String(raw.ifAlready.st).toLowerCase().replace(/-/g, '_');
+    if (raw.ifAlready.dur != null) duration = raw.ifAlready.dur;
+    converted = true;
+  }
+  return { st, duration, converted };
 }
 
 function resolveIfBonusRate(rate, ifBonus, attacker, target, extras = {}) {
@@ -260,7 +273,10 @@ function executeHabitAction(habit, actionData, attacker, targets, rank = 1, opti
     if (result.magnitude == null && typeof scalingValue === 'number' && ['advantage', 'weakened', 'vulnerable', 'resistance', 'evade'].includes(st)) {
       result.magnitude = scalingValue;
     }
-    result.duration = resolveDuration(raw, attacker, targets[0], options);
+    const resolved = resolveIfAlready(raw, targets[0], resolveDuration(raw, attacker, targets[0], options));
+    result.statusType = resolved.st;
+    result.duration = resolved.duration;
+    result.converted = resolved.converted;
   } else if (actionType === 'dmg') {
     result.damages = executeDamageAction(habit, actionData, attacker, targets, scalingValue, options.round, options);
     result.executed = result.damages.length;
@@ -397,6 +413,7 @@ export {
   commandModValue,
   ifBonusApplies,
   resolveDuration,
+  resolveIfAlready,
   Habit,
   loadDragonHabitsSync,
   loadCommandSync,
