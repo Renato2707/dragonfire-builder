@@ -1,6 +1,10 @@
 // battle.js
 
-import { calculateFinalDamage, sortByInitiative, isTeamAlive, rollChance } from './utils.js';
+import {
+  calculateFinalDamage, sortByInitiative, isTeamAlive, rollChance,
+  formatStatName, formatDamageTypeName, formatStatusName, formatDuration,
+  formatSignedPercent, formatTroopCapacity, isGrantedStatus, formatStackName
+} from './utils.js';
 import {
   updateEffects, processDamageEffects, processHealingEffects,
   canAct, canAttack, canUseAbilities, applyEffect, hasEffect
@@ -27,8 +31,7 @@ class Battle {
   initialize() {
     this.isActive = true;
     this.currentRound = 0;
-    this.logSeparator('BATTLE START');
-    this.logInfo(`3v3 Combat - Maximum ${this.maxRounds} rounds`);
+    this.logSeparator('Start of Combat');
     this.logTeamStatus('Team A', this.teamA);
     this.logTeamStatus('Team B', this.teamB);
     this.logSeparator();
@@ -74,7 +77,7 @@ class Battle {
   }
 
   phaseStartOfRound() {
-    this.logSeparator(`ROUND ${this.currentRound}`);
+    this.logSeparator(`Start of Round ${this.currentRound}`);
     for (const character of this.allCharacters) updateEffects(character);
     this.executeHabitsForPhase(PHASES.ROUND_START, this.allCharacters, this.currentRound);
   }
@@ -86,8 +89,10 @@ class Battle {
   phaseEndOfRound() {
     for (const character of this.allCharacters) {
       if (!character.isDead) {
-        processDamageEffects(character);
-        processHealingEffects(character);
+        const dot = processDamageEffects(character);
+        if (dot > 0) this.logAction(`${character.name} takes ${dot} damage from Bleed, Burn, or Panic`);
+        const recovery = processHealingEffects(character);
+        if (recovery > 0) this.logAction(`Applies Recovery to ${character.name} (+${recovery} Troop Capacity)`);
         if (typeof character.tickPercentMods === 'function') character.tickPercentMods();
       }
     }
@@ -127,7 +132,7 @@ class Battle {
   executeVanguard(character) {
     const kit = character.vanguardKit;
     if (!kit) return;
-    this.executeKit(character, kit, PHASES.COMBAT_START, 1, 'Vanguard');
+    this.executeKit(character, kit, PHASES.COMBAT_START, 1, kit.name || 'Vanguard Command');
   }
 
   executeCommand(character) {
@@ -141,7 +146,7 @@ class Battle {
     if (!habitLike || typeof habitLike.getBlocksFor !== 'function') return false;
     const blocks = habitLike.getBlocksFor(round, phase);
     if (!blocks.length) return false;
-    this.logAction(`${character.name} uses ${label}`);
+    this.logAction(`${character.name} activates ${label}`);
     for (const block of blocks) {
       if (!this.blockChanceHits(character, habitLike, block)) continue;
       for (const action of block.actions || []) this.runAction(character, habitLike, action, round);
@@ -172,7 +177,7 @@ class Battle {
     }
     if (character.isDead) return;
     if (!canAttack(character)) {
-      this.logAction(`${character.name} cannot attack`);
+      this.logAction(`${character.name} cannot launch a Basic Attack`);
       return;
     }
     const defender = this.selectBasicAttackTarget(character);
@@ -193,8 +198,9 @@ class Battle {
   executeBasicAttack(attacker, defender) {
     const damageType = this.selectDamageType(attacker);
     const actualDamage = defender.takeDamage(calculateFinalDamage(attacker, defender, damageType, 0, { basic: true }));
-    this.logAction(`${attacker.name} attacks ${defender.name} (${damageType}): -${actualDamage} HP`);
-    if (defender.isDead) this.logAction(`${defender.name} fell`);
+    this.logAction(`${attacker.name} launches a Basic Attack`);
+    this.logAction(`Deals ${actualDamage} ${formatDamageTypeName(damageType)} to ${defender.name}`);
+    if (defender.isDead) this.logAction(`${defender.name} retreated`);
   }
 
   selectDamageType(attacker) {
@@ -237,14 +243,14 @@ class Battle {
   logChanceRoll(habit, target, chance, hit) {
     const label = habit && habit.name ? habit.name : 'effect';
     const who = target && target.name ? target.name : 'target';
-    this.logAction(`  [${hit ? 'hit' : 'miss'}] ${label} → ${who} (${chance}%)`);
+    this.logAction(`[${hit ? 'hit' : 'miss'}] ${label} → ${who} (${chance}%)`);
   }
 
   executeHabit(character, habit, phase, round) {
     const r = round || this.currentRound || 1;
     const blocks = (habit.getBlocksFor(r, phase) || []).filter(block => this.blockAllowed(character, block));
     if (!blocks.length) return;
-    this.logAction(`${character.name} uses ${habit.name}`);
+    this.logAction(`${character.name} activates ${habit.name}`);
     for (const block of blocks) {
       if (!this.blockChanceHits(character, habit, block)) continue;
       for (const action of block.actions || []) this.runAction(character, habit, action, r);
@@ -256,7 +262,7 @@ class Battle {
       const rankIndex = Math.max(0, Math.min(4, (character.habitRank || 1) - 1));
       const value = Array.isArray(raw.pct) ? raw.pct[rankIndex] : raw.pct;
       character.commandMods[raw.field] = value;
-      this.logAction(`  ➜ ${raw.command || 'command'} ${raw.field} = ${value}`);
+      this.logAction(`${raw.command || 'Command'} gains: ${raw.field} ${formatSignedPercent(value)}`);
       return;
     }
     if (raw.t === 'copy_status') {
@@ -306,30 +312,45 @@ class Battle {
       if (rolled) this.logChanceRoll(habit, target, chance, hit);
       if (!hit) continue;
       applyEffect(target, present[0].toUpperCase(), character.habitRank, character.name, { duration: raw.dur });
-      this.logAction(`  ➜ copied ${present[0]} to ${target.name}`);
+      const statusName = formatStatusName(present[0]);
+      const verb = isGrantedStatus(present[0]) ? 'Grants' : 'Afflicts';
+      this.logAction(`${verb} ${statusName} to ${target.name} ${formatDuration(raw.dur)}`);
     }
   }
 
   logActionResult(character, habit, raw, target, actionResult) {
     const actionType = raw.t;
     if (actionType === 'mod' || actionType === 'stack') {
-      for (const effect of actionResult.effects) this.logAction(`  ➜ ${effect.log}`);
+      for (const effect of actionResult.effects) {
+        if (effect.kind === 'stack') {
+          this.logAction(`${effect.target} gains ${effect.added || 1} stack of ${formatStackName(effect.stackId)} (now ${effect.stacks}) ${formatDuration(effect.duration)}`);
+        } else {
+          const verb = Number(effect.value) < 0 ? 'Reduces' : 'Increases';
+          const basic = effect.excludeBasic ? ' (excluding Basic Attacks)' : '';
+          this.logAction(`${verb} ${formatStatName(effect.stat)}${basic} of ${effect.target} by ${formatSignedPercent(effect.value)} ${formatDuration(effect.duration)}`);
+        }
+      }
     } else if (actionType === 'status') {
       applyEffect(target, (raw.st || '').toUpperCase(), character.habitRank, character.name, {
         duration: raw.dur,
         magnitude: raw.val,
         immunities: raw.immunities
       });
-      this.logAction(`  ➜ ${(raw.st || '').toUpperCase()} applied to ${target.name}`);
+      const statusName = formatStatusName(raw.st);
+      if (isGrantedStatus(raw.st)) {
+        this.logAction(`Grants ${statusName} to ${target.name} ${formatDuration(raw.dur)}`);
+      } else {
+        this.logAction(`Afflicts ${target.name} with ${statusName} ${formatDuration(raw.dur)}`);
+      }
     } else if (actionType === 'dmg') {
       for (const dmg of actionResult.damages) {
         const actualDamage = target.takeDamage(dmg.amount);
-        this.logAction(`  ➜ ${character.name} deals ${actualDamage} ${(raw.dt || '').toUpperCase()} to ${target.name}`);
-        if (target.isDead) this.logAction(`    ${target.name} fell`);
+        this.logAction(`Deals ${actualDamage} ${formatDamageTypeName(raw.dt)} to ${target.name}`);
+        if (target.isDead) this.logAction(`${target.name} retreated`);
       }
     } else if (actionType === 'heal') {
       for (const heal of actionResult.heals) {
-        this.logAction(`  ➜ ${character.name} heals ${target.name} for ${target.heal(heal.amount)} HP`);
+        this.logAction(`Applies Recovery to ${target.name} (+${target.heal(heal.amount)} Troop Capacity)`);
       }
     }
   }
@@ -337,9 +358,9 @@ class Battle {
   checkVictory() {
     const teamAAlive = isTeamAlive(this.teamA);
     const teamBAlive = isTeamAlive(this.teamB);
-    if (!teamAAlive && !teamBAlive) this.endBattle(null, 'Both teams eliminated');
-    else if (!teamAAlive) this.endBattle('B', 'Team A eliminated');
-    else if (!teamBAlive) this.endBattle('A', 'Team B eliminated');
+    if (!teamAAlive && !teamBAlive) this.endBattle(null, 'Both teams retreated');
+    else if (!teamAAlive) this.endBattle('B', 'Team A retreated');
+    else if (!teamBAlive) this.endBattle('A', 'Team B retreated');
   }
 
   endBattle(winner, reason) {
@@ -347,9 +368,9 @@ class Battle {
     this.isFinished = true;
     this.winner = winner;
     this.endReason = reason;
-    this.logSeparator('BATTLE END');
+    this.logSeparator('Combat End');
     this.logInfo(`Round ${this.currentRound}/${this.maxRounds} — ${reason}`);
-    this.logInfo(winner === 'A' ? 'TEAM A WINS' : winner === 'B' ? 'TEAM B WINS' : 'DRAW');
+    this.logInfo(winner === 'A' ? 'Team A is victorious' : winner === 'B' ? 'Team B is victorious' : 'Draw');
     this.logFinalStatus();
   }
 
@@ -374,14 +395,14 @@ class Battle {
     this.logInfo(`${teamName}:`);
     for (const char of team) {
       const pos = char.positionName || getPositionName(char.slotPosition);
-      this.logAction(`${pos} · ${char.name}: ${char.isDead ? 'down' : `${Math.round(char.currentHealth)}/${Math.round(char.maxHealth)} HP`}`);
+      this.logAction(`${pos} · ${char.name}: ${formatTroopCapacity(char)}`);
     }
   }
 
   logRoundSummary() {
     this.logSeparator();
-    this.logTeamStatus('Team A Status', this.teamA);
-    this.logTeamStatus('Team B Status', this.teamB);
+    this.logTeamStatus('Team A', this.teamA);
+    this.logTeamStatus('Team B', this.teamB);
     this.logSeparator();
   }
 
@@ -395,7 +416,7 @@ class Battle {
     if (!character.activeEffects || !character.activeEffects.length) return 'no effects';
     return character.activeEffects
       .filter(e => (typeof e.isExpired === 'function' ? !e.isExpired() : e.duration > 0))
-      .map(e => e.name)
+      .map(e => formatStatusName(e.id || e.name))
       .join(', ') || 'no effects';
   }
 
