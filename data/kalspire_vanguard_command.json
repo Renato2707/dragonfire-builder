@@ -1,0 +1,58 @@
+{
+  "dragonId": "kalspire",
+  "name": "Tactical Strike",
+  "command": [
+    {
+      "phase": "after_basic_attack",
+      "rounds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+      "actions": [
+        {
+          "t": "dmg",
+          "dt": "tactical",
+          "pct": 50,
+          "tgt": { "side": "enemy", "count": 1, "select": "same_lane" }
+        },
+        {
+          "t": "status",
+          "st": "bleed",
+          "rate": 20,
+          "dur": 2,
+          "chance": 30,
+          "tgt": { "side": "enemy", "count": 1, "select": "adjacency" }
+        },
+        {
+          "t": "status",
+          "st": "bleed",
+          "rate": 20,
+          "dur": 2,
+          "chance": 30,
+          "tgt": { "side": "enemy", "count": 1, "select": "adjacency" }
+        }
+      ]
+    }
+  ],
+  "vanguard": [
+    {
+      "phase": "combat_start",
+      "rounds": [1],
+      "actions": [
+        {
+          "t": "mod",
+          "mods": [
+            { "stat": "str", "fixed": 15 },
+            { "stat": "int", "fixed": 15 },
+            { "stat": "inst", "fixed": 15 }
+          ],
+          "dur": "combat",
+          "tgt": { "side": "self" }
+        },
+        {
+          "t": "mod",
+          "mods": [{ "stat": "dmg_received", "pct": -8 }],
+          "dur": "combat",
+          "tgt": { "side": "ally", "count": 1, "slot": 2, "excludeSelf": true }
+        }
+      ]
+    }
+  ]
+}
