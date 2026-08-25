@@ -86,7 +86,7 @@
     "requires": {
       "type": ["object", "null"],
       "fields": {
-        "command": { "type": "string", "desc": "hasCommand(character, name) — kit present, not used-this-round" },
+        "command": { "type": "string", "desc": "hasCommand(character, name) — kit present" },
         "troop": {
           "type": "string",
           "values": ["archers", "shieldbearers", "spearmen", "cavalry", "siege"],
@@ -95,9 +95,20 @@
         "linkedRetreated": {
           "type": "string",
           "desc": "character.links[key] retreatedLastRound || isDead"
-        }
+        },
+        "troopsBelow": { "type": "number", "desc": "caster getHealthPercentage() < n (Sunfyre Golden Wrath)" },
+        "selfHpBelow": { "type": "number", "desc": "alias of troopsBelow" },
+        "selfHpAtLeast": { "type": "number", "desc": "caster HP% >= n" },
+        "noPrey": { "type": "boolean", "desc": "true if caster has no living Prey link/status" },
+        "hasPrey": { "type": "boolean", "desc": "true if getPrey(caster) exists" },
+        "preyHpAbove": { "type": "number", "desc": "prey getHealthPercentage() > n" },
+        "anyEnemyDealerFire": { "type": "boolean", "desc": "any living enemy getDealerType === fire" },
+        "stacks": { "type": "object", "fields": { "id": "string", "min": "integer" } },
+        "leastTroops": { "type": "boolean", "desc": "caster has lowest currentHealth among living combatants" },
+        "selfStatus": { "type": "string", "desc": "hasEffect(caster, status)" },
+        "pve": { "type": "boolean", "desc": "must match battle.pve (default false)" }
       },
-      "example": { "troop": "archers" }
+      "example": { "troopsBelow": 75 }
     },
     "actions": { "type": "array", "item": "Action", "required": true }
   },

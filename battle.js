@@ -10,7 +10,7 @@ import {
   updateEffects, processDamageEffects, processHealingEffects,
   canAct, canAttack, canUseAbilities, applyEffect, hasEffect, tryEvade, getEffect
 } from './effects.js';
-import { selectTargets, getPositionName, POSITIONS } from './positionSystem.js';
+import { selectTargets, getPositionName, POSITIONS, getDealerType } from './positionSystem.js';
 import { executeHabitAction, resolveChance, PHASES } from './habitParser.js';
 
 function enhancedNote(stat) {
@@ -25,6 +25,7 @@ class Battle {
     this.maxRounds = options.maxRounds || 10;
     this.verbose = options.verbose !== false;
     this.teamTroop = options.teamTroop || [null, null];
+    this.pve = !!options.pve;
     this.currentRound = 0;
     this.isActive = false;
     this.isFinished = false;
@@ -128,8 +129,19 @@ class Battle {
       || (kitName && String(kitName).toLowerCase() === want);
   }
 
+  getPrey(character) {
+    const linked = character.links && character.links.prey;
+    if (linked && !linked.isDead && hasEffect(linked, 'prey')) return linked;
+    return this.enemiesOf(character).find(c => c && !c.isDead && hasEffect(c, 'prey')) || null;
+  }
+
+  hasLeastTroops(character) {
+    const hp = character.currentHealth;
+    return this.allCharacters.filter(c => c && !c.isDead).every(c => c.currentHealth >= hp);
+  }
+
   blockAllowed(character, block) {
-    const req = block.requires;
+    const req = block && block.requires;
     if (!req) return true;
     if (req.command && !this.hasCommand(character, req.command)) return false;
     if (req.troop && this.troopOf(character) !== req.troop) return false;
@@ -137,6 +149,29 @@ class Battle {
       const linked = character.links && character.links[req.linkedRetreated];
       if (!linked || !(linked.retreatedLastRound || linked.isDead)) return false;
     }
+    const hp = typeof character.getHealthPercentage === 'function' ? character.getHealthPercentage() : 100;
+    if (req.troopsBelow != null && !(hp < Number(req.troopsBelow))) return false;
+    if (req.selfHpBelow != null && !(hp < Number(req.selfHpBelow))) return false;
+    if (req.selfHpAtLeast != null && !(hp >= Number(req.selfHpAtLeast))) return false;
+    if (req.pve != null && !!req.pve !== !!this.pve) return false;
+    const prey = this.getPrey(character);
+    if (req.noPrey && prey) return false;
+    if (req.hasPrey && !prey) return false;
+    if (req.preyHpAbove != null) {
+      if (!prey || prey.getHealthPercentage() <= Number(req.preyHpAbove)) return false;
+    }
+    if (req.anyEnemyDealerFire) {
+      const hasFire = this.enemiesOf(character).some(c => c && !c.isDead && getDealerType(c) === 'fire');
+      if (!hasFire) return false;
+    }
+    if (req.stacks) {
+      const id = req.stacks.id;
+      const min = req.stacks.min != null ? req.stacks.min : 1;
+      const count = typeof character.getStackCount === 'function' ? character.getStackCount(id) : 0;
+      if (count < min) return false;
+    }
+    if (req.leastTroops && !this.hasLeastTroops(character)) return false;
+    if (req.selfStatus && !hasEffect(character, req.selfStatus)) return false;
     return true;
   }
 
@@ -172,7 +207,7 @@ class Battle {
 
   executeKit(character, habitLike, phase, round, label) {
     if (!habitLike || typeof habitLike.getBlocksFor !== 'function') return false;
-    const blocks = habitLike.getBlocksFor(round, phase);
+    const blocks = habitLike.getBlocksFor(round, phase).filter(block => this.blockAllowed(character, block));
     if (!blocks.length) return false;
     this.logAction(`${character.name} activates ${label}`);
     for (const block of blocks) {
@@ -295,6 +330,7 @@ class Battle {
   }
 
   runAction(character, habit, raw, round) {
+    if (raw.requires && !this.blockAllowed(character, raw)) return;
     if (raw.t === 'mod_command') {
       const rankIndex = Math.max(0, Math.min(4, (character.habitRank || 1) - 1));
       const value = Array.isArray(raw.pct) ? raw.pct[rankIndex] : raw.pct;
@@ -328,6 +364,7 @@ class Battle {
           round
         });
         this.logActionResult(character, habit, raw, target, actionResult);
+        if (raw.tgt && raw.tgt.linkAs) character.links[raw.tgt.linkAs] = target;
         if (actionResult.onReachActions && actionResult.onReachActions.length) {
           for (const item of actionResult.onReachActions) {
             this.logAction(`${character.name} reaches stack threshold`);

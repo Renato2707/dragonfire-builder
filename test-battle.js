@@ -34,6 +34,37 @@ function mockFx(ids) {
   console.log('✓ chanceIf / ifBonus / control\n');
 }
 
+{
+  const dragon = (id, stats) => ({
+    id, name: id, breed: 'Hunter', rarity: 'Rare',
+    stats: stats || { str: 10, inst: 10, int: 80, init: 10 }
+  });
+  const caster = new Character(dragon('caster'), 0, 0);
+  const physical = new Character(dragon('physical', { str: 90, inst: 10, int: 10, init: 10 }), 1, 0);
+  const fireEnemy = new Character(dragon('fireE'), 1, 1);
+  caster.currentHealth = 40;
+  caster.maxHealth = 100;
+  const btl = new Battle([caster], [physical, fireEnemy], { verbose: false });
+  if (!btl.blockAllowed(caster, { requires: { troopsBelow: 75 } })) throw new Error('troopsBelow 75 should pass at 40%');
+  if (btl.blockAllowed(caster, { requires: { troopsBelow: 30 } })) throw new Error('troopsBelow 30 should fail at 40%');
+  if (!btl.blockAllowed(caster, { requires: { selfHpAtLeast: 40 } })) throw new Error('selfHpAtLeast 40 should pass');
+  if (!btl.blockAllowed(caster, { requires: { noPrey: true } })) throw new Error('noPrey should pass');
+  if (btl.blockAllowed(caster, { requires: { hasPrey: true } })) throw new Error('hasPrey should fail');
+  physical.activeEffects.push({ id: 'prey', duration: 2, isExpired: () => false });
+  caster.links.prey = physical;
+  if (btl.blockAllowed(caster, { requires: { noPrey: true } })) throw new Error('noPrey should fail with prey');
+  if (!btl.blockAllowed(caster, { requires: { hasPrey: true } })) throw new Error('hasPrey should pass');
+  if (!btl.blockAllowed(caster, { requires: { preyHpAbove: 10 } })) throw new Error('preyHpAbove should pass');
+  if (!btl.blockAllowed(caster, { requires: { anyEnemyDealerFire: true } })) throw new Error('anyEnemyDealerFire should pass');
+  const noFire = new Battle([caster], [physical], { verbose: false });
+  if (noFire.blockAllowed(caster, { requires: { anyEnemyDealerFire: true } })) throw new Error('anyEnemyDealerFire should fail vs physical only');
+  caster.stacks.mirage = 4;
+  if (!btl.blockAllowed(caster, { requires: { stacks: { id: 'mirage', min: 4 } } })) throw new Error('stacks min 4 should pass');
+  if (btl.blockAllowed(caster, { requires: { stacks: { id: 'mirage', min: 7 } } })) throw new Error('stacks min 7 should fail');
+  if (btl.blockAllowed(caster, { requires: { pve: true } })) throw new Error('pve true should fail in default PvP');
+  console.log('✓ requires troopsBelow / prey / dealerFire / stacks / pve\n');
+}
+
 try {
   // Passo 1: Carregar dragões
   console.log('1️⃣  Carregando dragões...');
