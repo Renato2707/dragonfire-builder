@@ -16,6 +16,49 @@ const DAMAGE_TYPES = {
   FIRE: { name: 'FIRE', causedBy: 'int', mitigatedBy: 'init', variance: 2 }
 };
 
+const STAT_NAMES = {
+  str: 'Strength',
+  int: 'Intelligence',
+  inst: 'Instinct',
+  init: 'Initiative',
+  dmg_dealt: 'Damage Dealt',
+  dmg_received: 'Damage Received',
+  fire_dealt: 'Fire Damage Dealt',
+  fire_received: 'Fire Damage Received',
+  physical_dealt: 'Physical Damage Dealt',
+  physical_received: 'Physical Damage Received',
+  tactical_dealt: 'Tactical Damage Dealt',
+  tactical_received: 'Tactical Damage Received',
+  recovery_dealt: 'Recovery Dealt',
+  recovery_received: 'Recovery Received'
+};
+
+const STATUS_NAMES = {
+  bleed: 'Bleed',
+  panic: 'Panic',
+  burn: 'Burn',
+  first_strike: 'First-Strike',
+  double_strike: 'Double-Strike',
+  recovery: 'Recovery',
+  advantage: 'Advantage',
+  resistance: 'Resistance',
+  slow: 'Slow',
+  weakened: 'Weakened',
+  vulnerable: 'Vulnerable',
+  prey: 'Prey',
+  evade: 'Evade',
+  taunt: 'Taunt',
+  stun: 'Stun',
+  overwhelm: 'Overwhelm',
+  stagger: 'Stagger',
+  confusion: 'Confusion',
+  immunity: 'Immunity'
+};
+
+const GRANTED_STATUSES = new Set([
+  'first_strike', 'double_strike', 'advantage', 'resistance', 'evade', 'immunity', 'recovery'
+]);
+
 function getDamageTypeConfig(damageType) {
   const type = DAMAGE_TYPES[String(damageType || '').toUpperCase()];
   if (!type) return DAMAGE_TYPES.PHYSICAL;
@@ -84,10 +127,61 @@ function isTeamAlive(teamCharacters) {
   return teamCharacters.some(c => !c.isDead);
 }
 
+function statusId(name) {
+  return String(name || '').toLowerCase().replace(/-/g, '_');
+}
+
+function formatStatName(stat) {
+  return STAT_NAMES[stat] || String(stat || '').replace(/_/g, ' ');
+}
+
+function formatDamageTypeName(damageType) {
+  const type = String(damageType || '').toUpperCase();
+  if (type === 'FIRE') return 'Fire Damage';
+  if (type === 'TACTICAL') return 'Tactical Damage';
+  if (type === 'BASIC') return 'Basic Attack';
+  return 'Physical Damage';
+}
+
+function formatStatusName(status) {
+  const id = statusId(status);
+  if (STATUS_NAMES[id]) return STATUS_NAMES[id];
+  return id.split('_').filter(Boolean).map(part => part.charAt(0).toUpperCase() + part.slice(1)).join(' ');
+}
+
+function formatDuration(duration) {
+  if (duration === 'combat' || duration == null) return 'until the end of combat';
+  const rounds = Number(duration);
+  if (rounds === 1) return 'until the end of the round';
+  return `for ${rounds} round(s)`;
+}
+
+function formatSignedPercent(value) {
+  const amount = Number(value);
+  if (Number.isNaN(amount)) return String(value);
+  if (amount > 0) return `+${amount}%`;
+  return `${amount}%`;
+}
+
+function formatTroopCapacity(character) {
+  if (!character || character.isDead) return 'retreated';
+  return `${Math.round(character.currentHealth)}/${Math.round(character.maxHealth)} Troop Capacity`;
+}
+
+function isGrantedStatus(status) {
+  return GRANTED_STATUSES.has(statusId(status));
+}
+
+function formatStackName(id) {
+  return String(id || 'stack').split('_').filter(Boolean).map(part => part.charAt(0).toUpperCase() + part.slice(1)).join(' ');
+}
+
 export {
   getRandomInt,
   rollChance,
   DAMAGE_TYPES,
+  STAT_NAMES,
+  STATUS_NAMES,
   getDamageTypeConfig,
   calculateBaseDamage,
   calculateMitigation,
@@ -95,5 +189,14 @@ export {
   calculateFinalDamage,
   hasActiveId,
   isTeamAlive,
-  sortByInitiative
+  sortByInitiative,
+  formatStatName,
+  formatDamageTypeName,
+  formatStatusName,
+  formatDuration,
+  formatSignedPercent,
+  formatTroopCapacity,
+  isGrantedStatus,
+  formatStackName,
+  statusId
 };
