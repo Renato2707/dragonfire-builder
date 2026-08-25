@@ -557,6 +557,41 @@ function mockFx(ids) {
   console.log('✓ ifBonus.any / selfHpAbove / selfStatus Tessarion\n');
 }
 
+{
+  const mk = (id, team) => new Character({
+    id, name: id, breed: 'Sentinel', rarity: 'Rare', stats: { str: 10, inst: 10, int: 10, init: 10 }
+  }, team, 1);
+  const syrax = mk('syrax', 0);
+  const ally = mk('ally', 0);
+  const foe = mk('foe', 1);
+  ally.maxHealth = 200;
+  ally.currentHealth = 100;
+  const habit = new Habit({ name: 'Strategic Revival', structured: [] }, 'syrax');
+  const raw = {
+    t: 'heal',
+    pct: [50, 60, 70, 85, 100],
+    ifBonus: { anyEnemyStatus: 'slow', mult: 1.5 }
+  };
+  const base = executeHabitAction(habit, raw, syrax, [ally], 1, {
+    skipChance: true, enemies: [foe]
+  });
+  applyEffect(foe, 'SLOW', 1, 'syrax', { duration: 2 });
+  const boosted = executeHabitAction(habit, raw, syrax, [ally], 1, {
+    skipChance: true, enemies: [foe]
+  });
+  if (!(boosted.heals[0].amount > base.heals[0].amount * 1.4)) {
+    throw new Error(`Slow should 1.5x Recovery, base ${base.heals[0].amount} boosted ${boosted.heals[0].amount}`);
+  }
+  if (!ifBonusApplies({ anyEnemyStatus: 'slow', mult: 1.5 }, syrax, ally, { enemies: [foe] })) {
+    throw new Error('anyEnemyStatus Slow should apply');
+  }
+  const clean = mk('clean', 1);
+  if (ifBonusApplies({ anyEnemyStatus: 'slow', mult: 1.5 }, syrax, ally, { enemies: [clean] })) {
+    throw new Error('anyEnemyStatus should miss without Slow');
+  }
+  console.log('✓ anyEnemyStatus Slow 1.5x Strategic Revival\n');
+}
+
 try {
   // Passo 1: Carregar dragões
   console.log('1️⃣  Carregando dragões...');

@@ -518,6 +518,7 @@ class Battle {
         const extras = {
           prey: this.getPrey(character),
           allies: this.alliesOf(character),
+          enemies: this.enemiesOf(character),
           defending: this.isDefending(character)
         };
         chance = applyChanceIf(chance, raw.chanceIf, target, extras);
@@ -530,6 +531,7 @@ class Battle {
           round,
           prey: extras.prey,
           allies: extras.allies,
+          enemies: extras.enemies,
           defending: extras.defending
         });
         this.logActionResult(character, habit, raw, target, actionResult);

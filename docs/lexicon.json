@@ -256,6 +256,7 @@
             "selfHpAbove": "number (caster Troop Capacity % > n)",
             "selfHpBelow": "number (caster Troop Capacity % < n)",
             "selfStatus": "string (caster has status)",
+            "anyEnemyStatus": "string (any living enemy has status — Strategic Revival Slow ×1.5)",
             "any": "Condition[] OR",
             "all": "Condition[] AND",
             "stacks": "{ id, min }",

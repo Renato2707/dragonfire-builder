@@ -83,6 +83,10 @@ function ifBonusApplies(ifBonus, attacker, target, extras = {}) {
   if (ifBonus.selfStatus) checks.push(statusConditionMet(attacker, ifBonus.selfStatus));
   if (ifBonus.selfHpAbove != null) checks.push(casterHpPct(attacker) > Number(ifBonus.selfHpAbove));
   if (ifBonus.selfHpBelow != null) checks.push(casterHpPct(attacker) < Number(ifBonus.selfHpBelow));
+  if (ifBonus.anyEnemyStatus) {
+    const pool = extras.enemies || [];
+    checks.push(pool.some(c => c && !c.isDead && statusConditionMet(c, ifBonus.anyEnemyStatus)));
+  }
   if (ifBonus.stacks && attacker && typeof attacker.getStackCount === 'function') {
     const spec = ifBonus.stacks;
     const id = spec.id || spec;
