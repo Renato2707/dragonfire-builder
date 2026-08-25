@@ -8,7 +8,8 @@ import {
 } from './utils.js';
 import {
   updateEffects, processDamageEffects, processHealingEffects,
-  canAct, canAttack, canUseAbilities, applyEffect, hasEffect, tryEvade, getEffect
+  canAct, canAttack, canUseAbilities, applyEffect, hasEffect, tryEvade, getEffect,
+  cleanseCharacter
 } from './effects.js';
 import { selectTargets, getPositionName, POSITIONS, getDealerType } from './positionSystem.js';
 import { executeHabitAction, resolveChance, PHASES } from './habitParser.js';
@@ -229,6 +230,7 @@ class Battle {
   }
 
   executeCharacterAction(character) {
+    character.lastCleanse = null;
     if (!canUseAbilities(character)) {
       if (hasEffect(character, 'overwhelm')) {
         this.logAction(`${character.name} cannot activate Commands or Habits (Overwhelm)`);
@@ -414,6 +416,17 @@ class Battle {
 
   logActionResult(character, habit, raw, target, actionResult) {
     const actionType = raw.t;
+    const statusId = String(raw.st || '').toLowerCase().replace(/-/g, '_');
+    if (actionType === 'cleanse' || (actionType === 'status' && statusId === 'cleanse')) {
+      const removed = cleanseCharacter(target, raw);
+      if (removed.length) {
+        character.lastCleanse = target;
+        this.logAction(`Cleanses ${removed.map(formatStatusName).join(', ')} from ${target.name}`);
+      } else {
+        this.logAction(`Cleanses nothing from ${target.name}`);
+      }
+      return;
+    }
     if (actionType === 'mod' || actionType === 'stack') {
       for (const effect of actionResult.effects) {
         if (effect.kind === 'stack') {

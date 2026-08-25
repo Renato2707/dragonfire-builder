@@ -230,6 +230,71 @@ function clearAllEffects(character) {
   return count;
 }
 
+const CONTROL_IDS = ['stun', 'stagger', 'overwhelm', 'confusion'];
+
+function matchesCleanseSpec(effect, spec) {
+  if (!effect || (typeof effect.isExpired === 'function' && effect.isExpired())) return false;
+  const id = String(effect.id || '').toLowerCase();
+  const types = (spec.types || spec.controlTypes || []).map(t => String(t).toLowerCase().replace(/-/g, '_'));
+  if (types.length && spec.t === 'cleanse' && spec.negative == null && spec.control == null && spec.remove == null) {
+    return types.includes(id);
+  }
+  if (spec.remove === 'positive') return effect.category === 'positive';
+  if (spec.remove === 'negative') return effect.category === 'negative';
+  if (spec.remove === 'control') return CONTROL_IDS.includes(id);
+  if (spec.filter && spec.filter.increases === 'dmg_received') {
+    return id === 'vulnerable' || (effect.defensePenalty || 0) > 0;
+  }
+  if (spec.filter && spec.filter.stat === 'dmg_dealt') {
+    return id === 'weakened' || (effect.damagePenalty || 0) > 0;
+  }
+  if (spec.filter && spec.filter.source === 'enemy') {
+    if (effect.category !== 'negative' && !CONTROL_IDS.includes(id)) return false;
+    if (spec.filter.stat === 'dmg_dealt') return id === 'weakened' || (effect.damagePenalty || 0) > 0;
+  }
+  return true;
+}
+
+function cleanseCharacter(character, spec = {}) {
+  if (!character || !character.activeEffects) return [];
+  const prefer = spec.prefer ? String(spec.prefer).toLowerCase().replace(/-/g, '_') : null;
+  let pool = character.activeEffects.filter(e => matchesCleanseSpec(e, spec));
+  if (prefer) pool.sort((a, b) => (b.id === prefer ? 1 : 0) - (a.id === prefer ? 1 : 0));
+
+  const removed = [];
+  const take = (list, n) => {
+    let got = 0;
+    for (const effect of list) {
+      if (got >= n) break;
+      if (removed.includes(effect.id)) continue;
+      if (removeEffect(character, effect.id)) {
+        removed.push(effect.id);
+        got += 1;
+      }
+    }
+  };
+
+  if (spec.negative || spec.control) {
+    const negs = pool.filter(e => e.category === 'negative');
+    const ctrls = pool.filter(e => CONTROL_IDS.includes(e.id));
+    take(negs, spec.negative || 0);
+    pool = character.activeEffects.filter(e => matchesCleanseSpec(e, spec));
+    const remainingCtrl = pool.filter(e => CONTROL_IDS.includes(e.id) && !removed.includes(e.id));
+    take(remainingCtrl, spec.control || 0);
+  } else {
+    const n = spec.count != null ? spec.count : 1;
+    if (spec.types && spec.types.length) {
+      const want = spec.types.map(t => String(t).toLowerCase().replace(/-/g, '_'));
+      take(pool.filter(e => want.includes(e.id)), n);
+    } else {
+      take(pool, n);
+    }
+  }
+
+  character.activeEffects = character.activeEffects.filter(e => (typeof e.isExpired === 'function' ? !e.isExpired() : e.duration > 0));
+  return removed;
+}
+
 export {
   EFFECTS_CATALOG,
   Effect,
@@ -251,5 +316,7 @@ export {
   removeEffect,
   removeAllNegativeEffects,
   removeAllPositiveEffects,
-  clearAllEffects
+  clearAllEffects,
+  cleanseCharacter,
+  CONTROL_IDS
 };

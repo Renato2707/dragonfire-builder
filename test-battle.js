@@ -5,6 +5,7 @@ import { Character } from './character.js';
 import { Battle } from './battle.js';
 import { loadDragonHabitsSync, loadCommandSync, ifBonusApplies } from './habitParser.js';
 import { applyChanceIf, statusConditionMet } from './utils.js';
+import { applyEffect, hasEffect, cleanseCharacter } from './effects.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -63,6 +64,25 @@ function mockFx(ids) {
   if (btl.blockAllowed(caster, { requires: { stacks: { id: 'mirage', min: 7 } } })) throw new Error('stacks min 7 should fail');
   if (btl.blockAllowed(caster, { requires: { pve: true } })) throw new Error('pve true should fail in default PvP');
   console.log('✓ requires troopsBelow / prey / dealerFire / stacks / pve\n');
+}
+
+{
+  const dummy = { id: 'x', name: 'X', breed: 'Hunter', rarity: 'Rare', stats: { str: 10, inst: 10, int: 10, init: 10 } };
+  const victim = new Character(dummy, 1, 0);
+  applyEffect(victim, 'ADVANTAGE', 1, 'A');
+  applyEffect(victim, 'RESISTANCE', 1, 'A');
+  applyEffect(victim, 'BURN', 1, 'A');
+  applyEffect(victim, 'WEAKENED', 1, 'A');
+  applyEffect(victim, 'STUN', 1, 'A');
+  const pos = cleanseCharacter(victim, { t: 'status', st: 'cleanse', remove: 'positive', count: 1 });
+  if (!pos.length || hasEffect(victim, pos[0])) throw new Error('positive cleanse failed');
+  if (!hasEffect(victim, 'burn')) throw new Error('burn should remain after positive cleanse');
+  const typed = cleanseCharacter(victim, { t: 'cleanse', types: ['bleed', 'panic', 'burn'], count: 1 });
+  if (!typed.includes('burn') || hasEffect(victim, 'burn')) throw new Error('typed burn cleanse failed');
+  const mixed = cleanseCharacter(victim, { t: 'cleanse', negative: 2, control: 1 });
+  if (!mixed.includes('weakened')) throw new Error('negative cleanse missed weakened');
+  if (!mixed.includes('stun')) throw new Error('control cleanse missed stun');
+  console.log('✓ cleanse positive / types / negative+control\n');
 }
 
 try {

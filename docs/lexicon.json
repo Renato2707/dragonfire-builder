@@ -254,6 +254,23 @@
         "tgt": { "side": "ally", "count": 2, "select": "any", "excludeSelf": true }
       }
     },
+    "cleanse": {
+      "t": "cleanse",
+      "fields": {
+        "remove": { "type": "string", "values": ["positive", "negative", "control"] },
+        "types": { "type": "string[]", "desc": "Specific status ids (bleed/panic/burn)" },
+        "count": { "type": "integer", "default": 1 },
+        "negative": { "type": "integer", "desc": "How many negative effects" },
+        "control": { "type": "integer", "desc": "How many Control (Stun|Stagger|Overwhelm|Confusion)" },
+        "filter": { "type": "object" },
+        "prefer": { "type": "string" },
+        "chance": { "type": ["number", "number[5]"] },
+        "tgt": { "type": "Targeting" }
+      },
+      "alias": { "t": "status", "st": "cleanse", "remove": "positive" },
+      "desc": "Removes matching effects. Does not apply Cleanse as a lasting status. Sets caster.lastCleanse.",
+      "example": { "t": "cleanse", "remove": "positive", "count": 1, "tgt": { "side": "enemy", "count": 1 } }
+    },
     "copy_status": {
       "t": "copy_status",
       "fields": {

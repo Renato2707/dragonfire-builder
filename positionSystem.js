@@ -178,6 +178,12 @@ function selectTargets(caster, friendlyTeam, enemyTeam, targetingParsed) {
     }
   }
 
+  if (select === 'last_cleanse') {
+    const last = caster.lastCleanse;
+    if (!last || last.isDead) return [];
+    return [last];
+  }
+
   if (select === 'prefer_lane:L') preferSlot(candidates, POSITIONS.LEFT);
   else if (select === 'prefer_lane:R') preferSlot(candidates, POSITIONS.RIGHT);
   else if (select === 'prefer_lane:V') preferSlot(candidates, POSITIONS.VANGUARD);
@@ -198,6 +204,10 @@ function selectTargets(caster, friendlyTeam, enemyTeam, targetingParsed) {
     candidates = candidates.filter(c => getDealerType(c) === want);
   } else if (select === 'prefer_without:stun') {
     candidates.sort((a, b) => (hasStatus(a, 'stun') ? 1 : 0) - (hasStatus(b, 'stun') ? 1 : 0));
+  } else if (select === 'prefer_control') {
+    const control = ['stun', 'stagger', 'overwhelm', 'confusion'];
+    const score = c => control.some(id => hasStatus(c, id)) ? 0 : 1;
+    candidates.sort((a, b) => score(a) - score(b));
   } else if (select === 'random') {
     candidates = shuffleArray(candidates);
   }
