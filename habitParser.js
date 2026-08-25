@@ -111,7 +111,18 @@ function loadCommandSync(data, dragonId) {
 }
 
 function executeHabitAction(habit, actionData, attacker, targets, rank = 1, options = {}) {
-  const result = { success: true, missed: false, chance: 100, executed: 0, log: [], damages: [], heals: [], effects: [], magnitude: null };
+  const result = {
+    success: true,
+    missed: false,
+    chance: 100,
+    executed: 0,
+    log: [],
+    damages: [],
+    heals: [],
+    effects: [],
+    magnitude: null,
+    onReachActions: []
+  };
   const rankIndex = Math.max(0, Math.min(4, rank - 1));
   const raw = actionData.data || actionData;
   result.chance = resolveChance(raw, rankIndex, attacker);
@@ -124,7 +135,9 @@ function executeHabitAction(habit, actionData, attacker, targets, rank = 1, opti
   result.magnitude = scaleByStat(raw.val, attacker, raw.scaleStat);
   const actionType = raw.t || actionData.type;
   if (actionType === 'mod' || actionType === 'stack') {
-    result.effects = executeModAction(habit, actionData, attacker, targets, scalingValue);
+    const modResult = executeModAction(habit, actionData, attacker, targets, scalingValue, rank);
+    result.effects = modResult.effects;
+    result.onReachActions = modResult.onReachActions;
     result.executed = result.effects.length;
   } else if (actionType === 'status') {
     const st = String(raw.st || '').toLowerCase().replace(/-/g, '_');
@@ -150,28 +163,53 @@ function executeHabitAction(habit, actionData, attacker, targets, rank = 1, opti
   return result;
 }
 
-function executeModAction(habit, actionData, attacker, targets, scalingValue) {
+function executeModAction(habit, actionData, attacker, targets, scalingValue, rank = 1) {
   const effects = [];
-  if (!scalingValue) return effects;
+  const onReachActions = [];
+  if (!scalingValue) return { effects, onReachActions };
   const raw = actionData.data || actionData;
   const duration = raw.dur == null ? 'combat' : raw.dur;
   const flags = scalingValue.__fixed || {};
-  const options = { excludeBasic: !!raw.excludeBasic, stackId: raw.id || null };
+  const options = {
+    excludeBasic: !!raw.excludeBasic,
+    stackId: raw.id || null,
+    maxStacks: raw.maxStacks != null ? raw.maxStacks : null
+  };
   for (const target of targets) {
     if (!target || target.isDead) continue;
     if (raw.t === 'stack' && typeof target.addStack === 'function') {
-      const added = raw.stacks || 1;
-      const count = target.addStack(raw.id || 'stack', scalingValue, duration, { ...options, stacks: added });
-      if (raw.tgt && raw.tgt.linkAs && attacker) attacker.links[raw.tgt.linkAs] = target;
-      effects.push({
-        target: target.name,
-        kind: 'stack',
-        stackId: raw.id || 'stack',
-        stacks: count,
-        added,
-        duration,
-        enhancedBy: raw.scaleStat || null
+      const wantAdd = raw.stacks || 1;
+      const before = typeof target.getStackCount === 'function' ? target.getStackCount(raw.id || 'stack') : 0;
+      const stackResult = target.addStack(raw.id || 'stack', scalingValue, duration, {
+        ...options,
+        stacks: wantAdd
       });
+      const count = stackResult.stacks != null ? stackResult.stacks : stackResult;
+      const added = stackResult.added != null ? stackResult.added : wantAdd;
+      if (raw.tgt && raw.tgt.linkAs && attacker) attacker.links[raw.tgt.linkAs] = target;
+      if (added > 0) {
+        effects.push({
+          target: target.name,
+          kind: 'stack',
+          stackId: raw.id || 'stack',
+          stacks: count,
+          added,
+          duration,
+          enhancedBy: raw.scaleStat || null
+        });
+      }
+      if (raw.onReach && count >= raw.onReach.stacks) {
+        const once = raw.onReach.once !== false;
+        const threshold = raw.onReach.stacks;
+        const canFire = once
+          ? (typeof target.markStackReached === 'function' ? target.markStackReached(raw.id || 'stack', threshold) : true)
+          : true;
+        if (canFire && before < threshold && count >= threshold) {
+          for (const reachAction of raw.onReach.actions || []) {
+            onReachActions.push({ caster: attacker, target, action: reachAction, rank });
+          }
+        }
+      }
     } else {
       for (const stat in scalingValue) {
         if (stat === '__fixed') continue;
@@ -188,7 +226,7 @@ function executeModAction(habit, actionData, attacker, targets, scalingValue) {
       }
     }
   }
-  return effects;
+  return { effects, onReachActions };
 }
 
 function executeDamageAction(habit, actionData, attacker, targets, scalingValue, round) {
