@@ -592,6 +592,30 @@ function mockFx(ids) {
   console.log('✓ anyEnemyStatus Slow 1.5x Strategic Revival\n');
 }
 
+{
+  const ts = new Character({
+    id: 'thunderstrike', name: 'Thunderstrike', breed: 'Warrior', rarity: 'Rare',
+    stats: { str: 10, inst: 10, int: 10, init: 10 }
+  }, 0, 1);
+  const foe = new Character({
+    id: 'foe', name: 'Foe', breed: 'Hunter', rarity: 'Rare',
+    stats: { str: 10, inst: 10, int: 10, init: 10 }
+  }, 1, 1);
+  const habit = new Habit({ name: 'Staggering Assault', structured: [] }, 'thunderstrike');
+  const raw = {
+    t: 'status',
+    st: 'stagger',
+    dur: 1,
+    ifBonus: { selfStatus: 'advantage', dur: 2 }
+  };
+  const plain = executeHabitAction(habit, raw, ts, [foe], 1, { skipChance: true });
+  if (plain.duration !== 1) throw new Error(`Stagger without Advantage should last 1, got ${plain.duration}`);
+  applyEffect(ts, 'ADVANTAGE', 1, 'self', { duration: 2, magnitude: 20 });
+  const boosted = executeHabitAction(habit, raw, ts, [foe], 1, { skipChance: true });
+  if (boosted.duration !== 2) throw new Error(`Stagger with Advantage should last 2, got ${boosted.duration}`);
+  console.log('✓ ifBonus.dur Staggering Assault Advantage\n');
+}
+
 try {
   // Passo 1: Carregar dragões
   console.log('1️⃣  Carregando dragões...');

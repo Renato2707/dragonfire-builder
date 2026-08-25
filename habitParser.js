@@ -96,6 +96,14 @@ function ifBonusApplies(ifBonus, attacker, target, extras = {}) {
   return checks.length > 0 && checks.every(Boolean);
 }
 
+function resolveDuration(raw, attacker, target, extras = {}) {
+  let dur = raw.dur == null ? 'combat' : raw.dur;
+  if (raw.ifBonus && raw.ifBonus.dur != null && ifBonusApplies(raw.ifBonus, attacker, target, extras)) {
+    dur = raw.ifBonus.dur;
+  }
+  return dur;
+}
+
 function resolveIfBonusRate(rate, ifBonus, attacker, target, extras = {}) {
   if (!ifBonusApplies(ifBonus, attacker, target, extras)) return rate;
   if (ifBonus.mult != null) return Number(rate) * Number(ifBonus.mult);
@@ -252,6 +260,7 @@ function executeHabitAction(habit, actionData, attacker, targets, rank = 1, opti
     if (result.magnitude == null && typeof scalingValue === 'number' && ['advantage', 'weakened', 'vulnerable', 'resistance', 'evade'].includes(st)) {
       result.magnitude = scalingValue;
     }
+    result.duration = resolveDuration(raw, attacker, targets[0], options);
   } else if (actionType === 'dmg') {
     result.damages = executeDamageAction(habit, actionData, attacker, targets, scalingValue, options.round, options);
     result.executed = result.damages.length;
@@ -267,7 +276,6 @@ function executeModAction(habit, actionData, attacker, targets, scalingValue, ra
   const onReachActions = [];
   const raw = actionData.data || actionData;
   if (raw.t !== 'stack' && !scalingValue) return { effects, onReachActions };
-  const duration = raw.dur == null ? 'combat' : raw.dur;
   const flags = (scalingValue && scalingValue.__fixed) || {};
   const options = {
     excludeBasic: !!raw.excludeBasic,
@@ -276,6 +284,7 @@ function executeModAction(habit, actionData, attacker, targets, scalingValue, ra
   };
   for (const target of targets) {
     if (!target || target.isDead) continue;
+    const duration = resolveDuration(raw, attacker, target, extras);
     const value = ifBonusApplies(raw.ifBonus, attacker, target, extras)
       ? applyIfBonusValue(scalingValue || {}, raw.ifBonus, attacker)
       : (scalingValue || {});
@@ -387,6 +396,7 @@ export {
   resolveChance,
   commandModValue,
   ifBonusApplies,
+  resolveDuration,
   Habit,
   loadDragonHabitsSync,
   loadCommandSync,

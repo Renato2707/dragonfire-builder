@@ -251,6 +251,7 @@
             "status": "string",
             "pct": "number",
             "mult": "number",
+            "dur": "number|combat (replaces action dur when condition met)",
             "dealer": "physical|tactical|fire",
             "defending": "boolean",
             "selfHpAbove": "number (caster Troop Capacity % > n)",

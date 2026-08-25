@@ -621,7 +621,7 @@ class Battle {
     } else if (actionType === 'status') {
       const magnitude = actionResult.magnitude != null ? actionResult.magnitude : raw.val;
       let st = String(raw.st || '').toLowerCase().replace(/-/g, '_');
-      let dur = raw.dur;
+      let dur = actionResult.duration != null ? actionResult.duration : raw.dur;
       if (raw.ifAlready && raw.ifAlready.st && hasEffect(target, st)) {
         st = String(raw.ifAlready.st).toLowerCase().replace(/-/g, '_');
         if (raw.ifAlready.dur != null) dur = raw.ifAlready.dur;
