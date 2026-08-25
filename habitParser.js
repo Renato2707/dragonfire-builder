@@ -33,9 +33,18 @@ function parseTargeting(targetingString) {
   return targeting;
 }
 
+function commandModValue(character, field) {
+  if (!character || !field || !character.commandMods) return null;
+  const stored = character.commandMods[field];
+  if (stored == null) return null;
+  if (typeof stored === 'object' && stored.value != null) return stored.value;
+  return stored;
+}
+
 function resolveChance(actionRaw, rankIndex, character) {
-  if (actionRaw && actionRaw.chanceField && character && character.commandMods[actionRaw.chanceField] != null) {
-    return character.commandMods[actionRaw.chanceField];
+  if (actionRaw && actionRaw.chanceField) {
+    const override = commandModValue(character, actionRaw.chanceField);
+    if (override != null) return override;
   }
   if (!actionRaw || actionRaw.chance == null) return 100;
   if (Array.isArray(actionRaw.chance)) return actionRaw.chance[rankIndex] ?? actionRaw.chance[0] ?? 100;
@@ -56,6 +65,12 @@ function ifBonusApplies(ifBonus, attacker, target, extras = {}) {
     if (who) return statusConditionMet(who, ifBonus.status);
     if (statusConditionMet(target, ifBonus.status)) return true;
     if (statusConditionMet(attacker, ifBonus.status)) return true;
+  }
+  if (ifBonus.stacks && attacker && typeof attacker.getStackCount === 'function') {
+    const spec = ifBonus.stacks;
+    const id = spec.id || spec;
+    const min = spec.min != null ? Number(spec.min) : 1;
+    return attacker.getStackCount(id) >= min;
   }
   return false;
 }
@@ -294,6 +309,10 @@ function executeDamageAction(habit, actionData, attacker, targets, scalingValue,
   const raw = actionData.data || actionData;
   const damageType = (raw.dt || 'physical').toUpperCase();
   let baseRate = typeof scalingValue === 'number' ? scalingValue : 0;
+  if (raw.rateField) {
+    const override = commandModValue(attacker, raw.rateField);
+    if (override != null) baseRate = Number(override);
+  }
   if (raw.roundBonus && round != null) {
     const bonus = raw.roundBonus[String(round)] ?? raw.roundBonus[round];
     if (bonus) baseRate *= bonus;
@@ -310,6 +329,10 @@ function executeHealAction(habit, actionData, attacker, targets, scalingValue, e
   const heals = [];
   const raw = actionData.data || actionData;
   let rate = typeof scalingValue === 'number' ? scalingValue : 0;
+  if (raw.rateField) {
+    const override = commandModValue(attacker, raw.rateField);
+    if (override != null) rate = Number(override);
+  }
   for (const target of targets) {
     if (!target || target.isDead) continue;
     const usedRate = resolveIfBonusRate(rate, raw.ifBonus, attacker, target, extras);
@@ -327,6 +350,7 @@ export {
   normalizeTiming,
   parseTargeting,
   resolveChance,
+  commandModValue,
   ifBonusApplies,
   Habit,
   loadDragonHabitsSync,

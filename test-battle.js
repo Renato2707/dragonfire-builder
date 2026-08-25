@@ -3,7 +3,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { Character } from './character.js';
 import { Battle } from './battle.js';
-import { loadDragonHabitsSync, loadCommandSync, ifBonusApplies, executeModAction } from './habitParser.js';
+import { loadDragonHabitsSync, loadCommandSync, ifBonusApplies, executeModAction, executeHabitAction, resolveChance } from './habitParser.js';
 import { applyEffect, hasEffect, cleanseCharacter, getEffect, isImmuneTo, processHealingEffects } from './effects.js';
 import { selectTargets } from './positionSystem.js';
 import { applyChanceIf, statusConditionMet, sortByInitiative } from './utils.js';
@@ -376,6 +376,45 @@ function mockFx(ids) {
   if (reaches !== 1) throw new Error(`onReach should fire once, fired ${reaches}`);
   if (!(vhagar.getModifiedStat('str') > 80)) throw new Error('Bulwark should raise Strength');
   console.log('✓ stack onReach Bulwark fires once at 3 stacks\n');
+}
+
+{
+  const d = new Character({
+    id: 'dawn', name: 'Dawnseeker', breed: 'Sentinel', rarity: 'Rare', stats: { str: 10, inst: 80, int: 10, init: 40 }
+  }, 0, 1);
+  const foe = new Character({
+    id: 'f', name: 'Foe', breed: 'Warrior', rarity: 'Rare', stats: { str: 10, inst: 10, int: 10, init: 10 }
+  }, 1, 1);
+  const btl = new Battle([d], [foe], { verbose: false });
+  btl.runAction(d, { name: 'Sunbreak' }, {
+    t: 'mod_command', command: 'Radiant Wings', field: 'tactical_rate', pct: [100, 110, 120, 135, 150]
+  }, 1);
+  if (d.commandMods.tactical_rate.value !== 100) throw new Error('Sunbreak should write rank 1 rate 100');
+  const habit = { getScalingValue: (a, i) => (a.data || a).pct };
+  const dmg = executeHabitAction(habit, {
+    t: 'dmg', dt: 'tactical', pct: 50, rateField: 'tactical_rate'
+  }, d, [foe], 1, { skipChance: true, round: 1 });
+  const baseline = executeHabitAction(habit, {
+    t: 'dmg', dt: 'tactical', pct: 50
+  }, d, [foe], 1, { skipChance: true, round: 1 });
+  if (!(dmg.damages[0].amount > baseline.damages[0].amount)) {
+    throw new Error('rateField should raise Radiant Wings damage on rounds 1-2');
+  }
+  d.tickCommandMods();
+  if (d.commandMods.tactical_rate) throw new Error('round-only command mod should expire');
+  btl.runAction(d, { name: 'Full Moon' }, {
+    t: 'mod_command', command: 'Crescent Blade', field: 'physical_rate', pct: 85, dur: 'combat'
+  }, 1);
+  d.tickCommandMods();
+  if (!d.commandMods.physical_rate) throw new Error('combat command mod should persist');
+  if (resolveChance({ chance: 20, chanceField: 'stun_chance' }, 0, d) !== 20) {
+    throw new Error('missing chanceField should use default');
+  }
+  d.commandMods.stun_chance = { value: 40, duration: 1 };
+  if (resolveChance({ chance: 20, chanceField: 'stun_chance' }, 0, d) !== 40) {
+    throw new Error('chanceField override failed');
+  }
+  console.log('✓ mod_command rateField / chanceField / duration\n');
 }
 
 try {

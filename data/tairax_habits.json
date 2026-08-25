@@ -129,7 +129,7 @@
             {
               "t": "mod_command",
               "command": "Burning Ward",
-              "field": "staggerChance",
+              "field": "stagger_chance",
               "pct": [37.5, 40, 42.5, 46.25, 50]
             }
           ]

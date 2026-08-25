@@ -114,7 +114,7 @@
             {
               "t": "mod_command",
               "command": "Feral Strike",
-              "field": "doubleStrikeChance",
+              "field": "double_strike_chance",
               "pct": [40, 42, 44, 47, 50]
             }
           ]

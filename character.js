@@ -154,6 +154,23 @@ class Character {
       mod.duration === 'combat' || (typeof mod.duration === 'number' && mod.duration > 0)
     );
     for (const stat of CORE_STATS) this.statModifiers[stat] = this.getPercentTotal(stat);
+    this.tickCommandMods();
+  }
+
+  tickCommandMods() {
+    for (const key of Object.keys(this.commandMods || {})) {
+      const stored = this.commandMods[key];
+      if (stored == null) continue;
+      if (typeof stored === 'number') {
+        delete this.commandMods[key];
+        continue;
+      }
+      if (stored.duration === 'combat') continue;
+      if (typeof stored.duration === 'number') {
+        stored.duration -= 1;
+        if (stored.duration <= 0) delete this.commandMods[key];
+      }
+    }
   }
 
   noteDeath() {

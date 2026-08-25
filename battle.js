@@ -486,7 +486,10 @@ class Battle {
     if (raw.t === 'mod_command') {
       const rankIndex = Math.max(0, Math.min(4, (character.habitRank || 1) - 1));
       const value = Array.isArray(raw.pct) ? raw.pct[rankIndex] : raw.pct;
-      character.commandMods[raw.field] = value;
+      character.commandMods[raw.field] = {
+        value,
+        duration: raw.dur == null ? 1 : raw.dur
+      };
       this.logAction(`${raw.command || 'Command'} gains: ${raw.field} ${formatSignedPercent(value)}`);
       return;
     }

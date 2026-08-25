@@ -164,9 +164,9 @@
             {
               "t": "mod_command",
               "command": "Crescent Blade",
-              "field": "physicalRate",
+              "field": "physical_rate",
               "pct": [85, 92, 99, 109.5, 120],
-              "ifStacks": { "id": "rising_tide", "min": 4, "mult": 2 }
+              "dur": "combat"
             }
           ]
         }

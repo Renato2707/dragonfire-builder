@@ -26,6 +26,7 @@
           "t": "dmg",
           "dt": "tactical",
           "pct": 50,
+          "rateField": "tactical_rate",
           "tgt": { "side": "enemy", "count": 1, "select": "same_lane" }
         }
       ]
@@ -37,6 +38,7 @@
         {
           "t": "heal",
           "pct": 30,
+          "rateField": "recovery_rate",
           "scaleStat": "init",
           "tgt": { "side": "ally", "count": 2, "select": "adjacency" }
         }

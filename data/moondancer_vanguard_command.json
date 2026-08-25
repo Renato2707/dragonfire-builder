@@ -31,6 +31,8 @@
           "t": "dmg",
           "dt": "physical",
           "pct": 75,
+          "rateField": "physical_rate",
+          "ifBonus": { "stacks": { "id": "rising_tide", "min": 4 }, "mult": 2 },
           "tgt": { "side": "enemy", "count": 2, "select": "adjacency" }
         }
       ]
