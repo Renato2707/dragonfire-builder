@@ -13,7 +13,13 @@
           "dur": 2,
           "chance": 20,
           "tgt": { "side": "enemy", "count": 1, "select": "adjacency" }
-        },
+        }
+      ]
+    },
+    {
+      "phase": "turn",
+      "rounds": [3, 6, 9],
+      "actions": [
         {
           "t": "dmg",
           "dt": "fire",
