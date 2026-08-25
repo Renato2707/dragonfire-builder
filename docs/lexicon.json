@@ -107,6 +107,11 @@
       "desc": "Block-level roll before actions. Array indexes habitRank-1. Omit = 100%.",
       "example": [17.5, 21, 24.5, 29.8, 35]
     },
+    "repeatPer": {
+      "type": "object",
+      "fields": { "side": "enemy|ally|self", "status": "status_id", "dealer": "physical|tactical|fire" },
+      "desc": "Run the block's actions N times = living matches (Gift of Fire: one Resistance roll per enemy with Burn). 0 matches skips the block."
+    },
     "requires": {
       "type": ["object", "null"],
       "fields": {

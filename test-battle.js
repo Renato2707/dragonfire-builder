@@ -216,6 +216,52 @@ function mockFx(ids) {
 }
 
 {
+  const mk = (id, team, slot, stats) => new Character({
+    id, name: id, breed: 'Hunter', rarity: 'Rare',
+    stats: stats || { str: 10, inst: 10, int: 10, init: 10 }
+  }, team, slot);
+  const tairax = mk('tairax', 0, 1);
+  const ally = mk('ally', 0, 0);
+  const burnedA = mk('burnA', 1, 0);
+  const burnedB = mk('burnB', 1, 1);
+  const clean = mk('clean', 1, 2);
+  applyEffect(burnedA, 'BURN', 1, 't', { duration: 2, damageRate: 20 });
+  applyEffect(burnedB, 'BURN', 1, 't', { duration: 2, damageRate: 20 });
+  const btl = new Battle([tairax, ally], [burnedA, burnedB, clean], { verbose: false });
+  const burns = btl.matchingPerTarget(tairax, { side: 'enemy', status: 'burn' });
+  if (burns.length !== 2) throw new Error(`repeatPer burn should count 2, got ${burns.length}`);
+  const habit = new Habit({
+    name: 'Gift of Fire',
+    structured: [{
+      phase: 'round_start',
+      rounds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+      repeatPer: { side: 'enemy', status: 'burn' },
+      actions: [{
+        t: 'status',
+        st: 'resistance',
+        val: 15,
+        dur: 2,
+        chance: 100,
+        tgt: { side: 'ally', count: 1, select: 'prefer_without:resistance' }
+      }]
+    }]
+  }, 'tairax');
+  btl.executeHabit(tairax, habit, 'round_start', 1);
+  const resisted = [tairax, ally].filter(c => hasEffect(c, 'resistance'));
+  if (resisted.length !== 2) throw new Error(`2 Burns should grant 2 Resistance, got ${resisted.length}`);
+  const none = new Battle([mk('t2', 0, 1)], [mk('e', 1, 1)], { verbose: false });
+  if (none.matchingPerTarget(none.teamA[0], { side: 'enemy', status: 'burn' }).length !== 0) {
+    throw new Error('no Burns should match 0');
+  }
+  const fire = mk('fire', 1, 0, { str: 10, inst: 10, int: 80, init: 10 });
+  const phys = mk('phys', 1, 1, { str: 80, inst: 10, int: 10, init: 10 });
+  const rally = new Battle([mk('vermax', 0, 1)], [fire, phys], { verbose: false });
+  const dealers = rally.matchingPerTarget(rally.teamA[0], { side: 'enemy', dealer: 'fire' });
+  if (dealers.length !== 1 || dealers[0] !== fire) throw new Error('repeatPer dealer:fire should count one');
+  console.log('✓ repeatPer Gift of Fire / Rallying Flame\n');
+}
+
+{
   const d = (id, team, slot) => new Character({
     id, name: id, breed: 'Warrior', rarity: 'Rare', stats: { str: 80, inst: 10, int: 10, init: 10 }
   }, team, slot);

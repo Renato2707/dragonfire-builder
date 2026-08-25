@@ -175,6 +175,7 @@ class Habit {
         requires: item.requires || null,
         chance: item.chance != null ? item.chance : null,
         oncePerRound: !!item.oncePerRound,
+        repeatPer: item.repeatPer || null,
         actions: item.actions || []
       });
     }

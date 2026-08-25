@@ -292,7 +292,7 @@ class Battle {
           if (character.oncePerRoundFired[key]) continue;
         }
         if (!this.blockChanceHits(character, habitLike, block)) continue;
-        for (const action of block.actions || []) this.runAction(character, habitLike, action, round);
+        this.runBlockActions(character, habitLike, block, round);
         if (block.oncePerRound) character.oncePerRoundFired[this.onceKey(habitLike, block)] = true;
       }
       return true;
@@ -452,15 +452,31 @@ class Battle {
 
   matchingPerTarget(character, spec) {
     if (!spec) return [];
-    const pools = this.teamPools(character);
-    const pool = spec.side === 'enemy' ? pools.enemies : pools.allies;
+    const pool = spec.side === 'enemy'
+      ? this.enemiesOf(character)
+      : spec.side === 'self'
+        ? [character]
+        : this.alliesOf(character);
     return pool.filter(c => {
-      if (!c) return false;
+      if (!c || c.isDead) return false;
+      if (spec.status && !hasEffect(c, spec.status)) return false;
+      if (spec.dealer && getDealerType(c) !== String(spec.dealer).toLowerCase()) return false;
       if (spec.filter && spec.filter.troopsBelow != null && c.getHealthPercentage() >= spec.filter.troopsBelow) return false;
       if (spec.filter && spec.filter.troopsAbove != null && c.getHealthPercentage() <= spec.filter.troopsAbove) return false;
       if (spec.filter && spec.filter.retreatedPreviousRound && !c.retreatedLastRound) return false;
       return true;
     });
+  }
+
+  runBlockActions(character, habit, block, round) {
+    let times = 1;
+    if (block.repeatPer) {
+      times = this.matchingPerTarget(character, block.repeatPer).length;
+      if (!times) return;
+    }
+    for (let i = 0; i < times; i += 1) {
+      for (const action of block.actions || []) this.runAction(character, habit, action, round);
+    }
   }
 
   logChanceRoll(habit, target, chance, hit) {
@@ -481,7 +497,7 @@ class Battle {
           if (character.oncePerRoundFired[key]) continue;
         }
         if (!this.blockChanceHits(character, habit, block)) continue;
-        for (const action of block.actions || []) this.runAction(character, habit, action, r);
+        this.runBlockActions(character, habit, block, r);
         if (block.oncePerRound) character.oncePerRoundFired[this.onceKey(habit, block)] = true;
       }
     });
