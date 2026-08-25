@@ -1,0 +1,54 @@
+{
+  "dragonId": "zivern",
+  "name": "Silent Shade",
+  "command": [
+    {
+      "phase": "turn",
+      "rounds": [1, 4, 6, 9],
+      "actions": [
+        {
+          "t": "mod",
+          "mods": [{ "stat": "tactical_received", "pct": 15 }],
+          "dur": 2,
+          "chance": 40,
+          "tgt": { "side": "enemy", "count": 1, "select": "same_lane" }
+        }
+      ]
+    },
+    {
+      "phase": "turn",
+      "rounds": [1, 4, 6, 9],
+      "actions": [
+        {
+          "t": "dmg",
+          "dt": "tactical",
+          "pct": 75,
+          "tgt": { "side": "enemy", "count": 2, "select": "adjacency" }
+        }
+      ]
+    }
+  ],
+  "vanguard": [
+    {
+      "phase": "combat_start",
+      "rounds": [1],
+      "actions": [
+        {
+          "t": "mod",
+          "mods": [{ "stat": "tactical_dealt", "pct": 16 }],
+          "dur": "combat",
+          "tgt": { "side": "self" }
+        },
+        {
+          "t": "mod",
+          "mods": [
+            { "stat": "inst", "fixed": 20 },
+            { "stat": "init", "fixed": 20 }
+          ],
+          "dur": "combat",
+          "tgt": { "side": "ally", "count": 1, "slot": 0, "excludeSelf": true }
+        }
+      ]
+    }
+  ]
+}
