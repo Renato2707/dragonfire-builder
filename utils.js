@@ -159,8 +159,9 @@ function formatDuration(duration) {
 function formatSignedPercent(value) {
   const amount = Number(value);
   if (Number.isNaN(amount)) return String(value);
-  if (amount > 0) return `+${amount}%`;
-  return `${amount}%`;
+  const rounded = Math.round(amount * 100) / 100;
+  if (rounded > 0) return `+${rounded}%`;
+  return `${rounded}%`;
 }
 
 function formatTroopCapacity(character) {
@@ -174,6 +175,29 @@ function isGrantedStatus(status) {
 
 function formatStackName(id) {
   return String(id || 'stack').split('_').filter(Boolean).map(part => part.charAt(0).toUpperCase() + part.slice(1)).join(' ');
+}
+
+function roundScaled(value) {
+  return Math.round(Number(value) * 100) / 100;
+}
+
+function scaleByStat(value, character, scaleStat) {
+  if (value == null || !scaleStat || !character) return value;
+  const enhancer = typeof character.getModifiedStat === 'function'
+    ? character.getModifiedStat(scaleStat)
+    : 0;
+  const factor = 1 + (Number(enhancer) || 0) / 100;
+  if (typeof value === 'number') return roundScaled(value * factor);
+  if (typeof value === 'object') {
+    const scaled = {};
+    for (const key in value) {
+      if (key === '__fixed') scaled[key] = value[key];
+      else if (typeof value[key] === 'number') scaled[key] = roundScaled(value[key] * factor);
+      else scaled[key] = value[key];
+    }
+    return scaled;
+  }
+  return value;
 }
 
 export {
@@ -198,5 +222,7 @@ export {
   formatTroopCapacity,
   isGrantedStatus,
   formatStackName,
-  statusId
+  statusId,
+  scaleByStat,
+  roundScaled
 };
