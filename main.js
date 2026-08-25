@@ -10,7 +10,9 @@ const TROOP_TYPES = [
   { id: '', label: '—' },
   { id: 'archers', label: 'Archers' },
   { id: 'shieldbearers', label: 'Shieldbearers' },
-  { id: 'spearmen', label: 'Spearmen' }
+  { id: 'spearmen', label: 'Spearmen' },
+  { id: 'cavalry', label: 'Cavalry' },
+  { id: 'siege', label: 'Siege' }
 ];
 
 let dragonsData = [];

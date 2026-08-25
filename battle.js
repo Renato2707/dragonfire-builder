@@ -128,7 +128,8 @@ class Battle {
   }
 
   troopOf(character) {
-    return character.troopType || this.teamTroop[character.teamId] || null;
+    const raw = character.troopType || this.teamTroop[character.teamId] || null;
+    return raw ? String(raw).toLowerCase().replace(/[\s_-]/g, '') : null;
   }
 
   hasCommand(character, name) {
@@ -197,7 +198,7 @@ class Battle {
     const req = block && block.requires;
     if (!req) return true;
     if (req.command && !this.hasCommand(character, req.command)) return false;
-    if (req.troop && this.troopOf(character) !== req.troop) return false;
+    if (req.troop && this.troopOf(character) !== String(req.troop).toLowerCase().replace(/[\s_-]/g, '')) return false;
     if (req.linkedRetreated) {
       const linked = character.links && character.links[req.linkedRetreated];
       if (!linked || !(linked.retreatedLastRound || linked.isDead)) return false;

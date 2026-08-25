@@ -64,7 +64,18 @@ function mockFx(ids) {
   if (!btl.blockAllowed(caster, { requires: { stacks: { id: 'mirage', min: 4 } } })) throw new Error('stacks min 4 should pass');
   if (btl.blockAllowed(caster, { requires: { stacks: { id: 'mirage', min: 7 } } })) throw new Error('stacks min 7 should fail');
   if (btl.blockAllowed(caster, { requires: { pve: true } })) throw new Error('pve true should fail in default PvP');
-  console.log('✓ requires troopsBelow / prey / dealerFire / stacks / pve\n');
+  const archers = new Battle([caster], [physical], { verbose: false, teamTroop: ['archers', null] });
+  if (!archers.blockAllowed(caster, { requires: { troop: 'archers' } })) throw new Error('leading Archers should pass');
+  if (archers.blockAllowed(caster, { requires: { troop: 'shieldbearers' } })) throw new Error('Shieldbearers should fail when leading Archers');
+  const shields = new Battle([caster], [physical], { verbose: false, teamTroop: ['Shield-Bearers', null] });
+  if (!shields.blockAllowed(caster, { requires: { troop: 'shieldbearers' } })) throw new Error('troop name should normalize');
+  caster.currentHealth = 10;
+  physical.currentHealth = 50;
+  fireEnemy.currentHealth = 50;
+  if (!btl.blockAllowed(caster, { requires: { leastTroops: true } })) throw new Error('leastTroops should pass at 10 vs 50');
+  caster.currentHealth = 80;
+  if (btl.blockAllowed(caster, { requires: { leastTroops: true } })) throw new Error('leastTroops should fail when others have fewer troops');
+  console.log('✓ requires troopsBelow / prey / dealerFire / stacks / pve / troop / leastTroops\n');
 }
 
 {

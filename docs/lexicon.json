@@ -114,7 +114,7 @@
         "troop": {
           "type": "string",
           "values": ["archers", "shieldbearers", "spearmen", "cavalry", "siege"],
-          "desc": "troopOf(character) === troop"
+          "desc": "Normalized troopOf (team troop or character.troopType) === troop. Adaptive Guard: archers → tactical_received, shieldbearers → fire_received."
         },
         "linkedRetreated": {
           "type": "string",
@@ -128,7 +128,7 @@
         "preyHpAbove": { "type": "number", "desc": "prey getHealthPercentage() > n" },
         "anyEnemyDealerFire": { "type": "boolean", "desc": "any living enemy getDealerType === fire" },
         "stacks": { "type": "object", "fields": { "id": "string", "min": "integer" } },
-        "leastTroops": { "type": "boolean", "desc": "caster has lowest currentHealth among living combatants" },
+        "leastTroops": { "type": "boolean", "desc": "caster currentHealth is lowest among living combatants (ties count). Full Moon extra Rising Tide stack." },
         "damageType": { "type": "string", "values": ["physical", "tactical", "fire", "basic"], "desc": "Matches Battle.damageContext on on_self_first_damage" },
         "excludeBasic": { "type": "boolean", "desc": "Fail if the hit was a Basic Attack" },
         "selfStatus": { "type": "string", "desc": "hasEffect(caster, status)" },
