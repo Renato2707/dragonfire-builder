@@ -7,7 +7,7 @@ import {
 } from './utils.js';
 import {
   updateEffects, processDamageEffects, processHealingEffects,
-  canAct, canAttack, canUseAbilities, applyEffect, hasEffect
+  canAct, canAttack, canUseAbilities, applyEffect, hasEffect, tryEvade
 } from './effects.js';
 import { selectTargets, getPositionName, POSITIONS } from './positionSystem.js';
 import { executeHabitAction, resolveChance, PHASES } from './habitParser.js';
@@ -93,8 +93,17 @@ class Battle {
   phaseEndOfRound() {
     for (const character of this.allCharacters) {
       if (!character.isDead) {
-        const dot = processDamageEffects(character);
-        if (dot > 0) this.logAction(`${character.name} takes ${dot} damage from Bleed, Burn, or Panic`);
+        const ticks = processDamageEffects(character, name => this.allCharacters.find(c => c.name === name));
+        for (const tick of ticks) {
+          if (character.isDead) break;
+          if (tryEvade(character)) {
+            this.logAction(`${character.name} Evades the ${formatDamageTypeName(tick.damageType)} from ${tick.name}`);
+            continue;
+          }
+          const actual = character.takeDamage(tick.amount);
+          this.logAction(`${character.name} takes ${actual} ${formatDamageTypeName(tick.damageType)} from ${tick.name}`);
+          if (character.isDead) this.logAction(`${character.name} retreated`);
+        }
         const recovery = processHealingEffects(character);
         if (recovery > 0) this.logAction(`Applies Recovery to ${character.name} (+${recovery} Troop Capacity)`);
         if (typeof character.tickPercentMods === 'function') character.tickPercentMods();
@@ -184,9 +193,13 @@ class Battle {
   }
 
   executeCharacterAction(character) {
-    this.executeCommand(character);
-    if (character.isDead) return;
-    if (canUseAbilities(character)) {
+    if (!canUseAbilities(character)) {
+      if (hasEffect(character, 'overwhelm')) {
+        this.logAction(`${character.name} cannot activate Commands or Habits (Overwhelm)`);
+      }
+    } else {
+      this.executeCommand(character);
+      if (character.isDead) return;
       this.executeHabitsForPhase(PHASES.TURN, [character], this.currentRound);
     }
     if (character.isDead) return;
@@ -195,7 +208,7 @@ class Battle {
     }
     if (character.isDead) return;
     if (!canAttack(character)) {
-      this.logAction(`${character.name} cannot launch a Basic Attack`);
+      this.logAction(`${character.name} cannot launch a Basic Attack (Stagger)`);
       return;
     }
     const defender = this.selectBasicAttackTarget(character);
@@ -215,8 +228,13 @@ class Battle {
 
   executeBasicAttack(attacker, defender) {
     const damageType = this.selectDamageType(attacker);
-    const actualDamage = defender.takeDamage(calculateFinalDamage(attacker, defender, damageType, 0, { basic: true }));
+    const rawDamage = calculateFinalDamage(attacker, defender, damageType, 0, { basic: true });
     this.logAction(`${attacker.name} launches a Basic Attack`);
+    if (tryEvade(defender)) {
+      this.logAction(`${defender.name} Evades the ${formatDamageTypeName(damageType)}`);
+      return;
+    }
+    const actualDamage = defender.takeDamage(rawDamage);
     this.logAction(`Deals ${actualDamage} ${formatDamageTypeName(damageType)} to ${defender.name}`);
     if (defender.isDead) this.logAction(`${defender.name} retreated`);
   }
@@ -353,10 +371,17 @@ class Battle {
       applyEffect(target, (raw.st || '').toUpperCase(), character.habitRank, character.name, {
         duration: raw.dur,
         magnitude,
+        damageRate: actionResult.damageRate,
         immunities: raw.immunities
       });
       const statusName = formatStatusName(raw.st);
-      const magText = magnitude != null ? ` (${formatSignedPercent(magnitude)})` : '';
+      const st = String(raw.st || '').toLowerCase().replace(/-/g, '_');
+      let magText = '';
+      if (['advantage', 'weakened', 'vulnerable', 'resistance', 'evade'].includes(st) && magnitude != null) {
+        magText = ` (${formatSignedPercent(magnitude)})`;
+      } else if (['burn', 'panic', 'bleed'].includes(st) && actionResult.damageRate != null) {
+        magText = ` (Damage Rate: ${formatSignedPercent(actionResult.damageRate)})`;
+      }
       if (isGrantedStatus(raw.st)) {
         this.logAction(`Grants ${statusName}${magText} to ${target.name} ${formatDuration(raw.dur)}${enhancedNote(raw.scaleStat)}`);
       } else {
@@ -364,6 +389,10 @@ class Battle {
       }
     } else if (actionType === 'dmg') {
       for (const dmg of actionResult.damages) {
+        if (tryEvade(target)) {
+          this.logAction(`${target.name} Evades the ${formatDamageTypeName(raw.dt)}`);
+          continue;
+        }
         const actualDamage = target.takeDamage(dmg.amount);
         this.logAction(`Deals ${actualDamage} ${formatDamageTypeName(raw.dt)} to ${target.name}${enhancedNote(raw.scaleStat)}`);
         if (target.isDead) this.logAction(`${target.name} retreated`);

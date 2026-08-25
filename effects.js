@@ -1,19 +1,21 @@
 // effects.js
 
+import { calculateFinalDamage, rollChance } from './utils.js';
+
 const EFFECTS_CATALOG = {
-  BLEED: { id: 'bleed', name: 'Bleed', category: 'damage', description: 'Physical DoT', duration: 2, damageType: 'physical', damagePerRound: 5, stackable: false, stackCap: 1 },
-  PANIC: { id: 'panic', name: 'Panic', category: 'damage', description: 'Tactical DoT', duration: 2, damageType: 'tactical', damagePerRound: 5, stackable: false, stackCap: 1 },
-  BURN: { id: 'burn', name: 'Burn', category: 'damage', description: 'Fire DoT', duration: 2, damageType: 'fire', damagePerRound: 5, stackable: false, stackCap: 1 },
+  BLEED: { id: 'bleed', name: 'Bleed', category: 'damage', description: 'Physical DoT', duration: 2, damageType: 'physical', damageRate: 20, stackable: false, stackCap: 1 },
+  PANIC: { id: 'panic', name: 'Panic', category: 'damage', description: 'Tactical DoT', duration: 2, damageType: 'tactical', damageRate: 20, stackable: false, stackCap: 1 },
+  BURN: { id: 'burn', name: 'Burn', category: 'damage', description: 'Fire DoT', duration: 2, damageType: 'fire', damageRate: 20, stackable: false, stackCap: 1 },
   FIRST_STRIKE: { id: 'first_strike', name: 'First-Strike', category: 'positive', description: 'Acts first', duration: 1, initiativeModifier: 999, stackable: false, stackCap: 1 },
   DOUBLE_STRIKE: { id: 'double_strike', name: 'Double-Strike', category: 'positive', description: 'Extra basic', duration: 1, extraActions: 1, stackable: false, stackCap: 1 },
   RECOVERY: { id: 'recovery', name: 'Recovery', category: 'positive', description: 'HoT', duration: 2, healPerRound: 15, stackable: false, stackCap: 1 },
-  ADVANTAGE: { id: 'advantage', name: 'Advantage', category: 'positive', description: '+damage', duration: 2, damageBonus: 15, stackable: true, stackCap: 5 },
+  ADVANTAGE: { id: 'advantage', name: 'Advantage', category: 'positive', description: '+damage', duration: 2, damageBonus: 20, stackable: true, stackCap: 5 },
   RESISTANCE: { id: 'resistance', name: 'Resistance', category: 'positive', description: '-received', duration: 2, defenseBonus: 20, stackable: true, stackCap: 5 },
   SLOW: { id: 'slow', name: 'Slow', category: 'negative', description: 'Acts last', duration: 2, initiativeModifier: -999, stackable: false, stackCap: 1 },
-  WEAKENED: { id: 'weakened', name: 'Weakened', category: 'negative', description: '-dealt', duration: 2, damagePenalty: 25, stackable: true, stackCap: 3 },
-  VULNERABLE: { id: 'vulnerable', name: 'Vulnerable', category: 'negative', description: '+received', duration: 2, defensePenalty: 25, stackable: true, stackCap: 3 },
+  WEAKENED: { id: 'weakened', name: 'Weakened', category: 'negative', description: '-dealt', duration: 2, damagePenalty: 20, stackable: true, stackCap: 3 },
+  VULNERABLE: { id: 'vulnerable', name: 'Vulnerable', category: 'negative', description: '+received', duration: 2, defensePenalty: 20, stackable: true, stackCap: 3 },
   PREY: { id: 'prey', name: 'Prey', category: 'negative', description: '-recovery', duration: 2, recoveryPenalty: 50, stackable: false, stackCap: 1 },
-  EVADE: { id: 'evade', name: 'Evade', category: 'control', description: 'Ignore hit', duration: 2, evasionChance: 25, stackable: true, stackCap: 3 },
+  EVADE: { id: 'evade', name: 'Evade', category: 'control', description: 'Ignore hit', duration: 2, evasionChance: 10, stackable: true, stackCap: 3 },
   CLEANSE: { id: 'cleanse', name: 'Cleanse', category: 'control', description: 'Remove effects', duration: 1, removesNegative: true, stackable: false, stackCap: 1, isInstant: true },
   TAUNT: { id: 'taunt', name: 'Taunt', category: 'control', description: 'Force target', duration: 2, forcedTarget: true, stackable: false, stackCap: 1 },
   STUN: { id: 'stun', name: 'Stun', category: 'control', description: 'Cannot act', duration: 1, preventsAllActions: true, stackable: false, stackCap: 1 },
@@ -36,7 +38,7 @@ class Effect {
     this.rank = rank;
     this.appliedBy = appliedBy;
     this.damageType = template.damageType || null;
-    this.damagePerRound = template.damagePerRound || 0;
+    this.damageRate = template.damageRate || 0;
     this.healPerRound = template.healPerRound || 0;
     this.evasionChance = template.evasionChance || 0;
     this.confusionChance = template.confusionChance || 0;
@@ -80,20 +82,26 @@ function applyEffect(character, effectId, rank = 1, appliedBy = null, options = 
     effect.maxDuration = options.duration;
   }
   if (options.magnitude != null) {
-    const mag = Math.abs(options.magnitude);
+    const mag = Math.abs(Number(options.magnitude));
     if (effect.id === 'weakened') effect.damagePenalty = mag;
     if (effect.id === 'vulnerable') effect.defensePenalty = mag;
     if (effect.id === 'advantage') effect.damageBonus = mag;
     if (effect.id === 'resistance') effect.defenseBonus = mag;
+    if (effect.id === 'evade') effect.evasionChance = mag;
   }
+  if (options.damageRate != null) effect.damageRate = Number(options.damageRate);
   if (options.immunities) effect.immunities = options.immunities;
 
   const existing = character.activeEffects.find(e => e.id === effect.id);
   if (existing && effect.stackable) {
     if (existing.rank < effect.stackCap) existing.rank += 1;
-    else existing.duration = Math.max(existing.duration, effect.duration);
+    existing.duration = Math.max(existing.duration, effect.duration);
+    if (effect.id === 'evade') existing.evasionChance = Math.max(existing.evasionChance, effect.evasionChance);
   } else if (existing && !effect.stackable) {
     existing.duration = Math.max(existing.duration, effect.duration);
+    if (effect.damageRate) existing.damageRate = effect.damageRate;
+    if (effect.damageBonus) existing.damageBonus = effect.damageBonus;
+    if (effect.damagePenalty) existing.damagePenalty = effect.damagePenalty;
   } else {
     character.activeEffects.push(effect);
     applyEffectModifiers(character, effect);
@@ -141,21 +149,31 @@ function updateEffects(character) {
   character.activeEffects = character.activeEffects.filter(e => !e.isExpired());
 }
 
-function processDamageEffects(character) {
-  let totalDamage = 0;
-  const damageBreakdown = {};
-  for (const effect of character.activeEffects) {
-    if (effect.category !== 'damage' || effect.isExpired()) continue;
-    if (effect.damagePerRound > 0) {
-      totalDamage += effect.damagePerRound;
-      damageBreakdown[effect.name] = (damageBreakdown[effect.name] || 0) + effect.damagePerRound;
-    }
+function tryEvade(character) {
+  const evade = getEffect(character, 'evade');
+  if (!evade) return false;
+  return rollChance(evade.evasionChance);
+}
+
+function getDotTicks(character) {
+  return character.activeEffects
+    .filter(effect => effect.category === 'damage' && !effect.isExpired())
+    .map(effect => ({
+      name: effect.name,
+      damageType: effect.damageType || 'physical',
+      rate: effect.damageRate != null ? effect.damageRate : 20,
+      appliedBy: effect.appliedBy
+    }));
+}
+
+function processDamageEffects(character, resolveAttacker) {
+  const ticks = [];
+  for (const tick of getDotTicks(character)) {
+    const attacker = (typeof resolveAttacker === 'function' && resolveAttacker(tick.appliedBy)) || character;
+    const amount = calculateFinalDamage(attacker, character, tick.damageType, tick.rate);
+    ticks.push({ ...tick, amount });
   }
-  if (totalDamage > 0) {
-    character.takeDamage(totalDamage);
-    character.logAction(`DOT DAMAGE: -${totalDamage} HP`);
-  }
-  return totalDamage;
+  return ticks;
 }
 
 function processHealingEffects(character) {
@@ -167,7 +185,6 @@ function processHealingEffects(character) {
     if (preyEffect) healing *= (1 - preyEffect.recoveryPenalty / 100);
     totalHealing += character.heal(Math.round(healing));
   }
-  if (totalHealing > 0) character.logAction(`HEALING: +${totalHealing} HP`);
   return totalHealing;
 }
 
@@ -224,6 +241,8 @@ export {
   getEffectsByCategory,
   getActiveEffectNames,
   updateEffects,
+  tryEvade,
+  getDotTicks,
   processDamageEffects,
   processHealingEffects,
   canAct,

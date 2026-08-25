@@ -127,8 +127,19 @@ function executeHabitAction(habit, actionData, attacker, targets, rank = 1, opti
     result.effects = executeModAction(habit, actionData, attacker, targets, scalingValue);
     result.executed = result.effects.length;
   } else if (actionType === 'status') {
+    const st = String(raw.st || '').toLowerCase().replace(/-/g, '_');
     result.effects = targets.filter(t => t && !t.isDead).map(t => ({ target: t.name, statusType: raw.st }));
     result.executed = result.effects.length;
+    if (['burn', 'panic', 'bleed'].includes(st)) {
+      result.damageRate = scaleByStat(
+        raw.rate ?? (typeof scalingValue === 'number' ? scalingValue : 20),
+        attacker,
+        raw.scaleStat
+      );
+    }
+    if (result.magnitude == null && typeof scalingValue === 'number' && ['advantage', 'weakened', 'vulnerable', 'resistance', 'evade'].includes(st)) {
+      result.magnitude = scalingValue;
+    }
   } else if (actionType === 'dmg') {
     result.damages = executeDamageAction(habit, actionData, attacker, targets, scalingValue, options.round);
     result.executed = result.damages.length;
