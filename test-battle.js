@@ -5,7 +5,7 @@ import { Character } from './character.js';
 import { Battle } from './battle.js';
 import { loadDragonHabitsSync, loadCommandSync, ifBonusApplies } from './habitParser.js';
 import { applyChanceIf, statusConditionMet } from './utils.js';
-import { applyEffect, hasEffect, cleanseCharacter, getEffect } from './effects.js';
+import { applyEffect, hasEffect, cleanseCharacter, getEffect, isImmuneTo } from './effects.js';
 import { selectTargets } from './positionSystem.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -214,6 +214,21 @@ function mockFx(ids) {
   btl.dealDamage(sun, 10, { type: 'tactical', basic: false });
   if (!sun.receivedDamageThisRound) throw new Error('flag should stay');
   console.log('✓ first-damage requires / notify flags\n');
+}
+
+{
+  const dummy = { id: 'x', name: 'X', breed: 'Hunter', rarity: 'Rare', stats: { str: 10, inst: 10, int: 10, init: 10 } };
+  const unit = new Character(dummy, 0, 0);
+  applyEffect(unit, 'WEAKENED', 1, 'e', { magnitude: 20, duration: 2 });
+  applyEffect(unit, 'VULNERABLE', 1, 'e', { magnitude: 10, duration: 2 });
+  applyEffect(unit, 'BURN', 1, 'e', { duration: 2 });
+  applyEffect(unit, 'IMMUNITY', 1, 'self', { duration: 2, immunities: ['vulnerable', 'weakened'] });
+  if (hasEffect(unit, 'weakened') || hasEffect(unit, 'vulnerable')) throw new Error('Immunity should purge Vulnerable/Weakened');
+  if (!hasEffect(unit, 'burn')) throw new Error('Immunity should not purge Burn');
+  if (!isImmuneTo(unit, 'weakened') || !isImmuneTo(unit, 'vulnerable')) throw new Error('isImmuneTo failed');
+  if (applyEffect(unit, 'WEAKENED', 1, 'e') != null) throw new Error('Weakened should be blocked');
+  if (applyEffect(unit, 'STUN', 1, 'e') == null) throw new Error('Stun should still apply');
+  console.log('✓ Immunity blocks and purges Vulnerable/Weakened\n');
 }
 
 try {

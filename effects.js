@@ -75,8 +75,27 @@ class Effect {
   }
 }
 
+function normalizeStatusId(id) {
+  return String(id || '').toLowerCase().replace(/-/g, '_');
+}
+
+function isImmuneTo(character, effectId) {
+  const want = normalizeStatusId(effectId);
+  if (!character || !want || want === 'immunity') return false;
+  for (const fx of character.activeEffects || []) {
+    if (fx.id !== 'immunity') continue;
+    if (typeof fx.isExpired === 'function' && fx.isExpired()) continue;
+    const list = (fx.immunities && fx.immunities.length)
+      ? fx.immunities
+      : ['vulnerable', 'weakened'];
+    if (list.some(x => normalizeStatusId(x) === want)) return true;
+  }
+  return false;
+}
+
 function applyEffect(character, effectId, rank = 1, appliedBy = null, options = {}) {
   const effect = new Effect(effectId, rank, appliedBy);
+  if (isImmuneTo(character, effect.id)) return null;
   if (options.duration != null) {
     effect.duration = options.duration;
     effect.maxDuration = options.duration;
@@ -91,7 +110,19 @@ function applyEffect(character, effectId, rank = 1, appliedBy = null, options = 
     if (effect.id === 'prey') effect.recoveryPenalty = mag;
   }
   if (options.damageRate != null) effect.damageRate = Number(options.damageRate);
-  if (options.immunities) effect.immunities = options.immunities;
+  if (options.immunities && options.immunities.length) {
+    effect.immunities = options.immunities.map(normalizeStatusId);
+  } else if (effect.id === 'immunity' && !effect.immunities.length) {
+    effect.immunities = ['vulnerable', 'weakened'];
+  }
+
+  if (effect.id === 'immunity' && effect.immunities.length) {
+    character.activeEffects = (character.activeEffects || []).filter(existing => {
+      if (!effect.immunities.includes(existing.id)) return true;
+      removeEffectModifiers(character, existing);
+      return false;
+    });
+  }
 
   const existing = character.activeEffects.find(e => e.id === effect.id);
   if (existing && effect.stackable) {
@@ -104,6 +135,7 @@ function applyEffect(character, effectId, rank = 1, appliedBy = null, options = 
     if (effect.damageBonus) existing.damageBonus = effect.damageBonus;
     if (effect.damagePenalty) existing.damagePenalty = effect.damagePenalty;
     if (effect.recoveryPenalty) existing.recoveryPenalty = effect.recoveryPenalty;
+    if (effect.immunities && effect.immunities.length) existing.immunities = effect.immunities;
   } else {
     character.activeEffects.push(effect);
     applyEffectModifiers(character, effect);
@@ -305,6 +337,7 @@ export {
   EFFECTS_CATALOG,
   Effect,
   applyEffect,
+  isImmuneTo,
   applyEffectModifiers,
   removeEffectModifiers,
   hasEffect,

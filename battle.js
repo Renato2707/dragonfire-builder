@@ -9,7 +9,7 @@ import {
 import {
   updateEffects, processDamageEffects, processHealingEffects,
   canAct, canAttack, canUseAbilities, applyEffect, hasEffect, tryEvade, getEffect,
-  cleanseCharacter
+  cleanseCharacter, isImmuneTo
 } from './effects.js';
 import { selectTargets, getPositionName, POSITIONS, getDealerType } from './positionSystem.js';
 import { executeHabitAction, resolveChance, PHASES } from './habitParser.js';
@@ -546,11 +546,15 @@ class Battle {
       const hit = !rolled || rollChance(chance);
       if (rolled) this.logChanceRoll(habit, target, chance, hit);
       if (!hit) continue;
-      applyEffect(target, chosen.toUpperCase(), character.habitRank, character.name, {
+      const statusName = formatStatusName(chosen);
+      const applied = applyEffect(target, chosen.toUpperCase(), character.habitRank, character.name, {
         duration: raw.dur,
         magnitude
       });
-      const statusName = formatStatusName(chosen);
+      if (!applied) {
+        this.logAction(`${target.name} is Immune to ${statusName}`);
+        continue;
+      }
       const verb = isGrantedStatus(chosen) ? 'Grants' : 'Afflicts';
       const magText = magnitude != null ? ` (${formatSignedPercent(magnitude)})` : '';
       this.logAction(`${verb} ${statusName}${magText} to ${target.name} ${formatDuration(raw.dur)}`);
@@ -582,13 +586,17 @@ class Battle {
       }
     } else if (actionType === 'status') {
       const magnitude = actionResult.magnitude != null ? actionResult.magnitude : raw.val;
-      applyEffect(target, (raw.st || '').toUpperCase(), character.habitRank, character.name, {
+      const applied = applyEffect(target, (raw.st || '').toUpperCase(), character.habitRank, character.name, {
         duration: raw.dur,
         magnitude,
         damageRate: actionResult.damageRate,
         immunities: raw.immunities
       });
       const statusName = formatStatusName(raw.st);
+      if (!applied) {
+        this.logAction(`${target.name} is Immune to ${statusName}`);
+        return;
+      }
       const st = String(raw.st || '').toLowerCase().replace(/-/g, '_');
       let magText = '';
       if (['advantage', 'weakened', 'vulnerable', 'resistance', 'evade'].includes(st) && magnitude != null) {

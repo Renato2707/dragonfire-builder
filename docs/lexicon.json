@@ -484,7 +484,8 @@
     "immunity": {
       "id": "immunity",
       "category": "positive",
-      "immunities": "from options.immunities"
+      "immunities": "from action.immunities; default [vulnerable, weakened]",
+      "effect": "applyEffect returns null for listed statuses; applying Immunity purges them if already present"
     },
     "normalization": "st lowercased; '-' → '_'; catalog key UPPER_SNAKE",
     "granted_statuses": [
