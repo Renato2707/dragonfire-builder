@@ -292,7 +292,8 @@ class Battle {
       if (!character || character.isDead) continue;
       const free = phase === PHASES.COMBAT_START
         || phase === PHASES.ON_SELF_FIRST_DAMAGE
-        || phase === PHASES.ON_ALLY_FIRE_DAMAGE;
+        || phase === PHASES.ON_ALLY_FIRE_DAMAGE
+        || phase === PHASES.ON_TAUNT;
       if (!free && !canUseAbilities(character)) continue;
       for (const habit of character.getHabitsForPhase(r, phase)) {
         this.executeHabit(character, habit, phase, r);
@@ -338,8 +339,12 @@ class Battle {
     const pools = this.teamPools(character);
     const alive = pools.enemies.filter(c => c && !c.isDead && c !== character);
     if (!alive.length) return null;
-    const taunters = alive.filter(c => hasEffect(c, 'taunt'));
-    return taunters[0] || alive[Math.floor(Math.random() * alive.length)];
+    const taunt = getEffect(character, 'taunt');
+    if (taunt && taunt.appliedBy) {
+      const forced = alive.find(c => c.name === taunt.appliedBy || c.id === taunt.appliedBy);
+      if (forced) return forced;
+    }
+    return alive[Math.floor(Math.random() * alive.length)];
   }
 
   performOneBasic(character, extra) {
@@ -591,28 +596,37 @@ class Battle {
       }
     } else if (actionType === 'status') {
       const magnitude = actionResult.magnitude != null ? actionResult.magnitude : raw.val;
-      const applied = applyEffect(target, (raw.st || '').toUpperCase(), character.habitRank, character.name, {
-        duration: raw.dur,
+      let st = String(raw.st || '').toLowerCase().replace(/-/g, '_');
+      let dur = raw.dur;
+      if (raw.ifAlready && raw.ifAlready.st && hasEffect(target, st)) {
+        st = String(raw.ifAlready.st).toLowerCase().replace(/-/g, '_');
+        if (raw.ifAlready.dur != null) dur = raw.ifAlready.dur;
+      }
+      const applied = applyEffect(target, st.toUpperCase(), character.habitRank, character.name, {
+        duration: dur,
         magnitude,
         damageRate: actionResult.damageRate,
         immunities: raw.immunities
       });
-      const statusName = formatStatusName(raw.st);
+      const statusName = formatStatusName(st);
       if (!applied) {
         this.logAction(`${target.name} is Immune to ${statusName}`);
         return;
       }
-      const st = String(raw.st || '').toLowerCase().replace(/-/g, '_');
       let magText = '';
       if (['advantage', 'weakened', 'vulnerable', 'resistance', 'evade'].includes(st) && magnitude != null) {
         magText = ` (${formatSignedPercent(magnitude)})`;
       } else if (['burn', 'panic', 'bleed'].includes(st) && actionResult.damageRate != null) {
         magText = ` (Damage Rate: ${formatSignedPercent(actionResult.damageRate)})`;
       }
-      if (isGrantedStatus(raw.st)) {
-        this.logAction(`Grants ${statusName}${magText} to ${target.name} ${formatDuration(raw.dur)}${enhancedNote(raw.scaleStat)}`);
+      if (isGrantedStatus(st)) {
+        this.logAction(`Grants ${statusName}${magText} to ${target.name} ${formatDuration(dur)}${enhancedNote(raw.scaleStat)}`);
       } else {
-        this.logAction(`Afflicts ${target.name} with ${statusName}${magText} ${formatDuration(raw.dur)}${enhancedNote(raw.scaleStat)}`);
+        this.logAction(`Afflicts ${target.name} with ${statusName}${magText} ${formatDuration(dur)}${enhancedNote(raw.scaleStat)}`);
+      }
+      if (st === 'taunt') {
+        character.lastTauntTarget = target;
+        this.executeHabitsForPhase(PHASES.ON_TAUNT, [character], this.currentRound);
       }
     } else if (actionType === 'dmg') {
       for (const dmg of actionResult.damages) {

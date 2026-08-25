@@ -219,6 +219,12 @@ function selectTargets(caster, friendlyTeam, enemyTeam, targetingParsed) {
     return marked.slice(0, 1);
   }
 
+  if (select === 'last_taunt') {
+    const last = caster.lastTauntTarget;
+    if (!last || last.isDead) return [];
+    return [last];
+  }
+
   if (select === 'last_cleanse') {
     const last = caster.lastCleanse;
     if (!last || last.isDead) return [];

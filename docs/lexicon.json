@@ -63,6 +63,12 @@
       "when": "Any ally (including self) receives Fire Damage. Use oncePerRound for The King's Ire.",
       "example": { "phase": "on_ally_fire_damage", "oncePerRound": true, "rounds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], "actions": [] }
     },
+    "on_taunt": {
+      "canonical": "on_taunt",
+      "type": "string",
+      "when": "After this character successfully afflicts Taunt (not ifAlready Stagger conversion). Target via select last_taunt.",
+      "example": { "phase": "on_taunt", "rounds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], "actions": [{ "t": "mod", "tgt": { "side": "enemy", "select": "last_taunt" } }] }
+    },
     "low_health": {
       "canonical": "low_health",
       "type": "string",
@@ -458,7 +464,8 @@
     "taunt": {
       "id": "taunt",
       "category": "control",
-      "forcedTarget": true
+      "forcedTarget": true,
+      "effect": "Afflicted unit's Basic Attack must target appliedBy. ifAlready.st converts a second Taunt into Stagger (Siren's Call)."
     },
     "stun": {
       "id": "stun",

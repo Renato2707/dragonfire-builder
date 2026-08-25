@@ -268,6 +268,23 @@ function mockFx(ids) {
   console.log('✓ First-Strike / Slow initiative order\n');
 }
 
+{
+  const d = (id, team, slot) => new Character({
+    id, name: id, breed: 'Warrior', rarity: 'Rare', stats: { str: 80, inst: 10, int: 10, init: 10 }
+  }, team, slot);
+  const vael = d('vael', 0, 1);
+  const dummy = d('dummy', 0, 0);
+  const foe = d('foe', 1, 1);
+  applyEffect(foe, 'TAUNT', 1, vael.name, { duration: 1 });
+  const btl = new Battle([vael, dummy], [foe], { verbose: false });
+  const forced = btl.selectBasicAttackTarget(foe);
+  if (forced !== vael) throw new Error(`Taunt should force Basic onto vael, got ${forced && forced.name}`);
+  applyEffect(foe, 'STAGGER', 1, vael.name, { duration: 1 });
+  const already = hasEffect(foe, 'taunt');
+  if (!already) throw new Error('setup taunt missing');
+  console.log('✓ Taunt forces Basic Attack onto appliedBy\n');
+}
+
 try {
   // Passo 1: Carregar dragões
   console.log('1️⃣  Carregando dragões...');
