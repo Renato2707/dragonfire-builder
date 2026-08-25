@@ -139,6 +139,33 @@ function mockFx(ids) {
   console.log('✓ lastBasicTarget exclude + breed/class targeting\n');
 }
 
+{
+  const d = (id, team, slot) => new Character({
+    id, name: id, breed: 'Warrior', rarity: 'Rare', stats: { str: 80, inst: 10, int: 10, init: 10 }
+  }, team, slot);
+  const a = d('striker', 0, 1);
+  const b = d('dummy', 1, 1);
+  b.maxHealth = 10000;
+  b.currentHealth = 10000;
+  applyEffect(a, 'DOUBLE_STRIKE', 1, a.name, { duration: 2 });
+  const btl = new Battle([a], [b], { verbose: false });
+  btl.currentRound = 1;
+  btl.executeCharacterAction(a);
+  const basics = btl.battleLog.filter(line => /Basic Attack/.test(line));
+  if (basics.length !== 2) throw new Error(`expected 2 Basic Attacks, got ${basics.length}: ${basics.join(' | ')}`);
+  if (!basics[1].includes('Double-Strike')) throw new Error('2nd hit should log Double-Strike');
+  const none = d('plain', 0, 1);
+  const dummy2 = d('dummy2', 1, 1);
+  dummy2.maxHealth = 10000;
+  dummy2.currentHealth = 10000;
+  const btl2 = new Battle([none], [dummy2], { verbose: false });
+  btl2.currentRound = 1;
+  btl2.executeCharacterAction(none);
+  const one = btl2.battleLog.filter(line => /launches a Basic Attack/.test(line));
+  if (one.length !== 1) throw new Error(`plain dragon should launch 1 basic, got ${one.length}`);
+  console.log('✓ Double-Strike 2nd Basic Attack\n');
+}
+
 try {
   // Passo 1: Carregar dragões
   console.log('1️⃣  Carregando dragões...');

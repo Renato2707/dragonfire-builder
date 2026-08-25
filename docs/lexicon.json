@@ -374,7 +374,7 @@
     "double_strike": {
       "id": "double_strike",
       "category": "positive",
-      "effect": "extraActions = 1",
+      "effect": "After the first Basic Attack (and its after_basic_attack hooks), launch a 2nd Basic Attack this turn, then fire after_basic_attack again. Blocked by Stagger.",
       "stackable": false
     },
     "recovery": {

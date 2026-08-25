@@ -257,14 +257,29 @@ class Battle {
       this.executeHabitsForPhase(PHASES.LOW_HEALTH, [character], this.currentRound);
     }
     if (character.isDead) return;
+    this.resolveBasicAttacks(character);
+  }
+
+  resolveBasicAttacks(character) {
     if (!canAttack(character)) {
       this.logAction(`${character.name} cannot launch a Basic Attack (Stagger)`);
       return;
     }
+    this.performOneBasic(character, false);
+    if (character.isDead) return;
+    if (!hasEffect(character, 'double_strike')) return;
+    if (!canAttack(character)) {
+      this.logAction(`${character.name} cannot launch a 2nd Basic Attack (Stagger)`);
+      return;
+    }
+    this.performOneBasic(character, true);
+  }
+
+  performOneBasic(character, extra) {
     const defender = this.selectBasicAttackTarget(character);
-    if (!defender) return;
+    if (!defender) return false;
     character.lastBasicTarget = defender;
-    this.executeBasicAttack(character, defender);
+    this.executeBasicAttack(character, defender, extra);
     character.lastDamageTarget = defender;
     if (!character.isDead && canUseAbilities(character)) {
       const kit = character.commandKit;
@@ -272,6 +287,7 @@ class Battle {
       this.executeKit(character, kit, PHASES.AFTER_BASIC_ATTACK, this.currentRound, label);
       this.executeHabitsForPhase(PHASES.AFTER_BASIC_ATTACK, [character], this.currentRound);
     }
+    return true;
   }
 
   selectBasicAttackTarget(character) {
@@ -281,10 +297,12 @@ class Battle {
     return taunters[0] || alive[Math.floor(Math.random() * alive.length)];
   }
 
-  executeBasicAttack(attacker, defender) {
+  executeBasicAttack(attacker, defender, extra = false) {
     const damageType = this.selectDamageType(attacker);
     const rawDamage = calculateFinalDamage(attacker, defender, damageType, 0, { basic: true });
-    this.logAction(`${attacker.name} launches a Basic Attack`);
+    this.logAction(extra
+      ? `${attacker.name} launches a 2nd Basic Attack (Double-Strike)`
+      : `${attacker.name} launches a Basic Attack`);
     if (tryEvade(defender)) {
       this.logAction(`${defender.name} Evades the ${formatDamageTypeName(damageType)}`);
       return;
