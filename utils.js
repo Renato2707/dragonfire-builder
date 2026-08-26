@@ -226,7 +226,8 @@ function applyChanceIf(chance, chanceIf, target, extras = {}) {
     result *= Number(mult) || 1;
   }
   if (chanceIf.allyStatus && Array.isArray(extras.allies)) {
-    if (extras.allies.some(ally => ally && statusConditionMet(ally, chanceIf.allyStatus))) {
+    const living = extras.allies.filter(ally => ally && !ally.isDead);
+    if (living.some(ally => statusConditionMet(ally, chanceIf.allyStatus))) {
       result *= Number(chanceIf.mult) || 1;
     }
   }

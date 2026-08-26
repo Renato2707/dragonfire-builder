@@ -183,7 +183,7 @@
         "chanceIf": {
           "type": "object",
           "example": { "bleed": 2, "burn": 2, "taunt": 2, "control": 2, "stacks": { "id": "rising_tide", "min": 6 }, "mult": 2 },
-          "desc": "Status keys multiply chance if TARGET has the status. stacks uses the CASTER (Blood Moon / Eclipsing Strike: ×2 at Rising Tide 6+). Also on the block (Eclipsing Strike)."
+          "desc": "Status keys multiply chance if TARGET has the status. stacks uses the CASTER (Blood Moon / Eclipsing Strike: ×2 at Rising Tide 6+). allyStatus: any living ally including self (New Moon / Full Moon: ×2 if any ally has Advantage). Also on the block (Eclipsing Strike)."
         },
         "ifStacks": {
           "type": "object",

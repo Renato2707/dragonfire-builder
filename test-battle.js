@@ -44,6 +44,15 @@ function mockFx(ids) {
   if (applyChanceIf(25, { stacks: { id: 'rising_tide', min: 6 }, mult: 2 }, clean, { attacker: { getStackCount: () => 3 } }) !== 25) {
     throw new Error('chanceIf.stacks below min should stay 25');
   }
+  if (applyChanceIf(25, { allyStatus: 'advantage', mult: 2 }, clean, { allies: [mockFx(['advantage'])] }) !== 50) {
+    throw new Error('chanceIf.allyStatus Advantage ×2 failed');
+  }
+  if (applyChanceIf(25, { allyStatus: 'advantage', mult: 2 }, clean, { allies: [clean] }) !== 25) {
+    throw new Error('chanceIf.allyStatus without Advantage should stay 25');
+  }
+  if (applyChanceIf(25, { allyStatus: 'advantage', mult: 2 }, clean, { allies: [{ ...mockFx(['advantage']), isDead: true }] }) !== 25) {
+    throw new Error('retreated ally Advantage must not double Rising Tide chance');
+  }
   console.log('✓ chanceIf / ifBonus / control\n');
 }
 
@@ -490,6 +499,30 @@ function mockFx(ids) {
   const bleedChance = applyChanceIf(25, { stacks: { id: 'rising_tide', min: 6 }, mult: 2 }, foe, extras);
   if (bleedChance !== 50) throw new Error(`Blood Moon Bleed at 6 stacks should be 50%, got ${bleedChance}`);
   console.log('✓ chanceIf.stacks Blood Moon / Eclipsing Strike\n');
+}
+
+{
+  const moon = new Character({
+    id: 'moondancer', name: 'Moondancer', breed: 'Warrior', rarity: 'Rare',
+    stats: { str: 10, inst: 10, int: 10, init: 10 }
+  }, 0, 1);
+  const ally = new Character({
+    id: 'syrax', name: 'Syrax', breed: 'Sentinel', rarity: 'Rare',
+    stats: { str: 10, inst: 10, int: 10, init: 10 }
+  }, 0, 0);
+  const spec = { allyStatus: 'advantage', mult: 2 };
+  const btl = new Battle([moon, ally], [], { verbose: false });
+  const extras = { allies: btl.alliesOf(moon), attacker: moon };
+  if (applyChanceIf(25, spec, moon, extras) !== 25) throw new Error('New Moon base chance should be 25');
+  applyEffect(ally, 'ADVANTAGE', 1, 'x', { duration: 2, magnitude: 20 });
+  if (applyChanceIf(25, spec, moon, extras) !== 50) throw new Error('any ally Advantage should double Rising Tide chance');
+  ally.isDead = true;
+  if (applyChanceIf(25, spec, moon, extras) !== 25) throw new Error('dead ally Advantage should not double');
+  ally.isDead = false;
+  applyEffect(moon, 'ADVANTAGE', 1, 'x', { duration: 2, magnitude: 20 });
+  const extrasSelf = { allies: btl.alliesOf(moon), attacker: moon };
+  if (applyChanceIf(25, spec, moon, extrasSelf) !== 50) throw new Error('self Advantage should also double');
+  console.log('✓ chanceIf.allyStatus New Moon / Full Moon\n');
 }
 
 {
