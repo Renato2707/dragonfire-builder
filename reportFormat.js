@@ -59,9 +59,7 @@ function formatMagnitude(stat, rawValue, isVanguard) {
   const value = String(rawValue || '').trim();
   const numeric = value.replace('%', '');
   if (isVanguard && CORE_STAT_NAMES.has(stat)) return `+${numeric} ${stat}`;
-  if (value.startsWith('+') || value.startsWith('-')) {
-    return `${value} ${stat}`;
-  }
+  if (value.startsWith('+') || value.startsWith('-')) return `${value} ${stat}`;
   return `${value} ${stat}`;
 }
 
@@ -74,6 +72,42 @@ function parseDuration(extra) {
 
 function effectKey(effect) {
   return [effect.target, effect.skill, effect.source, effect.mag].join('|');
+}
+
+function isRosterRow(line) {
+  if (/^Team [AB]:$/.test(line) || /^Final Status/.test(line)) return true;
+  return /^(Left Flank|Vanguard|Right Flank) · /.test(line);
+}
+
+function isRetreatEvent(line) {
+  return /^[A-Za-z][A-Za-z' -]* retreated$/.test(line);
+}
+
+function lastTeamSnapshot(rows) {
+  const filtered = (rows || []).filter(isRosterRow);
+  let start = -1;
+  for (let i = 0; i < filtered.length; i += 1) {
+    if (filtered[i] === 'Team A:') start = i;
+  }
+  return start >= 0 ? filtered.slice(start) : filtered;
+}
+
+function parseRecoveryLine(battle, actor, skill, raw) {
+  const split = splitTarget(battle, raw);
+  const rate = skill && skill !== 'Basic Attack' ? healRateOf(findCharacter(battle, actor), skill) : null;
+  const amount = Number((split.rest.match(/\+?(\d+)\s+Troop Capacity/i) || [])[1] || 0);
+  const by = (split.rest.match(/enhanced by (\w+)/i) || [])[1];
+  const bits = [rate != null ? `Recovery +${rate}%` : 'Recovery'];
+  if (by) bits.push(`enhanced by ${by}`);
+  return {
+    type: 'recover',
+    actor: actor || split.name,
+    skill: skill && skill !== 'Basic Attack' ? skill : 'Recovery',
+    target: split.name,
+    amount,
+    detail: bits.join(', '),
+    tick: !skill || skill === 'Basic Attack'
+  };
 }
 
 function parseLog(battle) {
@@ -92,9 +126,10 @@ function parseLog(battle) {
   const ensureRound = number => {
     let found = rounds.find(r => r.number === number);
     if (!found) {
-      found = { number, turnOrder: [], actors: [], roster: [] };
+      found = { number, turnOrder: [], actors: [], roster: [], ticks: [] };
       rounds.push(found);
     }
+    if (!found.ticks) found.ticks = [];
     return found;
   };
 
@@ -174,12 +209,27 @@ function parseLog(battle) {
       continue;
     }
 
-    if (skipRoster && (/^Team [AB]:$/.test(line) || /Troop Capacity/.test(line))) {
+    match = line.match(/^Applies Recovery to (.+)$/);
+    if (match) {
+      const heal = parseRecoveryLine(battle, actor, skill, match[1]);
+      if (heal.tick) ensureRound(round || 1).ticks.push(heal);
+      else if (actor) pushAction(actor, heal);
+      else ensureRound(round || 1).ticks.push(heal);
       i += 1;
       continue;
     }
 
-    if (/^Team [AB]:$/.test(line) || /Troop Capacity/.test(line) || /retreated/.test(line)) {
+    if (isRetreatEvent(line)) {
+      i += 1;
+      continue;
+    }
+
+    if (skipRoster && isRosterRow(line)) {
+      i += 1;
+      continue;
+    }
+
+    if (isRosterRow(line)) {
       if (round) ensureRound(round).roster.push(line);
       i += 1;
       continue;
@@ -287,28 +337,6 @@ function parseLog(battle) {
       actor = actor || match[1];
       skill = skill || match[3];
       pushEffect(match[1], n === 1 ? `1 stack of ${match[3]}` : `${n} stacks of ${match[3]}`, match[5]);
-      i += 1;
-      continue;
-    }
-
-    match = line.match(/^Applies Recovery to (.+)$/);
-    if (match) {
-      const split = splitTarget(battle, match[1]);
-      const rate = healRateOf(findCharacter(battle, actor), skill);
-      const amount = Number((split.rest.match(/\+?(\d+)\s+Troop Capacity/i) || [])[1] || 0);
-      const by = (split.rest.match(/enhanced by (\w+)/i) || [])[1];
-      const bits = [rate != null ? `Recovery +${rate}%` : 'Recovery'];
-      if (by) bits.push(`enhanced by ${by}`);
-      if (actor) {
-        pushAction(actor, {
-          type: 'recover',
-          actor,
-          skill,
-          target: split.name,
-          amount,
-          detail: bits.join(', ')
-        });
-      }
       i += 1;
       continue;
     }
@@ -464,9 +492,19 @@ export function formatBattleReport(battle, formationText) {
         }
       }
     }
-    if (pack.roster.length) {
+
+    if (pack.ticks && pack.ticks.length) {
+      for (const heal of pack.ticks) {
+        const left = applyHeal(heal.target, heal.amount);
+        out.push(`  ${nameTag(heal.target)} is under the effect of [ Recovery ] from itself. ${heal.detail}. +${heal.amount} Troop gained.`);
+        out.push(`  ${nameTag(heal.target)} recovers ${heal.amount} troops (${left} remaining).`);
+      }
+    }
+
+    const roster = lastTeamSnapshot(pack.roster);
+    if (roster.length) {
       out.push(BAR);
-      for (const row of pack.roster) out.push(`  ${row}`);
+      for (const row of roster) out.push(`  ${row}`);
     }
   }
 
@@ -480,9 +518,8 @@ export function formatBattleReport(battle, formationText) {
     }
     out.push('  Final Status:');
     const last = parsed.rounds[parsed.rounds.length - 1];
-    if (last && last.roster.length) {
-      for (const row of last.roster) out.push(`  ${row}`);
-    }
+    const roster = last ? lastTeamSnapshot(last.roster) : [];
+    for (const row of roster) out.push(`  ${row}`);
   }
 
   return out.filter((line, index) => !(line === '' && index === 0)).join('\n');
