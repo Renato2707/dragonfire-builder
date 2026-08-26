@@ -421,6 +421,38 @@ function mockFx(ids) {
 }
 
 {
+  const moon = new Character({
+    id: 'moondancer', name: 'Moondancer', breed: 'Warrior', rarity: 'Rare',
+    stats: { str: 10, inst: 10, int: 10, init: 10 }
+  }, 0, 1);
+  const sentinel = new Character({
+    id: 'syrax', name: 'Syrax', breed: 'Sentinel', rarity: 'Rare',
+    stats: { str: 10, inst: 10, int: 10, init: 10 }
+  }, 0, 0);
+  const habit = new Habit({ name: 'New Moon', structured: [] }, 'moondancer');
+  const raw = {
+    t: 'mod',
+    mods: [
+      { stat: 'inst', pct: [9, 10.8, 12.6, 15.3, 18] },
+      { stat: 'tactical_dealt', pct: [6, 7.2, 8.4, 10.2, 12] }
+    ],
+    ifStacks: { id: 'rising_tide', min: 4, mult: 1.5 },
+    dur: 2
+  };
+  executeHabitAction(habit, raw, moon, [sentinel], 1, { skipChance: true });
+  if (sentinel.getPercentTotal('inst') !== 9 || sentinel.getPercentTotal('tactical_dealt') !== 6) {
+    throw new Error('New Moon without 4 stacks should stay 9 / 6');
+  }
+  sentinel.percentMods = [];
+  moon.addStack('rising_tide', {}, 'combat', { stacks: 4, maxStacks: 8 });
+  executeHabitAction(habit, raw, moon, [sentinel], 1, { skipChance: true });
+  if (sentinel.getPercentTotal('inst') !== 13.5 || sentinel.getPercentTotal('tactical_dealt') !== 9) {
+    throw new Error(`New Moon at 4 stacks should be 13.5 / 9, got ${sentinel.getPercentTotal('inst')} / ${sentinel.getPercentTotal('tactical_dealt')}`);
+  }
+  console.log('✓ ifStacks New Moon 1.5x at Rising Tide 4+\n');
+}
+
+{
   const d = (id, team, slot) => new Character({
     id, name: id, breed: 'Warrior', rarity: 'Rare', stats: { str: 80, inst: 10, int: 10, init: 10 }
   }, team, slot);

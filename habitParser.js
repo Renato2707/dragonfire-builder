@@ -98,10 +98,26 @@ function ifBonusApplies(ifBonus, attacker, target, extras = {}) {
   return checks.length > 0 && checks.every(Boolean);
 }
 
+function bonusSpec(raw) {
+  if (!raw) return null;
+  if (raw.ifBonus) return raw.ifBonus;
+  if (raw.ifStacks) {
+    const s = raw.ifStacks;
+    return {
+      stacks: { id: s.id, min: s.min != null ? s.min : 1 },
+      mult: s.mult,
+      pct: s.pct,
+      dur: s.dur
+    };
+  }
+  return null;
+}
+
 function resolveDuration(raw, attacker, target, extras = {}) {
   let dur = raw.dur == null ? 'combat' : raw.dur;
-  if (raw.ifBonus && raw.ifBonus.dur != null && ifBonusApplies(raw.ifBonus, attacker, target, extras)) {
-    dur = raw.ifBonus.dur;
+  const bonus = bonusSpec(raw);
+  if (bonus && bonus.dur != null && ifBonusApplies(bonus, attacker, target, extras)) {
+    dur = bonus.dur;
   }
   return dur;
 }
@@ -304,8 +320,9 @@ function executeModAction(habit, actionData, attacker, targets, scalingValue, ra
   for (const target of targets) {
     if (!target || target.isDead) continue;
     const duration = resolveDuration(raw, attacker, target, extras);
-    const value = ifBonusApplies(raw.ifBonus, attacker, target, extras)
-      ? applyIfBonusValue(scalingValue || {}, raw.ifBonus, attacker)
+    const bonus = bonusSpec(raw);
+    const value = ifBonusApplies(bonus, attacker, target, extras)
+      ? applyIfBonusValue(scalingValue || {}, bonus, attacker)
       : (scalingValue || {});
     const valueFlags = value.__fixed || flags;
     if (raw.t === 'stack' && typeof target.addStack === 'function') {
@@ -382,7 +399,7 @@ function executeDamageAction(habit, actionData, attacker, targets, scalingValue,
   }
   for (const target of targets) {
     if (!target || target.isDead) continue;
-    const rate = resolveIfBonusRate(baseRate, raw.ifBonus, attacker, target, extras);
+    const rate = resolveIfBonusRate(baseRate, bonusSpec(raw), attacker, target, extras);
     damages.push({ target: target.name, amount: calculateFinalDamage(attacker, target, damageType, rate) });
   }
   return damages;
@@ -398,7 +415,7 @@ function executeHealAction(habit, actionData, attacker, targets, scalingValue, e
   }
   for (const target of targets) {
     if (!target || target.isDead) continue;
-    const usedRate = resolveIfBonusRate(rate, raw.ifBonus, attacker, target, extras);
+    const usedRate = resolveIfBonusRate(rate, bonusSpec(raw), attacker, target, extras);
     let amount = target.maxHealth * (usedRate / 100);
     if (typeof attacker.getRecoveryDealtMultiplier === 'function') amount *= attacker.getRecoveryDealtMultiplier();
     if (typeof target.getRecoveryReceivedMultiplier === 'function') amount *= target.getRecoveryReceivedMultiplier();

@@ -177,6 +177,12 @@
         "pick": { "type": "string", "value": "random", "desc": "One roll, one random mods[] entry (Phantom's Veil: Physical XOR Tactical XOR Fire Received)" },
         "chance": { "type": ["number", "number[5]"] },
         "chanceIf": { "type": "object", "example": { "bleed": 2, "burn": 2, "taunt": 2, "control": 2 }, "desc": "For each key (status id or control): if TARGET has that status, chance *= multiplier. control = Stun|Stagger|Overwhelm|Confusion." },
+        "ifStacks": {
+          "type": "object",
+          "fields": { "id": "stackId", "min": "integer", "mult": "number" },
+          "desc": "Alias of ifBonus.stacks+mult. New Moon: 1.5x Instinct/Tactical Dealt if caster Rising Tide >= 4."
+        },
+        "ifBonus": { "type": "object", "desc": "See dmg.ifBonus; also used on mod" },
         "perTarget": { "type": "object", "desc": "Repeats action N times = matching pool size" },
         "tgt": { "type": "Targeting" }
       },
