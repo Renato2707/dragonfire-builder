@@ -905,6 +905,38 @@ function mockFx(ids) {
 }
 
 {
+  const mk = (id, stars) => new Character({
+    id, name: id, breed: 'Hunter', rarity: 'Rare',
+    stats: { str: 10, inst: 10, int: 80, init: 10 }
+  }, 0, 1, { stars: stars || 10 });
+  const habit = new Habit({
+    name: 'Moonlit Hunt',
+    unlockStar: 10,
+    structured: [
+      { phase: 'round_start', rounds: [1], actions: [{ t: 'status', st: 'evade', val: [5, 6.5, 8, 10, 12.5], dur: 5, tgt: { side: 'self' } }] },
+      { phase: 'round_start', rounds: [6], actions: [{ t: 'mod', mods: [{ stat: 'fire_dealt', pct: [12, 15.6, 19.2, 24, 30] }], dur: 5, tgt: { side: 'self' } }] }
+    ]
+  }, 'tairax');
+  const tairax = mk('tairax', 10);
+  const foe = mk('foe', 10);
+  foe.teamId = 1;
+  tairax.setHabits([habit]);
+  const btl = new Battle([tairax], [foe], { verbose: false });
+  btl.executeHabit(tairax, habit, 'round_start', 1);
+  const evade = getEffect(tairax, 'evade');
+  if (!evade) throw new Error('Moonlit Hunt round 1 should grant Evade');
+  if (evade.evasionChance !== 5) throw new Error(`Evade rate should be 5, got ${evade.evasionChance}`);
+  if (evade.duration !== 5) throw new Error('Evade should last 5 rounds');
+  if (tairax.getPercentTotal('fire_dealt') !== 0) throw new Error('round 1 must not raise Fire Dealt');
+  btl.executeHabit(tairax, habit, 'round_start', 6);
+  if (tairax.getPercentTotal('fire_dealt') !== 12) throw new Error('round 6 should raise Fire Dealt +12');
+  const locked = mk('t2', 8);
+  locked.setHabits([habit]);
+  if (locked.getHabitsForPhase(1, 'round_start').length) throw new Error('Moonlit Hunt should stay locked below 10 stars');
+  console.log('✓ Moonlit Hunt Evade then Fire Dealt\n');
+}
+
+{
   const mk = (id, team, slot, breed) => new Character({
     id, name: id, breed: breed || 'Warrior', rarity: 'Rare',
     stats: { str: 10, inst: 80, int: 10, init: 10 }
