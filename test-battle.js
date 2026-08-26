@@ -346,6 +346,50 @@ function mockFx(ids) {
 }
 
 {
+  const mk = (id, hp, stars) => {
+    const c = new Character({
+      id, name: id, breed: 'Sentinel', rarity: 'Rare',
+      stats: { str: 10, inst: 80, int: 10, init: 10 }
+    }, 0, 1, { stars: stars || 8 });
+    c.maxHealth = 100;
+    c.currentHealth = hp;
+    return c;
+  };
+  const foe = new Character({
+    id: 'foe', name: 'foe', breed: 'Hunter', rarity: 'Rare',
+    stats: { str: 10, inst: 10, int: 10, init: 10 }
+  }, 1, 1);
+  const habit = new Habit({
+    name: 'Unbroken Splendor',
+    unlockStar: 8,
+    structured: [
+      { phase: 'combat_start', rounds: [1], actions: [{ t: 'mod', mods: [{ stat: 'fire_received', pct: [-7.5, -9, -10.5, -12.75, -15] }], dur: 'combat', tgt: { side: 'self' } }] },
+      { phase: 'round_start', rounds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], requires: { selfHpBelow: 50 }, actions: [
+        { t: 'mod', mods: [{ stat: 'dmg_received', pct: [-7.5, -9, -10.5, -12.75, -15] }], dur: 1, tgt: { side: 'self' } },
+        { t: 'cleanse', count: 1, chance: 100, filter: { increases: 'dmg_received' }, prefer: 'vulnerable', tgt: { side: 'self' } }
+      ] }
+    ]
+  }, 'sunfyre');
+  const sun = mk('sunfyre', 80, 8);
+  const btl = new Battle([sun], [foe], { verbose: false });
+  btl.executeHabit(sun, habit, 'combat_start', 1);
+  if (sun.getPercentTotal('fire_received') !== -7.5) throw new Error('Unbroken Splendor should reduce Fire Received at combat start');
+  btl.executeHabit(sun, habit, 'round_start', 1);
+  if (sun.getPercentTotal('dmg_received') !== 0) throw new Error('>=50% troops should skip the round-start band');
+  sun.currentHealth = 40;
+  applyEffect(sun, 'WEAKENED', 1, 'foe', { duration: 2, magnitude: -20 });
+  applyEffect(sun, 'VULNERABLE', 1, 'foe', { duration: 2, magnitude: 15 });
+  btl.executeHabit(sun, habit, 'round_start', 1);
+  if (sun.getPercentTotal('dmg_received') !== -7.5) throw new Error('<50% should reduce Damage Received');
+  if (hasEffect(sun, 'vulnerable')) throw new Error('Cleanse should prefer Vulnerable');
+  if (!hasEffect(sun, 'weakened')) throw new Error('Cleanse should not remove Weakened');
+  const locked = mk('sun2', 40, 6);
+  locked.setHabits([habit]);
+  if (locked.getHabitsForPhase(1, 'combat_start').length) throw new Error('Unbroken Splendor should stay locked below 8 stars');
+  console.log('✓ Unbroken Splendor Fire Received + Vulnerable Cleanse\n');
+}
+
+{
   const mk = (id, team, slot) => new Character({
     id, name: id, breed: 'Sentinel', rarity: 'Rare',
     stats: { str: 10, inst: 10, int: 10, init: 10 }

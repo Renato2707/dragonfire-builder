@@ -349,7 +349,7 @@
         "count": { "type": "integer", "default": 1 },
         "negative": { "type": "integer", "desc": "How many negative effects" },
         "control": { "type": "integer", "desc": "How many Control (Stun|Stagger|Overwhelm|Confusion)" },
-        "filter": { "type": "object" },
+        "filter": { "type": "object", "desc": "increases:dmg_received matches Vulnerable / defensePenalty (Unbroken Splendor). prefer:vulnerable sorts first." },
         "prefer": { "type": "string" },
         "chance": { "type": ["number", "number[5]"] },
         "tgt": { "type": "Targeting" }
