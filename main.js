@@ -192,6 +192,20 @@ function findCharacter(battle, name) {
   return (battle.allCharacters || []).find(c => c && c.name === name) || null;
 }
 
+function splitTarget(battle, raw) {
+  const text = String(raw || '').trim();
+  const names = ((battle && battle.allCharacters) || [])
+    .map(c => c && c.name)
+    .filter(Boolean)
+    .sort((a, b) => b.length - a.length);
+  for (const name of names) {
+    if (text === name) return { name, rest: '' };
+    if (text.startsWith(`${name} `)) return { name, rest: text.slice(name.length).trim() };
+  }
+  const match = text.match(/^([A-Za-z][A-Za-z'-]*)(?:\s+(.*))?$/);
+  return { name: match ? match[1] : text, rest: (match && match[2]) || '' };
+}
+
 function nameTag(name) {
   return `[ ${name} ]`;
 }
@@ -294,20 +308,24 @@ function rewriteLine(battle, line, ctx) {
 
   match = text.match(/^Afflicts (.+) with (.+)$/);
   if (match) {
+    const split = splitTarget(battle, match[1]);
     const skill = ctx.skill || 'effect';
-    const source = ctx.actor || match[1];
+    const source = ctx.actor || split.name;
+    const mag = [match[2], split.rest].filter(Boolean).join(' ');
     return {
-      text: `  ${nameTag(match[1])} is under the effect of ${nameTag(skill)} ${fromPhrase(source, match[1])}. ${match[2]}`,
+      text: effectLine(split.name, skill, source, mag),
       section: ctx.section
     };
   }
 
   match = text.match(/^Grants (.+) to (.+)$/);
   if (match) {
+    const split = splitTarget(battle, match[2]);
     const skill = ctx.skill || 'effect';
-    const source = ctx.actor || match[2];
+    const source = ctx.actor || split.name;
+    const mag = [match[1], split.rest].filter(Boolean).join(' ');
     return {
-      text: `  ${nameTag(match[2])} is under the effect of ${nameTag(skill)} ${fromPhrase(source, match[2])}. ${match[1]}`,
+      text: effectLine(split.name, skill, source, mag),
       section: ctx.section
     };
   }
@@ -325,9 +343,11 @@ function rewriteLine(battle, line, ctx) {
     };
   }
 
-  match = text.match(/^Applies Recovery to (.+) \((.+)\)(.*)$/);
+  match = text.match(/^Applies Recovery to (.+)$/);
   if (match) {
-    return { text: `  ${nameTag(match[1])} gains ${match[2]} Recovery.`, section: ctx.section };
+    const split = splitTarget(battle, match[1]);
+    const rest = split.rest ? ` ${split.rest}` : '';
+    return { text: `  ${nameTag(split.name)} gains Recovery${rest}.`, section: ctx.section };
   }
 
   match = text.match(/^Turn order: (.+)$/);
