@@ -4,6 +4,7 @@ import { loadDragons, getDragon, getAllDragons } from './data.js';
 import { Character, SLOT_NAMES, DEFAULT_LEVEL, DEFAULT_STARS, DEFAULT_HABIT_RANK } from './character.js';
 import { Battle } from './battle.js';
 import { loadDragonHabitsSync, loadCommandSync } from './habitParser.js';
+import { troopAdvantageSign, TROOP_ADVANTAGE_PCT } from './troopAdvantage.js';
 
 const SLOTS = [0, 1, 2];
 const TROOP_TYPES = [
@@ -131,6 +132,53 @@ function troopLabel(id) {
   return found && found.id ? found.label : '—';
 }
 
+function teamTroopOf(team) {
+  return team && team[0] ? team[0].troopType : null;
+}
+
+function advantagePhrase(ownTroop, enemyTroop) {
+  const sign = troopAdvantageSign(ownTroop, enemyTroop);
+  if (!sign) return '';
+  if (sign > 0) return ` Advantage (+${TROOP_ADVANTAGE_PCT}% DMG)`;
+  return ` Disadvantage (−${TROOP_ADVANTAGE_PCT}% DMG)`;
+}
+
+function affinityLine(character) {
+  const pct = typeof character.getTroopAffinityPct === 'function' ? character.getTroopAffinityPct() : 0;
+  if (pct > 0) return '  +20% to Dragon Stats';
+  if (pct < 0) return '  −20% to Dragon Stats';
+  return '';
+}
+
+function formatTeamFormation(title, team, enemyTroop) {
+  const troop = teamTroopOf(team);
+  const lines = [
+    `${title}:  ${troopLabel(troop)}${advantagePhrase(troop, enemyTroop)}`
+  ];
+  SLOTS.forEach(slot => {
+    const character = team.find(c => c.slotPosition === slot);
+    if (!character) {
+      lines.push(`  ${SLOT_NAMES[slot]} · —`);
+      return;
+    }
+    lines.push(
+      `  ${SLOT_NAMES[slot]} · ${character.name}: ${Math.round(character.currentHealth)}/${Math.round(character.maxHealth)} Troop Capacity${affinityLine(character)}`
+    );
+  });
+  return lines.join('\n');
+}
+
+function formatTroopFormation(battle) {
+  return [
+    '═'.repeat(55),
+    'Troop Formation',
+    '═'.repeat(55),
+    formatTeamFormation('Team A', battle.teamA, teamTroopOf(battle.teamB)),
+    formatTeamFormation('Team B', battle.teamB, teamTroopOf(battle.teamA)),
+    ''
+  ].join('\n');
+}
+
 function readTeam(prefix) {
   return SLOTS.map(slot => {
     const id = document.getElementById(`${prefix}-slot-${slot}`).value;
@@ -248,12 +296,12 @@ function affinityNote(character) {
   return '';
 }
 
-function renderStatus(container, team) {
+function renderStatus(container, team, enemyTroop) {
   container.innerHTML = '';
-  const troop = team[0] ? troopLabel(team[0].troopType) : '—';
+  const troop = teamTroopOf(team);
   const header = document.createElement('div');
   header.className = 'health';
-  header.textContent = `Tropa: ${troop}`;
+  header.textContent = `Tropa: ${troopLabel(troop)}${advantagePhrase(troop, enemyTroop)}`;
   header.style.marginBottom = '8px';
   container.appendChild(header);
   SLOTS.forEach(slot => {
@@ -274,10 +322,10 @@ function renderStatus(container, team) {
 
 function updateBattleDisplay() {
   const logElement = document.getElementById('battleLog');
-  logElement.textContent = currentBattle.getLog();
+  logElement.textContent = formatTroopFormation(currentBattle) + currentBattle.getLog();
   logElement.scrollTop = logElement.scrollHeight;
-  renderStatus(document.getElementById('teamAStatus'), currentBattle.teamA);
-  renderStatus(document.getElementById('teamBStatus'), currentBattle.teamB);
+  renderStatus(document.getElementById('teamAStatus'), currentBattle.teamA, teamTroopOf(currentBattle.teamB));
+  renderStatus(document.getElementById('teamBStatus'), currentBattle.teamB, teamTroopOf(currentBattle.teamA));
 }
 
 function reset() {
