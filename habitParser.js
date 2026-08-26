@@ -194,6 +194,7 @@ class Habit {
         chanceIf: item.chanceIf || null,
         oncePerRound: !!item.oncePerRound,
         onceWhen: item.onceWhen || null,
+        onceGroup: item.onceGroup || null,
         repeatPer: item.repeatPer || null,
         actions: item.actions || []
       });

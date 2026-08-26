@@ -124,7 +124,11 @@
     },
     "oncePerRound": {
       "type": "boolean",
-      "desc": "Consume the block on first trigger this round (The King's Ire: first ally Fire Damage). Cleared in advanceRetreatFlags. Skips activate log if already consumed."
+      "desc": "Consume on first trigger this round. Default key is habit:phase so sibling blocks share the lock (Adaptive Glory). Cleared in advanceRetreatFlags."
+    },
+    "onceGroup": {
+      "type": "string",
+      "desc": "Shared oncePerRound key. Adaptive Glory: all four damageType branches use onceGroup adaptive_glory so only the first hit of the round fires."
     },
     "onceWhen": {
       "type": "string",

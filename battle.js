@@ -285,8 +285,9 @@ class Battle {
   }
 
   onceKey(habit, block) {
-    const req = block.requires ? JSON.stringify(block.requires) : '';
-    return `${(habit && habit.name) || 'kit'}:${block.phase}:${req}`;
+    const name = (habit && habit.name) || 'kit';
+    if (block.onceGroup) return `${name}:${block.onceGroup}`;
+    return `${name}:${block.phase}`;
   }
 
   pendingBlocks(character, habit, blocks) {

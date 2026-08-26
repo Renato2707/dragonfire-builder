@@ -393,15 +393,15 @@ function mockFx(ids) {
   const mk = (id, team, slot) => new Character({
     id, name: id, breed: 'Sentinel', rarity: 'Rare',
     stats: { str: 10, inst: 10, int: 10, init: 10 }
-  }, team, slot);
+  }, team, slot, { stars: 10 });
   const glory = new Habit({
     name: 'Adaptive Glory',
-    unlockStar: 2,
+    unlockStar: 10,
     structured: [
-      { phase: 'on_self_first_damage', rounds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], oncePerRound: true, requires: { damageType: 'fire' }, actions: [{ t: 'heal', pct: 30, tgt: { side: 'self' } }] },
-      { phase: 'on_self_first_damage', rounds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], oncePerRound: true, requires: { damageType: 'tactical' }, actions: [{ t: 'mod', mods: [{ stat: 'dmg_dealt', pct: 12 }], dur: 1, tgt: { side: 'ally', count: 1, select: 'highest:troops' } }] },
-      { phase: 'on_self_first_damage', rounds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], oncePerRound: true, requires: { damageType: 'physical', excludeBasic: true }, actions: [{ t: 'mod', mods: [{ stat: 'dmg_dealt', pct: -12 }], dur: 1, tgt: { side: 'enemy', count: 1, select: 'highest:troops' } }] },
-      { phase: 'on_self_first_damage', rounds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], oncePerRound: true, requires: { damageType: 'basic' }, actions: [{ t: 'mod', mods: [{ stat: 'inst', pct: 12 }, { stat: 'init', pct: 6 }], dur: 1, tgt: { side: 'self' } }] }
+      { phase: 'on_self_first_damage', rounds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], oncePerRound: true, onceGroup: 'adaptive_glory', requires: { damageType: 'fire' }, actions: [{ t: 'heal', pct: 30, tgt: { side: 'self' } }] },
+      { phase: 'on_self_first_damage', rounds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], oncePerRound: true, onceGroup: 'adaptive_glory', requires: { damageType: 'tactical' }, actions: [{ t: 'mod', mods: [{ stat: 'dmg_dealt', pct: 12 }], dur: 1, tgt: { side: 'ally', count: 1, select: 'highest:troops' } }] },
+      { phase: 'on_self_first_damage', rounds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], oncePerRound: true, onceGroup: 'adaptive_glory', requires: { damageType: 'physical', excludeBasic: true }, actions: [{ t: 'mod', mods: [{ stat: 'dmg_dealt', pct: -12 }], dur: 1, tgt: { side: 'enemy', count: 1, select: 'highest:troops' } }] },
+      { phase: 'on_self_first_damage', rounds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], oncePerRound: true, onceGroup: 'adaptive_glory', requires: { damageType: 'basic' }, actions: [{ t: 'mod', mods: [{ stat: 'inst', pct: 12 }, { stat: 'init', pct: 6 }], dur: 1, tgt: { side: 'self' } }] }
     ]
   }, 'sunfyre');
   const run = (info) => {
@@ -434,7 +434,17 @@ function mockFx(ids) {
   const fireBasic = run({ type: 'fire', basic: true });
   if (fireBasic.sun.getPercentTotal('inst') !== 12) throw new Error('Fire Basic Attack is still a Basic Attack');
   if (fireBasic.sun.currentHealth !== 100) throw new Error('Fire Basic Attack must not take Fire Recovery branch');
-  console.log('✓ requires.damageType Adaptive Glory branches\n');
+  const chained = run({ type: 'fire', basic: false });
+  chained.btl.notifyDamage(chained.sun, { type: 'tactical', basic: false });
+  const chainedBuff = [chained.sun, chained.mate].some(c => c.getPercentTotal('dmg_dealt') === 12);
+  if (chainedBuff) throw new Error('second hit in the same round must not fire another Adaptive Glory branch');
+  const locked = mk('sun2', 0, 1);
+  locked.setStars(8);
+  locked.setHabits([glory]);
+  if (locked.getHabitsForPhase(1, 'on_self_first_damage').length) {
+    throw new Error('Adaptive Glory should stay locked below 10 stars');
+  }
+  console.log('✓ Adaptive Glory first-hit branches / shared oncePerRound / 10★\n');
 }
 
 {
