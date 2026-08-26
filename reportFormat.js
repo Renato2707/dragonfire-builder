@@ -60,7 +60,7 @@ function formatMagnitude(stat, rawValue, isVanguard) {
   const numeric = value.replace('%', '');
   if (isVanguard && CORE_STAT_NAMES.has(stat)) return `+${numeric} ${stat}`;
   if (value.startsWith('+') || value.startsWith('-')) {
-    return value.includes('%') ? `${value} ${stat}` : `${value} ${stat}`;
+    return `${value} ${stat}`;
   }
   return `${value} ${stat}`;
 }
@@ -86,7 +86,6 @@ function parseLog(battle) {
   let skill = null;
   let vanguard = false;
   let turnOrder = [];
-  let current = null;
   let seq = 0;
   let endKind = null;
   let skipRoster = false;
@@ -150,8 +149,7 @@ function parseLog(battle) {
     if (isBar(line) && /^Start of Round /.test(next)) {
       round = Number((next.match(/Round (\d+)/) || [])[1] || 0);
       phase = 'round_start';
-      current = ensureRound(round);
-      if (turnOrder.length) current.turnOrder = turnOrder.slice();
+      if (turnOrder.length) ensureRound(round).turnOrder = turnOrder.slice();
       skipRoster = false;
       i += 3;
       continue;
@@ -163,12 +161,8 @@ function parseLog(battle) {
       i += 3;
       continue;
     }
-    if (isBar(line)) {
+    if (isBar(line) || !line) {
       skipRoster = false;
-      i += 1;
-      continue;
-    }
-    if (!line) {
       i += 1;
       continue;
     }
@@ -236,16 +230,16 @@ function parseLog(battle) {
 
     match = line.match(/^Deals (\d+) (.+) to (.+)$/);
     if (match) {
-      const target = match[3];
-      const action = {
-        type: 'damage',
-        actor,
-        skill,
-        target,
-        amount: Number(match[1]),
-        dtype: match[2]
-      };
-      if (actor) pushAction(actor, action);
+      if (actor) {
+        pushAction(actor, {
+          type: 'damage',
+          actor,
+          skill,
+          target: match[3],
+          amount: Number(match[1]),
+          dtype: match[2]
+        });
+      }
       i += 1;
       continue;
     }
@@ -276,8 +270,7 @@ function parseLog(battle) {
     match = line.match(/^Afflicts (.+) with (.+)$/);
     if (match) {
       const split = splitTarget(battle, match[1]);
-      const mag = [match[2], split.rest].filter(Boolean).join(' ');
-      pushEffect(split.name, mag, match[2]);
+      pushEffect(split.name, [match[2], split.rest].filter(Boolean).join(' '), match[2]);
       i += 1;
       continue;
     }
@@ -285,8 +278,7 @@ function parseLog(battle) {
     match = line.match(/^Grants (.+) to (.+)$/);
     if (match) {
       const split = splitTarget(battle, match[2]);
-      const mag = [match[1], split.rest].filter(Boolean).join(' ');
-      pushEffect(split.name, mag, match[2]);
+      pushEffect(split.name, [match[1], split.rest].filter(Boolean).join(' '), match[2]);
       i += 1;
       continue;
     }
@@ -294,10 +286,9 @@ function parseLog(battle) {
     match = line.match(/^(.+?) gains (\d+) stacks? of (.+?) \(now (\d+)\)(.*)$/);
     if (match) {
       const n = Number(match[4]);
-      const label = n === 1 ? `1 stack of ${match[3]}` : `${n} stacks of ${match[3]}`;
       actor = actor || match[1];
       skill = skill || match[3];
-      pushEffect(match[1], label, match[5]);
+      pushEffect(match[1], n === 1 ? `1 stack of ${match[3]}` : `${n} stacks of ${match[3]}`, match[5]);
       i += 1;
       continue;
     }
@@ -305,8 +296,7 @@ function parseLog(battle) {
     match = line.match(/^Applies Recovery to (.+)$/);
     if (match) {
       const split = splitTarget(battle, match[1]);
-      const sourceChar = findCharacter(battle, actor);
-      const rate = healRateOf(sourceChar, skill);
+      const rate = healRateOf(findCharacter(battle, actor), skill);
       const amount = Number((split.rest.match(/\+?(\d+)\s+Troop Capacity/i) || [])[1] || 0);
       const by = (split.rest.match(/enhanced by (\w+)/i) || [])[1];
       const bits = [rate != null ? `Recovery +${rate}%` : 'Recovery'];
@@ -352,13 +342,6 @@ function snapshotFor(effects, name, atRound, beforeSeq) {
   return out;
 }
 
-function firstSeqOfTurn(bucket) {
-  const first = (bucket.actions || []).find(a => a.type === 'uses' || a.type === 'damage' || a.type === 'roll');
-  if (first && first.effect) return first.effect.seq;
-  if (bucket.actions && bucket.actions.length && bucket.actions[0].seq) return bucket.actions[0].seq;
-  return Infinity;
-}
-
 function minSeq(bucket, effects, name, round) {
   let min = Infinity;
   for (const action of bucket.actions || []) {
@@ -376,12 +359,41 @@ function formatEffect(battle, effect) {
   return `  ${nameTag(effect.target)} is under the effect of ${nameTag(effect.skill)} ${fromPhrase(battle, effect.source, effect.target)}. ${effect.mag}`;
 }
 
+function groupActions(actions) {
+  const groups = [];
+  let current = null;
+  for (const action of actions || []) {
+    if (action.type === 'uses') {
+      current = { skill: action.skill, actor: action.actor, extra: action.extra, items: [] };
+      groups.push(current);
+      continue;
+    }
+    if (!current) {
+      current = { skill: action.skill || 'effect', actor: action.actor, items: [] };
+      groups.push(current);
+    }
+    current.items.push(action);
+  }
+  return groups;
+}
+
 export function formatBattleReport(battle, formationText) {
   const parsed = parseLog(battle);
   const hp = {};
   for (const character of battle.allCharacters || []) {
     hp[character.name] = Math.round(character.maxHealth);
   }
+
+  const applyDamage = (name, amount) => {
+    hp[name] = Math.max(0, (hp[name] || 0) - amount);
+    return hp[name];
+  };
+  const applyHeal = (name, amount) => {
+    const character = findCharacter(battle, name);
+    const cap = character ? Math.round(character.maxHealth) : 99999;
+    hp[name] = Math.min(cap, (hp[name] || 0) + amount);
+    return hp[name];
+  };
 
   const out = [];
   out.push(formationText || '');
@@ -396,17 +408,6 @@ export function formatBattleReport(battle, formationText) {
   out.push(DASH);
   if (parsed.turnOrder.length) out.push(`Turn order: ${parsed.turnOrder.join(' → ')}`);
 
-  const applyDamage = (name, amount) => {
-    hp[name] = Math.max(0, (hp[name] || 0) - amount);
-    return hp[name];
-  };
-  const applyHeal = (name, amount) => {
-    const character = findCharacter(battle, name);
-    const cap = character ? Math.round(character.maxHealth) : 99999;
-    hp[name] = Math.min(cap, (hp[name] || 0) + amount);
-    return hp[name];
-  };
-
   for (const pack of parsed.rounds) {
     out.push(BAR);
     out.push(`• Round ${pack.number}`);
@@ -419,39 +420,44 @@ export function formatBattleReport(battle, formationText) {
       for (const effect of snapshotFor(parsed.effects, name, pack.number, cut)) {
         out.push(formatEffect(battle, effect));
       }
-      if (bucket.cannot) {
-        out.push(`  ${name} cannot act (${bucket.cannot})`);
-      }
-      for (const action of bucket.actions) {
-        if (action.type === 'uses') {
-          if (action.skill === 'Basic Attack') {
-            continue;
+      if (bucket.cannot) out.push(`  ${name} cannot act (${bucket.cannot})`);
+
+      for (const group of groupActions(bucket.actions)) {
+        const damages = group.items.filter(item => item.type === 'damage');
+        const recovers = group.items.filter(item => item.type === 'recover');
+        const rolls = group.items.filter(item => item.type === 'roll');
+        const fx = group.items.filter(item => item.type === 'effect');
+
+        for (const roll of rolls) {
+          out.push(`  [${roll.result}] ${roll.skill} → ${roll.target} (${roll.chance})`);
+        }
+
+        if (recovers.length) {
+          for (const heal of recovers) {
+            const left = applyHeal(heal.target, heal.amount);
+            const who = heal.actor === heal.target
+              ? 'on itself'
+              : `affecting ${nameTag(heal.target)}${laneSuffix(battle, heal.target)}`;
+            out.push(`  ${nameTag(heal.actor)} activates [ ${heal.skill} ] ${who}. Recovers ${heal.amount} total troops.`);
+            out.push(`  ${nameTag(heal.target)} recovers ${heal.amount} troops (${left} remaining).`);
           }
-          out.push(`  ${nameTag(action.actor)} uses [ ${action.skill} ].`);
-          continue;
-        }
-        if (action.type === 'effect') {
-          out.push(formatEffect(battle, action.effect));
-          continue;
-        }
-        if (action.type === 'roll') {
-          out.push(`  [${action.result}] ${action.skill} → ${action.target} (${action.chance})`);
-          continue;
-        }
-        if (action.type === 'recover') {
-          const left = applyHeal(action.target, action.amount);
-          out.push(`  ${nameTag(action.actor)} activates [ ${action.skill} ] ${action.actor === action.target ? 'on itself' : `affecting ${nameTag(action.target)}${laneSuffix(battle, action.target)}`}. ${action.detail}.`);
-          out.push(`  ${nameTag(action.target)} recovers ${action.amount} troops (${left} remaining).`);
-          continue;
-        }
-        if (action.type === 'damage') {
-          const left = applyDamage(action.target, action.amount);
-          const atk = action.skill === 'Basic Attack' || !action.skill
-            ? 'Basic Attack'
-            : action.skill;
-          out.push(`  ${nameTag(action.actor)} uses [ ${atk} ] to attack ${nameTag(action.target)}${laneSuffix(battle, action.target)}.`);
-          out.push(`  Deals ${action.amount} ${action.dtype} against ${nameTag(action.target)}.`);
-          out.push(`  ${nameTag(action.target)} takes ${action.amount} losses (${left} remaining).`);
+        } else if (damages.length) {
+          for (const hit of damages) {
+            const left = applyDamage(hit.target, hit.amount);
+            const atk = hit.skill || group.skill || 'Basic Attack';
+            out.push(`  ${nameTag(hit.actor || name)} uses [ ${atk} ] to attack ${nameTag(hit.target)}${laneSuffix(battle, hit.target)}.`);
+            out.push(`  Deals ${hit.amount} ${hit.dtype} against ${nameTag(hit.target)}.`);
+            out.push(`  ${nameTag(hit.target)} takes ${hit.amount} losses (${left} remaining).`);
+          }
+        } else if (fx.length) {
+          const targets = [];
+          for (const item of fx) {
+            if (!targets.includes(item.effect.target)) targets.push(item.effect.target);
+          }
+          const list = targets.map(target => `${nameTag(target)}${laneSuffix(battle, target)}`).join(', ');
+          out.push(`  ${nameTag(name)} activates [ ${group.skill} ] affecting ${list}.`);
+          const mags = fx.map(item => item.effect.mag).filter((mag, index, arr) => arr.indexOf(mag) === index);
+          if (mags.length) out.push(`  ${mags.join(' ')}`);
         }
       }
     }
