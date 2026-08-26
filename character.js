@@ -35,6 +35,7 @@ class Character {
     this.receivedRecoveryLastRound = false;
     this.receivedDamageThisRound = false;
     this.oncePerRoundFired = {};
+    this.oncePerCombatFired = {};
     this.activeEffects = [];
     this.actionLog = [];
     this.percentMods = [];
