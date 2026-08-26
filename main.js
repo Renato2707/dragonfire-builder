@@ -364,6 +364,11 @@ function formatBattleReport(battle) {
     const next = lines[i + 1] || '';
 
     if (isBar(line) && next === 'Start of Combat') {
+      if (!combatHeader) {
+        combat.push(BAR, 'Combat Phase', BAR);
+        combatHeader = true;
+      }
+      combat.push('Start of Combat:');
       i += 3;
       skipRoster = true;
       ctx.section = 'prep';
@@ -375,7 +380,7 @@ function formatBattleReport(battle) {
         combat.push(BAR, 'Combat Phase', BAR);
         combatHeader = true;
       }
-      combat.push(BAR, `Round ${number}`, BAR);
+      combat.push(BAR, `Start of Round ${number}:`, BAR);
       i += 3;
       skipRoster = false;
       ctx.section = 'combat';
