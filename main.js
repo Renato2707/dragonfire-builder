@@ -241,6 +241,7 @@ function rewriteLine(battle, line, ctx) {
     ctx.vanguard = vanguard;
     if (vanguard) ctx.section = 'prep';
     else if (ctx.section === 'prep') ctx.section = 'combat';
+    if (vanguard) return { text: '', section: 'prep' };
     return {
       text: `  ${actorTag(actor, battle)} uses [ ${skill} ].`,
       section: ctx.section
