@@ -220,7 +220,7 @@ function statusConditionMet(character, key) {
 function applyChanceIf(chance, chanceIf, target, extras = {}) {
   if (chance == null || !chanceIf || typeof chanceIf !== 'object') return chance;
   let result = Number(chance);
-  const skip = new Set(['mult', 'allyStatus', 'preyRecoveredLastRound', 'stacks']);
+  const skip = new Set(['mult', 'allyStatus', 'preyRecoveredLastRound', 'stacks', 'selfStatus']);
   if (chanceIf.preyRecoveredLastRound && extras.prey && extras.prey.receivedRecoveryLastRound) {
     const mult = chanceIf.mult != null ? chanceIf.mult : chanceIf.preyRecoveredLastRound;
     result *= Number(mult) || 1;
@@ -237,6 +237,12 @@ function applyChanceIf(chance, chanceIf, target, extras = {}) {
     const id = spec.id || spec;
     const min = spec.min != null ? Number(spec.min) : 1;
     if (caster && typeof caster.getStackCount === 'function' && caster.getStackCount(id) >= min) {
+      result *= Number(chanceIf.mult) || 1;
+    }
+  }
+  if (chanceIf.selfStatus) {
+    const caster = extras.attacker || extras.caster;
+    if (statusConditionMet(caster, chanceIf.selfStatus)) {
       result *= Number(chanceIf.mult) || 1;
     }
   }

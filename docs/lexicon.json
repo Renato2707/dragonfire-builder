@@ -183,7 +183,7 @@
         "chanceIf": {
           "type": "object",
           "example": { "bleed": 2, "burn": 2, "taunt": 2, "control": 2, "stacks": { "id": "rising_tide", "min": 6 }, "mult": 2 },
-          "desc": "Status keys multiply chance if TARGET has the status. stacks uses the CASTER (Blood Moon / Eclipsing Strike: ×2 at Rising Tide 6+). allyStatus: any living ally including self (New Moon / Full Moon: ×2 if any ally has Advantage). Also on the block (Eclipsing Strike)."
+          "desc": "Status keys multiply chance if TARGET has the status. stacks uses the CASTER. selfStatus uses the CASTER (Unyielding Resolve: ×1.5 if Weakened). allyStatus: any living ally including self."
         },
         "ifStacks": {
           "type": "object",
@@ -261,6 +261,10 @@
           "type": "object",
           "fields": { "st": "status_id", "dur": "number|combat" },
           "desc": "If TARGET already has action.st, apply ifAlready.st instead (Siren's Call: Taunt → Stagger). Does not fire on_taunt."
+        },
+        "onHit": {
+          "type": "Action",
+          "desc": "Run after this status is applied (Unyielding Resolve: cleanse Weakened on self)."
         },
         "tgt": { "type": "Targeting" }
       },

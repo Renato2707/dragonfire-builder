@@ -724,6 +724,12 @@ class Battle {
         character.lastTauntTarget = target;
         this.executeHabitsForPhase(PHASES.ON_TAUNT, [character], this.currentRound);
       }
+      if (raw.onHit) {
+        this.runAction(character, habit, {
+          ...raw.onHit,
+          tgt: raw.onHit.tgt || raw.tgt || { side: 'self' }
+        }, this.currentRound);
+      }
     } else if (actionType === 'dmg') {
       for (const dmg of actionResult.damages) {
         const actualDamage = this.dealDamage(target, dmg.amount, { type: raw.dt, basic: false, source: character });

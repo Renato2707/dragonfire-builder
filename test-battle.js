@@ -53,6 +53,13 @@ function mockFx(ids) {
   if (applyChanceIf(25, { allyStatus: 'advantage', mult: 2 }, clean, { allies: [{ ...mockFx(['advantage']), isDead: true }] }) !== 25) {
     throw new Error('retreated ally Advantage must not double Rising Tide chance');
   }
+  const weakened = mockFx(['weakened']);
+  if (applyChanceIf(20, { selfStatus: 'weakened', mult: 1.5 }, weakened, { attacker: weakened }) !== 30) {
+    throw new Error('Unyielding Resolve Weakened should be 30%');
+  }
+  if (applyChanceIf(20, { selfStatus: 'weakened', mult: 1.5 }, clean, { attacker: clean }) !== 20) {
+    throw new Error('Unyielding Resolve without Weakened should stay 20');
+  }
   console.log('✓ chanceIf / ifBonus / control\n');
 }
 
@@ -692,6 +699,47 @@ function mockFx(ids) {
   if (edge50.getPercentTotal('fire_received') !== -5) throw new Error('exactly 50% is the <75 band');
   if (edge25.getPercentTotal('fire_received') !== -10) throw new Error('exactly 25% is the <50 band');
   console.log('✓ Trial by Flame Fire Received bands\n');
+}
+
+{
+  const vermax = new Character({
+    id: 'vermax', name: 'Vermax', breed: 'Warrior', rarity: 'Rare',
+    stats: { str: 80, inst: 10, int: 10, init: 10 }
+  }, 0, 1, { stars: 10 });
+  const foe = new Character({
+    id: 'foe', name: 'Foe', breed: 'Hunter', rarity: 'Rare',
+    stats: { str: 10, inst: 10, int: 10, init: 10 }
+  }, 1, 1);
+  const habit = new Habit({
+    name: 'Unyielding Resolve',
+    unlockStar: 10,
+    structured: [{
+      phase: 'round_start',
+      rounds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+      actions: [{
+        t: 'status',
+        st: 'advantage',
+        val: 15,
+        dur: 2,
+        chance: 100,
+        chanceIf: { selfStatus: 'weakened', mult: 1.5 },
+        onHit: { t: 'cleanse', types: ['weakened'], count: 1 },
+        tgt: { side: 'self' }
+      }]
+    }]
+  }, 'vermax');
+  applyEffect(vermax, 'WEAKENED', 1, 'foe', { duration: 2, magnitude: -20 });
+  const btl = new Battle([vermax], [foe], { verbose: false });
+  btl.executeHabit(vermax, habit, 'round_start', 1);
+  if (!hasEffect(vermax, 'advantage')) throw new Error('Unyielding Resolve should grant Advantage');
+  if (hasEffect(vermax, 'weakened')) throw new Error('successful Advantage should Cleanse Weakened');
+  const locked = new Character({
+    id: 'v2', name: 'v2', breed: 'Warrior', rarity: 'Rare',
+    stats: { str: 80, inst: 10, int: 10, init: 10 }
+  }, 0, 1, { stars: 8 });
+  locked.setHabits([habit]);
+  if (locked.getHabitsForPhase(1, 'round_start').length) throw new Error('Unyielding Resolve should stay locked below 10 stars');
+  console.log('✓ Unyielding Resolve Advantage + Cleanse Weakened\n');
 }
 
 {
