@@ -96,6 +96,7 @@ function applyDamageMultipliers(baseDamage, attacker, defender, damageType, opti
   if (typeof defender.getReceivedMultiplier === 'function') {
     finalDamage *= defender.getReceivedMultiplier(damageType, flags);
   }
+  finalDamage *= troopAdvantageMultiplier(attacker, defender);
   return finalDamage;
 }
 
