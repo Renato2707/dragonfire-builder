@@ -601,6 +601,52 @@ function mockFx(ids) {
 }
 
 {
+  const mk = (id, team, slot) => new Character({
+    id, name: id, breed: 'Sentinel', rarity: 'Rare',
+    stats: { str: 10, inst: 80, int: 10, init: 10 }
+  }, team, slot, { stars: 10 });
+  const habit = new Habit({
+    name: "Mother's Mercy",
+    unlockStar: 10,
+    structured: [{
+      phase: 'turn',
+      rounds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+      actions: [{
+        t: 'cleanse',
+        negative: 2,
+        control: 1,
+        chance: 100,
+        tgt: { side: 'ally', count: 1, select: 'prefer_control' }
+      }]
+    }]
+  }, 'syrax');
+  const syrax = mk('syrax', 0, 1);
+  const stunned = mk('stunned', 0, 0);
+  const dirty = mk('dirty', 0, 2);
+  const foe = mk('foe', 1, 1);
+  applyEffect(stunned, 'STUN', 1, 'foe', { duration: 2 });
+  applyEffect(stunned, 'WEAKENED', 1, 'foe', { duration: 2, magnitude: -10 });
+  applyEffect(stunned, 'VULNERABLE', 1, 'foe', { duration: 2, magnitude: 10 });
+  applyEffect(stunned, 'BLEED', 1, 'foe', { duration: 2 });
+  applyEffect(dirty, 'WEAKENED', 1, 'foe', { duration: 2, magnitude: -10 });
+  applyEffect(dirty, 'BURN', 1, 'foe', { duration: 2 });
+  syrax.setHabits([habit]);
+  const btl = new Battle([syrax, stunned, dirty], [foe], { verbose: false });
+  btl.executeHabit(syrax, habit, 'turn', 1);
+  if (hasEffect(stunned, 'stun')) throw new Error("Mother's Mercy should Cleanse the Control on the prioritized ally");
+  const leftoverNeg = ['weakened', 'vulnerable', 'bleed'].filter(id => hasEffect(stunned, id));
+  if (leftoverNeg.length !== 1) throw new Error(`should Cleanse 2 Negatives, leftover ${leftoverNeg.join(',')}`);
+  if (!hasEffect(dirty, 'weakened') || !hasEffect(dirty, 'burn')) {
+    throw new Error('the non-Control ally must not be chosen over a Control ally');
+  }
+  const locked = mk('s2', 0, 1);
+  locked.setStars(8);
+  locked.setHabits([habit]);
+  if (locked.getHabitsForPhase(1, 'turn').length) throw new Error("Mother's Mercy should stay locked below 10 stars");
+  console.log("✓ Mother's Mercy 2 Negative + 1 Control, prefer Control ally\n");
+}
+
+{
   const mk = (id, team, slot, breed) => new Character({
     id, name: id, breed: breed || 'Warrior', rarity: 'Rare',
     stats: { str: 10, inst: 80, int: 10, init: 10 }

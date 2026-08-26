@@ -283,6 +283,17 @@ function clearAllEffects(character) {
 
 const CONTROL_IDS = ['stun', 'stagger', 'overwhelm', 'confusion'];
 
+function isControlEffect(effect) {
+  return CONTROL_IDS.includes(String(effect.id || '').toLowerCase());
+}
+
+function isNegativeEffect(effect) {
+  if (!effect || isControlEffect(effect)) return false;
+  const id = String(effect.id || '').toLowerCase();
+  if (effect.category === 'negative' || effect.category === 'damage') return true;
+  return id === 'prey' || id === 'nullify_recovery';
+}
+
 function matchesCleanseSpec(effect, spec) {
   if (!effect || (typeof effect.isExpired === 'function' && effect.isExpired())) return false;
   const id = String(effect.id || '').toLowerCase();
@@ -326,11 +337,11 @@ function cleanseCharacter(character, spec = {}) {
   };
 
   if (spec.negative || spec.control) {
-    const negs = pool.filter(e => e.category === 'negative');
-    const ctrls = pool.filter(e => CONTROL_IDS.includes(e.id));
+    const negs = pool.filter(isNegativeEffect);
+    const ctrls = pool.filter(isControlEffect);
     take(negs, spec.negative || 0);
     pool = character.activeEffects.filter(e => matchesCleanseSpec(e, spec));
-    const remainingCtrl = pool.filter(e => CONTROL_IDS.includes(e.id) && !removed.includes(e.id));
+    const remainingCtrl = pool.filter(e => isControlEffect(e) && !removed.includes(e.id));
     take(remainingCtrl, spec.control || 0);
   } else {
     const n = spec.count != null ? spec.count : 1;
