@@ -193,6 +193,7 @@ class Habit {
         chance: item.chance != null ? item.chance : null,
         chanceIf: item.chanceIf || null,
         oncePerRound: !!item.oncePerRound,
+        oncePerCombat: !!item.oncePerCombat,
         onceWhen: item.onceWhen || null,
         onceGroup: item.onceGroup || null,
         repeatPer: item.repeatPer || null,
