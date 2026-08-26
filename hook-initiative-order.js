@@ -8,7 +8,6 @@ function living(list) {
 
 function isFreePhase(phase) {
   return phase === PHASES.COMBAT_START
-    || phase === PHASES.ROUND_START
     || phase === PHASES.ON_SELF_FIRST_DAMAGE
     || phase === PHASES.ON_ALLY_FIRE_DAMAGE
     || phase === PHASES.ON_TAUNT
