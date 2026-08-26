@@ -7,6 +7,7 @@ import { applyInitiativeOrder } from './hook-initiative-order.js';
 import { loadDragonHabitsSync, loadCommandSync } from './habitParser.js';
 import { troopAdvantageSign, TROOP_ADVANTAGE_PCT } from './troopAdvantage.js';
 import { VANGUARD_NAMES } from './vanguardNames.js';
+import { healRateOf } from './healRate.js';
 
 applyInitiativeOrder(Battle);
 
@@ -244,30 +245,6 @@ function effectLine(target, skill, source, magnitude) {
     `  ${nameTag(target)} is under the effect of ${nameTag(skill)} ${fromPhrase(source, target)}.`,
     `  ${magnitude}`
   ].join('\n');
-}
-
-function kitsOf(character) {
-  if (!character) return [];
-  return [
-    ...(character.habits || []),
-    character.commandKit,
-    character.vanguardKit
-  ].filter(Boolean);
-}
-
-function healRateOf(character, skillName) {
-  if (!character || !skillName) return null;
-  const rankIndex = Math.max(0, Math.min(4, (character.habitRank || 1) - 1));
-  for (const kit of kitsOf(character)) {
-    if (kit.name !== skillName) continue;
-    for (const block of kit.blocks || []) {
-      for (const action of block.actions || []) {
-        if (action.t !== 'heal' || action.pct == null) continue;
-        return Array.isArray(action.pct) ? action.pct[rankIndex] : action.pct;
-      }
-    }
-  }
-  return null;
 }
 
 function recoveryDetail(battle, ctx, rest) {
