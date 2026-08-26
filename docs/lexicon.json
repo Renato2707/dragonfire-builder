@@ -113,6 +113,10 @@
       "desc": "Block-level roll before actions. Array indexes habitRank-1. Omit = 100%.",
       "example": [17.5, 21, 24.5, 29.8, 35]
     },
+    "chanceIf": {
+      "type": "object",
+      "desc": "Applied to block.chance (Eclipsing Strike: ×2 at Rising Tide 6+ on the caster)."
+    },
     "repeatPer": {
       "type": "object",
       "fields": { "side": "enemy|ally|self", "status": "status_id", "dealer": "physical|tactical|fire" },
@@ -176,7 +180,11 @@
         "scaleStat": { "type": "core_stat", "desc": "value *= 1 + getModifiedStat(scaleStat)/100" },
         "pick": { "type": "string", "value": "random", "desc": "One roll, one random mods[] entry (Phantom's Veil: Physical XOR Tactical XOR Fire Received)" },
         "chance": { "type": ["number", "number[5]"] },
-        "chanceIf": { "type": "object", "example": { "bleed": 2, "burn": 2, "taunt": 2, "control": 2 }, "desc": "For each key (status id or control): if TARGET has that status, chance *= multiplier. control = Stun|Stagger|Overwhelm|Confusion." },
+        "chanceIf": {
+          "type": "object",
+          "example": { "bleed": 2, "burn": 2, "taunt": 2, "control": 2, "stacks": { "id": "rising_tide", "min": 6 }, "mult": 2 },
+          "desc": "Status keys multiply chance if TARGET has the status. stacks uses the CASTER (Blood Moon / Eclipsing Strike: ×2 at Rising Tide 6+). Also on the block (Eclipsing Strike)."
+        },
         "ifStacks": {
           "type": "object",
           "fields": { "id": "stackId", "min": "integer", "mult": "number" },

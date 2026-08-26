@@ -191,6 +191,7 @@ class Habit {
         rounds: timing.rounds,
         requires: item.requires || null,
         chance: item.chance != null ? item.chance : null,
+        chanceIf: item.chanceIf || null,
         oncePerRound: !!item.oncePerRound,
         onceWhen: item.onceWhen || null,
         repeatPer: item.repeatPer || null,

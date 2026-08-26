@@ -35,6 +35,15 @@ function mockFx(ids) {
   if (ifBonusApplies({ status: 'panic', pct: 150 }, clean, clean)) throw new Error('ifBonus panic miss should be false');
   if (!ifBonusApplies({ defending: true, mult: 2 }, clean, clean, { defending: true })) throw new Error('ifBonus defending should apply');
   if (ifBonusApplies({ defending: true, mult: 2 }, clean, clean, { defending: false })) throw new Error('ifBonus defending miss should be false');
+  const moon = {
+    getStackCount: id => (id === 'rising_tide' ? 6 : 0)
+  };
+  if (applyChanceIf(25, { stacks: { id: 'rising_tide', min: 6 }, mult: 2 }, clean, { attacker: moon }) !== 50) {
+    throw new Error('chanceIf.stacks ×2 at Rising Tide 6+ failed');
+  }
+  if (applyChanceIf(25, { stacks: { id: 'rising_tide', min: 6 }, mult: 2 }, clean, { attacker: { getStackCount: () => 3 } }) !== 25) {
+    throw new Error('chanceIf.stacks below min should stay 25');
+  }
   console.log('✓ chanceIf / ifBonus / control\n');
 }
 
@@ -450,6 +459,37 @@ function mockFx(ids) {
     throw new Error(`New Moon at 4 stacks should be 13.5 / 9, got ${sentinel.getPercentTotal('inst')} / ${sentinel.getPercentTotal('tactical_dealt')}`);
   }
   console.log('✓ ifStacks New Moon 1.5x at Rising Tide 4+\n');
+}
+
+{
+  const moon = new Character({
+    id: 'moondancer', name: 'Moondancer', breed: 'Warrior', rarity: 'Rare',
+    stats: { str: 10, inst: 10, int: 10, init: 10 }
+  }, 0, 1);
+  const foe = new Character({
+    id: 'foe', name: 'Foe', breed: 'Hunter', rarity: 'Rare',
+    stats: { str: 10, inst: 10, int: 10, init: 10 }
+  }, 1, 1);
+  const habit = new Habit({
+    name: 'Eclipsing Strike',
+    structured: [{
+      phase: 'turn',
+      rounds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+      chance: [20, 26, 32, 40, 50],
+      chanceIf: { stacks: { id: 'rising_tide', min: 6 }, mult: 2 },
+      actions: [{ t: 'mod', mods: [{ stat: 'dmg_dealt', pct: -18 }], dur: 2, tgt: { side: 'enemy', count: 1, select: 'highest:troops' } }]
+    }]
+  }, 'moondancer');
+  const block = habit.blocks[0];
+  if (!block.chanceIf || !block.chanceIf.stacks) throw new Error('block.chanceIf.stacks must parse');
+  moon.addStack('rising_tide', {}, 'combat', { stacks: 6, maxStacks: 8 });
+  const btl = new Battle([moon], [foe], { verbose: false });
+  const extras = { attacker: moon };
+  const boosted = applyChanceIf(20, block.chanceIf, foe, extras);
+  if (boosted !== 40) throw new Error(`Eclipsing Strike at 6 stacks should be 40%, got ${boosted}`);
+  const bleedChance = applyChanceIf(25, { stacks: { id: 'rising_tide', min: 6 }, mult: 2 }, foe, extras);
+  if (bleedChance !== 50) throw new Error(`Blood Moon Bleed at 6 stacks should be 50%, got ${bleedChance}`);
+  console.log('✓ chanceIf.stacks Blood Moon / Eclipsing Strike\n');
 }
 
 {

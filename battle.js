@@ -303,10 +303,17 @@ class Battle {
   blockChanceHits(character, habit, block) {
     if (block.chance == null) return true;
     const rankIndex = Math.max(0, Math.min(4, (character.habitRank || 1) - 1));
-    const chance = resolveChance({ chance: block.chance }, rankIndex, character);
+    let chance = resolveChance({ chance: block.chance }, rankIndex, character);
     const first = (block.actions || [])[0];
     const targets = first ? this.resolveTargets(character, habit, first) : [character];
     const target = targets[0] || character;
+    chance = applyChanceIf(chance, block.chanceIf, target, {
+      attacker: character,
+      prey: this.getPrey(character),
+      allies: this.alliesOf(character),
+      enemies: this.enemiesOf(character),
+      defending: this.isDefending(character)
+    });
     const hit = rollChance(chance);
     this.logChanceRoll(habit, target, chance, hit);
     return hit;
@@ -579,6 +586,7 @@ class Battle {
         if (target.isDead) continue;
         let chance = resolveChance(raw, rankIndex, character);
         const extras = {
+          attacker: character,
           prey: this.getPrey(character),
           allies: this.alliesOf(character),
           enemies: this.enemiesOf(character),
