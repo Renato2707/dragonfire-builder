@@ -688,6 +688,41 @@ function mockFx(ids) {
 }
 
 {
+  const mk = (id, team, slot, stars) => new Character({
+    id, name: id, breed: 'Sentinel', rarity: 'Rare',
+    stats: { str: 10, inst: 10, int: 10, init: 10 }
+  }, team, slot, { stars: stars || 4 });
+  const habit = new Habit({
+    name: 'Flight Mastery',
+    unlockStar: 4,
+    structured: [{
+      phase: 'combat_start',
+      rounds: [1],
+      actions: [
+        { t: 'mod', mods: [{ stat: 'init', pct: [6, 7.2, 8.4, 10.2, 12] }], scaleStat: 'inst', dur: 'combat', tgt: { side: 'ally', count: 3, select: 'any' } },
+        { t: 'mod', mods: [{ stat: 'init', pct: [-6, -7.2, -8.4, -10.2, -12] }], scaleStat: 'inst', dur: 'combat', tgt: { side: 'enemy', count: 3, select: 'any' } }
+      ]
+    }]
+  }, 'syrax');
+  const allies = [mk('syrax', 0, 1), mk('a', 0, 0), mk('b', 0, 2)];
+  const foes = [mk('e0', 1, 0), mk('e1', 1, 1), mk('e2', 1, 2)];
+  allies[0].setHabits([habit]);
+  const btl = new Battle(allies, foes, { verbose: false });
+  btl.executeHabit(allies[0], habit, 'combat_start', 1);
+  const expected = 6.6;
+  for (const a of allies) {
+    if (a.getPercentTotal('init') !== expected) throw new Error(`${a.name} ally Init should be +6 enhanced by Instinct 10 (= +6.6), got ${a.getPercentTotal('init')}`);
+  }
+  for (const e of foes) {
+    if (e.getPercentTotal('init') !== -expected) throw new Error(`${e.name} enemy Init should be -6.6, got ${e.getPercentTotal('init')}`);
+  }
+  const locked = mk('s2', 0, 1, 2);
+  locked.setHabits([habit]);
+  if (locked.getHabitsForPhase(1, 'combat_start').length) throw new Error('Flight Mastery should stay locked below 4 stars');
+  console.log('✓ Flight Mastery ally/enemy Initiative (Instinct-enhanced)\n');
+}
+
+{
   const mk = (id, team, slot, breed) => new Character({
     id, name: id, breed: breed || 'Warrior', rarity: 'Rare',
     stats: { str: 10, inst: 80, int: 10, init: 10 }
