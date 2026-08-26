@@ -20,9 +20,6 @@ const SELECT_ALIASES = {
   'prefer_lane:v': 'prefer_lane:V',
   'prefer_lane:vanguard': 'prefer_lane:V',
   'prefer_lane:center': 'prefer_lane:V',
-  'prefer_dealer:fire': 'dealer:fire',
-  'prefer_dealer:tactical': 'dealer:tactical',
-  'prefer_dealer:physical': 'dealer:physical',
   'adjacent': 'adjacency',
   'adjacent_lane': 'adjacency',
   'prefer_class:hunter': 'prefer_class:hunter',
@@ -252,6 +249,12 @@ function selectTargets(caster, friendlyTeam, enemyTeam, targetingParsed) {
     return marked.slice(0, 1);
   }
 
+  if (select === 'last_buff' || select === 'last_mod') {
+    const last = caster.lastBuffTarget;
+    if (!last || last.isDead) return [];
+    return [last];
+  }
+
   if (select === 'last_taunt') {
     const last = caster.lastTauntTarget;
     if (!last || last.isDead) return [];
@@ -282,6 +285,13 @@ function selectTargets(caster, friendlyTeam, enemyTeam, targetingParsed) {
   } else if (select === 'dealer:tactical' || select === 'dealer:fire' || select === 'dealer:physical') {
     const want = select.split(':')[1];
     candidates = candidates.filter(c => getDealerType(c) === want);
+  } else if (select.startsWith('prefer_dealer:')) {
+    const want = select.split(':')[1];
+    candidates.sort((a, b) => {
+      const sa = getDealerType(a) === want ? 0 : 1;
+      const sb = getDealerType(b) === want ? 0 : 1;
+      return sa - sb;
+    });
   } else if (select.startsWith('prefer_without:')) {
     const status = select.split(':')[1];
     candidates.sort((a, b) => (hasStatus(a, status) ? 1 : 0) - (hasStatus(b, status) ? 1 : 0));

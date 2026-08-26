@@ -345,6 +345,7 @@ class Battle {
     if (!pending.length) return false;
     character.lastDamageTargets = [];
     character.lastDamageTarget = null;
+    character.lastBuffTarget = null;
     return this.withConfusion(character, () => {
       this.logAction(`${character.name} activates ${label}`);
       for (const block of pending) {
@@ -549,6 +550,7 @@ class Battle {
     const blocks = (habit.getBlocksFor(r, phase) || []).filter(block => this.blockAllowed(character, block));
     const pending = this.pendingBlocks(character, habit, blocks);
     if (!pending.length) return;
+    character.lastBuffTarget = character.lastBuffTarget || null;
     this.withConfusion(character, () => {
       this.logAction(`${character.name} activates ${habit.name}`);
       for (const block of pending) {
@@ -683,6 +685,7 @@ class Battle {
       return;
     }
     if (actionType === 'mod' || actionType === 'stack') {
+      if (actionResult.effects && actionResult.effects.length) character.lastBuffTarget = target;
       for (const effect of actionResult.effects) {
         if (effect.kind === 'stack') {
           this.logAction(`${effect.target} gains ${effect.added || 1} stack of ${formatStackName(effect.stackId)} (now ${effect.stacks}) ${formatDuration(effect.duration)}${enhancedNote(effect.enhancedBy)}`);
@@ -723,6 +726,7 @@ class Battle {
       } else {
         this.logAction(`Afflicts ${target.name} with ${statusName}${magText} ${formatDuration(dur)}${enhancedNote(raw.scaleStat)}`);
       }
+      character.lastBuffTarget = target;
       if (st === 'taunt' && !converted) {
         character.lastTauntTarget = target;
         this.executeHabitsForPhase(PHASES.ON_TAUNT, [character], this.currentRound);

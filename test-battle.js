@@ -489,6 +489,61 @@ function mockFx(ids) {
 }
 
 {
+  const mk = (id, team, slot, stats, breed) => new Character({
+    id, name: id, breed: breed || 'Sentinel', rarity: 'Rare',
+    stats: stats || { str: 10, inst: 80, int: 10, init: 10 }
+  }, team, slot);
+  const kit = new Habit({
+    name: 'Blazing Fury',
+    structured: [
+      {
+        phase: 'turn',
+        rounds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+        chance: 100,
+        actions: [
+          { t: 'mod', mods: [{ stat: 'fire_dealt', pct: 10 }], dur: 2, tgt: { side: 'ally', count: 1, select: 'prefer_dealer:fire' } },
+          { t: 'status', st: 'first_strike', dur: 2, tgt: { side: 'ally', count: 1, select: 'last_buff' } }
+        ]
+      },
+      {
+        phase: 'turn',
+        rounds: [1, 4, 6, 9],
+        actions: [{ t: 'dmg', dt: 'tactical', pct: 110, tgt: { side: 'enemy', count: 1, select: 'adjacency' } }]
+      }
+    ]
+  }, 'syrax');
+  const syrax = mk('syrax', 0, 1);
+  const fireAlly = mk('caraxes', 0, 0, { str: 10, inst: 10, int: 80, init: 10 }, 'Hunter');
+  const tacAlly = mk('dawn', 0, 2, { str: 10, inst: 80, int: 10, init: 10 }, 'Sentinel');
+  const foe = mk('foe', 1, 1, { str: 80, inst: 10, int: 10, init: 10 }, 'Warrior');
+  foe.maxHealth = 5000;
+  foe.currentHealth = 5000;
+  syrax.setCommandKit(kit);
+  const btl = new Battle([syrax, fireAlly, tacAlly], [foe], { verbose: false });
+  btl.currentRound = 1;
+  btl.executeKit(syrax, kit, 'turn', 1, 'Blazing Fury');
+  if (fireAlly.getPercentTotal('fire_dealt') !== 10) throw new Error('Blazing Fury should prefer the Fire ally');
+  if (tacAlly.getPercentTotal('fire_dealt') !== 0) throw new Error('Tactical ally should lose the prefer_dealer:fire sort');
+  if (!hasEffect(fireAlly, 'first_strike')) throw new Error('First-Strike must land on the same ally as Fire Dealt');
+  if (hasEffect(tacAlly, 'first_strike')) throw new Error('First-Strike must not split onto a second ally');
+  if (foe.currentHealth === 5000) throw new Error('Rounds 1/4/6/9 should deal Tactical in adjacency');
+  const s2 = mk('syrax2', 0, 1);
+  const onlyTac = mk('vesper', 0, 0, { str: 10, inst: 80, int: 10, init: 10 });
+  const foe2 = mk('foe2', 1, 1, { str: 80, inst: 10, int: 10, init: 10 }, 'Warrior');
+  foe2.maxHealth = 5000;
+  foe2.currentHealth = 5000;
+  s2.setCommandKit(kit);
+  const noFire = new Battle([s2, onlyTac], [foe2], { verbose: false });
+  noFire.currentRound = 2;
+  noFire.executeKit(s2, kit, 'turn', 2, 'Blazing Fury');
+  const buffed = [s2, onlyTac].filter(c => c.getPercentTotal('fire_dealt') === 10);
+  if (buffed.length !== 1) throw new Error('with no Fire ally, still buff 1 ally');
+  if (!hasEffect(buffed[0], 'first_strike')) throw new Error('First-Strike follows the buffed ally when no Fire dealer');
+  if (foe2.currentHealth !== 5000) throw new Error('Round 2 must not deal the 1/4/6/9 Tactical');
+  console.log('✓ Blazing Fury prefer Fire ally + First-Strike + Tactical rounds\n');
+}
+
+{
   const mk = (id, team, slot, breed) => new Character({
     id, name: id, breed: breed || 'Warrior', rarity: 'Rare',
     stats: { str: 10, inst: 80, int: 10, init: 10 }
