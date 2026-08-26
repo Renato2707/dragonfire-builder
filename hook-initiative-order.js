@@ -1,8 +1,18 @@
 import { sortByInitiative } from './utils.js';
+import { canUseAbilities } from './effects.js';
 import { PHASES } from './habitParser.js';
 
 function living(list) {
   return sortByInitiative((list || []).filter(c => c && !c.isDead));
+}
+
+function isFreePhase(phase) {
+  return phase === PHASES.COMBAT_START
+    || phase === PHASES.ROUND_START
+    || phase === PHASES.ON_SELF_FIRST_DAMAGE
+    || phase === PHASES.ON_ALLY_FIRE_DAMAGE
+    || phase === PHASES.ON_TAUNT
+    || phase === PHASES.ON_LINK_PROC;
 }
 
 export function applyInitiativeOrder(Battle) {
@@ -19,8 +29,15 @@ export function applyInitiativeOrder(Battle) {
     this.executeHabitsForPhase(PHASES.COMBAT_START, order, 1);
   };
 
-  const origHabits = Battle.prototype.executeHabitsForPhase;
   Battle.prototype.executeHabitsForPhase = function (phase, characters, round) {
-    return origHabits.call(this, phase, living(characters), round);
+    const r = round || (phase === PHASES.COMBAT_START ? 1 : this.currentRound);
+    const ordered = living(characters);
+    for (const character of ordered) {
+      if (!character || character.isDead) continue;
+      if (!isFreePhase(phase) && !canUseAbilities(character)) continue;
+      for (const habit of character.getHabitsForPhase(r, phase)) {
+        this.executeHabit(character, habit, phase, r);
+      }
+    }
   };
 }
