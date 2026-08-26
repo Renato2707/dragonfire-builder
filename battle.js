@@ -169,8 +169,32 @@ class Battle {
       return 0;
     }
     const actual = target.takeDamage(amount);
-    if (actual > 0) this.notifyDamage(target, info);
+    if (actual > 0) {
+      this.notifyDamage(target, info);
+      if (info.source && String(info.type || '').toLowerCase() === 'tactical') {
+        this.notifyLinkProc(info.source, 'tactical');
+      }
+    }
     return actual;
+  }
+
+  notifyLinkProc(source, event) {
+    if (!source) return;
+    const prev = this.damageContext;
+    this.damageContext = { ...(prev || {}), linkEvent: event, linkSource: source };
+    try {
+      for (const watcher of this.allCharacters) {
+        if (!watcher || watcher.isDead) continue;
+        const links = watcher.links || {};
+        if (!Object.values(links).includes(source)) continue;
+        const kit = watcher.commandKit;
+        const label = watcher.commandName || (kit && kit.name) || 'Command';
+        if (kit) this.executeKit(watcher, kit, PHASES.ON_LINK_PROC, this.currentRound, label);
+        this.executeHabitsForPhase(PHASES.ON_LINK_PROC, [watcher], this.currentRound);
+      }
+    } finally {
+      this.damageContext = prev || null;
+    }
   }
 
   notifyDamage(target, info = {}) {
@@ -245,6 +269,18 @@ class Battle {
         if (req.excludeBasic && isBasic) return false;
       }
     }
+    if (req.linkAs) {
+      const linked = character.links && character.links[req.linkAs];
+      const src = this.damageContext && this.damageContext.linkSource;
+      if (!linked || linked !== src) return false;
+    }
+    if (req.linkEvent) {
+      const ev = this.damageContext && this.damageContext.linkEvent;
+      const want = String(req.linkEvent).toLowerCase();
+      if (want === 'tactical_or_recovery') {
+        if (ev !== 'tactical' && ev !== 'recovery') return false;
+      } else if (ev !== want) return false;
+    }
     return true;
   }
 
@@ -302,9 +338,10 @@ class Battle {
     return this.withConfusion(character, () => {
       this.logAction(`${character.name} activates ${label}`);
       for (const block of pending) {
-        this.consumeOnce(character, habitLike, block);
+        if (block.oncePerRound && block.onceWhen !== 'success') this.consumeOnce(character, habitLike, block);
         if (!this.blockChanceHits(character, habitLike, block)) continue;
         this.runBlockActions(character, habitLike, block, round);
+        if (block.oncePerRound && block.onceWhen === 'success') this.consumeOnce(character, habitLike, block);
       }
       return true;
     });
@@ -317,7 +354,8 @@ class Battle {
       const free = phase === PHASES.COMBAT_START
         || phase === PHASES.ON_SELF_FIRST_DAMAGE
         || phase === PHASES.ON_ALLY_FIRE_DAMAGE
-        || phase === PHASES.ON_TAUNT;
+        || phase === PHASES.ON_TAUNT
+        || phase === PHASES.ON_LINK_PROC;
       if (!free && !canUseAbilities(character)) continue;
       for (const habit of character.getHabitsForPhase(r, phase)) {
         this.executeHabit(character, habit, phase, r);
@@ -399,7 +437,7 @@ class Battle {
     this.logAction(extra
       ? `${attacker.name} launches a 2nd Basic Attack (Double-Strike)`
       : `${attacker.name} launches a Basic Attack`);
-    const actualDamage = this.dealDamage(defender, rawDamage, { type: damageType, basic: true });
+    const actualDamage = this.dealDamage(defender, rawDamage, { type: damageType, basic: true, source: attacker });
     if (!actualDamage) return;
     this.logAction(`Deals ${actualDamage} ${formatDamageTypeName(damageType)} to ${defender.name}`);
     if (defender.isDead) this.logAction(`${defender.name} retreated`);
@@ -504,9 +542,10 @@ class Battle {
     this.withConfusion(character, () => {
       this.logAction(`${character.name} activates ${habit.name}`);
       for (const block of pending) {
-        this.consumeOnce(character, habit, block);
+        if (block.oncePerRound && block.onceWhen !== 'success') this.consumeOnce(character, habit, block);
         if (!this.blockChanceHits(character, habit, block)) continue;
         this.runBlockActions(character, habit, block, r);
+        if (block.oncePerRound && block.onceWhen === 'success') this.consumeOnce(character, habit, block);
       }
     });
   }
@@ -679,7 +718,7 @@ class Battle {
       }
     } else if (actionType === 'dmg') {
       for (const dmg of actionResult.damages) {
-        const actualDamage = this.dealDamage(target, dmg.amount, { type: raw.dt, basic: false });
+        const actualDamage = this.dealDamage(target, dmg.amount, { type: raw.dt, basic: false, source: character });
         if (!actualDamage) continue;
         character.lastDamageTarget = target;
         this.logAction(`Deals ${actualDamage} ${formatDamageTypeName(raw.dt)} to ${target.name}${enhancedNote(raw.scaleStat)}`);
@@ -693,6 +732,7 @@ class Battle {
         } else {
           this.logAction(`Applies Recovery to ${target.name} (+${healed} Troop Capacity)${enhancedNote(raw.scaleStat)}`);
           this.notifyPreyRecovery(target);
+          this.notifyLinkProc(character, 'recovery');
         }
       }
     }

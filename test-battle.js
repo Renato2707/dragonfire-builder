@@ -357,6 +357,70 @@ function mockFx(ids) {
 }
 
 {
+  const mk = (id, team, slot, breed) => new Character({
+    id, name: id, breed: breed || 'Warrior', rarity: 'Rare',
+    stats: { str: 10, inst: 80, int: 10, init: 10 }
+  }, team, slot);
+  const moon = mk('moondancer', 0, 1, 'Warrior');
+  const sentinel = mk('syrax', 0, 0, 'Sentinel');
+  const warrior = mk('vhagar', 0, 2, 'Warrior');
+  const foe = mk('foe', 1, 1, 'Hunter');
+  foe.maxHealth = 5000;
+  foe.currentHealth = 5000;
+  const grant = selectTargets(moon, [moon, sentinel, warrior], [foe], {
+    side: 'ally', count: 1, select: 'class:sentinel', excludeSelf: true
+  });
+  if (grant[0] !== sentinel) throw new Error('Crescent Blade must target an Ally Sentinel');
+  const proc = new Habit({
+    name: 'Crescent Blade',
+    structured: [{
+      phase: 'on_link_proc',
+      rounds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+      oncePerRound: true,
+      onceWhen: 'success',
+      chance: 100,
+      requires: { linkAs: 'crescent_blade_ally', linkEvent: 'tactical_or_recovery' },
+      actions: [{
+        t: 'stack',
+        id: 'rising_tide',
+        stacks: 1,
+        maxStacks: 8,
+        mods: [{ stat: 'dmg_received', pct: -2 }],
+        dur: 'combat',
+        tgt: { side: 'self' }
+      }]
+    }]
+  }, 'moondancer');
+  moon.commandKit = proc;
+  moon.commandName = 'Crescent Blade';
+  moon.links.crescent_blade_ally = sentinel;
+  const btl = new Battle([moon, sentinel, warrior], [foe], { verbose: false });
+  btl.currentRound = 1;
+  btl.notifyLinkProc(sentinel, 'tactical');
+  if (moon.getStackCount('rising_tide') !== 1) throw new Error('Tactical from linked Sentinel should grant Rising Tide');
+  if (moon.getPercentTotal('dmg_received') !== -2) throw new Error('each Rising Tide stack is -2% Damage Received');
+  btl.notifyLinkProc(sentinel, 'tactical');
+  if (moon.getStackCount('rising_tide') !== 1) throw new Error('Rising Tide from Crescent Blade is once per round');
+  btl.notifyLinkProc(sentinel, 'recovery');
+  if (moon.getStackCount('rising_tide') !== 1) throw new Error('recovery after a success same round must not stack');
+  moon.advanceRetreatFlags();
+  btl.currentRound = 2;
+  btl.notifyLinkProc(sentinel, 'recovery');
+  if (moon.getStackCount('rising_tide') !== 2) throw new Error('next round Recovery should grant another stack');
+  btl.notifyLinkProc(warrior, 'tactical');
+  if (moon.getStackCount('rising_tide') !== 2) throw new Error('unlinked ally must not proc Crescent Blade');
+  const phys = mk('moon2', 0, 1, 'Warrior');
+  phys.commandKit = proc;
+  phys.commandName = 'Crescent Blade';
+  phys.links.crescent_blade_ally = sentinel;
+  const btl2 = new Battle([phys, sentinel], [foe], { verbose: false });
+  btl2.currentRound = 1;
+  btl2.dealDamage(foe, 10, { type: 'physical', basic: false, source: sentinel });
+  if (phys.getStackCount('rising_tide') !== 0) throw new Error('Physical damage must not proc Crescent Blade');
+  console.log('✓ Crescent Blade Rising Tide once per round\n');
+}
+
+{
   const d = (id, team, slot) => new Character({
     id, name: id, breed: 'Warrior', rarity: 'Rare', stats: { str: 80, inst: 10, int: 10, init: 10 }
   }, team, slot);

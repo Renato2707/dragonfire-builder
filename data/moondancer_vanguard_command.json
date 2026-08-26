@@ -16,10 +16,29 @@
           "tgt": {
             "side": "ally",
             "count": 1,
-            "select": "any",
+            "select": "class:sentinel",
             "excludeSelf": true,
             "linkAs": "crescent_blade_ally"
           }
+        }
+      ]
+    },
+    {
+      "phase": "on_link_proc",
+      "rounds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+      "oncePerRound": true,
+      "onceWhen": "success",
+      "chance": 50,
+      "requires": { "linkAs": "crescent_blade_ally", "linkEvent": "tactical_or_recovery" },
+      "actions": [
+        {
+          "t": "stack",
+          "id": "rising_tide",
+          "stacks": 1,
+          "maxStacks": 8,
+          "mods": [{ "stat": "dmg_received", "pct": -2 }],
+          "dur": "combat",
+          "tgt": { "side": "self" }
         }
       ]
     },

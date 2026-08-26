@@ -14,7 +14,8 @@ const PHASES = {
   ON_PREY_RECOVERY: 'on_prey_recovery',
   ON_SELF_FIRST_DAMAGE: 'on_self_first_damage',
   ON_ALLY_FIRE_DAMAGE: 'on_ally_fire_damage',
-  ON_TAUNT: 'on_taunt'
+  ON_TAUNT: 'on_taunt',
+  ON_LINK_PROC: 'on_link_proc'
 };
 
 function normalizeTiming(item) {
@@ -175,6 +176,7 @@ class Habit {
         requires: item.requires || null,
         chance: item.chance != null ? item.chance : null,
         oncePerRound: !!item.oncePerRound,
+        onceWhen: item.onceWhen || null,
         repeatPer: item.repeatPer || null,
         actions: item.actions || []
       });

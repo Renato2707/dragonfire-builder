@@ -69,6 +69,12 @@
       "when": "After this character successfully afflicts Taunt (not ifAlready Stagger conversion). Target via select last_taunt.",
       "example": { "phase": "on_taunt", "rounds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], "actions": [{ "t": "mod", "tgt": { "side": "enemy", "select": "last_taunt" } }] }
     },
+    "on_link_proc": {
+      "canonical": "on_link_proc",
+      "type": "string",
+      "when": "Linked ally deals Tactical Damage (landed) or applies Recovery. Crescent Blade: 50% Rising Tide on Moondancer, max 1 success/round, max 8 stacks, -2% Damage Received each.",
+      "example": { "phase": "on_link_proc", "oncePerRound": true, "onceWhen": "success", "chance": 50, "requires": { "linkAs": "crescent_blade_ally", "linkEvent": "tactical_or_recovery" }, "rounds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], "actions": [] }
+    },
     "low_health": {
       "canonical": "low_health",
       "type": "string",
@@ -116,6 +122,12 @@
       "type": "boolean",
       "desc": "Consume the block on first trigger this round (The King's Ire: first ally Fire Damage). Cleared in advanceRetreatFlags. Skips activate log if already consumed."
     },
+    "onceWhen": {
+      "type": "string",
+      "values": ["attempt", "success"],
+      "default": "attempt",
+      "desc": "success = consume only after a hit (Crescent Blade 50% until one Rising Tide). Omit/attempt = consume on first event."
+    },
     "requires": {
       "type": ["object", "null"],
       "fields": {
@@ -141,7 +153,9 @@
         "damageType": { "type": "string", "values": ["physical", "tactical", "fire", "basic"], "desc": "Matches Battle.damageContext. basic is exclusive: a Basic Attack never matches fire/tactical/physical (Adaptive Glory)." },
         "excludeBasic": { "type": "boolean", "desc": "Fail if the hit was a Basic Attack. Implied for non-basic damageType branches." },
         "selfStatus": { "type": "string", "desc": "hasEffect(caster, status)" },
-        "pve": { "type": "boolean", "desc": "must match battle.pve (default false)" }
+        "pve": { "type": "boolean", "desc": "must match battle.pve (default false)" },
+        "linkAs": { "type": "string", "desc": "character.links[key] must be damageContext.linkSource" },
+        "linkEvent": { "type": "string", "values": ["tactical", "recovery", "tactical_or_recovery"] }
       },
       "example": { "troopsBelow": 75 }
     },
