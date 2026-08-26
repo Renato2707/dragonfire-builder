@@ -7,13 +7,13 @@ import { applyInitiativeOrder } from './hook-initiative-order.js';
 import { loadDragonHabitsSync, loadCommandSync } from './habitParser.js';
 import { troopAdvantageSign, TROOP_ADVANTAGE_PCT } from './troopAdvantage.js';
 import { VANGUARD_NAMES } from './vanguardNames.js';
-import { healRateOf } from './healRate.js';
+import { formatBattleReport } from './reportFormat.js';
 
 applyInitiativeOrder(Battle);
 
 const SLOTS = [0, 1, 2];
 const BAR = '═'.repeat(55);
-const CORE_STAT_NAMES = new Set(['Strength', 'Instinct', 'Intelligence', 'Initiative']);
+const DASH = '- '.repeat(27).trim();
 const TROOP_TYPES = [
   { id: '', label: '—' },
   { id: 'shieldbearers', label: 'Shieldbearers' },
@@ -180,309 +180,14 @@ function formatTeamFormation(title, team, enemyTroop) {
 function formatTroopFormation(battle) {
   return [
     BAR,
-    'Troop Formation',
+    '• Troop Formation',
+    DASH,
+    'This section shows how both teams were set up at the beginning',
     BAR,
     formatTeamFormation('Team A', battle.teamA, teamTroopOf(battle.teamB)),
     formatTeamFormation('Team B', battle.teamB, teamTroopOf(battle.teamA)),
     ''
   ].join('\n');
-}
-
-function findCharacter(battle, name) {
-  if (!battle || !name) return null;
-  return (battle.allCharacters || []).find(c => c && c.name === name) || null;
-}
-
-function splitTarget(battle, raw) {
-  const text = String(raw || '').trim();
-  const names = ((battle && battle.allCharacters) || [])
-    .map(c => c && c.name)
-    .filter(Boolean)
-    .sort((a, b) => b.length - a.length);
-  for (const name of names) {
-    if (text === name) return { name, rest: '' };
-    if (text.startsWith(`${name} `)) return { name, rest: text.slice(name.length).trim() };
-  }
-  const match = text.match(/^([A-Za-z][A-Za-z'-]*)(?:\s+(.*))?$/);
-  return { name: match ? match[1] : text, rest: (match && match[2]) || '' };
-}
-
-function nameTag(name) {
-  return `[ ${name} ]`;
-}
-
-function laneOf(battle, name) {
-  const character = findCharacter(battle, name);
-  return character ? (character.positionName || SLOT_NAMES[character.slotPosition] || '') : '';
-}
-
-function fromPhrase(source, target) {
-  if (!source) return '';
-  if (source === target) return 'from itself';
-  return `from ${nameTag(source)}`;
-}
-
-function isBar(line) {
-  return /^═+$/.test(String(line || '').trim());
-}
-
-function vanguardTitle(battle, actorName) {
-  const character = findCharacter(battle, actorName);
-  if (!character) return 'Vanguard';
-  return VANGUARD_NAMES[character.id] || 'Vanguard';
-}
-
-function formatMagnitude(stat, rawValue, isVanguard) {
-  const value = String(rawValue || '').trim();
-  const numeric = value.replace('%', '');
-  if (isVanguard && CORE_STAT_NAMES.has(stat)) return `${numeric} ${stat}`;
-  if (value.includes('%')) return `${value} ${stat}`;
-  return `${value} ${stat}`;
-}
-
-function effectLine(target, skill, source, magnitude) {
-  return [
-    `  ${nameTag(target)} is under the effect of ${nameTag(skill)} ${fromPhrase(source, target)}.`,
-    `  ${magnitude}`
-  ].join('\n');
-}
-
-function recoveryDetail(battle, ctx, rest) {
-  const actor = findCharacter(battle, ctx.actor);
-  const rate = healRateOf(actor, ctx.skill);
-  const amount = (rest.match(/\+?(\d+)\s+Troop Capacity/i) || [])[1];
-  const by = (rest.match(/enhanced by (\w+)/i) || [])[1];
-  const bits = [];
-  bits.push(rate != null ? `Recovery +${rate}%` : 'Recovery');
-  if (by) bits.push(`enhanced by ${by}`);
-  const gained = amount ? `+${amount} Troop gained` : '';
-  return `${bits.join(', ')}.${gained ? ` ${gained}.` : ''}`;
-}
-
-function rewriteLine(battle, line, ctx) {
-  const text = String(line || '').trim();
-  if (!text) return { text: '', section: ctx.section };
-
-  let match = text.match(/^(.+?) activates (.+)$/);
-  if (match) {
-    const actor = match[1];
-    const rawSkill = match[2];
-    const vanguard = /\(Vanguard\)$/i.test(rawSkill) || rawSkill === 'Vanguard';
-    const skill = vanguard ? vanguardTitle(battle, actor) : rawSkill;
-    ctx.actor = actor;
-    ctx.skill = skill;
-    ctx.vanguard = vanguard;
-    if (vanguard) return { text: '', section: 'prep' };
-    ctx.section = 'combat';
-    return {
-      text: `  ${nameTag(actor)} uses [ ${skill} ].`,
-      section: 'combat'
-    };
-  }
-
-  match = text.match(/^(.+?) launches a 2nd Basic Attack/);
-  if (match) {
-    ctx.actor = match[1];
-    ctx.skill = 'Basic Attack';
-    ctx.vanguard = false;
-    ctx.section = 'combat';
-    return { text: `  ${nameTag(match[1])} uses [ Basic Attack ] (Double-Strike).`, section: 'combat' };
-  }
-
-  match = text.match(/^(.+?) launches a Basic Attack/);
-  if (match) {
-    ctx.actor = match[1];
-    ctx.skill = 'Basic Attack';
-    ctx.vanguard = false;
-    ctx.section = 'combat';
-    return { text: `  ${nameTag(match[1])} uses [ Basic Attack ].`, section: 'combat' };
-  }
-
-  match = text.match(/^Deals (\d+) (.+) to (.+)$/);
-  if (match) {
-    ctx.section = 'combat';
-    const lane = laneOf(battle, match[3]);
-    const target = lane ? `${nameTag(match[3])} (${lane})` : nameTag(match[3]);
-    return {
-      text: `  Deals ${match[1]} ${match[2]} against ${target}. ${nameTag(match[3])} takes ${match[1]} losses.`,
-      section: 'combat'
-    };
-  }
-
-  match = text.match(/^(Increases|Reduces) (.+) of (.+?) by ([+\-][\d.]+%?)(?:\s+(.+))?$/);
-  if (match) {
-    const stat = match[2].replace(/ \(excluding Basic Attacks\)/, '');
-    const target = match[3];
-    const magnitude = formatMagnitude(stat, match[4], ctx.vanguard);
-    const skill = ctx.skill || 'effect';
-    const source = ctx.actor || target;
-    return {
-      text: effectLine(target, skill, source, magnitude),
-      section: ctx.section
-    };
-  }
-
-  match = text.match(/^Afflicts (.+) with (.+)$/);
-  if (match) {
-    const split = splitTarget(battle, match[1]);
-    const skill = ctx.skill || 'effect';
-    const source = ctx.actor || split.name;
-    const mag = [match[2], split.rest].filter(Boolean).join(' ');
-    return {
-      text: effectLine(split.name, skill, source, mag),
-      section: ctx.section
-    };
-  }
-
-  match = text.match(/^Grants (.+) to (.+)$/);
-  if (match) {
-    const split = splitTarget(battle, match[2]);
-    const skill = ctx.skill || 'effect';
-    const source = ctx.actor || split.name;
-    const mag = [match[1], split.rest].filter(Boolean).join(' ');
-    return {
-      text: effectLine(split.name, skill, source, mag),
-      section: ctx.section
-    };
-  }
-
-  match = text.match(/^(.+?) gains (\d+) stacks? of (.+?) \(now (\d+)\)(.*)$/);
-  if (match) {
-    const target = match[1];
-    const skill = ctx.skill || match[3];
-    const source = ctx.actor || target;
-    const n = Number(match[4]);
-    const label = n === 1 ? `1 stack of ${match[3]}` : `${n} stacks of ${match[3]}`;
-    return {
-      text: effectLine(target, skill, source, label),
-      section: ctx.section
-    };
-  }
-
-  match = text.match(/^Applies Recovery to (.+)$/);
-  if (match) {
-    const split = splitTarget(battle, match[1]);
-    const skill = ctx.skill || 'Recovery';
-    const source = ctx.actor || split.name;
-    return {
-      text: effectLine(split.name, skill, source, recoveryDetail(battle, ctx, split.rest)),
-      section: ctx.section
-    };
-  }
-
-  match = text.match(/^Turn order: (.+)$/);
-  if (match) return { text: `  Turn order: ${match[1]}`, section: 'combat' };
-
-  if (/^Team [AB]:$/.test(text) || /Troop Capacity/.test(text) || /^Final Status/.test(text)) {
-    return { text: `  ${text}`, section: ctx.section };
-  }
-
-  return { text: `  ${text}`, section: ctx.section };
-}
-
-function isHabitLine(text) {
-  return /uses \[/.test(text || '');
-}
-
-function formatBattleReport(battle) {
-  const lines = battle.battleLog || [];
-  const prep = [];
-  const combat = [];
-  const ctx = { actor: null, skill: null, vanguard: false, section: 'prep' };
-  let i = 0;
-  let skipRoster = false;
-  let window = 'none';
-  let startCombatBuf = [];
-  let startRoundLabel = false;
-
-  const flushStartCombat = () => {
-    if (startCombatBuf.some(isHabitLine)) {
-      combat.push('Start of Combat:');
-      combat.push(...startCombatBuf);
-    }
-    startCombatBuf = [];
-    window = 'none';
-  };
-
-  const push = item => {
-    if (!item || !item.text) return;
-    if (item.section === 'prep') {
-      prep.push(item.text);
-      return;
-    }
-    if (window === 'combat_start') {
-      startCombatBuf.push(item.text);
-      return;
-    }
-    if (window === 'round_start') {
-      if (/Turn order:/.test(item.text)) {
-        window = 'turns';
-        combat.push(item.text);
-        return;
-      }
-      if (isHabitLine(item.text) && !startRoundLabel) {
-        combat.push('Start of Round:');
-        startRoundLabel = true;
-      }
-      combat.push(item.text);
-      return;
-    }
-    combat.push(item.text);
-  };
-
-  while (i < lines.length) {
-    const line = lines[i];
-    const next = lines[i + 1] || '';
-
-    if (isBar(line) && next === 'Start of Combat') {
-      i += 3;
-      skipRoster = true;
-      ctx.section = 'prep';
-      window = 'combat_start';
-      startCombatBuf = [];
-      continue;
-    }
-    if (isBar(line) && /^Start of Round /.test(next)) {
-      const number = (next.match(/Round (\d+)/) || [])[1] || '';
-      flushStartCombat();
-      combat.push(BAR, `Round ${number}`, BAR);
-      i += 3;
-      skipRoster = false;
-      ctx.section = 'combat';
-      window = 'round_start';
-      startRoundLabel = false;
-      continue;
-    }
-    if (isBar(line) && next === 'Combat End') {
-      flushStartCombat();
-      const ahead = lines.slice(i, i + 8).join('\n');
-      const title = /Maximum \d+ rounds reached/.test(ahead) ? 'Stalemate' : 'Combat End';
-      combat.push(BAR, title, BAR);
-      i += 3;
-      skipRoster = false;
-      ctx.section = 'combat';
-      window = 'none';
-      continue;
-    }
-    if (isBar(line)) {
-      if (skipRoster) skipRoster = false;
-      i += 1;
-      continue;
-    }
-    if (skipRoster && (/^Team [AB]:$/.test(line) || /Troop Capacity/.test(line))) {
-      i += 1;
-      continue;
-    }
-    push(rewriteLine(battle, line, ctx));
-    i += 1;
-  }
-  flushStartCombat();
-
-  const out = [BAR, 'Preparations', BAR];
-  if (prep.length) out.push(...prep);
-  else out.push('  (no city upgrades / boosts)');
-  if (combat.length) out.push(...combat);
-  return out.join('\n');
 }
 
 function readTeam(prefix) {
@@ -630,7 +335,7 @@ function renderStatus(container, team, enemyTroop) {
 
 function updateBattleDisplay() {
   const logElement = document.getElementById('battleLog');
-  logElement.textContent = formationHeader + formatBattleReport(currentBattle);
+  logElement.textContent = formatBattleReport(currentBattle, formationHeader);
   logElement.scrollTop = logElement.scrollHeight;
   renderStatus(document.getElementById('teamAStatus'), currentBattle.teamA, teamTroopOf(currentBattle.teamB));
   renderStatus(document.getElementById('teamBStatus'), currentBattle.teamB, teamTroopOf(currentBattle.teamA));
