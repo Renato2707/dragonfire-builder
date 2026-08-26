@@ -64,7 +64,7 @@ class Character {
   }
 
   calculateMaxHealth() {
-    return Math.max(50, (this.stats.str + this.stats.int) * 2);
+    return calculateTroopCapacity(this.level, this.stars);
   }
 
   getTroopAffinityPct() {
