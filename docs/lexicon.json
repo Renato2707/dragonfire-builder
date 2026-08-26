@@ -139,7 +139,7 @@
     "requires": {
       "type": ["object", "null"],
       "fields": {
-        "command": { "type": "string", "desc": "hasCommand(character, name) — kit present" },
+        "command": { "type": "string", "desc": "hasCommand(character, name) — kit present (Strategic Revival requires Blazing Fury)" },
         "troop": {
           "type": "string",
           "values": ["archers", "shieldbearers", "spearmen", "cavalry", "siege"],
