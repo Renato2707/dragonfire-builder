@@ -18,6 +18,7 @@ const TROOP_TYPES = [
 
 let dragonsData = [];
 let currentBattle = null;
+let formationHeader = '';
 
 document.addEventListener('DOMContentLoaded', async () => {
   dragonsData = await loadDragons();
@@ -161,8 +162,9 @@ function formatTeamFormation(title, team, enemyTroop) {
       lines.push(`  ${SLOT_NAMES[slot]} · —`);
       return;
     }
+    const cap = Math.round(character.maxHealth);
     lines.push(
-      `  ${SLOT_NAMES[slot]} · ${character.name}: ${Math.round(character.currentHealth)}/${Math.round(character.maxHealth)} Troop Capacity${affinityLine(character)}`
+      `  ${SLOT_NAMES[slot]} · ${character.name}: ${cap}/${cap} Troop Capacity${affinityLine(character)}`
     );
   });
   return lines.join('\n');
@@ -274,6 +276,7 @@ async function startBattle() {
     defendingTeam: Number(document.getElementById('defending-team').value)
   });
   currentBattle.start();
+  formationHeader = formatTroopFormation(currentBattle);
   currentBattle.runRound();
   updateBattleDisplay();
   setSlotsDisabled(true);
@@ -322,7 +325,7 @@ function renderStatus(container, team, enemyTroop) {
 
 function updateBattleDisplay() {
   const logElement = document.getElementById('battleLog');
-  logElement.textContent = formatTroopFormation(currentBattle) + currentBattle.getLog();
+  logElement.textContent = formationHeader + currentBattle.getLog();
   logElement.scrollTop = logElement.scrollHeight;
   renderStatus(document.getElementById('teamAStatus'), currentBattle.teamA, teamTroopOf(currentBattle.teamB));
   renderStatus(document.getElementById('teamBStatus'), currentBattle.teamB, teamTroopOf(currentBattle.teamA));
@@ -330,6 +333,7 @@ function updateBattleDisplay() {
 
 function reset() {
   currentBattle = null;
+  formationHeader = '';
   document.getElementById('battleLog').textContent = 'Monte a formação. Tropa do time liga Affinity (+20%) só nos dragões que têm essa tropa.';
   document.getElementById('teamAStatus').innerHTML = '';
   document.getElementById('teamBStatus').innerHTML = '';
