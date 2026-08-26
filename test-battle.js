@@ -647,6 +647,47 @@ function mockFx(ids) {
 }
 
 {
+  const mk = (id, slot) => new Character({
+    id, name: id, breed: 'Sentinel', rarity: 'Rare',
+    stats: { str: 10, inst: 80, int: 10, init: 10 }
+  }, 0, slot, { stars: 8 });
+  const habit = new Habit({
+    name: 'Tactical Inferno',
+    unlockStar: 8,
+    structured: [{
+      phase: 'round_start',
+      rounds: [1],
+      actions: [
+        { t: 'mod', mods: [{ stat: 'tactical_dealt', pct: [18, 21.6, 25.2, 30.6, 36] }], dur: 3, tgt: { side: 'ally', count: 1, select: 'prefer_lane:L' } },
+        { t: 'mod', mods: [{ stat: 'fire_dealt', pct: [18, 21.6, 25.2, 30.6, 36] }], dur: 3, tgt: { side: 'ally', count: 1, select: 'prefer_lane:R' } }
+      ]
+    }]
+  }, 'syrax');
+  const left = mk('left', 0);
+  const syrax = mk('syrax', 1);
+  const right = mk('right', 2);
+  const foe = new Character({
+    id: 'foe', name: 'foe', breed: 'Hunter', rarity: 'Rare',
+    stats: { str: 10, inst: 10, int: 80, init: 10 }
+  }, 1, 1);
+  syrax.setHabits([habit]);
+  const btl = new Battle([left, syrax, right], [foe], { verbose: false });
+  btl.executeHabit(syrax, habit, 'round_start', 1);
+  if (left.getPercentTotal('tactical_dealt') !== 18) throw new Error('Tactical Inferno should buff Left Flank Tactical Dealt');
+  if (right.getPercentTotal('fire_dealt') !== 18) throw new Error('Tactical Inferno should buff Right Flank Fire Dealt');
+  if (syrax.getPercentTotal('tactical_dealt') !== 0 || syrax.getPercentTotal('fire_dealt') !== 0) {
+    throw new Error('Vanguard Syrax should not steal the flank buffs');
+  }
+  if (left.getPercentTotal('fire_dealt') !== 0) throw new Error('Left Flank should not get the Fire buff');
+  if (right.getPercentTotal('tactical_dealt') !== 0) throw new Error('Right Flank should not get the Tactical buff');
+  const locked = mk('s2', 1);
+  locked.setStars(6);
+  locked.setHabits([habit]);
+  if (locked.getHabitsForPhase(1, 'round_start').length) throw new Error('Tactical Inferno should stay locked below 8 stars');
+  console.log('✓ Tactical Inferno Left Tactical / Right Fire\n');
+}
+
+{
   const mk = (id, team, slot, breed) => new Character({
     id, name: id, breed: breed || 'Warrior', rarity: 'Rare',
     stats: { str: 10, inst: 80, int: 10, init: 10 }
