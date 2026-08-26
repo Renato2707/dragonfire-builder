@@ -146,8 +146,8 @@
           "desc": "character.links[key] retreatedLastRound || isDead"
         },
         "troopsBelow": { "type": "number", "desc": "caster getHealthPercentage() < n (Sunfyre Golden Wrath)" },
-        "selfHpBelow": { "type": "number", "desc": "alias of troopsBelow" },
-        "selfHpAtLeast": { "type": "number", "desc": "caster HP% >= n" },
+        "selfHpBelow": { "type": "number", "desc": "alias of troopsBelow. Radiant Majesty: <75 both other allies; <50 also self." },
+        "selfHpAtLeast": { "type": "number", "desc": "caster HP% >= n. Radiant Majesty: >=75 buffs the other ally with most troops." },
         "noPrey": { "type": "boolean", "desc": "true if caster has no living Prey link/status" },
         "hasPrey": { "type": "boolean", "desc": "true if getPrey(caster) exists" },
         "preyHpAbove": { "type": "number", "desc": "prey getHealthPercentage() > n" },

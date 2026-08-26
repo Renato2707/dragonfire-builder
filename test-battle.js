@@ -743,6 +743,47 @@ function mockFx(ids) {
 }
 
 {
+  const mk = (id, slot, troops) => {
+    const c = new Character({
+      id, name: id, breed: 'Sentinel', rarity: 'Rare',
+      stats: { str: 10, inst: 80, int: 10, init: 10 }
+    }, 0, slot);
+    c.maxHealth = 100;
+    c.currentHealth = troops;
+    return c;
+  };
+  const habit = new Habit({
+    name: 'Radiant Majesty',
+    unlockStar: 2,
+    structured: [
+      { phase: 'round_start', rounds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], requires: { selfHpAtLeast: 75 }, actions: [{ t: 'mod', mods: [{ stat: 'dmg_dealt', pct: [5, 6, 7, 8.5, 10] }], dur: 1, tgt: { side: 'ally', count: 1, select: 'highest:troops', excludeSelf: true } }] },
+      { phase: 'round_start', rounds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], requires: { selfHpBelow: 75 }, actions: [{ t: 'mod', mods: [{ stat: 'dmg_dealt', pct: [5, 6, 7, 8.5, 10] }], dur: 1, tgt: { side: 'ally', count: 2, select: 'any', excludeSelf: true } }] },
+      { phase: 'round_start', rounds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], requires: { selfHpBelow: 50 }, actions: [{ t: 'mod', mods: [{ stat: 'dmg_dealt', pct: [5, 6, 7, 8.5, 10] }], dur: 1, tgt: { side: 'self' } }] }
+    ]
+  }, 'sunfyre');
+  const run = (hp) => {
+    const sun = mk('sunfyre', 1, hp);
+    const a = mk('a', 0, 90);
+    const b = mk('b', 2, 40);
+    const foe = new Character({ id: 'foe', name: 'foe', breed: 'Hunter', rarity: 'Rare', stats: { str: 10, inst: 10, int: 10, init: 10 } }, 1, 1);
+    const btl = new Battle([sun, a, b], [foe], { verbose: false });
+    btl.executeHabit(sun, habit, 'round_start', 1);
+    return { sun, a, b };
+  };
+  const healthy = run(80);
+  if (healthy.a.getPercentTotal('dmg_dealt') !== 5) throw new Error('healthy: other ally with most troops should get +5%');
+  if (healthy.b.getPercentTotal('dmg_dealt') !== 0) throw new Error('healthy: low-troop ally should not be buffed');
+  if (healthy.sun.getPercentTotal('dmg_dealt') !== 0) throw new Error('healthy: Sunfyre should not self-buff');
+  const mid = run(60);
+  if (mid.a.getPercentTotal('dmg_dealt') !== 5 || mid.b.getPercentTotal('dmg_dealt') !== 5) throw new Error('<75%: both other allies');
+  if (mid.sun.getPercentTotal('dmg_dealt') !== 0) throw new Error('<75% but >=50%: no self buff');
+  const low = run(40);
+  if (low.a.getPercentTotal('dmg_dealt') !== 5 || low.b.getPercentTotal('dmg_dealt') !== 5) throw new Error('<50%: both other allies');
+  if (low.sun.getPercentTotal('dmg_dealt') !== 5) throw new Error('<50%: Sunfyre also buffs self');
+  console.log('✓ Radiant Majesty troop-capacity bands\n');
+}
+
+{
   const d = (id, team, slot) => new Character({
     id, name: id, breed: 'Warrior', rarity: 'Rare', stats: { str: 80, inst: 10, int: 10, init: 10 }
   }, team, slot);
