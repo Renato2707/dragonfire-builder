@@ -240,7 +240,46 @@ function formatMagnitude(stat, rawValue, isVanguard) {
 }
 
 function effectLine(target, skill, source, magnitude) {
-  return `  ${nameTag(target)} is under the effect of ${nameTag(skill)} ${fromPhrase(source, target)}. ${magnitude}`;
+  return [
+    `  ${nameTag(target)} is under the effect of ${nameTag(skill)} ${fromPhrase(source, target)}.`,
+    `  ${magnitude}`
+  ].join('\n');
+}
+
+function kitsOf(character) {
+  if (!character) return [];
+  return [
+    ...(character.habits || []),
+    character.commandKit,
+    character.vanguardKit
+  ].filter(Boolean);
+}
+
+function healRateOf(character, skillName) {
+  if (!character || !skillName) return null;
+  const rankIndex = Math.max(0, Math.min(4, (character.habitRank || 1) - 1));
+  for (const kit of kitsOf(character)) {
+    if (kit.name !== skillName) continue;
+    for (const block of kit.blocks || []) {
+      for (const action of block.actions || []) {
+        if (action.t !== 'heal' || action.pct == null) continue;
+        return Array.isArray(action.pct) ? action.pct[rankIndex] : action.pct;
+      }
+    }
+  }
+  return null;
+}
+
+function recoveryDetail(battle, ctx, rest) {
+  const actor = findCharacter(battle, ctx.actor);
+  const rate = healRateOf(actor, ctx.skill);
+  const amount = (rest.match(/\+?(\d+)\s+Troop Capacity/i) || [])[1];
+  const by = (rest.match(/enhanced by (\w+)/i) || [])[1];
+  const bits = [];
+  bits.push(rate != null ? `Recovery +${rate}%` : 'Recovery');
+  if (by) bits.push(`enhanced by ${by}`);
+  const gained = amount ? `+${amount} Troop gained` : '';
+  return `${bits.join(', ')}.${gained ? ` ${gained}.` : ''}`;
 }
 
 function rewriteLine(battle, line, ctx) {
@@ -348,9 +387,8 @@ function rewriteLine(battle, line, ctx) {
     const split = splitTarget(battle, match[1]);
     const skill = ctx.skill || 'Recovery';
     const source = ctx.actor || split.name;
-    const mag = split.rest ? `Recovery ${split.rest}` : 'Recovery';
     return {
-      text: effectLine(split.name, skill, source, mag),
+      text: effectLine(split.name, skill, source, recoveryDetail(battle, ctx, split.rest)),
       section: ctx.section
     };
   }
