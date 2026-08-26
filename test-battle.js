@@ -826,6 +826,44 @@ function mockFx(ids) {
 }
 
 {
+  const mk = (id, team, slot, stars) => new Character({
+    id, name: id, breed: 'Hunter', rarity: 'Rare',
+    stats: { str: 10, inst: 10, int: 80, init: 10 }
+  }, team, slot, { stars: stars || 4 });
+  const habit = new Habit({
+    name: 'Sunder',
+    unlockStar: 4,
+    structured: [{
+      phase: 'round_start',
+      rounds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+      actions: [{
+        t: 'mod',
+        mods: [{ stat: 'dmg_received', pct: [7.5, 9, 10.5, 12.75, 15] }],
+        dur: 1,
+        tgt: { side: 'enemy', count: 'all', select: 'has_control' }
+      }]
+    }]
+  }, 'tairax');
+  const tairax = mk('tairax', 0, 1);
+  const stunned = mk('stunned', 1, 0);
+  const staggered = mk('staggered', 1, 1);
+  const weakened = mk('weakened', 1, 2);
+  applyEffect(stunned, 'STUN', 1, 'tairax', { duration: 2 });
+  applyEffect(staggered, 'STAGGER', 1, 'tairax', { duration: 2 });
+  applyEffect(weakened, 'WEAKENED', 1, 'tairax', { duration: 2, magnitude: -10 });
+  tairax.setHabits([habit]);
+  const btl = new Battle([tairax], [stunned, staggered, weakened], { verbose: false });
+  btl.executeHabit(tairax, habit, 'round_start', 1);
+  if (stunned.getPercentTotal('dmg_received') !== 7.5) throw new Error('Sunder should mark Stun');
+  if (staggered.getPercentTotal('dmg_received') !== 7.5) throw new Error('Sunder should mark Stagger');
+  if (weakened.getPercentTotal('dmg_received') !== 0) throw new Error('Weakened is Negative, not Control');
+  const locked = mk('t2', 0, 1, 2);
+  locked.setHabits([habit]);
+  if (locked.getHabitsForPhase(1, 'round_start').length) throw new Error('Sunder should stay locked below 4 stars');
+  console.log('✓ Sunder Damage Received on Control enemies\n');
+}
+
+{
   const mk = (id, team, slot, breed) => new Character({
     id, name: id, breed: breed || 'Warrior', rarity: 'Rare',
     stats: { str: 10, inst: 80, int: 10, init: 10 }
