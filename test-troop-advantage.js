@@ -3,7 +3,7 @@ import {
   troopAdvantageSign,
   troopAdvantageMultiplier,
   TROOP_ADVANTAGE_PCT
-} from './utils.js';
+} from './troopAdvantage.js';
 
 function assert(cond, msg) {
   if (!cond) throw new Error(msg);
