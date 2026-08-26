@@ -5,6 +5,7 @@ import { Character, SLOT_NAMES, DEFAULT_LEVEL, DEFAULT_STARS, DEFAULT_HABIT_RANK
 import { Battle } from './battle.js';
 import { loadDragonHabitsSync, loadCommandSync } from './habitParser.js';
 import { troopAdvantageSign, TROOP_ADVANTAGE_PCT } from './troopAdvantage.js';
+import { VANGUARD_NAMES } from './vanguardNames.js';
 
 const SLOTS = [0, 1, 2];
 const BAR = '═'.repeat(55);
@@ -207,10 +208,10 @@ function isBar(line) {
   return /^═+$/.test(String(line || '').trim());
 }
 
-function skillLabel(raw) {
-  const text = String(raw || '').trim();
-  if (/\(Vanguard\)$/i.test(text) || text === 'Vanguard') return 'Vanguard';
-  return text;
+function vanguardTitle(battle, actorName) {
+  const character = findCharacter(battle, actorName);
+  if (!character) return 'Vanguard';
+  return VANGUARD_NAMES[character.id] || 'Vanguard';
 }
 
 function formatMagnitude(stat, rawValue, isVanguard) {
@@ -222,10 +223,6 @@ function formatMagnitude(stat, rawValue, isVanguard) {
 }
 
 function effectLine(target, skill, source, magnitude) {
-  if (skill === 'Vanguard') {
-    if (source && source !== target) return `  ${nameTag(target)} ${magnitude} from ${nameTag(source)}.`;
-    return `  ${nameTag(target)} ${magnitude}.`;
-  }
   return `  ${nameTag(target)} is under the effect of ${nameTag(skill)} ${fromPhrase(source, target)}. ${magnitude}`;
 }
 
@@ -238,7 +235,7 @@ function rewriteLine(battle, line, ctx) {
     const actor = match[1];
     const rawSkill = match[2];
     const vanguard = /\(Vanguard\)$/i.test(rawSkill) || rawSkill === 'Vanguard';
-    const skill = skillLabel(rawSkill);
+    const skill = vanguard ? vanguardTitle(battle, actor) : rawSkill;
     ctx.actor = actor;
     ctx.skill = skill;
     ctx.vanguard = vanguard;
@@ -456,6 +453,7 @@ async function loadKit(character) {
       const cmdData = await cmdRes.json();
       const kit = loadCommandSync(cmdData, character.id);
       character.commandName = kit.name;
+      character.vanguardName = VANGUARD_NAMES[character.id] || kit.name;
       character.setCommandKit(kit.command);
       character.setVanguardKit(kit.vanguard);
     }
