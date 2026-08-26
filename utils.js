@@ -62,36 +62,240 @@ const GRANTED_STATUSES = new Set([
 
 const CONTROL_STATUSES = ['stun', 'stagger', 'overwhelm', 'confusion'];
 
-const FIELD_TROOPS = ['cavalry', 'shieldbearers', 'archers', 'spearmen'];
-const TROOP_BEATS = {
-  cavalry: 'shieldbearers',
-  shieldbearers: 'archers',
-  archers: 'spearmen',
-  spearmen: 'cavalry'
+function getDamageTypeConfig(damageType) {
+  const type = DAMAGE_TYPES[String(damageType || '').toUpperCase()];
+  if (!type) return DAMAGE_TYPES.PHYSICAL;
+  return type;
+}
+
+function calculateBaseDamage(attacker, damageType) {
+  const typeConfig = getDamageTypeConfig(damageType);
+  const attackerStat = attacker.getModifiedStat(typeConfig.causedBy);
+  const variance = getRandomInt(-typeConfig.variance, typeConfig.variance);
+  return Math.max(1, Math.round(attackerStat * 1.2 + variance));
+}
+
+function calculateMitigation(defender, damageType) {
+  const typeConfig = getDamageTypeConfig(damageType);
+  const defenderStat = defender.getModifiedStat(typeConfig.mitigatedBy);
+  return Math.min(defenderStat * 0.3, defenderStat * 0.8);
+}
+
+function applyDamageMultipliers(baseDamage, attacker, defender, damageType, options = {}) {
+  let finalDamage = baseDamage;
+  if (attacker.damageBonus) finalDamage *= (1 + attacker.damageBonus / 100);
+  if (attacker.damagePenalty) finalDamage *= (1 - attacker.damagePenalty / 100);
+  if (defender.defenseBonus) finalDamage *= (1 - defender.defenseBonus / 100);
+  if (defender.defensePenalty) finalDamage *= (1 + defender.defensePenalty / 100);
+  const flags = { basic: !!options.basic };
+  if (typeof attacker.getDealtMultiplier === 'function') {
+    finalDamage *= attacker.getDealtMultiplier(damageType, flags);
+  }
+  if (typeof defender.getReceivedMultiplier === 'function') {
+    finalDamage *= defender.getReceivedMultiplier(damageType, flags);
+  }
+  return finalDamage;
+}
+
+function calculateFinalDamage(attacker, defender, damageType, bonusPercent = 0, options = {}) {
+  const baseDamage = calculateBaseDamage(attacker, damageType);
+  const mitigation = calculateMitigation(defender, damageType);
+  let damageMitigated = applyDamageMultipliers(baseDamage - mitigation, attacker, defender, damageType, options);
+  if (bonusPercent) damageMitigated *= (1 + bonusPercent / 100);
+  return Math.max(1, Math.round(damageMitigated));
+}
+
+function hasActiveId(character, id) {
+  const want = String(id).toLowerCase();
+  return (character.activeEffects || []).some(e => {
+    const active = typeof e.isExpired === 'function' ? !e.isExpired() : e.duration > 0;
+    const eid = String(e.id || e.name || '').toLowerCase().replace(/-/g, '_');
+    return active && eid === want;
+  });
+}
+
+function sortByInitiative(characters) {
+  const band = c => {
+    if (hasActiveId(c, 'slow')) return 2;
+    if (hasActiveId(c, 'first_strike')) return 0;
+    return 1;
+  };
+  return [...characters].sort((a, b) => {
+    const diff = band(a) - band(b);
+    if (diff) return diff;
+    const ia = typeof a.getInitiative === 'function' ? a.getInitiative() : 0;
+    const ib = typeof b.getInitiative === 'function' ? b.getInitiative() : 0;
+    return ib - ia;
+  });
+}
+
+function isTeamAlive(teamCharacters) {
+  return teamCharacters.some(c => !c.isDead);
+}
+
+function statusId(name) {
+  return String(name || '').toLowerCase().replace(/-/g, '_');
+}
+
+function formatStatName(stat) {
+  return STAT_NAMES[stat] || String(stat || '').replace(/_/g, ' ');
+}
+
+function formatDamageTypeName(damageType) {
+  const type = String(damageType || '').toUpperCase();
+  if (type === 'FIRE') return 'Fire Damage';
+  if (type === 'TACTICAL') return 'Tactical Damage';
+  if (type === 'BASIC') return 'Basic Attack';
+  return 'Physical Damage';
+}
+
+function formatStatusName(status) {
+  const id = statusId(status);
+  if (STATUS_NAMES[id]) return STATUS_NAMES[id];
+  return id.split('_').filter(Boolean).map(part => part.charAt(0).toUpperCase() + part.slice(1)).join(' ');
+}
+
+function formatDuration(duration) {
+  if (duration === 'combat' || duration == null) return 'until the end of combat';
+  const rounds = Number(duration);
+  if (rounds === 1) return 'until the end of the round';
+  return `for ${rounds} round(s)`;
+}
+
+function formatSignedPercent(value) {
+  const amount = Number(value);
+  if (Number.isNaN(amount)) return String(value);
+  const rounded = Math.round(amount * 100) / 100;
+  if (rounded > 0) return `+${rounded}%`;
+  return `${rounded}%`;
+}
+
+function formatTroopCapacity(character) {
+  if (!character || character.isDead) return 'retreated';
+  return `${Math.round(character.currentHealth)}/${Math.round(character.maxHealth)} Troop Capacity`;
+}
+
+function isGrantedStatus(status) {
+  return GRANTED_STATUSES.has(statusId(status));
+}
+
+function formatStackName(id) {
+  return String(id || 'stack').split('_').filter(Boolean).map(part => part.charAt(0).toUpperCase() + part.slice(1)).join(' ');
+}
+
+function roundScaled(value) {
+  return Math.round(Number(value) * 100) / 100;
+}
+
+function scaleByStat(value, character, scaleStat) {
+  if (value == null || !scaleStat || !character) return value;
+  const enhancer = typeof character.getModifiedStat === 'function'
+    ? character.getModifiedStat(scaleStat)
+    : 0;
+  const factor = 1 + (Number(enhancer) || 0) / 100;
+  if (typeof value === 'number') return roundScaled(value * factor);
+  if (typeof value === 'object') {
+    const scaled = {};
+    for (const key in value) {
+      if (key === '__fixed') scaled[key] = value[key];
+      else if (typeof value[key] === 'number') scaled[key] = roundScaled(value[key] * factor);
+      else scaled[key] = value[key];
+    }
+    return scaled;
+  }
+  return value;
+}
+
+function hasControl(character) {
+  return CONTROL_STATUSES.some(id => hasActiveId(character, id));
+}
+
+function statusConditionMet(character, key) {
+  if (!character || key == null) return false;
+  const id = statusId(key);
+  if (id === 'control') return hasControl(character);
+  return hasActiveId(character, id);
+}
+
+function getDealerType(character) {
+  if (!character || typeof character.getModifiedStat !== 'function') return 'physical';
+  const str = character.getModifiedStat('str');
+  const inst = character.getModifiedStat('inst');
+  const int = character.getModifiedStat('int');
+  if (str >= inst && str >= int) return 'physical';
+  if (int >= str && int >= inst) return 'fire';
+  return 'tactical';
+}
+
+function applyChanceIf(chance, chanceIf, target, extras = {}) {
+  if (chance == null || !chanceIf || typeof chanceIf !== 'object') return chance;
+  let result = Number(chance);
+  const skip = new Set(['mult', 'allyStatus', 'preyRecoveredLastRound', 'stacks', 'selfStatus', 'dealer']);
+  if (chanceIf.dealer && target && getDealerType(target) === String(chanceIf.dealer).toLowerCase()) {
+    result *= Number(chanceIf.mult) || 1;
+  }
+  if (chanceIf.preyRecoveredLastRound && extras.prey && extras.prey.receivedRecoveryLastRound) {
+    const mult = chanceIf.mult != null ? chanceIf.mult : chanceIf.preyRecoveredLastRound;
+    result *= Number(mult) || 1;
+  }
+  if (chanceIf.allyStatus && Array.isArray(extras.allies)) {
+    const living = extras.allies.filter(ally => ally && !ally.isDead);
+    if (living.some(ally => statusConditionMet(ally, chanceIf.allyStatus))) {
+      result *= Number(chanceIf.mult) || 1;
+    }
+  }
+  if (chanceIf.stacks) {
+    const caster = extras.attacker || extras.caster;
+    const spec = chanceIf.stacks;
+    const id = spec.id || spec;
+    const min = spec.min != null ? Number(spec.min) : 1;
+    if (caster && typeof caster.getStackCount === 'function' && caster.getStackCount(id) >= min) {
+      result *= Number(chanceIf.mult) || 1;
+    }
+  }
+  if (chanceIf.selfStatus) {
+    const caster = extras.attacker || extras.caster;
+    if (statusConditionMet(caster, chanceIf.selfStatus)) {
+      result *= Number(chanceIf.mult) || 1;
+    }
+  }
+  for (const key of Object.keys(chanceIf)) {
+    if (skip.has(key)) continue;
+    if (statusConditionMet(target, key)) {
+      const mult = Number(chanceIf[key]);
+      if (!Number.isNaN(mult)) result *= mult;
+    }
+  }
+  return result;
+}
+
+export {
+  getRandomInt,
+  rollChance,
+  DAMAGE_TYPES,
+  STAT_NAMES,
+  STATUS_NAMES,
+  getDamageTypeConfig,
+  calculateBaseDamage,
+  calculateMitigation,
+  applyDamageMultipliers,
+  calculateFinalDamage,
+  hasActiveId,
+  hasControl,
+  statusConditionMet,
+  applyChanceIf,
+  getDealerType,
+  isTeamAlive,
+  sortByInitiative,
+  formatStatName,
+  formatDamageTypeName,
+  formatStatusName,
+  formatDuration,
+  formatSignedPercent,
+  formatTroopCapacity,
+  isGrantedStatus,
+  formatStackName,
+  statusId,
+  scaleByStat,
+  roundScaled
 };
-const TROOP_ADVANTAGE_PCT = 7;
-
-function normalizeTroopName(troop) {
-  return troop ? String(troop).toLowerCase().replace(/[\s_-]/g, '') : null;
-}
-
-function troopOf(character) {
-  return normalizeTroopName(character && character.troopType);
-}
-
-function troopAdvantageSign(atkTroop, defTroop) {
-  const atk = normalizeTroopName(atkTroop);
-  const def = normalizeTroopName(defTroop);
-  if (!atk || !def || atk === def) return 0;
-  if (atk === 'siege' && FIELD_TROOPS.includes(def)) return -1;
-  if (def === 'siege' && FIELD_TROOPS.includes(atk)) return 1;
-  if (TROOP_BEATS[atk] === def) return 1;
-  if (TROOP_BEATS[def] === atk) return -1;
-  return 0;
-}
-
-function troopAdvantageMultiplier(attacker, defender) {
-  const sign = troopAdvantageSign(troopOf(attacker), troopOf(defender));
-  if (!sign) return 1;
-  return 1 + sign * (TROOP_ADVANTAGE_PCT / 100);
-}
