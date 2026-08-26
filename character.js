@@ -7,6 +7,12 @@ const DEFAULT_LEVEL = 16;
 const DEFAULT_STARS = 2;
 const DEFAULT_HABIT_RANK = 1;
 const SLOT_NAMES = { 0: 'Left Flank', 1: 'Vanguard', 2: 'Right Flank' };
+const AFFINITY_STAT_PCT = 20;
+const WEAKNESS_STAT_PCT = -20;
+
+function normalizeTroop(troop) {
+  return troop ? String(troop).toLowerCase().replace(/[\s_-]/g, '') : null;
+}
 
 class Character {
   constructor(dragonData, teamId, slotPosition, options = {}) {
@@ -59,6 +65,15 @@ class Character {
 
   calculateMaxHealth() {
     return Math.max(50, (this.stats.str + this.stats.int) * 2);
+  }
+
+  getTroopAffinityPct() {
+    const troop = normalizeTroop(this.troopType);
+    if (!troop) return 0;
+    const listed = list => (list || []).some(t => normalizeTroop(t) === troop);
+    if (listed(this.affinity)) return AFFINITY_STAT_PCT;
+    if (listed(this.weaknesses)) return WEAKNESS_STAT_PCT;
+    return 0;
   }
 
   addStatModifier(statName, amount, duration = 'combat', options = {}) {
@@ -122,7 +137,8 @@ class Character {
     const base = this.stats[stat] || 0;
     const flat = this.flatMods[stat] || 0;
     const pct = this.getPercentTotal(stat);
-    if (CORE_STATS.includes(stat)) return Math.max(0, (base + flat) * (1 + pct / 100));
+    const affinity = CORE_STATS.includes(stat) ? this.getTroopAffinityPct() : 0;
+    if (CORE_STATS.includes(stat)) return Math.max(0, (base + flat) * (1 + (pct + affinity) / 100));
     return pct;
   }
 
@@ -283,5 +299,8 @@ export {
   SLOT_NAMES,
   DEFAULT_LEVEL,
   DEFAULT_STARS,
-  DEFAULT_HABIT_RANK
+  DEFAULT_HABIT_RANK,
+  AFFINITY_STAT_PCT,
+  WEAKNESS_STAT_PCT,
+  normalizeTroop
 };
