@@ -360,6 +360,10 @@ function rewriteLine(battle, line, ctx) {
   return { text: `  ${text}`, section: ctx.section };
 }
 
+function isHabitLine(text) {
+  return /uses \[/.test(text || '');
+}
+
 function formatBattleReport(battle) {
   const lines = battle.battleLog || [];
   const prep = [];
@@ -367,7 +371,18 @@ function formatBattleReport(battle) {
   const ctx = { actor: null, skill: null, vanguard: false, section: 'prep' };
   let i = 0;
   let skipRoster = false;
-  let combatHeader = false;
+  let window = 'none';
+  let startCombatBuf = [];
+  let startRoundLabel = false;
+
+  const flushStartCombat = () => {
+    if (startCombatBuf.some(isHabitLine)) {
+      combat.push('Start of Combat:');
+      combat.push(...startCombatBuf);
+    }
+    startCombatBuf = [];
+    window = 'none';
+  };
 
   const push = item => {
     if (!item || !item.text) return;
@@ -375,9 +390,22 @@ function formatBattleReport(battle) {
       prep.push(item.text);
       return;
     }
-    if (!combatHeader) {
-      combat.push(BAR, 'Combat Phase', BAR);
-      combatHeader = true;
+    if (window === 'combat_start') {
+      startCombatBuf.push(item.text);
+      return;
+    }
+    if (window === 'round_start') {
+      if (/Turn order:/.test(item.text)) {
+        window = 'turns';
+        combat.push(item.text);
+        return;
+      }
+      if (isHabitLine(item.text) && !startRoundLabel) {
+        combat.push('Start of Round:');
+        startRoundLabel = true;
+      }
+      combat.push(item.text);
+      return;
     }
     combat.push(item.text);
   };
@@ -387,33 +415,33 @@ function formatBattleReport(battle) {
     const next = lines[i + 1] || '';
 
     if (isBar(line) && next === 'Start of Combat') {
-      if (!combatHeader) {
-        combat.push(BAR, 'Combat Phase', BAR);
-        combatHeader = true;
-      }
-      combat.push('Start of Combat:');
       i += 3;
       skipRoster = true;
       ctx.section = 'prep';
+      window = 'combat_start';
+      startCombatBuf = [];
       continue;
     }
     if (isBar(line) && /^Start of Round /.test(next)) {
       const number = (next.match(/Round (\d+)/) || [])[1] || '';
-      if (!combatHeader) {
-        combat.push(BAR, 'Combat Phase', BAR);
-        combatHeader = true;
-      }
-      combat.push(BAR, `Start of Round ${number}:`, BAR);
+      flushStartCombat();
+      combat.push(BAR, `Round ${number}`, BAR);
       i += 3;
       skipRoster = false;
       ctx.section = 'combat';
+      window = 'round_start';
+      startRoundLabel = false;
       continue;
     }
     if (isBar(line) && next === 'Combat End') {
-      combat.push(BAR, 'Combat End', BAR);
+      flushStartCombat();
+      const ahead = lines.slice(i, i + 8).join('\n');
+      const title = /Maximum \d+ rounds reached/.test(ahead) ? 'Stalemate' : 'Combat End';
+      combat.push(BAR, title, BAR);
       i += 3;
       skipRoster = false;
       ctx.section = 'combat';
+      window = 'none';
       continue;
     }
     if (isBar(line)) {
@@ -428,6 +456,7 @@ function formatBattleReport(battle) {
     push(rewriteLine(battle, line, ctx));
     i += 1;
   }
+  flushStartCombat();
 
   const out = [BAR, 'Preparations', BAR];
   if (prep.length) out.push(...prep);
