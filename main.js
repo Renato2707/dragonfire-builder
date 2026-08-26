@@ -346,8 +346,13 @@ function rewriteLine(battle, line, ctx) {
   match = text.match(/^Applies Recovery to (.+)$/);
   if (match) {
     const split = splitTarget(battle, match[1]);
-    const rest = split.rest ? ` ${split.rest}` : '';
-    return { text: `  ${nameTag(split.name)} gains Recovery${rest}.`, section: ctx.section };
+    const skill = ctx.skill || 'Recovery';
+    const source = ctx.actor || split.name;
+    const mag = split.rest ? `Recovery ${split.rest}` : 'Recovery';
+    return {
+      text: effectLine(split.name, skill, source, mag),
+      section: ctx.section
+    };
   }
 
   match = text.match(/^Turn order: (.+)$/);
