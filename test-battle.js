@@ -257,6 +257,7 @@ function mockFx(ids) {
   if (burns.length !== 2) throw new Error(`repeatPer burn should count 2, got ${burns.length}`);
   const habit = new Habit({
     name: 'Gift of Fire',
+    unlockStar: 8,
     structured: [{
       phase: 'round_start',
       rounds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
@@ -271,6 +272,7 @@ function mockFx(ids) {
       }]
     }]
   }, 'tairax');
+  tairax.setStars(8);
   btl.executeHabit(tairax, habit, 'round_start', 1);
   const resisted = [tairax, ally].filter(c => hasEffect(c, 'resistance'));
   if (resisted.length !== 2) throw new Error(`2 Burns should grant 2 Resistance, got ${resisted.length}`);
@@ -278,6 +280,12 @@ function mockFx(ids) {
   if (none.matchingPerTarget(none.teamA[0], { side: 'enemy', status: 'burn' }).length !== 0) {
     throw new Error('no Burns should match 0');
   }
+  none.executeHabit(none.teamA[0], habit, 'round_start', 1);
+  if (hasEffect(none.teamA[0], 'resistance')) throw new Error('Gift of Fire must skip when no enemy has Burn');
+  const locked = mk('t3', 0, 1);
+  locked.setStars(6);
+  locked.setHabits([habit]);
+  if (locked.getHabitsForPhase(1, 'round_start').length) throw new Error('Gift of Fire should stay locked below 8 stars');
   const fire = mk('fire', 1, 0, { str: 10, inst: 10, int: 80, init: 10 });
   const phys = mk('phys', 1, 1, { str: 80, inst: 10, int: 10, init: 10 });
   const rally = new Battle([mk('vermax', 0, 1)], [fire, phys], { verbose: false });
