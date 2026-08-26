@@ -235,11 +235,14 @@ class Battle {
       const ctx = this.damageContext;
       if (!ctx) return false;
       const want = String(req.damageType).toLowerCase();
+      const hitType = String(ctx.type || '').toLowerCase();
+      const isBasic = !!ctx.basic;
       if (want === 'basic') {
-        if (!ctx.basic) return false;
+        if (!isBasic) return false;
       } else {
-        if (String(ctx.type || '').toLowerCase() !== want) return false;
-        if (req.excludeBasic && ctx.basic) return false;
+        if (isBasic) return false;
+        if (hitType !== want) return false;
+        if (req.excludeBasic && isBasic) return false;
       }
     }
     return true;

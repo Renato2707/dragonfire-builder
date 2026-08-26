@@ -309,6 +309,54 @@ function mockFx(ids) {
 }
 
 {
+  const mk = (id, team, slot) => new Character({
+    id, name: id, breed: 'Sentinel', rarity: 'Rare',
+    stats: { str: 10, inst: 10, int: 10, init: 10 }
+  }, team, slot);
+  const glory = new Habit({
+    name: 'Adaptive Glory',
+    unlockStar: 2,
+    structured: [
+      { phase: 'on_self_first_damage', rounds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], oncePerRound: true, requires: { damageType: 'fire' }, actions: [{ t: 'heal', pct: 30, tgt: { side: 'self' } }] },
+      { phase: 'on_self_first_damage', rounds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], oncePerRound: true, requires: { damageType: 'tactical' }, actions: [{ t: 'mod', mods: [{ stat: 'dmg_dealt', pct: 12 }], dur: 1, tgt: { side: 'ally', count: 1, select: 'highest:troops' } }] },
+      { phase: 'on_self_first_damage', rounds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], oncePerRound: true, requires: { damageType: 'physical', excludeBasic: true }, actions: [{ t: 'mod', mods: [{ stat: 'dmg_dealt', pct: -12 }], dur: 1, tgt: { side: 'enemy', count: 1, select: 'highest:troops' } }] },
+      { phase: 'on_self_first_damage', rounds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], oncePerRound: true, requires: { damageType: 'basic' }, actions: [{ t: 'mod', mods: [{ stat: 'inst', pct: 12 }, { stat: 'init', pct: 6 }], dur: 1, tgt: { side: 'self' } }] }
+    ]
+  }, 'sunfyre');
+  const run = (info) => {
+    const sun = mk('sunfyre', 0, 1);
+    const mate = mk('mate', 0, 0);
+    const foe = mk('foe', 1, 1);
+    sun.maxHealth = 200;
+    sun.currentHealth = 100;
+    sun.setHabits([glory]);
+    const btl = new Battle([sun, mate], [foe], { verbose: false });
+    btl.currentRound = 1;
+    btl.notifyDamage(sun, info);
+    return { sun, mate, foe, btl };
+  };
+  const fireHit = run({ type: 'fire', basic: false });
+  if (fireHit.sun.currentHealth <= 100) throw new Error('Fire first hit should Recover');
+  if (fireHit.sun.getPercentTotal('inst') !== 0) throw new Error('Fire must not take the Basic Attack branch');
+  const tac = run({ type: 'tactical', basic: false });
+  const tacBuff = [tac.sun, tac.mate].some(c => c.getPercentTotal('dmg_dealt') === 12);
+  if (!tacBuff) throw new Error('Tactical first hit should buff ally Damage Dealt');
+  if (tac.foe.getPercentTotal('dmg_dealt') !== 0) throw new Error('Tactical must not take Physical branch');
+  const phys = run({ type: 'physical', basic: false });
+  if (phys.foe.getPercentTotal('dmg_dealt') !== -12) throw new Error('Physical (non-basic) should debuff the enemy');
+  if (phys.sun.getPercentTotal('inst') !== 0) throw new Error('Physical skill must not take Basic Attack branch');
+  const basicPhys = run({ type: 'physical', basic: true });
+  if (basicPhys.sun.getPercentTotal('inst') !== 12 || basicPhys.sun.getPercentTotal('init') !== 6) {
+    throw new Error('Basic Attack should buff Instinct and Initiative');
+  }
+  if (basicPhys.foe.getPercentTotal('dmg_dealt') !== 0) throw new Error('Physical Basic Attack must not take Physical skill branch');
+  const fireBasic = run({ type: 'fire', basic: true });
+  if (fireBasic.sun.getPercentTotal('inst') !== 12) throw new Error('Fire Basic Attack is still a Basic Attack');
+  if (fireBasic.sun.currentHealth !== 100) throw new Error('Fire Basic Attack must not take Fire Recovery branch');
+  console.log('✓ requires.damageType Adaptive Glory branches\n');
+}
+
+{
   const d = (id, team, slot) => new Character({
     id, name: id, breed: 'Warrior', rarity: 'Rare', stats: { str: 80, inst: 10, int: 10, init: 10 }
   }, team, slot);
