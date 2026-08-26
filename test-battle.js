@@ -526,6 +526,72 @@ function mockFx(ids) {
 }
 
 {
+  const mk = (id, team, slot, stats, breed) => new Character({
+    id, name: id, breed: breed || 'Warrior', rarity: 'Rare',
+    stats: stats || { str: 80, inst: 10, int: 10, init: 10 }
+  }, team, slot);
+  const rounds = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+  const kit = new Habit({
+    name: 'Spreading Blaze',
+    structured: [
+      {
+        phase: 'after_basic_attack',
+        rounds,
+        actions: [
+          { t: 'dmg', dt: 'physical', pct: 50, tgt: { side: 'enemy', count: 1, select: 'same_lane' } },
+          {
+            t: 'stack', id: 'spreading_blaze', stacks: 1, maxStacks: 10,
+            mods: [{ stat: 'tactical_dealt', pct: 2.5 }], dur: 'combat', chance: 100,
+            tgt: { side: 'ally', count: 1, select: 'dealer:tactical' }
+          }
+        ]
+      },
+      {
+        phase: 'after_basic_attack',
+        rounds,
+        requires: { anyEnemyDealerFire: true },
+        actions: [{
+          t: 'stack', id: 'spreading_blaze', stacks: 1, maxStacks: 10,
+          mods: [{ stat: 'tactical_dealt', pct: 2.5 }], dur: 'combat', chance: 100,
+          tgt: { side: 'ally', count: 1, select: 'dealer:tactical' }
+        }]
+      }
+    ]
+  }, 'vermax');
+  const vermax = mk('vermax', 0, 1);
+  const tac = mk('syrax', 0, 0, { str: 10, inst: 80, int: 10, init: 10 }, 'Sentinel');
+  const fire = mk('caraxes', 1, 0, { str: 10, inst: 10, int: 80, init: 10 }, 'Hunter');
+  const lane = mk('foe', 1, 1);
+  lane.maxHealth = 5000;
+  lane.currentHealth = 5000;
+  fire.maxHealth = 5000;
+  fire.currentHealth = 5000;
+  vermax.setCommandKit(kit);
+  const btl = new Battle([vermax, tac], [fire, lane], { verbose: false });
+  btl.currentRound = 1;
+  const hpBefore = lane.currentHealth;
+  btl.executeKit(vermax, kit, 'after_basic_attack', 1, 'Spreading Blaze');
+  if (lane.currentHealth >= hpBefore) throw new Error('Spreading Blaze should deal Physical to same lane');
+  if (tac.getStackCount('spreading_blaze') !== 2) {
+    throw new Error(`Fire enemy should repeat the stack, got ${tac.getStackCount('spreading_blaze')}`);
+  }
+  if (tac.getPercentTotal('tactical_dealt') !== 5) throw new Error('two Spreading Blaze stacks should be +5% Tactical Dealt');
+  const v2 = mk('vermax2', 0, 1);
+  const t2 = mk('syrax2', 0, 0, { str: 10, inst: 80, int: 10, init: 10 }, 'Sentinel');
+  const physFoe = mk('foe2', 1, 1);
+  physFoe.maxHealth = 5000;
+  physFoe.currentHealth = 5000;
+  v2.setCommandKit(kit);
+  const btl2 = new Battle([v2, t2], [physFoe], { verbose: false });
+  btl2.currentRound = 1;
+  btl2.executeKit(v2, kit, 'after_basic_attack', 1, 'Spreading Blaze');
+  if (t2.getStackCount('spreading_blaze') !== 1) {
+    throw new Error(`no Fire enemy should grant 1 stack, got ${t2.getStackCount('spreading_blaze')}`);
+  }
+  console.log('✓ Spreading Blaze after Basic + Fire repeat\n');
+}
+
+{
   const d = (id, team, slot) => new Character({
     id, name: id, breed: 'Warrior', rarity: 'Rare', stats: { str: 80, inst: 10, int: 10, init: 10 }
   }, team, slot);
