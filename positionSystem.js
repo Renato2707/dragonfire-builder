@@ -299,6 +299,9 @@ function selectTargets(caster, friendlyTeam, enemyTeam, targetingParsed) {
     const control = ['stun', 'stagger', 'overwhelm', 'confusion'];
     const score = c => control.some(id => hasStatus(c, id)) ? 0 : 1;
     candidates.sort((a, b) => score(a) - score(b));
+  } else if (select === 'has_control') {
+    const types = (tgt.controlTypes || ['stun', 'stagger', 'overwhelm', 'confusion']).map(t => String(t).toLowerCase());
+    candidates = candidates.filter(c => types.some(id => hasStatus(c, id)));
   } else if (select.startsWith('prefer_class:') || select.startsWith('prefer_breed:')) {
     preferClass(candidates, select.split(':')[1]);
   } else if (select.startsWith('class:') || select.startsWith('breed:')) {

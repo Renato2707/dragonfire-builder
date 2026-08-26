@@ -765,6 +765,67 @@ function mockFx(ids) {
 }
 
 {
+  const mk = (id, team, slot, stars) => new Character({
+    id, name: id, breed: 'Hunter', rarity: 'Rare',
+    stats: { str: 10, inst: 10, int: 80, init: 10 }
+  }, team, slot, { stars: stars || 6 });
+  const kit = new Habit({
+    name: 'Burning Ward',
+    structured: [
+      { phase: 'turn', rounds: [1, 3, 5, 7, 9], actions: [{ t: 'status', st: 'stagger', dur: 2, chance: 25, chanceField: 'stagger_chance', tgt: { side: 'enemy', count: 1, select: 'any' } }] },
+      { phase: 'turn', rounds: [2, 5, 8], actions: [
+        { t: 'dmg', dt: 'fire', pct: 115, tgt: { side: 'enemy', count: 1, select: 'prefer_without:burn' } },
+        { t: 'status', st: 'burn', rate: 20, dur: 2, chance: 100, tgt: { side: 'enemy', count: 1, select: 'last_dmg' } }
+      ] }
+    ]
+  }, 'tairax');
+  const gleam = new Habit({
+    name: 'Gleamstrike',
+    unlockStar: 6,
+    structured: [
+      { phase: 'round_start', rounds: [1, 3, 5, 7, 9], actions: [{ t: 'mod_command', command: 'Burning Ward', field: 'stagger_chance', pct: [37.5, 40, 42.5, 46.25, 50] }] },
+      { phase: 'turn', rounds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], requires: { command: 'Burning Ward' }, actions: [{ t: 'dmg', dt: 'fire', pct: [20, 24, 28, 34, 40], tgt: { side: 'enemy', count: 'all', select: 'has_control' } }] }
+    ]
+  }, 'tairax');
+  const tairax = mk('tairax', 0, 1);
+  const burned = mk('burned', 1, 0);
+  const clean = mk('clean', 1, 1);
+  const stunned = mk('stunned', 1, 2);
+  applyEffect(burned, 'BURN', 1, 'tairax', { duration: 2, damageRate: 20 });
+  applyEffect(stunned, 'STUN', 1, 'tairax', { duration: 2 });
+  burned.maxHealth = 8000; burned.currentHealth = 8000;
+  clean.maxHealth = 8000; clean.currentHealth = 8000;
+  stunned.maxHealth = 8000; stunned.currentHealth = 8000;
+  tairax.setCommandKit(kit);
+  tairax.commandName = 'Burning Ward';
+  tairax.setHabits([gleam]);
+  const btl = new Battle([tairax], [burned, clean, stunned], { verbose: false });
+  btl.currentRound = 2;
+  btl.executeKit(tairax, kit, 'turn', 2, 'Burning Ward');
+  if (clean.currentHealth === 8000) throw new Error('Burning Ward should prefer the unburned enemy');
+  if (!hasEffect(clean, 'burn')) throw new Error('Burn must land on the same Fire target');
+  if (burned.currentHealth !== 8000) throw new Error('already-Burned enemy should lose the prefer_without:burn sort');
+  const odd = new Battle([mk('t2', 0, 1)], [mk('e', 1, 1)], { verbose: false });
+  const caster = odd.teamA[0];
+  caster.setCommandKit(kit);
+  caster.commandName = 'Burning Ward';
+  caster.setHabits([gleam]);
+  odd.currentRound = 1;
+  odd.executeHabit(caster, gleam, 'round_start', 1);
+  if (resolveChance({ chance: 25, chanceField: 'stagger_chance' }, 0, caster) !== 37.5) {
+    throw new Error('Gleamstrike should raise odd-round Stagger chance to 37.5');
+  }
+  const hpBefore = odd.teamB[0].currentHealth;
+  applyEffect(odd.teamB[0], 'STAGGER', 1, 't2', { duration: 2 });
+  odd.executeHabit(caster, gleam, 'turn', 1);
+  if (odd.teamB[0].currentHealth >= hpBefore) throw new Error('Gleamstrike should Fire all Control enemies');
+  const locked = mk('t3', 0, 1, 4);
+  locked.setHabits([gleam]);
+  if (locked.getHabitsForPhase(1, 'round_start').length) throw new Error('Gleamstrike should stay locked below 6 stars');
+  console.log('✓ Burning Ward prefer unburned + Gleamstrike Stagger/Control Fire\n');
+}
+
+{
   const mk = (id, team, slot, breed) => new Character({
     id, name: id, breed: breed || 'Warrior', rarity: 'Rare',
     stats: { str: 10, inst: 80, int: 10, init: 10 }

@@ -24,12 +24,7 @@
           "t": "dmg",
           "dt": "fire",
           "pct": 115,
-          "tgt": {
-            "side": "enemy",
-            "count": 1,
-            "select": "any",
-            "filter": { "withoutStatus": "burn" }
-          }
+          "tgt": { "side": "enemy", "count": 1, "select": "prefer_without:burn" }
         },
         {
           "t": "status",
@@ -37,12 +32,7 @@
           "rate": 20,
           "dur": 2,
           "chance": 50,
-          "tgt": {
-            "side": "enemy",
-            "count": 1,
-            "select": "any",
-            "filter": { "withoutStatus": "burn" }
-          }
+          "tgt": { "side": "enemy", "count": 1, "select": "last_dmg" }
         }
       ]
     }

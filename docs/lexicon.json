@@ -610,6 +610,7 @@
         "prefer_dealer:tactical",
         "prefer_dealer:physical",
         "prefer_control",
+        "has_control",
         "prefer_without:stun",
         "prefer_without:resistance",
         "prefer_class:hunter",
@@ -653,7 +654,7 @@
         "last_mod": "last_buff",
         "last_dmg_all": "command_hits"
       },
-      "desc": "prefer_dealer:TYPE sorts that dealer first without excluding others (Blazing Fury). last_buff is the last mod/status target this activation (First-Strike on the same ally)."
+      "desc": "prefer_dealer:TYPE sorts that dealer first without excluding others (Blazing Fury). last_buff is the last mod/status target this activation (First-Strike on the same ally). has_control filters to Stun/Stagger/Overwhelm/Confusion (Gleamstrike Fire)."
     },
     "filter": {
       "status": "string",
