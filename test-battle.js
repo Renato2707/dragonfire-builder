@@ -723,6 +723,48 @@ function mockFx(ids) {
 }
 
 {
+  const mk = (id, team, slot, stars) => new Character({
+    id, name: id, breed: 'Sentinel', rarity: 'Rare',
+    stats: { str: 10, inst: 10, int: 10, init: 10 }
+  }, team, slot, { stars: stars == null ? 2 : stars });
+  const habit = new Habit({
+    name: 'Mindful Synergy',
+    unlockStar: 2,
+    structured: [{
+      phase: 'combat_start',
+      rounds: [1],
+      actions: [{
+        t: 'mod',
+        mods: [
+          { stat: 'int', pct: [6.5, 7.8, 9.1, 11.05, 13] },
+          { stat: 'inst', pct: [6.5, 7.8, 9.1, 11.05, 13] }
+        ],
+        scaleStat: 'init',
+        dur: 'combat',
+        tgt: { side: 'ally', count: 3, select: 'any' }
+      }]
+    }]
+  }, 'syrax');
+  const allies = [mk('syrax', 0, 1), mk('a', 0, 0), mk('b', 0, 2)];
+  const foes = [mk('e0', 1, 0), mk('e1', 1, 1), mk('e2', 1, 2)];
+  allies[0].setHabits([habit]);
+  const btl = new Battle(allies, foes, { verbose: false });
+  btl.executeHabit(allies[0], habit, 'combat_start', 1);
+  const expected = 7.15;
+  for (const a of allies) {
+    if (a.getPercentTotal('int') !== expected) throw new Error(`${a.name} Int should be +6.5 enhanced by Initiative 10 (= +7.15), got ${a.getPercentTotal('int')}`);
+    if (a.getPercentTotal('inst') !== expected) throw new Error(`${a.name} Inst should be +7.15, got ${a.getPercentTotal('inst')}`);
+  }
+  for (const e of foes) {
+    if (e.getPercentTotal('int') !== 0 || e.getPercentTotal('inst') !== 0) throw new Error('Mindful Synergy must not buff enemies');
+  }
+  const locked = mk('s2', 0, 1, 1);
+  locked.setHabits([habit]);
+  if (locked.getHabitsForPhase(1, 'combat_start').length) throw new Error('Mindful Synergy should stay locked below 2 stars');
+  console.log('✓ Mindful Synergy Int/Inst on 3 allies (Initiative-enhanced)\n');
+}
+
+{
   const mk = (id, team, slot, breed) => new Character({
     id, name: id, breed: breed || 'Warrior', rarity: 'Rare',
     stats: { str: 10, inst: 80, int: 10, init: 10 }
