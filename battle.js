@@ -292,13 +292,20 @@ class Battle {
 
   pendingBlocks(character, habit, blocks) {
     return (blocks || []).filter(block => {
-      if (!block.oncePerRound) return true;
-      return !character.oncePerRoundFired[this.onceKey(habit, block)];
+      const key = this.onceKey(habit, block);
+      if (block.oncePerCombat && character.oncePerCombatFired && character.oncePerCombatFired[key]) return false;
+      if (block.oncePerRound && character.oncePerRoundFired[key]) return false;
+      return true;
     });
   }
 
   consumeOnce(character, habit, block) {
-    if (block.oncePerRound) character.oncePerRoundFired[this.onceKey(habit, block)] = true;
+    const key = this.onceKey(habit, block);
+    if (block.oncePerRound) character.oncePerRoundFired[key] = true;
+    if (block.oncePerCombat) {
+      if (!character.oncePerCombatFired) character.oncePerCombatFired = {};
+      character.oncePerCombatFired[key] = true;
+    }
   }
 
   blockChanceHits(character, habit, block) {
@@ -349,10 +356,10 @@ class Battle {
     return this.withConfusion(character, () => {
       this.logAction(`${character.name} activates ${label}`);
       for (const block of pending) {
-        if (block.oncePerRound && block.onceWhen !== 'success') this.consumeOnce(character, habitLike, block);
+        if ((block.oncePerRound || block.oncePerCombat) && block.onceWhen !== 'success') this.consumeOnce(character, habitLike, block);
         if (!this.blockChanceHits(character, habitLike, block)) continue;
         this.runBlockActions(character, habitLike, block, round);
-        if (block.oncePerRound && block.onceWhen === 'success') this.consumeOnce(character, habitLike, block);
+        if ((block.oncePerRound || block.oncePerCombat) && block.onceWhen === 'success') this.consumeOnce(character, habitLike, block);
       }
       return true;
     });
@@ -554,10 +561,10 @@ class Battle {
     this.withConfusion(character, () => {
       this.logAction(`${character.name} activates ${habit.name}`);
       for (const block of pending) {
-        if (block.oncePerRound && block.onceWhen !== 'success') this.consumeOnce(character, habit, block);
+        if ((block.oncePerRound || block.oncePerCombat) && block.onceWhen !== 'success') this.consumeOnce(character, habit, block);
         if (!this.blockChanceHits(character, habit, block)) continue;
         this.runBlockActions(character, habit, block, r);
-        if (block.oncePerRound && block.onceWhen === 'success') this.consumeOnce(character, habit, block);
+        if ((block.oncePerRound || block.oncePerCombat) && block.onceWhen === 'success') this.consumeOnce(character, habit, block);
       }
     });
   }
