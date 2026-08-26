@@ -864,6 +864,39 @@ function mockFx(ids) {
 }
 
 {
+  const mk = (id, team, slot, stats) => new Character({
+    id, name: id, breed: 'Hunter', rarity: 'Rare',
+    stats: stats || { str: 10, inst: 10, int: 10, init: 10 }
+  }, team, slot, { stars: 2 });
+  const habit = new Habit({
+    name: 'Whisper of Ash',
+    unlockStar: 2,
+    structured: [
+      { phase: 'round_start', rounds: [1], actions: [{ t: 'mod', mods: [{ stat: 'str', pct: [-16, -19.2, -22.4, -27.2, -32] }, { stat: 'init', pct: [-16, -19.2, -22.4, -27.2, -32] }], scaleStat: 'int', dur: 5, tgt: { side: 'enemy', count: 1, select: 'same_lane' } }] },
+      { phase: 'round_start', rounds: [6], actions: [{ t: 'mod', mods: [{ stat: 'int', pct: [16, 19.2, 22.4, 27.2, 32] }, { stat: 'init', pct: [16, 19.2, 22.4, 27.2, 32] }], dur: 5, tgt: { side: 'self' } }] }
+    ]
+  }, 'tairax');
+  const tairax = mk('tairax', 0, 1);
+  const lane = mk('lane', 1, 1);
+  const flank = mk('flank', 1, 0);
+  tairax.setHabits([habit]);
+  const btl = new Battle([tairax], [lane, flank], { verbose: false });
+  btl.executeHabit(tairax, habit, 'round_start', 1);
+  if (lane.getPercentTotal('str') !== -17.6 || lane.getPercentTotal('init') !== -17.6) {
+    throw new Error(`same-lane should be -16 enhanced by Int 10 (= -17.6), got str ${lane.getPercentTotal('str')}`);
+  }
+  if (flank.getPercentTotal('str') !== 0) throw new Error('off-lane enemy must not be shredded');
+  if (tairax.getPercentTotal('int') !== 0) throw new Error('round 1 must not self-buff');
+  btl.executeHabit(tairax, habit, 'round_start', 6);
+  if (tairax.getPercentTotal('int') !== 16 || tairax.getPercentTotal('init') !== 16) {
+    throw new Error('round 6 should self-buff Int/Init +16');
+  }
+  btl.executeHabit(tairax, habit, 'round_start', 2);
+  if (tairax.getPercentTotal('int') !== 16) throw new Error('round 2 should not add another Whisper of Ash');
+  console.log('✓ Whisper of Ash same-lane shred / round-6 self buff\n');
+}
+
+{
   const mk = (id, team, slot, breed) => new Character({
     id, name: id, breed: breed || 'Warrior', rarity: 'Rare',
     stats: { str: 10, inst: 80, int: 10, init: 10 }
