@@ -8,8 +8,8 @@ import { loadDragonHabitsSync, loadCommandSync } from './habitParser.js';
 const SLOTS = [0, 1, 2];
 const TROOP_TYPES = [
   { id: '', label: '—' },
-  { id: 'archers', label: 'Archers' },
   { id: 'shieldbearers', label: 'Shieldbearers' },
+  { id: 'archers', label: 'Archers' },
   { id: 'spearmen', label: 'Spearmen' },
   { id: 'cavalry', label: 'Cavalry' },
   { id: 'siege', label: 'Siege' }
@@ -48,14 +48,40 @@ function fillTroopSelect(select) {
   });
 }
 
+function formatAffinities(dragon) {
+  const list = (dragon.affinity || []).map(name => {
+    const found = TROOP_TYPES.find(troop => troop.id === String(name).toLowerCase().replace(/[\s_-]/g, ''));
+    return found && found.label ? found.label : name;
+  });
+  return list.length ? list.join('/') : '—';
+}
+
+function dragonOptionLabel(dragon) {
+  return `${dragon.name} (${dragon.rarity}, ${dragon.breed}, ${formatAffinities(dragon)})`;
+}
+
 function fillDragonSelect(select) {
   select.innerHTML = '<option value="">—</option>';
-  getAllDragons().forEach(dragon => {
+  getAllDragons()
+    .slice()
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .forEach(dragon => {
+      const option = document.createElement('option');
+      option.value = dragon.id;
+      option.textContent = dragonOptionLabel(dragon);
+      select.appendChild(option);
+    });
+}
+
+function fillLevelSelect(select) {
+  select.innerHTML = '';
+  for (let level = 1; level <= 50; level += 1) {
     const option = document.createElement('option');
-    option.value = dragon.id;
-    option.textContent = dragon.name;
+    option.value = String(level);
+    option.textContent = `Lv ${level}`;
+    if (level === DEFAULT_LEVEL) option.selected = true;
     select.appendChild(option);
-  });
+  }
 }
 
 function fillStarSelect(select) {
@@ -74,7 +100,7 @@ function fillHabitSelect(select) {
   for (let rank = 1; rank <= 5; rank += 1) {
     const option = document.createElement('option');
     option.value = String(rank);
-    option.textContent = `H${rank}`;
+    option.textContent = `Lvl ${rank}`;
     if (rank === DEFAULT_HABIT_RANK) option.selected = true;
     select.appendChild(option);
   }
@@ -84,6 +110,7 @@ function populateSlotSelects() {
   SLOTS.forEach(slot => {
     ['teamA', 'teamB'].forEach(prefix => {
       fillDragonSelect(document.getElementById(`${prefix}-slot-${slot}`));
+      fillLevelSelect(document.getElementById(`${prefix}-level-${slot}`));
       fillStarSelect(document.getElementById(`${prefix}-stars-${slot}`));
       fillHabitSelect(document.getElementById(`${prefix}-habit-${slot}`));
     });
@@ -111,6 +138,7 @@ function readTeam(prefix) {
     return {
       dragon: getDragon(id),
       slot,
+      level: readNumber(`${prefix}-level-${slot}`, DEFAULT_LEVEL),
       stars: readNumber(`${prefix}-stars-${slot}`, DEFAULT_STARS),
       habitRank: readNumber(`${prefix}-habit-${slot}`, DEFAULT_HABIT_RANK)
     };
@@ -144,6 +172,7 @@ function setSlotsDisabled(disabled) {
   SLOTS.forEach(slot => {
     ['teamA', 'teamB'].forEach(prefix => {
       document.getElementById(`${prefix}-slot-${slot}`).disabled = disabled;
+      document.getElementById(`${prefix}-level-${slot}`).disabled = disabled;
       document.getElementById(`${prefix}-stars-${slot}`).disabled = disabled;
       document.getElementById(`${prefix}-habit-${slot}`).disabled = disabled;
     });
@@ -178,7 +207,7 @@ function buildTeam(prefix, teamId) {
   const troop = readTroop(prefix);
   return readTeam(prefix).map(entry => {
     const character = new Character(entry.dragon, teamId, entry.slot, {
-      level: DEFAULT_LEVEL,
+      level: entry.level,
       stars: entry.stars,
       habitRank: entry.habitRank
     });
@@ -212,6 +241,13 @@ function nextRound() {
   if (!continues) document.getElementById('btnNextRound').disabled = true;
 }
 
+function affinityNote(character) {
+  const pct = typeof character.getTroopAffinityPct === 'function' ? character.getTroopAffinityPct() : 0;
+  if (pct > 0) return ' · +20% to Dragon Stats';
+  if (pct < 0) return ' · −20% to Dragon Stats';
+  return '';
+}
+
 function renderStatus(container, team) {
   container.innerHTML = '';
   const troop = team[0] ? troopLabel(team[0].troopType) : '—';
@@ -231,7 +267,7 @@ function renderStatus(container, team) {
     }
     div.className = `character-status ${char.isDead ? 'dead' : ''}`;
     const percent = char.getHealthPercentage();
-    div.innerHTML = `<div class="name">${SLOT_NAMES[slot]} · ${char.name}</div><div class="health">Nv ${char.level} · ${char.stars}★ · H${char.habitRank} · ${Math.round(char.currentHealth)}/${Math.round(char.maxHealth)}</div><div class="bar" style="width: ${percent}%"></div>`;
+    div.innerHTML = `<div class="name">${SLOT_NAMES[slot]} · ${char.name}</div><div class="health">Lv ${char.level} · ${char.stars}★ · Lvl ${char.habitRank} · ${Math.round(char.currentHealth)}/${Math.round(char.maxHealth)}${affinityNote(char)}</div><div class="bar" style="width: ${percent}%"></div>`;
     container.appendChild(div);
   });
 }
@@ -244,28 +280,13 @@ function updateBattleDisplay() {
   renderStatus(document.getElementById('teamBStatus'), currentBattle.teamB);
 }
 
-function resetProgressSelects() {
-  document.getElementById('teamA-troop').value = '';
-  document.getElementById('teamB-troop').value = '';
-  document.getElementById('defending-team').value = '1';
-  SLOTS.forEach(slot => {
-    ['teamA', 'teamB'].forEach(prefix => {
-      document.getElementById(`${prefix}-slot-${slot}`).value = '';
-      document.getElementById(`${prefix}-stars-${slot}`).value = String(DEFAULT_STARS);
-      document.getElementById(`${prefix}-habit-${slot}`).value = String(DEFAULT_HABIT_RANK);
-    });
-  });
-}
-
 function reset() {
   currentBattle = null;
-  document.getElementById('battleLog').textContent = 'Monte a formação. Tropa do time liga hábitos como Adaptive Guard.';
+  document.getElementById('battleLog').textContent = 'Monte a formação. Tropa do time liga Affinity (+20%) só nos dragões que têm essa tropa.';
   document.getElementById('teamAStatus').innerHTML = '';
   document.getElementById('teamBStatus').innerHTML = '';
-  resetProgressSelects();
   setSlotsDisabled(false);
-  document.getElementById('btnStartBattle').disabled = true;
+  onFormationChange();
   document.getElementById('btnNextRound').disabled = true;
   document.getElementById('btnReset').disabled = true;
-  document.getElementById('error').textContent = '';
 }
