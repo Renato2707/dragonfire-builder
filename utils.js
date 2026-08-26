@@ -217,10 +217,23 @@ function statusConditionMet(character, key) {
   return hasActiveId(character, id);
 }
 
+function getDealerType(character) {
+  if (!character || typeof character.getModifiedStat !== 'function') return 'physical';
+  const str = character.getModifiedStat('str');
+  const inst = character.getModifiedStat('inst');
+  const int = character.getModifiedStat('int');
+  if (str >= inst && str >= int) return 'physical';
+  if (int >= str && int >= inst) return 'fire';
+  return 'tactical';
+}
+
 function applyChanceIf(chance, chanceIf, target, extras = {}) {
   if (chance == null || !chanceIf || typeof chanceIf !== 'object') return chance;
   let result = Number(chance);
-  const skip = new Set(['mult', 'allyStatus', 'preyRecoveredLastRound', 'stacks', 'selfStatus']);
+  const skip = new Set(['mult', 'allyStatus', 'preyRecoveredLastRound', 'stacks', 'selfStatus', 'dealer']);
+  if (chanceIf.dealer && target && getDealerType(target) === String(chanceIf.dealer).toLowerCase()) {
+    result *= Number(chanceIf.mult) || 1;
+  }
   if (chanceIf.preyRecoveredLastRound && extras.prey && extras.prey.receivedRecoveryLastRound) {
     const mult = chanceIf.mult != null ? chanceIf.mult : chanceIf.preyRecoveredLastRound;
     result *= Number(mult) || 1;
@@ -271,6 +284,7 @@ export {
   hasControl,
   statusConditionMet,
   applyChanceIf,
+  getDealerType,
   isTeamAlive,
   sortByInitiative,
   formatStatName,

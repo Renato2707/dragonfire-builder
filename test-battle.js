@@ -971,6 +971,40 @@ function mockFx(ids) {
 }
 
 {
+  const mk = (id, team, slot, stats, stars) => new Character({
+    id, name: id, breed: 'Hunter', rarity: 'Rare',
+    stats: stats || { str: 10, inst: 10, int: 80, init: 10 }
+  }, team, slot, { stars: stars || 6 });
+  const habit = new Habit({
+    name: 'Cunning Ruse',
+    unlockStar: 6,
+    structured: [
+      { phase: 'round_start', rounds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], actions: [{ t: 'stack', id: 'mirage', stacks: 1, maxStacks: 10, chance: 100, mods: [{ stat: 'fire_dealt', pct: 2.5 }], dur: 'combat', tgt: { side: 'self' } }] },
+      { phase: 'turn', rounds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], requires: { stacks: { id: 'mirage', min: 4 } }, actions: [{ t: 'status', st: 'weakened', val: 15, dur: 2, chance: 100, chanceIf: { dealer: 'tactical', mult: 2 }, tgt: { side: 'enemy', count: 3, select: 'any' } }] }
+    ]
+  }, 'tashix');
+  const tashix = mk('tashix', 0, 1);
+  const tac = mk('tac', 1, 0, { str: 10, inst: 80, int: 10, init: 10 });
+  const fire = mk('fire', 1, 1);
+  const phys = mk('phys', 1, 2, { str: 80, inst: 10, int: 10, init: 10 });
+  tashix.setHabits([habit]);
+  const btl = new Battle([tashix], [tac, fire, phys], { verbose: false });
+  for (let i = 0; i < 3; i += 1) btl.executeHabit(tashix, habit, 'round_start', 1);
+  if (tashix.getStackCount('mirage') !== 3) throw new Error('three rolls should be 3 Mirage');
+  btl.executeHabit(tashix, habit, 'turn', 1);
+  if ([tac, fire, phys].some(c => hasEffect(c, 'weakened'))) throw new Error('Weakened needs 4+ Mirage');
+  btl.executeHabit(tashix, habit, 'round_start', 1);
+  btl.executeHabit(tashix, habit, 'turn', 1);
+  if (![tac, fire, phys].every(c => hasEffect(c, 'weakened'))) throw new Error('4+ Mirage should Weakened 3 enemies');
+  if (applyChanceIf(10, { dealer: 'tactical', mult: 2 }, tac) !== 20) throw new Error('Tactical dealer should double Weakened chance');
+  if (applyChanceIf(10, { dealer: 'tactical', mult: 2 }, fire) !== 10) throw new Error('Fire dealer should keep base Weakened chance');
+  const locked = mk('t2', 0, 1, null, 4);
+  locked.setHabits([habit]);
+  if (locked.getHabitsForPhase(1, 'round_start').length) throw new Error('Cunning Ruse should stay locked below 6 stars');
+  console.log('✓ Cunning Ruse 4+ Mirage Weakened / Tactical 2x chance\n');
+}
+
+{
   const mk = (id, team, slot, breed) => new Character({
     id, name: id, breed: breed || 'Warrior', rarity: 'Rare',
     stats: { str: 10, inst: 80, int: 10, init: 10 }
