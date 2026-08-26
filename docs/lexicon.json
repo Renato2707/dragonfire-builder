@@ -112,6 +112,10 @@
       "fields": { "side": "enemy|ally|self", "status": "status_id", "dealer": "physical|tactical|fire" },
       "desc": "Run the block's actions N times = living matches (Gift of Fire: one Resistance roll per enemy with Burn). 0 matches skips the block."
     },
+    "oncePerRound": {
+      "type": "boolean",
+      "desc": "Consume the block on first trigger this round (The King's Ire: first ally Fire Damage). Cleared in advanceRetreatFlags. Skips activate log if already consumed."
+    },
     "requires": {
       "type": ["object", "null"],
       "fields": {

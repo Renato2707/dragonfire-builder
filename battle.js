@@ -250,6 +250,17 @@ class Battle {
     return `${(habit && habit.name) || 'kit'}:${block.phase}:${req}`;
   }
 
+  pendingBlocks(character, habit, blocks) {
+    return (blocks || []).filter(block => {
+      if (!block.oncePerRound) return true;
+      return !character.oncePerRoundFired[this.onceKey(habit, block)];
+    });
+  }
+
+  consumeOnce(character, habit, block) {
+    if (block.oncePerRound) character.oncePerRoundFired[this.onceKey(habit, block)] = true;
+  }
+
   blockChanceHits(character, habit, block) {
     if (block.chance == null) return true;
     const rankIndex = Math.max(0, Math.min(4, (character.habitRank || 1) - 1));
@@ -283,17 +294,14 @@ class Battle {
   executeKit(character, habitLike, phase, round, label) {
     if (!habitLike || typeof habitLike.getBlocksFor !== 'function') return false;
     const blocks = habitLike.getBlocksFor(round, phase).filter(block => this.blockAllowed(character, block));
-    if (!blocks.length) return false;
+    const pending = this.pendingBlocks(character, habitLike, blocks);
+    if (!pending.length) return false;
     return this.withConfusion(character, () => {
       this.logAction(`${character.name} activates ${label}`);
-      for (const block of blocks) {
-        if (block.oncePerRound) {
-          const key = this.onceKey(habitLike, block);
-          if (character.oncePerRoundFired[key]) continue;
-        }
+      for (const block of pending) {
+        this.consumeOnce(character, habitLike, block);
         if (!this.blockChanceHits(character, habitLike, block)) continue;
         this.runBlockActions(character, habitLike, block, round);
-        if (block.oncePerRound) character.oncePerRoundFired[this.onceKey(habitLike, block)] = true;
       }
       return true;
     });
@@ -488,17 +496,14 @@ class Battle {
   executeHabit(character, habit, phase, round) {
     const r = round || this.currentRound || 1;
     const blocks = (habit.getBlocksFor(r, phase) || []).filter(block => this.blockAllowed(character, block));
-    if (!blocks.length) return;
+    const pending = this.pendingBlocks(character, habit, blocks);
+    if (!pending.length) return;
     this.withConfusion(character, () => {
       this.logAction(`${character.name} activates ${habit.name}`);
-      for (const block of blocks) {
-        if (block.oncePerRound) {
-          const key = this.onceKey(habit, block);
-          if (character.oncePerRoundFired[key]) continue;
-        }
+      for (const block of pending) {
+        this.consumeOnce(character, habit, block);
         if (!this.blockChanceHits(character, habit, block)) continue;
         this.runBlockActions(character, habit, block, r);
-        if (block.oncePerRound) character.oncePerRoundFired[this.onceKey(habit, block)] = true;
       }
     });
   }

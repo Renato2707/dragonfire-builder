@@ -262,6 +262,53 @@ function mockFx(ids) {
 }
 
 {
+  const mk = (id, team, slot, stats) => new Character({
+    id, name: id, breed: 'Sentinel', rarity: 'Rare',
+    stats: stats || { str: 10, inst: 10, int: 10, init: 10 }
+  }, team, slot);
+  const sun = mk('sunfyre', 0, 1);
+  const ally = mk('ally', 0, 0);
+  const fire = mk('fire', 1, 1, { str: 10, inst: 10, int: 80, init: 10 });
+  ally.maxHealth = 5000;
+  ally.currentHealth = 5000;
+  fire.maxHealth = 5000;
+  fire.currentHealth = 5000;
+  const habit = new Habit({
+    name: "The King's Ire",
+    unlockStar: 2,
+    structured: [{
+      phase: 'on_ally_fire_damage',
+      rounds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+      oncePerRound: true,
+      actions: [
+        { t: 'dmg', dt: 'tactical', pct: 50, tgt: { side: 'enemy', count: 1, select: 'dealer:fire' } },
+        { t: 'mod', mods: [{ stat: 'int', pct: -15 }], dur: 2, tgt: { side: 'enemy', count: 1, select: 'last_dmg' } }
+      ]
+    }]
+  }, 'sunfyre');
+  sun.setHabits([habit]);
+  const btl = new Battle([sun, ally], [fire], { verbose: false });
+  btl.currentRound = 1;
+  btl.notifyDamage(ally, { type: 'fire', basic: false });
+  const firstInt = fire.getPercentTotal('int');
+  if (firstInt !== -15) throw new Error(`King's Ire should reduce Int on first Fire, got ${firstInt}`);
+  const activations = btl.battleLog.filter(line => /activates The King's Ire/.test(line)).length;
+  if (activations !== 1) throw new Error(`expected 1 activation, got ${activations}`);
+  btl.notifyDamage(ally, { type: 'fire', basic: false });
+  if (btl.battleLog.filter(line => /activates The King's Ire/.test(line)).length !== 1) {
+    throw new Error("King's Ire must not activate on the second Fire hit");
+  }
+  if (fire.getPercentTotal('int') !== -15) throw new Error('second Fire must not stack another Int reduction');
+  sun.advanceRetreatFlags();
+  btl.currentRound = 2;
+  btl.notifyDamage(ally, { type: 'fire', basic: false });
+  if (btl.battleLog.filter(line => /activates The King's Ire/.test(line)).length !== 2) {
+    throw new Error("King's Ire should refresh next round");
+  }
+  console.log('✓ oncePerRound The King\'s Ire\n');
+}
+
+{
   const d = (id, team, slot) => new Character({
     id, name: id, breed: 'Warrior', rarity: 'Rare', stats: { str: 80, inst: 10, int: 10, init: 10 }
   }, team, slot);
