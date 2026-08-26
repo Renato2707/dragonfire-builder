@@ -544,6 +544,63 @@ function mockFx(ids) {
 }
 
 {
+  const mk = (id, team, slot, hp) => {
+    const c = new Character({
+      id, name: id, breed: 'Sentinel', rarity: 'Rare',
+      stats: { str: 10, inst: 10, int: 10, init: 10 }
+    }, team, slot, { stars: 6 });
+    c.maxHealth = 100;
+    c.currentHealth = hp;
+    return c;
+  };
+  const habit = new Habit({
+    name: 'Strategic Revival',
+    unlockStar: 6,
+    structured: [{
+      phase: 'turn',
+      rounds: [2, 5, 8],
+      requires: { command: 'Blazing Fury' },
+      actions: [
+        { t: 'heal', pct: [50, 60, 70, 85, 100], ifBonus: { anyEnemyStatus: 'slow', mult: 1.5 }, tgt: { side: 'ally', count: 1, select: 'lowest:troops' } },
+        { t: 'status', st: 'resistance', val: 20, dur: 2, chance: 100, tgt: { side: 'ally', count: 1, select: 'last_buff' } }
+      ]
+    }]
+  }, 'syrax');
+  const run = (opts) => {
+    const syrax = mk('syrax', 0, 1, 90);
+    const low = mk('low', 0, 0, 40);
+    const foe = mk('foe', 1, 1, 100);
+    if (opts.slow) applyEffect(foe, 'SLOW', 1, 'x', { duration: 2 });
+    syrax.setHabits([habit]);
+    if (opts.command !== false) {
+      syrax.setCommandKit(new Habit({ name: 'Blazing Fury', structured: [] }, 'syrax'));
+      syrax.commandName = 'Blazing Fury';
+    }
+    const btl = new Battle([syrax, low], [foe], { verbose: false });
+    btl.currentRound = opts.round;
+    btl.executeHabit(syrax, habit, 'turn', opts.round);
+    return { syrax, low, foe, btl };
+  };
+  const base = run({ round: 2 });
+  if (base.low.currentHealth <= 40) throw new Error('Strategic Revival should Recover the lowest-troop ally');
+  if (base.syrax.currentHealth !== 90) throw new Error('higher-troop Syrax should not be the Recovery target');
+  if (!hasEffect(base.low, 'resistance')) throw new Error('Resistance must follow the Recovered ally');
+  const healed = base.low.currentHealth - 40;
+  const slow = run({ round: 2, slow: true });
+  const slowHealed = slow.low.currentHealth - 40;
+  if (slowHealed <= healed) throw new Error('Slow on an enemy should 1.5x Recovery');
+  const skip = run({ round: 1 });
+  if (skip.low.currentHealth !== 40) throw new Error('Rounds 2/5/8 only');
+  const noCmd = run({ round: 2, command: false });
+  if (noCmd.low.currentHealth !== 40) throw new Error('Strategic Revival requires Blazing Fury');
+  const locked = mk('s2', 0, 1, 40);
+  locked.setStars(4);
+  locked.setHabits([habit]);
+  if (locked.getHabitsForPhase(2, 'turn').length) throw new Error('Strategic Revival should stay locked below 6 stars');
+  console.log('✓ Strategic Revival Recovery ×1.5 vs Slow + Resistance\n');
+}
+
+{
   const mk = (id, team, slot, breed) => new Character({
     id, name: id, breed: breed || 'Warrior', rarity: 'Rare',
     stats: { str: 10, inst: 80, int: 10, init: 10 }

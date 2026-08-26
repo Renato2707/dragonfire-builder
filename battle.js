@@ -754,6 +754,7 @@ class Battle {
           this.logAction(`${target.name} cannot receive Recovery (Nullify Recovery)`);
         } else {
           this.logAction(`Applies Recovery to ${target.name} (+${healed} Troop Capacity)${enhancedNote(raw.scaleStat)}`);
+          character.lastBuffTarget = target;
           this.notifyPreyRecovery(target);
           this.notifyLinkProc(character, 'recovery');
         }

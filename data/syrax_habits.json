@@ -134,7 +134,7 @@
               "val": 20,
               "dur": 2,
               "chance": [25, 30, 35, 42.5, 50],
-              "tgt": { "side": "ally", "count": 1, "select": "lowest:troops" }
+              "tgt": { "side": "ally", "count": 1, "select": "last_buff" }
             }
           ]
         }
