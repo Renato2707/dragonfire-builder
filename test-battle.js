@@ -448,6 +448,47 @@ function mockFx(ids) {
 }
 
 {
+  const mk = (id, team, slot, stats) => new Character({
+    id, name: id, breed: 'Hunter', rarity: 'Rare',
+    stats: stats || { str: 10, inst: 10, int: 80, init: 10 }
+  }, team, slot, { stars: 4 });
+  const habit = new Habit({
+    name: 'Extinguish',
+    unlockStar: 4,
+    structured: [{
+      phase: 'combat_start',
+      rounds: [1],
+      actions: [{
+        t: 'mod',
+        mods: [{ stat: 'fire_dealt', pct: [-13.5, -16.2, -18.9, -22.95, -27] }],
+        dur: 'combat',
+        tgt: { side: 'enemy', count: 1, select: 'dealer:fire' }
+      }]
+    }]
+  }, 'sunfyre');
+  const sun = mk('sunfyre', 0, 1, { str: 10, inst: 80, int: 10, init: 10 });
+  const fire = mk('caraxes', 1, 1);
+  const phys = mk('vhagar', 1, 0, { str: 80, inst: 10, int: 10, init: 10 });
+  const fire2 = mk('antares', 1, 2);
+  sun.setHabits([habit]);
+  const btl = new Battle([sun], [fire, phys, fire2], { verbose: false });
+  btl.executeHabit(sun, habit, 'combat_start', 1);
+  const shredded = [fire, fire2].filter(c => c.getPercentTotal('fire_dealt') === -13.5);
+  if (shredded.length !== 1) throw new Error(`Extinguish should hit exactly 1 Fire dealer, got ${shredded.length}`);
+  if (phys.getPercentTotal('fire_dealt') !== 0) throw new Error('Extinguish must not hit a Physical dealer');
+  const none = mk('sun3', 0, 1, { str: 10, inst: 80, int: 10, init: 10 });
+  const onlyPhys = mk('tank', 1, 1, { str: 80, inst: 10, int: 10, init: 10 });
+  const empty = new Battle([none], [onlyPhys], { verbose: false });
+  empty.executeHabit(none, habit, 'combat_start', 1);
+  if (onlyPhys.getPercentTotal('fire_dealt') !== 0) throw new Error('no Fire dealer should skip Extinguish');
+  const locked = mk('sun2', 0, 1, { str: 10, inst: 80, int: 10, init: 10 });
+  locked.setStars(2);
+  locked.setHabits([habit]);
+  if (locked.getHabitsForPhase(1, 'combat_start').length) throw new Error('Extinguish should stay locked below 4 stars');
+  console.log('✓ Extinguish Fire Dealt shred on 1 Fire dealer\n');
+}
+
+{
   const mk = (id, team, slot, breed) => new Character({
     id, name: id, breed: breed || 'Warrior', rarity: 'Rare',
     stats: { str: 10, inst: 80, int: 10, init: 10 }
