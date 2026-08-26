@@ -576,6 +576,8 @@
     "count": { "type": ["integer", "string"], "default": 1, "all": "all" },
     "excludeSelf": { "type": "boolean" },
     "excludeLastBasic": { "type": "boolean", "desc": "Drop caster.lastBasicTarget (Kalspire splash)" },
+    "hpBelow": { "type": "number", "desc": "Target Troop Capacity % < n (Trial by Flame bands)" },
+    "hpAtLeast": { "type": "number", "desc": "Target Troop Capacity % >= n. Exclusive bands: 50–75 / 25–50 / <25." },
     "slot": { "type": "integer", "values": [0, 1, 2], "desc": "Exact slot filter" },
     "linkAs": { "type": "string", "desc": "attacker.links[key] = target" },
     "select": {
@@ -645,6 +647,7 @@
       "withoutStatus": "string",
       "troopsAbove": "number percent",
       "troopsBelow": "number percent",
+      "hpAtLeast": "number percent",
       "receivedRecoveryLastRound": "boolean — prefer (sort first) characters who received Recovery last round",
       "dealer": ["physical", "tactical", "fire"]
     },

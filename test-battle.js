@@ -647,6 +647,54 @@ function mockFx(ids) {
 }
 
 {
+  const mk = (id, slot, pct) => {
+    const c = new Character({
+      id, name: id, breed: 'Warrior', rarity: 'Rare',
+      stats: { str: 80, inst: 10, int: 10, init: 10 }
+    }, 0, slot);
+    c.maxHealth = 100;
+    c.currentHealth = pct;
+    return c;
+  };
+  const vermax = mk('vermax', 1, 80);
+  const mid = mk('mid', 0, 60);
+  const low = mk('low', 2, 40);
+  const crit = new Character({
+    id: 'crit', name: 'crit', breed: 'Sentinel', rarity: 'Rare',
+    stats: { str: 10, inst: 10, int: 10, init: 10 }
+  }, 1, 1);
+  const habit = new Habit({
+    name: 'Trial by Flame',
+    unlockStar: 2,
+    structured: [{
+      phase: 'round_start',
+      rounds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+      actions: [
+        { t: 'mod', mods: [{ stat: 'fire_received', pct: [-5, -6, -7, -8.5, -10] }], dur: 1, tgt: { side: 'ally', count: 'all', hpBelow: 75, hpAtLeast: 50 } },
+        { t: 'mod', mods: [{ stat: 'fire_received', pct: [-10, -12, -14, -17, -20] }], dur: 1, tgt: { side: 'ally', count: 'all', hpBelow: 50, hpAtLeast: 25 } },
+        { t: 'mod', mods: [{ stat: 'fire_received', pct: [-15, -18, -21, -25.5, -30] }], dur: 1, tgt: { side: 'ally', count: 'all', hpBelow: 25 } }
+      ]
+    }]
+  }, 'vermax');
+  const btl = new Battle([vermax, mid, low], [crit], { verbose: false });
+  const critAlly = mk('dying', 0, 20);
+  btl.teamA.push(critAlly);
+  btl.allCharacters = [...btl.teamA, ...btl.teamB];
+  btl.executeHabit(vermax, habit, 'round_start', 1);
+  if (vermax.getPercentTotal('fire_received') !== 0) throw new Error('80% troops should not get Trial by Flame');
+  if (mid.getPercentTotal('fire_received') !== -5) throw new Error('60% should be the -5% band');
+  if (low.getPercentTotal('fire_received') !== -10) throw new Error('40% should be the -10% band');
+  if (critAlly.getPercentTotal('fire_received') !== -15) throw new Error('20% should be the -15% band');
+  const edge50 = mk('edge50', 0, 50);
+  const edge25 = mk('edge25', 2, 25);
+  const btl2 = new Battle([vermax, edge50, edge25], [crit], { verbose: false });
+  btl2.executeHabit(vermax, habit, 'round_start', 1);
+  if (edge50.getPercentTotal('fire_received') !== -5) throw new Error('exactly 50% is the <75 band');
+  if (edge25.getPercentTotal('fire_received') !== -10) throw new Error('exactly 25% is the <50 band');
+  console.log('✓ Trial by Flame Fire Received bands\n');
+}
+
+{
   const d = (id, team, slot) => new Character({
     id, name: id, breed: 'Warrior', rarity: 'Rare', stats: { str: 80, inst: 10, int: 10, init: 10 }
   }, team, slot);

@@ -125,6 +125,11 @@ function troopCount(character) {
   return Number(character && character.currentHealth) || 0;
 }
 
+function healthPct(character) {
+  if (character && typeof character.getHealthPercentage === 'function') return character.getHealthPercentage();
+  return 100;
+}
+
 function sortByTroops(candidates, lowestFirst) {
   const dir = lowestFirst ? 1 : -1;
   candidates.sort((a, b) => {
@@ -201,10 +206,13 @@ function selectTargets(caster, friendlyTeam, enemyTeam, targetingParsed) {
       candidates = candidates.filter(c => !hasStatus(c, tgt.filter.withoutStatus));
     }
     if (tgt.filter.troopsAbove != null) {
-      candidates = candidates.filter(c => c.getHealthPercentage() > tgt.filter.troopsAbove);
+      candidates = candidates.filter(c => healthPct(c) > tgt.filter.troopsAbove);
     }
     if (tgt.filter.troopsBelow != null) {
-      candidates = candidates.filter(c => c.getHealthPercentage() < tgt.filter.troopsBelow);
+      candidates = candidates.filter(c => healthPct(c) < tgt.filter.troopsBelow);
+    }
+    if (tgt.filter.hpAtLeast != null) {
+      candidates = candidates.filter(c => healthPct(c) >= tgt.filter.hpAtLeast);
     }
     if (tgt.filter.dealer) {
       const want = String(tgt.filter.dealer).toLowerCase();
@@ -218,6 +226,11 @@ function selectTargets(caster, friendlyTeam, enemyTeam, targetingParsed) {
       candidates.sort((a, b) => (b.receivedRecoveryLastRound ? 1 : 0) - (a.receivedRecoveryLastRound ? 1 : 0));
     }
   }
+
+  const hpBelow = tgt.hpBelow != null ? tgt.hpBelow : null;
+  const hpAtLeast = tgt.hpAtLeast != null ? tgt.hpAtLeast : null;
+  if (hpBelow != null) candidates = candidates.filter(c => healthPct(c) < Number(hpBelow));
+  if (hpAtLeast != null) candidates = candidates.filter(c => healthPct(c) >= Number(hpAtLeast));
 
   if (select === 'last_dmg' || select === 'last_damage') {
     const last = caster.lastDamageTarget;
