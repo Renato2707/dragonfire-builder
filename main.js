@@ -222,6 +222,10 @@ function formatMagnitude(stat, rawValue, isVanguard) {
 }
 
 function effectLine(target, skill, source, magnitude) {
+  if (skill === 'Vanguard') {
+    if (source && source !== target) return `  ${nameTag(target)} ${magnitude} from ${nameTag(source)}.`;
+    return `  ${nameTag(target)} ${magnitude}.`;
+  }
   return `  ${nameTag(target)} is under the effect of ${nameTag(skill)} ${fromPhrase(source, target)}. ${magnitude}`;
 }
 
