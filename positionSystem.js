@@ -188,6 +188,9 @@ function selectTargets(caster, friendlyTeam, enemyTeam, targetingParsed) {
   if (tgt.excludeLastBasic && caster.lastBasicTarget) {
     candidates = candidates.filter(c => c !== caster.lastBasicTarget);
   }
+  if (tgt.excludeLastDmg && caster.lastDamageTarget) {
+    candidates = candidates.filter(c => c !== caster.lastDamageTarget);
+  }
   if (candidates.length === 0) return [];
 
   if (tgt.slot != null) {
@@ -236,6 +239,10 @@ function selectTargets(caster, friendlyTeam, enemyTeam, targetingParsed) {
     const last = caster.lastDamageTarget;
     if (!last || last.isDead) return [];
     return [last];
+  }
+
+  if (select === 'command_hits' || select === 'last_dmg_all') {
+    return (caster.lastDamageTargets || []).filter(c => c && !c.isDead);
   }
 
   if (select === 'prey') {

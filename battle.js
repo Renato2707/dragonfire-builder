@@ -342,6 +342,7 @@ class Battle {
     const blocks = habitLike.getBlocksFor(round, phase).filter(block => this.blockAllowed(character, block));
     const pending = this.pendingBlocks(character, habitLike, blocks);
     if (!pending.length) return false;
+    character.lastDamageTargets = [];
     return this.withConfusion(character, () => {
       this.logAction(`${character.name} activates ${label}`);
       for (const block of pending) {
@@ -735,6 +736,8 @@ class Battle {
         const actualDamage = this.dealDamage(target, dmg.amount, { type: raw.dt, basic: false, source: character });
         if (!actualDamage) continue;
         character.lastDamageTarget = target;
+        character.lastDamageTargets = character.lastDamageTargets || [];
+        if (!character.lastDamageTargets.includes(target)) character.lastDamageTargets.push(target);
         this.logAction(`Deals ${actualDamage} ${formatDamageTypeName(raw.dt)} to ${target.name}${enhancedNote(raw.scaleStat)}`);
         if (target.isDead) this.logAction(`${target.name} retreated`);
       }

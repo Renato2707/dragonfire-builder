@@ -23,7 +23,7 @@
           "t": "dmg",
           "dt": "tactical",
           "pct": 110,
-          "tgt": { "side": "enemy", "count": 1, "select": "adjacency" }
+          "tgt": { "side": "enemy", "count": 1, "select": "adjacency", "excludeLastDmg": true }
         }
       ]
     },
@@ -36,7 +36,7 @@
           "t": "dmg",
           "dt": "fire",
           "pct": 55,
-          "tgt": { "side": "enemy", "count": 1, "select": "same_lane" }
+          "tgt": { "side": "enemy", "select": "command_hits" }
         },
         {
           "t": "status",
@@ -44,21 +44,7 @@
           "rate": 20,
           "dur": 2,
           "chance": 50,
-          "tgt": { "side": "enemy", "count": 1, "select": "same_lane" }
-        },
-        {
-          "t": "dmg",
-          "dt": "fire",
-          "pct": 55,
-          "tgt": { "side": "enemy", "count": 1, "select": "adjacency" }
-        },
-        {
-          "t": "status",
-          "st": "burn",
-          "rate": 20,
-          "dur": 2,
-          "chance": 50,
-          "tgt": { "side": "enemy", "count": 1, "select": "adjacency" }
+          "tgt": { "side": "enemy", "select": "command_hits" }
         }
       ]
     }

@@ -580,6 +580,7 @@
     "count": { "type": ["integer", "string"], "default": 1, "all": "all" },
     "excludeSelf": { "type": "boolean" },
     "excludeLastBasic": { "type": "boolean", "desc": "Drop caster.lastBasicTarget (Kalspire splash)" },
+    "excludeLastDmg": { "type": "boolean", "desc": "Drop caster.lastDamageTarget (Golden Wrath 2nd hit, Shadowsong 2nd Fire)" },
     "hpBelow": { "type": "number", "desc": "Target Troop Capacity % < n (Trial by Flame bands)" },
     "hpAtLeast": { "type": "number", "desc": "Target Troop Capacity % >= n. Exclusive bands: 50–75 / 25–50 / <25." },
     "slot": { "type": "integer", "values": [0, 1, 2], "desc": "Exact slot filter" },
@@ -614,6 +615,7 @@
         "class:champion",
         "last_cleanse",
         "last_dmg",
+        "command_hits",
         "prey",
         "random"
       ],
@@ -642,7 +644,8 @@
         "prefer_breed:warrior": "prefer_class:warrior",
         "prefer_breed:sentinel": "prefer_class:sentinel",
         "prefer_breed:champion": "prefer_class:champion",
-        "last_damage": "last_dmg"
+        "last_damage": "last_dmg",
+        "last_dmg_all": "command_hits"
       },
       "desc": "lowest_troops / highest_troops = remaining troop count (currentHealth). Ties break by slot (Left → Vanguard → Right). Dead excluded. Includes self unless excludeSelf. prefer_without:STATUS sorts those without the status first (still eligible if all have it)."
     },

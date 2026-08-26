@@ -784,6 +784,59 @@ function mockFx(ids) {
 }
 
 {
+  const mk = (id, team, slot) => {
+    const c = new Character({
+      id, name: id, breed: team === 0 ? 'Sentinel' : 'Warrior', rarity: 'Rare',
+      stats: { str: 10, inst: 80, int: 10, init: 10 }
+    }, team, slot);
+    c.maxHealth = 10000;
+    c.currentHealth = 10000;
+    return c;
+  };
+  const rounds = [1, 4, 7, 10];
+  const kit = new Habit({
+    name: 'Golden Wrath',
+    structured: [
+      { phase: 'turn', rounds, actions: [{ t: 'dmg', dt: 'tactical', pct: 110, tgt: { side: 'enemy', count: 1, select: 'same_lane' } }] },
+      { phase: 'turn', rounds, requires: { troopsBelow: 75 }, actions: [{ t: 'dmg', dt: 'tactical', pct: 110, tgt: { side: 'enemy', count: 1, select: 'adjacency', excludeLastDmg: true } }] },
+      { phase: 'turn', rounds, requires: { troopsBelow: 50 }, actions: [
+        { t: 'dmg', dt: 'fire', pct: 55, tgt: { side: 'enemy', select: 'command_hits' } },
+        { t: 'status', st: 'burn', rate: 20, dur: 2, chance: 100, tgt: { side: 'enemy', select: 'command_hits' } }
+      ] }
+    ]
+  }, 'sunfyre');
+  const run = (hpPct) => {
+    const sun = mk('sunfyre', 0, 1);
+    sun.maxHealth = 100;
+    sun.currentHealth = hpPct;
+    const foes = [mk('L', 1, 0), mk('V', 1, 1), mk('R', 1, 2)];
+    sun.setCommandKit(kit);
+    const btl = new Battle([sun], foes, { verbose: false });
+    btl.currentRound = 1;
+    btl.executeKit(sun, kit, 'turn', 1, 'Golden Wrath');
+    return { sun, foes };
+  };
+  const healthy = run(80);
+  if (healthy.sun.lastDamageTargets.length !== 1) throw new Error('>=75% Golden Wrath hits only same-lane');
+  if (healthy.foes[1].currentHealth === 10000) throw new Error('same-lane Vanguard should take Tactical');
+  if (healthy.foes[0].currentHealth !== 10000 || healthy.foes[2].currentHealth !== 10000) {
+    throw new Error('>=75% should not splash flanks');
+  }
+  const mid = run(60);
+  if (mid.sun.lastDamageTargets.length !== 2) throw new Error('<75% should hit a 2nd adjacent enemy');
+  if (mid.sun.lastDamageTargets.includes(mid.foes[1]) === false) throw new Error('2nd hit must keep the same-lane target');
+  if (hasEffect(mid.foes[1], 'burn')) throw new Error('<75% but >=50% should not Burn');
+  const low = run(40);
+  if (low.sun.lastDamageTargets.length !== 2) throw new Error('<50% still two targets');
+  const burned = low.foes.filter(f => hasEffect(f, 'burn'));
+  if (burned.length !== 2) throw new Error('<50% Burn on the same two targets');
+  const midDmg = 10000 - mid.foes[1].currentHealth;
+  const lowDmg = 10000 - low.foes[1].currentHealth;
+  if (lowDmg <= midDmg) throw new Error('<50% should add Fire on the same targets');
+  console.log('✓ Golden Wrath same-lane / 2nd adjacent / Fire+Burn\n');
+}
+
+{
   const d = (id, team, slot) => new Character({
     id, name: id, breed: 'Warrior', rarity: 'Rare', stats: { str: 80, inst: 10, int: 10, init: 10 }
   }, team, slot);
