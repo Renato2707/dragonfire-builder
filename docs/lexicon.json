@@ -151,7 +151,7 @@
         "noPrey": { "type": "boolean", "desc": "true if caster has no living Prey link/status" },
         "hasPrey": { "type": "boolean", "desc": "true if getPrey(caster) exists" },
         "preyHpAbove": { "type": "number", "desc": "prey getHealthPercentage() > n" },
-        "anyEnemyDealerFire": { "type": "boolean", "desc": "any living enemy getDealerType === fire" },
+        "anyEnemyDealerFire": { "type": "boolean", "desc": "any living enemy getDealerType === fire. Spreading Blaze extra roll." },
         "stacks": { "type": "object", "fields": { "id": "string", "min": "integer" } },
         "leastTroops": { "type": "boolean", "desc": "caster currentHealth is lowest among living combatants (ties count). Full Moon extra Rising Tide stack." },
         "damageType": { "type": "string", "values": ["physical", "tactical", "fire", "basic"], "desc": "Matches Battle.damageContext. basic is exclusive: a Basic Attack never matches fire/tactical/physical (Adaptive Glory)." },

@@ -592,6 +592,61 @@ function mockFx(ids) {
 }
 
 {
+  const mk = (id, team, slot, stats, breed) => new Character({
+    id, name: id, breed: breed || 'Warrior', rarity: 'Rare',
+    stats: stats || { str: 80, inst: 10, int: 10, init: 10 }
+  }, team, slot, { stars: 6 });
+  const habit = new Habit({
+    name: 'Rallying Flame',
+    unlockStar: 6,
+    structured: [{
+      phase: 'combat_start',
+      rounds: [1],
+      repeatPer: { side: 'enemy', dealer: 'fire' },
+      actions: [
+        {
+          t: 'stack', id: 'rallying_flame', stacks: 1, maxStacks: 4, chance: 100,
+          mods: [{ stat: 'physical_dealt', pct: 5 }], dur: 'combat', tgt: { side: 'self' }
+        },
+        {
+          t: 'stack', id: 'spreading_blaze', stacks: 1, maxStacks: 10, chance: 100,
+          mods: [{ stat: 'tactical_dealt', pct: 2.5 }], dur: 'combat',
+          tgt: { side: 'ally', count: 1, select: 'dealer:tactical' }
+        }
+      ]
+    }]
+  }, 'vermax');
+  const vermax = mk('vermax', 0, 1);
+  const tac = mk('syrax', 0, 0, { str: 10, inst: 80, int: 10, init: 10 }, 'Sentinel');
+  const fireA = mk('caraxes', 1, 0, { str: 10, inst: 10, int: 80, init: 10 }, 'Hunter');
+  const fireB = mk('antares', 1, 2, { str: 10, inst: 10, int: 80, init: 10 }, 'Hunter');
+  vermax.setHabits([habit]);
+  const btl = new Battle([vermax, tac], [fireA, fireB], { verbose: false });
+  btl.executeHabitsForPhase('combat_start', [vermax], 1);
+  if (vermax.getStackCount('rallying_flame') !== 2) {
+    throw new Error(`2 Fire dealers should grant 2 Rallying Flame, got ${vermax.getStackCount('rallying_flame')}`);
+  }
+  if (vermax.getPercentTotal('physical_dealt') !== 10) throw new Error('Rallying Flame should be +5% Physical Dealt per stack');
+  if (tac.getStackCount('spreading_blaze') !== 2) {
+    throw new Error(`2 Fire dealers should grant 2 Spreading Blaze, got ${tac.getStackCount('spreading_blaze')}`);
+  }
+  const locked = mk('vermax2', 0, 1);
+  locked.setStars(2);
+  locked.setHabits([habit]);
+  if (locked.getHabitsForPhase(1, 'combat_start').length) throw new Error('Rallying Flame should stay locked below 6 stars');
+  const v3 = mk('vermax3', 0, 1);
+  const t3 = mk('syrax3', 0, 0, { str: 10, inst: 80, int: 10, init: 10 }, 'Sentinel');
+  const phys = mk('foe', 1, 1);
+  v3.setHabits([habit]);
+  const none = new Battle([v3, t3], [phys], { verbose: false });
+  none.executeHabitsForPhase('combat_start', [v3], 1);
+  if (v3.getStackCount('rallying_flame') !== 0 || t3.getStackCount('spreading_blaze') !== 0) {
+    throw new Error('no Fire enemy should skip Rallying Flame');
+  }
+  console.log('✓ Rallying Flame combat start per Fire dealer\n');
+}
+
+{
   const d = (id, team, slot) => new Character({
     id, name: id, breed: 'Warrior', rarity: 'Rare', stats: { str: 80, inst: 10, int: 10, init: 10 }
   }, team, slot);
