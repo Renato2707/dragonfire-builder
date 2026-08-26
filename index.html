@@ -39,7 +39,7 @@
             grid-template-columns: 110px minmax(0, 1fr);
         }
         .slot-row label { font-size: 0.8em; color: #8a8a8a; }
-        select {
+        select, input[type="text"] {
             width: 100%;
             padding: 7px;
             background: #111;
@@ -56,9 +56,10 @@
         }
         button:hover:not(:disabled) { background: #2c2c2c; }
         button:disabled { opacity: 0.4; cursor: not-allowed; }
-        .start-section { text-align: center; margin-bottom: 24px; }
+        .start-section { text-align: center; margin-bottom: 16px; }
         .start-section label { font-size: 12px; color: #8a8a8a; margin-right: 8px; }
-        .start-section select { margin-right: 16px; width: auto; }
+        .start-section select, .start-section input[type="text"] { margin-right: 8px; width: auto; min-width: 160px; }
+        .formation-bar { margin-bottom: 24px; }
         .battle-section {
             display: grid;
             grid-template-columns: 1fr 2fr 1fr;
@@ -166,6 +167,14 @@
                     <select id="teamB-habit-2" title="Habit Lvl"></select>
                 </div>
             </div>
+        </div>
+        <div class="start-section formation-bar">
+            <label for="saved-formation">Formações</label>
+            <select id="saved-formation"></select>
+            <input id="formation-name" type="text" placeholder="Nome da formação" />
+            <button id="btnSaveFormation" type="button">Salvar</button>
+            <button id="btnLoadFormation" type="button">Carregar</button>
+            <button id="btnDeleteFormation" type="button">Apagar</button>
         </div>
         <div class="start-section">
             <label for="defending-team">Defending</label>
