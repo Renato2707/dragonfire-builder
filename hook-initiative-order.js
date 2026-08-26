@@ -21,10 +21,6 @@ export function applyInitiativeOrder(Battle) {
 
   const origHabits = Battle.prototype.executeHabitsForPhase;
   Battle.prototype.executeHabitsForPhase = function (phase, characters, round) {
-    const ordered = living(characters);
-    if (phase === PHASES.ROUND_START) {
-      this.logAction(`Turn order: ${ordered.map(c => c.name).join(' → ')}`);
-    }
-    return origHabits.call(this, phase, ordered, round);
+    return origHabits.call(this, phase, living(characters), round);
   };
 }
