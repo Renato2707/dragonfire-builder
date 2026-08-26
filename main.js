@@ -240,9 +240,10 @@ function rewriteLine(battle, line, ctx) {
     ctx.skill = skill;
     ctx.vanguard = vanguard;
     if (vanguard) return { text: '', section: 'prep' };
+    ctx.section = 'combat';
     return {
       text: `  ${nameTag(actor)} uses [ ${skill} ].`,
-      section: ctx.section
+      section: 'combat'
     };
   }
 
@@ -313,8 +314,10 @@ function rewriteLine(battle, line, ctx) {
     const target = match[1];
     const skill = ctx.skill || match[3];
     const source = ctx.actor || target;
+    const n = Number(match[4]);
+    const label = n === 1 ? `1 stack of ${match[3]}` : `${n} stacks of ${match[3]}`;
     return {
-      text: effectLine(target, skill, source, `${match[4]} stack(s) of ${match[3]}`),
+      text: effectLine(target, skill, source, label),
       section: ctx.section
     };
   }
@@ -345,8 +348,15 @@ function formatBattleReport(battle) {
 
   const push = item => {
     if (!item || !item.text) return;
-    if (item.section === 'prep') prep.push(item.text);
-    else combat.push(item.text);
+    if (item.section === 'prep') {
+      prep.push(item.text);
+      return;
+    }
+    if (!combatHeader) {
+      combat.push(BAR, 'Combat Phase', BAR);
+      combatHeader = true;
+    }
+    combat.push(item.text);
   };
 
   while (i < lines.length) {
