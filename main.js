@@ -7,6 +7,7 @@ import { loadDragonHabitsSync, loadCommandSync } from './habitParser.js';
 import { troopAdvantageSign, TROOP_ADVANTAGE_PCT } from './troopAdvantage.js';
 
 const SLOTS = [0, 1, 2];
+const BAR = '═'.repeat(55);
 const TROOP_TYPES = [
   { id: '', label: '—' },
   { id: 'shieldbearers', label: 'Shieldbearers' },
@@ -172,13 +173,122 @@ function formatTeamFormation(title, team, enemyTroop) {
 
 function formatTroopFormation(battle) {
   return [
-    '═'.repeat(55),
+    BAR,
     'Troop Formation',
-    '═'.repeat(55),
+    BAR,
     formatTeamFormation('Team A', battle.teamA, teamTroopOf(battle.teamB)),
     formatTeamFormation('Team B', battle.teamB, teamTroopOf(battle.teamA)),
     ''
   ].join('\n');
+}
+
+function findCharacter(battle, name) {
+  if (!battle || !name) return null;
+  return (battle.allCharacters || []).find(c => c && c.name === name) || null;
+}
+
+function tagged(name, battle) {
+  const character = findCharacter(battle, name);
+  if (!character) return `[ ${name} ]`;
+  const lane = character.positionName || SLOT_NAMES[character.slotPosition] || '';
+  return `[ ${name} ] (${lane})`;
+}
+
+function isBar(line) {
+  return /^═+$/.test(String(line || '').trim());
+}
+
+function rewriteLine(battle, line) {
+  const raw = String(line || '');
+  const text = raw.trim();
+  if (!text) return '';
+
+  let match = text.match(/^(.+?) activates (.+)$/);
+  if (match) return `  ${tagged(match[1], battle)} uses [ ${match[2]} ]`;
+
+  match = text.match(/^(.+?) launches a 2nd Basic Attack/);
+  if (match) return `  ${tagged(match[1], battle)} uses [ Basic Attack ] (Double-Strike)`;
+
+  match = text.match(/^(.+?) launches a Basic Attack/);
+  if (match) return `  ${tagged(match[1], battle)} uses [ Basic Attack ]`;
+
+  match = text.match(/^Deals (\d+) (.+) to (.+)$/);
+  if (match) {
+    return `  Deals ${match[1]} ${match[2]} against ${tagged(match[3], battle)}. ${tagged(match[3], battle)} takes ${match[1]} losses.`;
+  }
+
+  match = text.match(/^Increases (.+) of (.+) by (.+)$/);
+  if (match) return `  ${tagged(match[2], battle)} is under the effect: ${match[1]} ${match[3]}.`;
+
+  match = text.match(/^Reduces (.+) of (.+) by (.+)$/);
+  if (match) return `  ${tagged(match[2], battle)} is under the effect: ${match[1]} ${match[3]}.`;
+
+  match = text.match(/^Afflicts (.+) with (.+)$/);
+  if (match) return `  ${tagged(match[1], battle)} is afflicted with ${match[2]}.`;
+
+  match = text.match(/^Grants (.+) to (.+)$/);
+  if (match) return `  ${tagged(match[2], battle)} is granted ${match[1]}.`;
+
+  match = text.match(/^Applies Recovery to (.+) \((.+)\)(.*)$/);
+  if (match) return `  Applies Recovery to ${tagged(match[1], battle)} (${match[2]})${match[3] || ''}`;
+
+  match = text.match(/^Turn order: (.+)$/);
+  if (match) return `  Turn order: ${match[1]}`;
+
+  if (/^Team [AB]:$/.test(text) || /Troop Capacity/.test(text) || /^Final Status/.test(text)) {
+    return raw.startsWith('  ') ? raw : `  ${text}`;
+  }
+
+  return raw.startsWith('  ') ? raw : `  ${text}`;
+}
+
+function formatBattleReport(battle) {
+  const lines = battle.battleLog || [];
+  const out = [];
+  let i = 0;
+  let skipRoster = false;
+
+  while (i < lines.length) {
+    const line = lines[i];
+    const next = lines[i + 1] || '';
+
+    if (isBar(line) && next === 'Start of Combat') {
+      out.push(BAR, 'Preparations', BAR);
+      i += 3;
+      skipRoster = true;
+      continue;
+    }
+    if (isBar(line) && /^Start of Round /.test(next)) {
+      const number = (next.match(/Round (\d+)/) || [])[1] || '';
+      out.push(BAR, `Round ${number}`, BAR);
+      i += 3;
+      skipRoster = false;
+      continue;
+    }
+    if (isBar(line) && next === 'Combat End') {
+      out.push(BAR, 'Combat End', BAR);
+      i += 3;
+      skipRoster = false;
+      continue;
+    }
+    if (isBar(line)) {
+      if (skipRoster) {
+        skipRoster = false;
+        i += 1;
+        continue;
+      }
+      i += 1;
+      continue;
+    }
+    if (skipRoster && (/^Team [AB]:$/.test(line) || /Troop Capacity/.test(line))) {
+      i += 1;
+      continue;
+    }
+    const rewritten = rewriteLine(battle, line);
+    if (rewritten !== '') out.push(rewritten);
+    i += 1;
+  }
+  return out.join('\n');
 }
 
 function readTeam(prefix) {
@@ -325,7 +435,7 @@ function renderStatus(container, team, enemyTroop) {
 
 function updateBattleDisplay() {
   const logElement = document.getElementById('battleLog');
-  logElement.textContent = formationHeader + currentBattle.getLog();
+  logElement.textContent = formationHeader + formatBattleReport(currentBattle);
   logElement.scrollTop = logElement.scrollHeight;
   renderStatus(document.getElementById('teamAStatus'), currentBattle.teamA, teamTroopOf(currentBattle.teamB));
   renderStatus(document.getElementById('teamBStatus'), currentBattle.teamB, teamTroopOf(currentBattle.teamA));
