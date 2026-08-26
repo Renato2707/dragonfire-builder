@@ -1,5 +1,7 @@
 // character.js
 
+import { calculateTroopCapacity } from './troopCapacity.js';
+
 const CORE_STATS = ['str', 'inst', 'int', 'init'];
 const DEALT_BY_TYPE = { PHYSICAL: 'physical_dealt', TACTICAL: 'tactical_dealt', FIRE: 'fire_dealt' };
 const RECEIVED_BY_TYPE = { PHYSICAL: 'physical_received', TACTICAL: 'tactical_received', FIRE: 'fire_received' };
