@@ -57,9 +57,11 @@ function splitTarget(battle, raw) {
 
 function formatMagnitude(stat, rawValue, isVanguard) {
   const value = String(rawValue || '').trim();
-  const numeric = value.replace('%', '');
-  if (isVanguard && CORE_STAT_NAMES.has(stat)) return `+${numeric} ${stat}`;
-  if (value.startsWith('+') || value.startsWith('-')) return `${value} ${stat}`;
+  const signed = value.match(/^([+\-]?)([\d.]+%?)$/);
+  const sign = signed ? (signed[1] || (Number(signed[2]) < 0 ? '-' : '+')) : '';
+  const amount = signed ? signed[2] : value.replace(/^\++/, '');
+  if (isVanguard && CORE_STAT_NAMES.has(stat)) return `+${String(amount).replace('%', '')} ${stat}`;
+  if (signed) return `${sign === '-' ? '-' : '+'}${amount} ${stat}`;
   return `${value} ${stat}`;
 }
 
@@ -447,7 +449,9 @@ export function formatBattleReport(battle, formationText) {
     for (const name of order) {
       const bucket = pack.actors.find(a => a.name === name) || { name, actions: [], cannot: null };
       const cut = minSeq(bucket, parsed.effects, name, pack.number);
+      out.push(DASH);
       out.push(`${nameTag(name)}${laneSuffix(battle, name)}:`);
+      out.push(DASH);
       for (const effect of snapshotFor(parsed.effects, name, pack.number, cut)) {
         out.push(formatEffect(battle, effect));
       }
