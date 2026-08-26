@@ -85,7 +85,6 @@ function parseLog(battle) {
   let actor = null;
   let skill = null;
   let vanguard = false;
-  let turnOrder = [];
   let seq = 0;
   let endKind = null;
   let skipRoster = false;
@@ -149,7 +148,6 @@ function parseLog(battle) {
     if (isBar(line) && /^Start of Round /.test(next)) {
       round = Number((next.match(/Round (\d+)/) || [])[1] || 0);
       phase = 'round_start';
-      if (turnOrder.length) ensureRound(round).turnOrder = turnOrder.slice();
       skipRoster = false;
       i += 3;
       continue;
@@ -169,8 +167,8 @@ function parseLog(battle) {
 
     let match = line.match(/^Turn order: (.+)$/);
     if (match) {
-      turnOrder = match[1].split(/\s*→\s*/).map(s => s.trim()).filter(Boolean);
-      if (round) ensureRound(round).turnOrder = turnOrder.slice();
+      const names = match[1].split(/\s*→\s*/).map(s => s.trim()).filter(Boolean);
+      if (round) ensureRound(round).turnOrder = names;
       if (phase === 'round_start') phase = 'turns';
       i += 1;
       continue;
@@ -318,7 +316,7 @@ function parseLog(battle) {
     i += 1;
   }
 
-  return { effects, rounds, turnOrder, endKind };
+  return { effects, rounds, endKind };
 }
 
 function stillActive(effect, atRound) {
@@ -377,6 +375,11 @@ function groupActions(actions) {
   return groups;
 }
 
+function orderForRound(pack) {
+  if (pack.turnOrder && pack.turnOrder.length) return pack.turnOrder;
+  return (pack.actors || []).map(actor => actor.name);
+}
+
 export function formatBattleReport(battle, formationText) {
   const parsed = parseLog(battle);
   const hp = {};
@@ -406,13 +409,13 @@ export function formatBattleReport(battle, formationText) {
   out.push(DASH);
   out.push('Every action in each round of the battle is listed here, in the order they happened.');
   out.push(DASH);
-  if (parsed.turnOrder.length) out.push(`Turn order: ${parsed.turnOrder.join(' → ')}`);
 
   for (const pack of parsed.rounds) {
+    const order = orderForRound(pack);
     out.push(BAR);
     out.push(`• Round ${pack.number}`);
     out.push(BAR);
-    const order = pack.turnOrder.length ? pack.turnOrder : parsed.turnOrder;
+    if (order.length) out.push(`Turn order: ${order.join(' → ')}`);
     for (const name of order) {
       const bucket = pack.actors.find(a => a.name === name) || { name, actions: [], cannot: null };
       const cut = minSeq(bucket, parsed.effects, name, pack.number);
