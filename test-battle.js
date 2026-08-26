@@ -937,6 +937,40 @@ function mockFx(ids) {
 }
 
 {
+  const mk = (id, team, slot) => new Character({
+    id, name: id, breed: 'Hunter', rarity: 'Rare',
+    stats: { str: 10, inst: 10, int: 80, init: 10 }
+  }, team, slot);
+  const kit = new Habit({
+    name: 'Shimmering Mirage',
+    structured: [
+      { phase: 'turn', rounds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], actions: [{ t: 'stack', id: 'mirage', stacks: 1, maxStacks: 10, mods: [{ stat: 'fire_dealt', pct: 2.5 }], dur: 'combat', chance: 100, tgt: { side: 'self' } }] },
+      { phase: 'turn', rounds: [3, 6, 9], actions: [{ t: 'dmg', dt: 'fire', pct: 200, tgt: { side: 'enemy', count: 1, select: 'adjacency' } }] }
+    ]
+  }, 'tashix');
+  const tashix = mk('tashix', 0, 1);
+  const foe = mk('foe', 1, 1);
+  foe.maxHealth = 20000;
+  foe.currentHealth = 20000;
+  tashix.setCommandKit(kit);
+  const btl = new Battle([tashix], [foe], { verbose: false });
+  btl.currentRound = 1;
+  btl.executeKit(tashix, kit, 'turn', 1, 'Shimmering Mirage');
+  if (tashix.getStackCount('mirage') !== 1) throw new Error('round 1 should gain 1 Mirage');
+  if (tashix.getPercentTotal('fire_dealt') !== 2.5) throw new Error('each Mirage stack is +2.5 Fire Dealt');
+  if (foe.currentHealth !== 20000) throw new Error('round 1 must not deal the 3/6/9 Fire');
+  btl.currentRound = 3;
+  const hp = foe.currentHealth;
+  btl.executeKit(tashix, kit, 'turn', 3, 'Shimmering Mirage');
+  if (tashix.getStackCount('mirage') !== 2) throw new Error('round 3 should add another Mirage');
+  if (foe.currentHealth >= hp) throw new Error('rounds 3/6/9 should deal Fire in adjacency');
+  for (let i = 0; i < 12; i += 1) btl.executeKit(tashix, kit, 'turn', 1, 'Shimmering Mirage');
+  if (tashix.getStackCount('mirage') !== 10) throw new Error('Mirage caps at 10 stacks');
+  if (tashix.getPercentTotal('fire_dealt') !== 25) throw new Error('10 stacks should be +25 Fire Dealt');
+  console.log('✓ Shimmering Mirage stacks + Fire rounds 3/6/9\n');
+}
+
+{
   const mk = (id, team, slot, breed) => new Character({
     id, name: id, breed: breed || 'Warrior', rarity: 'Rare',
     stats: { str: 10, inst: 80, int: 10, init: 10 }
