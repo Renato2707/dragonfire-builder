@@ -239,8 +239,6 @@ function rewriteLine(battle, line, ctx) {
     ctx.actor = actor;
     ctx.skill = skill;
     ctx.vanguard = vanguard;
-    if (vanguard) ctx.section = 'prep';
-    else if (ctx.section === 'prep') ctx.section = 'combat';
     if (vanguard) return { text: '', section: 'prep' };
     return {
       text: `  ${nameTag(actor)} uses [ ${skill} ].`,
@@ -306,6 +304,17 @@ function rewriteLine(battle, line, ctx) {
     const source = ctx.actor || match[2];
     return {
       text: `  ${nameTag(match[2])} is under the effect of ${nameTag(skill)} ${fromPhrase(source, match[2])}. ${match[1]}`,
+      section: ctx.section
+    };
+  }
+
+  match = text.match(/^(.+?) gains (\d+) stacks? of (.+?) \(now (\d+)\)(.*)$/);
+  if (match) {
+    const target = match[1];
+    const skill = ctx.skill || match[3];
+    const source = ctx.actor || target;
+    return {
+      text: effectLine(target, skill, source, `${match[4]} stack(s) of ${match[3]}`),
       section: ctx.section
     };
   }
