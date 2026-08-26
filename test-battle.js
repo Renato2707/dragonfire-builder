@@ -287,50 +287,62 @@ function mockFx(ids) {
 }
 
 {
-  const mk = (id, team, slot, stats) => new Character({
+  const mk = (id, team, slot, stats, opts) => new Character({
     id, name: id, breed: 'Sentinel', rarity: 'Rare',
     stats: stats || { str: 10, inst: 10, int: 10, init: 10 }
-  }, team, slot);
-  const sun = mk('sunfyre', 0, 1);
+  }, team, slot, opts);
+  const sun = mk('sunfyre', 0, 1, { str: 10, inst: 10, int: 10, init: 10 }, { stars: 6 });
   const ally = mk('ally', 0, 0);
   const fire = mk('fire', 1, 1, { str: 10, inst: 10, int: 80, init: 10 });
   ally.maxHealth = 5000;
   ally.currentHealth = 5000;
   fire.maxHealth = 5000;
   fire.currentHealth = 5000;
+  sun.maxHealth = 5000;
+  sun.currentHealth = 5000;
   const habit = new Habit({
     name: "The King's Ire",
-    unlockStar: 2,
+    unlockStar: 6,
     structured: [{
       phase: 'on_ally_fire_damage',
       rounds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
       oncePerRound: true,
       actions: [
         { t: 'dmg', dt: 'tactical', pct: 50, tgt: { side: 'enemy', count: 1, select: 'dealer:fire' } },
-        { t: 'mod', mods: [{ stat: 'int', pct: -15 }], dur: 2, tgt: { side: 'enemy', count: 1, select: 'last_dmg' } }
+        { t: 'mod', mods: [{ stat: 'int', pct: -15 }], scaleStat: 'inst', dur: 2, tgt: { side: 'enemy', count: 1, select: 'last_dmg' } }
       ]
     }]
   }, 'sunfyre');
   sun.setHabits([habit]);
   const btl = new Battle([sun, ally], [fire], { verbose: false });
   btl.currentRound = 1;
-  btl.notifyDamage(ally, { type: 'fire', basic: false });
+  const hpBefore = fire.currentHealth;
+  btl.dealDamage(ally, 10, { type: 'fire', basic: false, source: fire });
+  if (fire.currentHealth >= hpBefore) throw new Error("King's Ire should deal Tactical to the Fire dealer");
   const firstInt = fire.getPercentTotal('int');
-  if (firstInt !== -15) throw new Error(`King's Ire should reduce Int on first Fire, got ${firstInt}`);
+  if (firstInt !== -16.5) throw new Error(`King's Ire Int should be -15 enhanced by Instinct 10 (= -16.5), got ${firstInt}`);
   const activations = btl.battleLog.filter(line => /activates The King's Ire/.test(line)).length;
   if (activations !== 1) throw new Error(`expected 1 activation, got ${activations}`);
-  btl.notifyDamage(ally, { type: 'fire', basic: false });
+  btl.dealDamage(ally, 10, { type: 'fire', basic: false, source: fire });
   if (btl.battleLog.filter(line => /activates The King's Ire/.test(line)).length !== 1) {
     throw new Error("King's Ire must not activate on the second Fire hit");
   }
-  if (fire.getPercentTotal('int') !== -15) throw new Error('second Fire must not stack another Int reduction');
+  btl.dealDamage(sun, 10, { type: 'physical', basic: false, source: fire });
+  if (btl.battleLog.filter(line => /activates The King's Ire/.test(line)).length !== 1) {
+    throw new Error('Physical damage must not trigger The King\'s Ire');
+  }
   sun.advanceRetreatFlags();
   btl.currentRound = 2;
-  btl.notifyDamage(ally, { type: 'fire', basic: false });
+  btl.dealDamage(sun, 10, { type: 'fire', basic: false, source: fire });
   if (btl.battleLog.filter(line => /activates The King's Ire/.test(line)).length !== 2) {
-    throw new Error("King's Ire should refresh next round");
+    throw new Error("King's Ire should fire next round when Sunfyre itself takes Fire");
   }
-  console.log('✓ oncePerRound The King\'s Ire\n');
+  const locked = mk('sun2', 0, 1, null, { stars: 4 });
+  locked.setHabits([habit]);
+  if (locked.getHabitsForPhase(1, 'on_ally_fire_damage').length) {
+    throw new Error("The King's Ire should stay locked below 6 stars");
+  }
+  console.log('✓ The King\'s Ire first ally Fire / once per round / 6★\n');
 }
 
 {

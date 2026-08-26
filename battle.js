@@ -343,6 +343,7 @@ class Battle {
     const pending = this.pendingBlocks(character, habitLike, blocks);
     if (!pending.length) return false;
     character.lastDamageTargets = [];
+    character.lastDamageTarget = null;
     return this.withConfusion(character, () => {
       this.logAction(`${character.name} activates ${label}`);
       for (const block of pending) {

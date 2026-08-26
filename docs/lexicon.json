@@ -60,7 +60,7 @@
     "on_ally_fire_damage": {
       "canonical": "on_ally_fire_damage",
       "type": "string",
-      "when": "Any ally (including self) receives Fire Damage. Use oncePerRound for The King's Ire.",
+      "when": "Any ally (including self) receives Fire Damage that actually lands (after Evade). The King's Ire (6★): oncePerRound Tactical + Instinct-enhanced Int shred on 1 Fire dealer.",
       "example": { "phase": "on_ally_fire_damage", "oncePerRound": true, "rounds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], "actions": [] }
     },
     "on_taunt": {
