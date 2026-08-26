@@ -8,6 +8,7 @@ import { troopAdvantageSign, TROOP_ADVANTAGE_PCT } from './troopAdvantage.js';
 
 const SLOTS = [0, 1, 2];
 const BAR = '═'.repeat(55);
+const CORE_STAT_NAMES = new Set(['Strength', 'Instinct', 'Intelligence', 'Initiative']);
 const TROOP_TYPES = [
   { id: '', label: '—' },
   { id: 'shieldbearers', label: 'Shieldbearers' },
@@ -187,96 +188,186 @@ function findCharacter(battle, name) {
   return (battle.allCharacters || []).find(c => c && c.name === name) || null;
 }
 
-function tagged(name, battle) {
+function nameTag(name) {
+  return `[ ${name} ]`;
+}
+
+function actorTag(name, battle) {
   const character = findCharacter(battle, name);
-  if (!character) return `[ ${name} ]`;
-  const lane = character.positionName || SLOT_NAMES[character.slotPosition] || '';
-  return `[ ${name} ] (${lane})`;
+  const lane = character ? (character.positionName || SLOT_NAMES[character.slotPosition] || '') : '';
+  return lane ? `${nameTag(name)} (${lane})` : nameTag(name);
+}
+
+function fromPhrase(source, target) {
+  if (!source) return '';
+  if (source === target) return 'from itself';
+  return `from ${nameTag(source)}`;
 }
 
 function isBar(line) {
   return /^═+$/.test(String(line || '').trim());
 }
 
-function rewriteLine(battle, line) {
-  const raw = String(line || '');
-  const text = raw.trim();
-  if (!text) return '';
+function skillLabel(raw) {
+  const text = String(raw || '').trim();
+  if (/\(Vanguard\)$/i.test(text) || text === 'Vanguard') return 'Vanguard';
+  return text;
+}
+
+function formatMagnitude(stat, rawValue, isVanguard) {
+  const value = String(rawValue || '').trim();
+  const numeric = value.replace('%', '');
+  if (isVanguard && CORE_STAT_NAMES.has(stat)) return `${numeric} ${stat}`;
+  if (value.includes('%')) return `${value} ${stat}`;
+  return `${value} ${stat}`;
+}
+
+function effectLine(target, skill, source, magnitude) {
+  return `  ${nameTag(target)} is under the effect of ${nameTag(skill)} ${fromPhrase(source, target)}. ${magnitude}`;
+}
+
+function rewriteLine(battle, line, ctx) {
+  const text = String(line || '').trim();
+  if (!text) return { text: '', section: ctx.section };
 
   let match = text.match(/^(.+?) activates (.+)$/);
-  if (match) return `  ${tagged(match[1], battle)} uses [ ${match[2]} ]`;
+  if (match) {
+    const actor = match[1];
+    const rawSkill = match[2];
+    const vanguard = /\(Vanguard\)$/i.test(rawSkill) || rawSkill === 'Vanguard';
+    const skill = skillLabel(rawSkill);
+    ctx.actor = actor;
+    ctx.skill = skill;
+    ctx.vanguard = vanguard;
+    if (vanguard) ctx.section = 'prep';
+    else if (ctx.section === 'prep') ctx.section = 'combat';
+    return {
+      text: `  ${actorTag(actor, battle)} uses [ ${skill} ].`,
+      section: ctx.section
+    };
+  }
 
   match = text.match(/^(.+?) launches a 2nd Basic Attack/);
-  if (match) return `  ${tagged(match[1], battle)} uses [ Basic Attack ] (Double-Strike)`;
+  if (match) {
+    ctx.actor = match[1];
+    ctx.skill = 'Basic Attack';
+    ctx.vanguard = false;
+    ctx.section = 'combat';
+    return { text: `  ${actorTag(match[1], battle)} uses [ Basic Attack ] (Double-Strike) to attack.`, section: 'combat' };
+  }
 
   match = text.match(/^(.+?) launches a Basic Attack/);
-  if (match) return `  ${tagged(match[1], battle)} uses [ Basic Attack ]`;
+  if (match) {
+    ctx.actor = match[1];
+    ctx.skill = 'Basic Attack';
+    ctx.vanguard = false;
+    ctx.section = 'combat';
+    return { text: `  ${actorTag(match[1], battle)} uses [ Basic Attack ] to attack.`, section: 'combat' };
+  }
 
   match = text.match(/^Deals (\d+) (.+) to (.+)$/);
   if (match) {
-    return `  Deals ${match[1]} ${match[2]} against ${tagged(match[3], battle)}. ${tagged(match[3], battle)} takes ${match[1]} losses.`;
+    ctx.section = 'combat';
+    return {
+      text: `  Deals ${match[1]} ${match[2]} against ${actorTag(match[3], battle)}. ${nameTag(match[3])} takes ${match[1]} losses.`,
+      section: 'combat'
+    };
   }
 
-  match = text.match(/^Increases (.+) of (.+) by (.+)$/);
-  if (match) return `  ${tagged(match[2], battle)} is under the effect: ${match[1]} ${match[3]}.`;
-
-  match = text.match(/^Reduces (.+) of (.+) by (.+)$/);
-  if (match) return `  ${tagged(match[2], battle)} is under the effect: ${match[1]} ${match[3]}.`;
+  match = text.match(/^(Increases|Reduces) (.+) of (.+?) by ([+\-][\d.]+%?)(?:\s+(.+))?$/);
+  if (match) {
+    const stat = match[2].replace(/ \(excluding Basic Attacks\)/, '');
+    const target = match[3];
+    const magnitude = formatMagnitude(stat, match[4], ctx.vanguard);
+    const skill = ctx.skill || 'effect';
+    const source = ctx.actor || target;
+    return {
+      text: effectLine(target, skill, source, magnitude),
+      section: ctx.section
+    };
+  }
 
   match = text.match(/^Afflicts (.+) with (.+)$/);
-  if (match) return `  ${tagged(match[1], battle)} is afflicted with ${match[2]}.`;
-
-  match = text.match(/^Grants (.+) to (.+)$/);
-  if (match) return `  ${tagged(match[2], battle)} is granted ${match[1]}.`;
-
-  match = text.match(/^Applies Recovery to (.+) \((.+)\)(.*)$/);
-  if (match) return `  Applies Recovery to ${tagged(match[1], battle)} (${match[2]})${match[3] || ''}`;
-
-  match = text.match(/^Turn order: (.+)$/);
-  if (match) return `  Turn order: ${match[1]}`;
-
-  if (/^Team [AB]:$/.test(text) || /Troop Capacity/.test(text) || /^Final Status/.test(text)) {
-    return raw.startsWith('  ') ? raw : `  ${text}`;
+  if (match) {
+    const skill = ctx.skill || 'effect';
+    const source = ctx.actor || match[1];
+    return {
+      text: `  ${nameTag(match[1])} is under the effect of ${nameTag(skill)} ${fromPhrase(source, match[1])}. ${match[2]}`,
+      section: ctx.section
+    };
   }
 
-  return raw.startsWith('  ') ? raw : `  ${text}`;
+  match = text.match(/^Grants (.+) to (.+)$/);
+  if (match) {
+    const skill = ctx.skill || 'effect';
+    const source = ctx.actor || match[2];
+    return {
+      text: `  ${nameTag(match[2])} is under the effect of ${nameTag(skill)} ${fromPhrase(source, match[2])}. ${match[1]}`,
+      section: ctx.section
+    };
+  }
+
+  match = text.match(/^Applies Recovery to (.+) \((.+)\)(.*)$/);
+  if (match) {
+    return { text: `  ${nameTag(match[1])} gains ${match[2]} Recovery.`, section: ctx.section };
+  }
+
+  match = text.match(/^Turn order: (.+)$/);
+  if (match) return { text: `  Turn order: ${match[1]}`, section: 'combat' };
+
+  if (/^Team [AB]:$/.test(text) || /Troop Capacity/.test(text) || /^Final Status/.test(text)) {
+    return { text: `  ${text}`, section: ctx.section };
+  }
+
+  return { text: `  ${text}`, section: ctx.section };
 }
 
 function formatBattleReport(battle) {
   const lines = battle.battleLog || [];
-  const out = [];
+  const prep = [];
+  const combat = [];
+  const ctx = { actor: null, skill: null, vanguard: false, section: 'prep' };
   let i = 0;
   let skipRoster = false;
+  let combatHeader = false;
+
+  const push = item => {
+    if (!item || !item.text) return;
+    if (item.section === 'prep') prep.push(item.text);
+    else combat.push(item.text);
+  };
 
   while (i < lines.length) {
     const line = lines[i];
     const next = lines[i + 1] || '';
 
     if (isBar(line) && next === 'Start of Combat') {
-      out.push(BAR, 'Preparations', BAR);
       i += 3;
       skipRoster = true;
+      ctx.section = 'prep';
       continue;
     }
     if (isBar(line) && /^Start of Round /.test(next)) {
       const number = (next.match(/Round (\d+)/) || [])[1] || '';
-      out.push(BAR, `Round ${number}`, BAR);
+      if (!combatHeader) {
+        combat.push(BAR, 'Combat Phase', BAR);
+        combatHeader = true;
+      }
+      combat.push(BAR, `Round ${number}`, BAR);
       i += 3;
       skipRoster = false;
+      ctx.section = 'combat';
       continue;
     }
     if (isBar(line) && next === 'Combat End') {
-      out.push(BAR, 'Combat End', BAR);
+      combat.push(BAR, 'Combat End', BAR);
       i += 3;
       skipRoster = false;
+      ctx.section = 'combat';
       continue;
     }
     if (isBar(line)) {
-      if (skipRoster) {
-        skipRoster = false;
-        i += 1;
-        continue;
-      }
+      if (skipRoster) skipRoster = false;
       i += 1;
       continue;
     }
@@ -284,10 +375,14 @@ function formatBattleReport(battle) {
       i += 1;
       continue;
     }
-    const rewritten = rewriteLine(battle, line);
-    if (rewritten !== '') out.push(rewritten);
+    push(rewriteLine(battle, line, ctx));
     i += 1;
   }
+
+  const out = [BAR, 'Preparations', BAR];
+  if (prep.length) out.push(...prep);
+  else out.push('  (no city upgrades / boosts)');
+  if (combat.length) out.push(...combat);
   return out.join('\n');
 }
 
