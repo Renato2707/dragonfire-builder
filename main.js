@@ -14,6 +14,8 @@ applyInitiativeOrder(Battle);
 const SLOTS = [0, 1, 2];
 const BAR = '═'.repeat(55);
 const DASH = '- '.repeat(27).trim();
+const FORMATIONS_KEY = 'dfb-formations';
+const LAST_KEY = '_last';
 const TROOP_TYPES = [
   { id: '', label: '—' },
   { id: 'shieldbearers', label: 'Shieldbearers' },
@@ -38,12 +40,27 @@ document.addEventListener('DOMContentLoaded', async () => {
   fillTroopSelect(document.getElementById('teamB-troop'));
   SLOTS.forEach(slot => {
     ['teamA', 'teamB'].forEach(prefix => {
-      document.getElementById(`${prefix}-slot-${slot}`).addEventListener('change', onFormationChange);
+      ['slot', 'level', 'stars', 'habit'].forEach(kind => {
+        document.getElementById(`${prefix}-${kind}-${slot}`).addEventListener('change', onFormationChange);
+      });
     });
   });
+  document.getElementById('teamA-troop').addEventListener('change', onFormationChange);
+  document.getElementById('teamB-troop').addEventListener('change', onFormationChange);
+  document.getElementById('defending-team').addEventListener('change', onFormationChange);
   document.getElementById('btnStartBattle').addEventListener('click', startBattle);
   document.getElementById('btnNextRound').addEventListener('click', nextRound);
   document.getElementById('btnReset').addEventListener('click', reset);
+  document.getElementById('btnSaveFormation').addEventListener('click', saveNamedFormation);
+  document.getElementById('btnLoadFormation').addEventListener('click', loadSelectedFormation);
+  document.getElementById('btnDeleteFormation').addEventListener('click', deleteSelectedFormation);
+  document.getElementById('saved-formation').addEventListener('change', () => {
+    const name = document.getElementById('saved-formation').value;
+    if (name) document.getElementById('formation-name').value = name;
+  });
+  refreshFormationList();
+  const last = readStore()[LAST_KEY];
+  if (last) applyFormation(last);
   onFormationChange();
 });
 
@@ -190,6 +207,116 @@ function formatTroopFormation(battle) {
   ].join('\n');
 }
 
+function snapshotTeam(prefix) {
+  return {
+    troop: readTroop(prefix),
+    slots: SLOTS.map(slot => ({
+      id: document.getElementById(`${prefix}-slot-${slot}`).value || '',
+      level: document.getElementById(`${prefix}-level-${slot}`).value,
+      stars: document.getElementById(`${prefix}-stars-${slot}`).value,
+      habit: document.getElementById(`${prefix}-habit-${slot}`).value
+    }))
+  };
+}
+
+function snapshotFormation() {
+  return {
+    defending: document.getElementById('defending-team').value,
+    teamA: snapshotTeam('teamA'),
+    teamB: snapshotTeam('teamB')
+  };
+}
+
+function applyTeam(prefix, data) {
+  if (!data) return;
+  if (data.troop != null) document.getElementById(`${prefix}-troop`).value = data.troop || '';
+  (data.slots || []).forEach((slot, index) => {
+    const id = document.getElementById(`${prefix}-slot-${index}`);
+    const level = document.getElementById(`${prefix}-level-${index}`);
+    const stars = document.getElementById(`${prefix}-stars-${index}`);
+    const habit = document.getElementById(`${prefix}-habit-${index}`);
+    if (id && slot.id != null) id.value = slot.id;
+    if (level && slot.level != null) level.value = String(slot.level);
+    if (stars && slot.stars != null) stars.value = String(slot.stars);
+    if (habit && slot.habit != null) habit.value = String(slot.habit);
+  });
+}
+
+function applyFormation(data) {
+  if (!data) return;
+  applyTeam('teamA', data.teamA);
+  applyTeam('teamB', data.teamB);
+  if (data.defending != null) document.getElementById('defending-team').value = String(data.defending);
+}
+
+function readStore() {
+  try {
+    return JSON.parse(localStorage.getItem(FORMATIONS_KEY) || '{}') || {};
+  } catch (error) {
+    return {};
+  }
+}
+
+function writeStore(store) {
+  localStorage.setItem(FORMATIONS_KEY, JSON.stringify(store));
+}
+
+function refreshFormationList(selected) {
+  const select = document.getElementById('saved-formation');
+  const store = readStore();
+  const names = Object.keys(store).filter(name => name !== LAST_KEY).sort((a, b) => a.localeCompare(b));
+  select.innerHTML = '<option value="">—</option>';
+  names.forEach(name => {
+    const option = document.createElement('option');
+    option.value = name;
+    option.textContent = name;
+    select.appendChild(option);
+  });
+  if (selected) select.value = selected;
+}
+
+function saveNamedFormation() {
+  const name = document.getElementById('formation-name').value.trim();
+  if (!name) {
+    document.getElementById('error').textContent = 'Dê um nome para salvar a formação.';
+    return;
+  }
+  const store = readStore();
+  store[name] = snapshotFormation();
+  store[LAST_KEY] = store[name];
+  writeStore(store);
+  refreshFormationList(name);
+  document.getElementById('error').textContent = '';
+}
+
+function loadSelectedFormation() {
+  const name = document.getElementById('saved-formation').value;
+  const store = readStore();
+  if (!name || !store[name]) {
+    document.getElementById('error').textContent = 'Escolha uma formação salva.';
+    return;
+  }
+  applyFormation(store[name]);
+  document.getElementById('formation-name').value = name;
+  onFormationChange();
+}
+
+function deleteSelectedFormation() {
+  const name = document.getElementById('saved-formation').value;
+  if (!name) return;
+  const store = readStore();
+  delete store[name];
+  writeStore(store);
+  document.getElementById('formation-name').value = '';
+  refreshFormationList();
+}
+
+function persistLast() {
+  const store = readStore();
+  store[LAST_KEY] = snapshotFormation();
+  writeStore(store);
+}
+
 function readTeam(prefix) {
   return SLOTS.map(slot => {
     const id = document.getElementById(`${prefix}-slot-${slot}`).value;
@@ -211,6 +338,7 @@ function teamReady(entries) {
 }
 
 function onFormationChange() {
+  persistLast();
   const teamA = readTeam('teamA');
   const teamB = readTeam('teamB');
   const duplicateA = teamA.filter(Boolean).length === 3 && !teamReady(teamA);
@@ -218,7 +346,7 @@ function onFormationChange() {
   const error = document.getElementById('error');
   if (duplicateA || duplicateB) {
     error.textContent = 'Cada time: um dragão por posição, sem repetir.';
-  } else {
+  } else if (error.textContent === 'Cada time: um dragão por posição, sem repetir.') {
     error.textContent = '';
   }
   document.getElementById('btnStartBattle').disabled = !teamReady(teamA) || !teamReady(teamB);
