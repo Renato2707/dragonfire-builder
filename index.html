@@ -231,6 +231,20 @@
         var el = document.getElementById(id);
         if (el) el.value = value == null ? '' : String(value);
       }
+      function selectedName(id) {
+        var el = document.getElementById(id);
+        if (!el || el.selectedIndex < 0) return '';
+        var opt = el.options[el.selectedIndex];
+        if (!opt || !opt.value) return '';
+        return opt.textContent.split(' (')[0];
+      }
+      function describe(prefix) {
+        var troop = selectedName(prefix + '-troop') || 'sem tropa';
+        var dragons = [0, 1, 2].map(function (slot) {
+          return selectedName(prefix + '-slot-' + slot) || '—';
+        }).join(', ');
+        return troop + ' · ' + dragons;
+      }
       function status(prefix, text, bad) {
         var box = document.getElementById(prefix + '-save-status');
         if (!box) return;
@@ -306,13 +320,11 @@
             name = name + ' ' + n;
             setVal(prefix + '-name', name);
           }
-          var snap = snapshot(prefix);
-          var filled = snap.slots.filter(function (slot) { return slot.id; }).length;
           var lib = readLib();
-          lib[name] = snap;
+          lib[name] = snapshot(prefix);
           writeLib(lib);
           refresh(name, name);
-          status(prefix, 'Salvou "' + name + '" (' + filled + ' dragão(s)).');
+          status(prefix, 'Salvou "' + name + '": ' + describe(prefix));
         } catch (err) {
           status(prefix, 'Erro ao salvar: ' + err.message, true);
         }
@@ -328,7 +340,7 @@
           apply(prefix, lib[name]);
           setVal(prefix + '-name', name);
           refresh(prefix === 'teamA' ? name : val('teamA-saved'), prefix === 'teamB' ? name : val('teamB-saved'));
-          status(prefix, 'Carregou "' + name + '".');
+          status(prefix, 'Carregou "' + name + '": ' + describe(prefix));
         } catch (err) {
           status(prefix, 'Erro ao carregar: ' + err.message, true);
         }
