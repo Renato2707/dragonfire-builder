@@ -149,7 +149,7 @@
                     <select id="teamA-habit-2" title="Habit Lvl"></select>
                 </div>
                 <div class="team-save">
-                    <select id="teamA-saved" title="Times salvos"></select>
+                    <select id="teamA-saved"></select>
                     <input id="teamA-name" type="text" placeholder="Nome do time" />
                     <button type="button" onclick="dfbSaveTeam('teamA')">Salvar</button>
                     <button type="button" onclick="dfbLoadTeam('teamA')">Carregar</button>
@@ -185,7 +185,7 @@
                     <select id="teamB-habit-2" title="Habit Lvl"></select>
                 </div>
                 <div class="team-save">
-                    <select id="teamB-saved" title="Times salvos"></select>
+                    <select id="teamB-saved"></select>
                     <input id="teamB-name" type="text" placeholder="Nome do time" />
                     <button type="button" onclick="dfbSaveTeam('teamB')">Salvar</button>
                     <button type="button" onclick="dfbLoadTeam('teamB')">Carregar</button>
@@ -274,16 +274,15 @@
           setVal(prefix + '-stars-' + index, slot.stars || '');
           setVal(prefix + '-habit-' + index, slot.habit || '');
         });
-        var ev = new Event('change');
         var first = document.getElementById(prefix + '-slot-0');
-        if (first) first.dispatchEvent(ev);
+        if (first) first.dispatchEvent(new Event('change'));
       }
       function refresh(selectedA, selectedB) {
         ['teamA', 'teamB'].forEach(function (prefix) {
           var select = document.getElementById(prefix + '-saved');
           if (!select) return;
           var keep = prefix === 'teamA' ? selectedA : selectedB;
-          select.innerHTML = '<option value="">Times salvos</option>';
+          select.innerHTML = '<option value="">—</option>';
           names().forEach(function (name) {
             var opt = document.createElement('option');
             opt.value = name;
@@ -302,8 +301,8 @@
           if (!name) {
             name = prefix === 'teamA' ? 'Time A' : 'Time B';
             var n = 1;
-            var lib = readLib();
-            while (lib[name + ' ' + n]) n += 1;
+            var existing = readLib();
+            while (existing[name + ' ' + n]) n += 1;
             name = name + ' ' + n;
             setVal(prefix + '-name', name);
           }
@@ -312,8 +311,8 @@
           var lib = readLib();
           lib[name] = snap;
           writeLib(lib);
-          refresh(prefix === 'teamA' ? name : val('teamA-saved'), prefix === 'teamB' ? name : val('teamB-saved'));
-          status(prefix, 'Salvou "' + name + '" (' + filled + ' dragão(s) + tropa).');
+          refresh(name, name);
+          status(prefix, 'Salvou "' + name + '" (' + filled + ' dragão(s)).');
         } catch (err) {
           status(prefix, 'Erro ao salvar: ' + err.message, true);
         }
