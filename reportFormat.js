@@ -5,6 +5,22 @@ import { healRateOf } from './healRate.js';
 const BAR = '═'.repeat(55);
 const DASH = '- '.repeat(27).trim();
 const CORE_STAT_NAMES = new Set(['Strength', 'Instinct', 'Intelligence', 'Initiative']);
+const STAT_KEYS = {
+  Strength: 'str',
+  Instinct: 'inst',
+  Intelligence: 'int',
+  Initiative: 'init',
+  'Damage Dealt': 'dmg_dealt',
+  'Damage Received': 'dmg_received',
+  'Fire Damage Dealt': 'fire_dealt',
+  'Fire Damage Received': 'fire_received',
+  'Physical Damage Dealt': 'physical_dealt',
+  'Physical Damage Received': 'physical_received',
+  'Tactical Damage Dealt': 'tactical_dealt',
+  'Tactical Damage Received': 'tactical_received',
+  'Recovery Dealt': 'recovery_dealt',
+  'Recovery Received': 'recovery_received'
+};
 
 function isBar(line) {
   return /^═+$/.test(String(line || '').trim());
@@ -55,12 +71,77 @@ function splitTarget(battle, raw) {
   return { name: match ? match[1] : text, rest: (match && match[2]) || '' };
 }
 
-function formatMagnitude(stat, rawValue, isVanguard) {
+function kitList(character) {
+  if (!character) return [];
+  return [
+    ...(character.parsedHabits || []),
+    character.commandKit,
+    character.vanguardKit
+  ].filter(Boolean);
+}
+
+function kitMatches(character, habit, skill) {
+  const want = String(skill || '').toLowerCase();
+  if (!want) return false;
+  const names = [
+    habit && habit.name,
+    habit && habit.name && String(habit.name).replace(/ Vanguard$/i, ''),
+    character && character.commandName,
+    character && character.vanguardName,
+    character && VANGUARD_NAMES[character.id]
+  ];
+  return names.some(name => name && String(name).toLowerCase() === want);
+}
+
+function basePctFor(battle, sourceName, skill, statLabel) {
+  const character = findCharacter(battle, sourceName);
+  const key = STAT_KEYS[statLabel] || String(statLabel || '').toLowerCase().replace(/\s+/g, '_');
+  if (!character || !key) return null;
+  const rankIndex = Math.max(0, Math.min(4, (character.habitRank || 1) - 1));
+  for (const habit of kitList(character)) {
+    if (!kitMatches(character, habit, skill)) continue;
+    const blocks = habit.blocks || habit.structured || [];
+    for (const block of blocks) {
+      for (const action of block.actions || []) {
+        for (const mod of action.mods || []) {
+          if (mod.stat !== key) continue;
+          const arr = mod.fixed != null ? mod.fixed : mod.pct;
+          if (Array.isArray(arr)) return arr[rankIndex];
+          if (typeof arr === 'number') return arr;
+        }
+      }
+    }
+  }
+  return null;
+}
+
+function signedPct(value) {
+  const amount = Number(value);
+  if (Number.isNaN(amount)) return String(value);
+  const rounded = Math.round(amount * 100) / 100;
+  if (rounded > 0) return `+${rounded}%`;
+  return `${rounded}%`;
+}
+
+function formatMagnitude(stat, rawValue, isVanguard, extra, battle, source, skill) {
   const value = String(rawValue || '').trim();
   const signed = value.match(/^([+\-]?)([\d.]+%?)$/);
   const sign = signed ? (signed[1] || (Number(signed[2]) < 0 ? '-' : '+')) : '';
   const amount = signed ? signed[2] : value.replace(/^\++/, '');
-  if (isVanguard && CORE_STAT_NAMES.has(stat)) return `+${String(amount).replace('%', '')} ${stat}`;
+  const scaled = signed
+    ? `${sign === '-' ? '-' : '+'}${amount}${/%/.test(amount) ? '' : '%'}`
+    : value;
+  const enhance = String(extra || '').match(/enhanced by ([A-Za-z]+)/i);
+  if (isVanguard && CORE_STAT_NAMES.has(stat) && !enhance) {
+    return `+${String(amount).replace('%', '')} ${stat}`;
+  }
+  if (enhance) {
+    const base = basePctFor(battle, source, skill, stat);
+    if (base != null) {
+      return `${signedPct(base)} ${stat} (enhanced by ${enhance[1]} → ${scaled})`;
+    }
+    return `${scaled} ${stat} (enhanced by ${enhance[1]})`;
+  }
   if (signed) return `${sign === '-' ? '-' : '+'}${amount} ${stat}`;
   return `${value} ${stat}`;
 }
@@ -312,7 +393,11 @@ function parseLog(battle) {
     match = line.match(/^(Increases|Reduces) (.+) of (.+?) by ([+\-][\d.]+%?)(?:\s+(.+))?$/);
     if (match) {
       const stat = match[2].replace(/ \(excluding Basic Attacks\)/, '');
-      pushEffect(match[3], formatMagnitude(stat, match[4], vanguard), match[5]);
+      pushEffect(
+        match[3],
+        formatMagnitude(stat, match[4], vanguard, match[5], battle, actor, skill),
+        match[5]
+      );
       i += 1;
       continue;
     }
