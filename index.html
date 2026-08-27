@@ -56,11 +56,21 @@
         }
         button:hover:not(:disabled) { background: #2c2c2c; }
         button:disabled { opacity: 0.4; cursor: not-allowed; }
+        .team-save {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto auto auto;
+            gap: 6px;
+            margin-top: 12px;
+        }
+        .team-save-status {
+            margin-top: 8px;
+            font-size: 0.75em;
+            color: #8a8a8a;
+            min-height: 1.1em;
+        }
         .start-section { text-align: center; margin-bottom: 16px; }
         .start-section label { font-size: 12px; color: #8a8a8a; margin-right: 8px; }
-        .start-section select, .start-section input[type="text"] { margin-right: 8px; width: auto; min-width: 160px; }
-        .formation-bar { margin-bottom: 8px; }
-        #formation-status { text-align: center; font-size: 0.85em; color: #8a8a8a; min-height: 1.2em; margin-bottom: 16px; }
+        .start-section select { margin-right: 16px; width: auto; }
         .battle-section {
             display: grid;
             grid-template-columns: 1fr 2fr 1fr;
@@ -102,6 +112,7 @@
         @media (max-width: 1100px) {
             .battle-section, .setup-section { grid-template-columns: 1fr; }
             .slot-row { grid-template-columns: 90px 1fr 64px 52px 60px; }
+            .team-save { grid-template-columns: 1fr 1fr; }
         }
     </style>
 </head>
@@ -139,6 +150,14 @@
                     <select id="teamA-stars-2" title="Estrelas"></select>
                     <select id="teamA-habit-2" title="Habit Lvl"></select>
                 </div>
+                <div class="team-save">
+                    <select id="teamA-saved" title="Times salvos"></select>
+                    <input id="teamA-name" type="text" placeholder="Nome do time" />
+                    <button id="btnSaveA" type="button">Salvar</button>
+                    <button id="btnLoadA" type="button">Carregar</button>
+                    <button id="btnDeleteA" type="button">Apagar</button>
+                </div>
+                <div id="teamA-save-status" class="team-save-status"></div>
             </div>
             <div class="team-panel">
                 <h2>Time B</h2>
@@ -167,17 +186,16 @@
                     <select id="teamB-stars-2" title="Estrelas"></select>
                     <select id="teamB-habit-2" title="Habit Lvl"></select>
                 </div>
+                <div class="team-save">
+                    <select id="teamB-saved" title="Times salvos"></select>
+                    <input id="teamB-name" type="text" placeholder="Nome do time" />
+                    <button id="btnSaveB" type="button">Salvar</button>
+                    <button id="btnLoadB" type="button">Carregar</button>
+                    <button id="btnDeleteB" type="button">Apagar</button>
+                </div>
+                <div id="teamB-save-status" class="team-save-status"></div>
             </div>
         </div>
-        <div class="start-section formation-bar">
-            <label for="saved-formation">Formações</label>
-            <select id="saved-formation"></select>
-            <input id="formation-name" type="text" placeholder="Nome da formação" />
-            <button id="btnSaveFormation" type="button">Salvar</button>
-            <button id="btnLoadFormation" type="button">Carregar</button>
-            <button id="btnDeleteFormation" type="button">Apagar</button>
-        </div>
-        <div id="formation-status">Escreva um nome e clique Salvar. Para abrir, escolha na lista ou clique Carregar.</div>
         <div class="start-section">
             <label for="defending-team">Defending</label>
             <select id="defending-team">
