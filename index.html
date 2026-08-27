@@ -35,9 +35,7 @@
             align-items: center;
             margin-bottom: 10px;
         }
-        .slot-row.troop-row {
-            grid-template-columns: 110px minmax(0, 1fr);
-        }
+        .slot-row.troop-row { grid-template-columns: 110px minmax(0, 1fr); }
         .slot-row label { font-size: 0.8em; color: #8a8a8a; }
         select, input[type="text"] {
             width: 100%;
@@ -64,9 +62,9 @@
         }
         .team-save-status {
             margin-top: 8px;
-            font-size: 0.75em;
+            font-size: 0.8em;
             color: #8a8a8a;
-            min-height: 1.1em;
+            min-height: 1.2em;
         }
         .start-section { text-align: center; margin-bottom: 16px; }
         .start-section label { font-size: 12px; color: #8a8a8a; margin-right: 8px; }
@@ -153,11 +151,11 @@
                 <div class="team-save">
                     <select id="teamA-saved" title="Times salvos"></select>
                     <input id="teamA-name" type="text" placeholder="Nome do time" />
-                    <button id="btnSaveA" type="button">Salvar</button>
-                    <button id="btnLoadA" type="button">Carregar</button>
-                    <button id="btnDeleteA" type="button">Apagar</button>
+                    <button type="button" onclick="dfbSaveTeam('teamA')">Salvar</button>
+                    <button type="button" onclick="dfbLoadTeam('teamA')">Carregar</button>
+                    <button type="button" onclick="dfbDeleteTeam('teamA')">Apagar</button>
                 </div>
-                <div id="teamA-save-status" class="team-save-status"></div>
+                <div id="teamA-save-status" class="team-save-status">Escreva um nome e clique Salvar.</div>
             </div>
             <div class="team-panel">
                 <h2>Time B</h2>
@@ -189,11 +187,11 @@
                 <div class="team-save">
                     <select id="teamB-saved" title="Times salvos"></select>
                     <input id="teamB-name" type="text" placeholder="Nome do time" />
-                    <button id="btnSaveB" type="button">Salvar</button>
-                    <button id="btnLoadB" type="button">Carregar</button>
-                    <button id="btnDeleteB" type="button">Apagar</button>
+                    <button type="button" onclick="dfbSaveTeam('teamB')">Salvar</button>
+                    <button type="button" onclick="dfbLoadTeam('teamB')">Carregar</button>
+                    <button type="button" onclick="dfbDeleteTeam('teamB')">Apagar</button>
                 </div>
-                <div id="teamB-save-status" class="team-save-status"></div>
+                <div id="teamB-save-status" class="team-save-status">Escreva um nome e clique Salvar.</div>
             </div>
         </div>
         <div class="start-section">
@@ -222,6 +220,152 @@
             </div>
         </div>
     </div>
+    <script>
+    (function () {
+      var KEY = 'dfb-team-library';
+      function val(id) {
+        var el = document.getElementById(id);
+        return el ? el.value : '';
+      }
+      function setVal(id, value) {
+        var el = document.getElementById(id);
+        if (el) el.value = value == null ? '' : String(value);
+      }
+      function status(prefix, text, bad) {
+        var box = document.getElementById(prefix + '-save-status');
+        if (!box) return;
+        box.textContent = text;
+        box.style.color = bad ? '#b07070' : '#9bbb7a';
+      }
+      function readLib() {
+        try {
+          var raw = localStorage.getItem(KEY);
+          var data = raw ? JSON.parse(raw) : {};
+          return data && typeof data === 'object' ? data : {};
+        } catch (e) {
+          return {};
+        }
+      }
+      function writeLib(data) {
+        localStorage.setItem(KEY, JSON.stringify(data));
+      }
+      function names() {
+        return Object.keys(readLib()).sort(function (a, b) { return a.localeCompare(b); });
+      }
+      function snapshot(prefix) {
+        return {
+          troop: val(prefix + '-troop'),
+          slots: [0, 1, 2].map(function (slot) {
+            return {
+              id: val(prefix + '-slot-' + slot),
+              level: val(prefix + '-level-' + slot),
+              stars: val(prefix + '-stars-' + slot),
+              habit: val(prefix + '-habit-' + slot)
+            };
+          })
+        };
+      }
+      function apply(prefix, data) {
+        if (!data) return;
+        setVal(prefix + '-troop', data.troop || '');
+        (data.slots || []).forEach(function (slot, index) {
+          setVal(prefix + '-slot-' + index, slot.id || '');
+          setVal(prefix + '-level-' + index, slot.level || '');
+          setVal(prefix + '-stars-' + index, slot.stars || '');
+          setVal(prefix + '-habit-' + index, slot.habit || '');
+        });
+        var ev = new Event('change');
+        var first = document.getElementById(prefix + '-slot-0');
+        if (first) first.dispatchEvent(ev);
+      }
+      function refresh(selectedA, selectedB) {
+        ['teamA', 'teamB'].forEach(function (prefix) {
+          var select = document.getElementById(prefix + '-saved');
+          if (!select) return;
+          var keep = prefix === 'teamA' ? selectedA : selectedB;
+          select.innerHTML = '<option value="">Times salvos</option>';
+          names().forEach(function (name) {
+            var opt = document.createElement('option');
+            opt.value = name;
+            opt.textContent = name;
+            select.appendChild(opt);
+          });
+          if (keep) select.value = keep;
+        });
+      }
+      function pickName(prefix) {
+        return (val(prefix + '-name') || '').trim() || val(prefix + '-saved');
+      }
+      window.dfbSaveTeam = function (prefix) {
+        try {
+          var name = pickName(prefix);
+          if (!name) {
+            name = prefix === 'teamA' ? 'Time A' : 'Time B';
+            var n = 1;
+            var lib = readLib();
+            while (lib[name + ' ' + n]) n += 1;
+            name = name + ' ' + n;
+            setVal(prefix + '-name', name);
+          }
+          var snap = snapshot(prefix);
+          var filled = snap.slots.filter(function (slot) { return slot.id; }).length;
+          var lib = readLib();
+          lib[name] = snap;
+          writeLib(lib);
+          refresh(prefix === 'teamA' ? name : val('teamA-saved'), prefix === 'teamB' ? name : val('teamB-saved'));
+          status(prefix, 'Salvou "' + name + '" (' + filled + ' dragão(s) + tropa).');
+        } catch (err) {
+          status(prefix, 'Erro ao salvar: ' + err.message, true);
+        }
+      };
+      window.dfbLoadTeam = function (prefix) {
+        try {
+          var name = pickName(prefix);
+          var lib = readLib();
+          if (!name || !lib[name]) {
+            status(prefix, 'Escolha um time na lista ou digite o nome.', true);
+            return;
+          }
+          apply(prefix, lib[name]);
+          setVal(prefix + '-name', name);
+          refresh(prefix === 'teamA' ? name : val('teamA-saved'), prefix === 'teamB' ? name : val('teamB-saved'));
+          status(prefix, 'Carregou "' + name + '".');
+        } catch (err) {
+          status(prefix, 'Erro ao carregar: ' + err.message, true);
+        }
+      };
+      window.dfbDeleteTeam = function (prefix) {
+        try {
+          var name = pickName(prefix);
+          var lib = readLib();
+          if (!name || !lib[name]) {
+            status(prefix, 'Escolha o time para apagar.', true);
+            return;
+          }
+          delete lib[name];
+          writeLib(lib);
+          setVal(prefix + '-name', '');
+          refresh();
+          status(prefix, 'Apagou "' + name + '".');
+        } catch (err) {
+          status(prefix, 'Erro ao apagar: ' + err.message, true);
+        }
+      };
+      window.addEventListener('DOMContentLoaded', function () {
+        refresh();
+        ['teamA', 'teamB'].forEach(function (prefix) {
+          var select = document.getElementById(prefix + '-saved');
+          if (!select) return;
+          select.addEventListener('change', function () {
+            if (select.value) {
+              setVal(prefix + '-name', select.value);
+              window.dfbLoadTeam(prefix);
+            }
+          });
+        });
+      });
+    })();
+    </script>
     <script type="module" src="./main.js"></script>
 </body>
 </html>
