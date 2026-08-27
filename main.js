@@ -14,9 +14,7 @@ applyInitiativeOrder(Battle);
 const SLOTS = [0, 1, 2];
 const BAR = '═'.repeat(55);
 const DASH = '- '.repeat(27).trim();
-const FORMATIONS_KEY = 'dfb-formations';
-const LAST_KEY = '_last';
-const TEAMS_KEY = '_teams';
+const LAST_KEY = 'dfb-last-setup';
 const TROOP_TYPES = [
   { id: '', label: '—' },
   { id: 'shieldbearers', label: 'Shieldbearers' },
@@ -52,15 +50,14 @@ async function boot() {
   document.getElementById('btnStartBattle').addEventListener('click', startBattle);
   document.getElementById('btnNextRound').addEventListener('click', nextRound);
   document.getElementById('btnReset').addEventListener('click', reset);
-  bindTeamSave('teamA');
-  bindTeamSave('teamB');
-  refreshTeamLists();
-  const last = readStore()[LAST_KEY];
-  if (last) {
-    if (last.teamA) applyTeam('teamA', last.teamA);
-    if (last.teamB) applyTeam('teamB', last.teamB);
-    if (last.defending != null) document.getElementById('defending-team').value = String(last.defending);
-  }
+  try {
+    const last = JSON.parse(localStorage.getItem(LAST_KEY) || 'null');
+    if (last) {
+      if (last.teamA) applyTeam('teamA', last.teamA);
+      if (last.teamB) applyTeam('teamB', last.teamB);
+      if (last.defending != null) document.getElementById('defending-team').value = String(last.defending);
+    }
+  } catch (error) {}
   onFormationChange();
 }
 
@@ -240,165 +237,14 @@ function applyTeam(prefix, data) {
   });
 }
 
-function readStore() {
-  try {
-    return JSON.parse(localStorage.getItem(FORMATIONS_KEY) || '{}') || {};
-  } catch (error) {
-    return {};
-  }
-}
-
-function writeStore(store) {
-  try {
-    localStorage.setItem(FORMATIONS_KEY, JSON.stringify(store));
-    return true;
-  } catch (error) {
-    return false;
-  }
-}
-
-function teamLibrary() {
-  const store = readStore();
-  if (!store[TEAMS_KEY] || typeof store[TEAMS_KEY] !== 'object') store[TEAMS_KEY] = {};
-  for (const key of Object.keys(store)) {
-    if (key === LAST_KEY || key === TEAMS_KEY) continue;
-    const entry = store[key];
-    if (entry && entry.teamA && entry.teamA.slots) {
-      if (!store[TEAMS_KEY][`${key} A`]) store[TEAMS_KEY][`${key} A`] = entry.teamA;
-      if (entry.teamB && entry.teamB.slots && !store[TEAMS_KEY][`${key} B`]) {
-        store[TEAMS_KEY][`${key} B`] = entry.teamB;
-      }
-      delete store[key];
-    } else if (entry && entry.slots && !store[TEAMS_KEY][key]) {
-      store[TEAMS_KEY][key] = entry;
-      delete store[key];
-    }
-  }
-  return store;
-}
-
-function teamNames() {
-  return Object.keys(teamLibrary()[TEAMS_KEY] || {}).sort((a, b) => a.localeCompare(b));
-}
-
-function setTeamStatus(prefix, text, isError) {
-  const box = document.getElementById(`${prefix}-save-status`);
-  if (!box) return;
-  box.textContent = text || '';
-  box.style.color = isError ? '#b07070' : '#8a8a8a';
-}
-
-function fillSavedSelect(select, selected) {
-  const names = teamNames();
-  select.innerHTML = '<option value="">Times salvos</option>';
-  names.forEach(name => {
-    const option = document.createElement('option');
-    option.value = name;
-    option.textContent = name;
-    select.appendChild(option);
-  });
-  if (selected) select.value = selected;
-}
-
-function refreshTeamLists(selectedA, selectedB) {
-  fillSavedSelect(document.getElementById('teamA-saved'), selectedA);
-  fillSavedSelect(document.getElementById('teamB-saved'), selectedB);
-}
-
-function nextTeamName(prefix) {
-  const label = prefix === 'teamA' ? 'Time A' : 'Time B';
-  const names = teamNames();
-  let n = 1;
-  let name = `${label} ${n}`;
-  while (names.includes(name)) {
-    n += 1;
-    name = `${label} ${n}`;
-  }
-  return name;
-}
-
-function pickTeamName(prefix) {
-  return (document.getElementById(`${prefix}-name`).value || '').trim()
-    || document.getElementById(`${prefix}-saved`).value
-    || '';
-}
-
-function saveTeam(prefix) {
-  let name = pickTeamName(prefix);
-  if (!name) {
-    name = nextTeamName(prefix);
-    document.getElementById(`${prefix}-name`).value = name;
-  }
-  const store = teamLibrary();
-  store[TEAMS_KEY][name] = snapshotTeam(prefix);
-  if (!writeStore(store)) {
-    setTeamStatus(prefix, 'Não deu para salvar neste navegador.', true);
-    return;
-  }
-  persistLast();
-  refreshTeamLists(prefix === 'teamA' ? name : document.getElementById('teamA-saved').value,
-    prefix === 'teamB' ? name : document.getElementById('teamB-saved').value);
-  setTeamStatus(prefix, `Time "${name}" salvo.`);
-}
-
-function loadTeam(prefix, name) {
-  const chosen = name || pickTeamName(prefix);
-  const store = teamLibrary();
-  const data = store[TEAMS_KEY][chosen];
-  if (!chosen || !data) {
-    setTeamStatus(prefix, 'Escolha um time na lista ou digite o nome salvo.', true);
-    return;
-  }
-  if (currentBattle) reset();
-  applyTeam(prefix, data);
-  document.getElementById(`${prefix}-name`).value = chosen;
-  refreshTeamLists(
-    prefix === 'teamA' ? chosen : document.getElementById('teamA-saved').value,
-    prefix === 'teamB' ? chosen : document.getElementById('teamB-saved').value
-  );
-  onFormationChange();
-  setTeamStatus(prefix, `Time "${chosen}" carregado.`);
-}
-
-function deleteTeam(prefix) {
-  const name = pickTeamName(prefix);
-  if (!name) {
-    setTeamStatus(prefix, 'Escolha o time para apagar.', true);
-    return;
-  }
-  const store = teamLibrary();
-  if (!store[TEAMS_KEY][name]) {
-    setTeamStatus(prefix, `Não achei "${name}".`, true);
-    return;
-  }
-  delete store[TEAMS_KEY][name];
-  writeStore(store);
-  document.getElementById(`${prefix}-name`).value = '';
-  refreshTeamLists();
-  setTeamStatus(prefix, `Time "${name}" apagado.`);
-}
-
-function bindTeamSave(prefix) {
-  const letter = prefix === 'teamA' ? 'A' : 'B';
-  document.getElementById(`btnSave${letter}`).addEventListener('click', () => saveTeam(prefix));
-  document.getElementById(`btnLoad${letter}`).addEventListener('click', () => loadTeam(prefix));
-  document.getElementById(`btnDelete${letter}`).addEventListener('click', () => deleteTeam(prefix));
-  document.getElementById(`${prefix}-saved`).addEventListener('change', event => {
-    const name = event.target.value;
-    if (!name) return;
-    document.getElementById(`${prefix}-name`).value = name;
-    loadTeam(prefix, name);
-  });
-}
-
 function persistLast() {
-  const store = teamLibrary();
-  store[LAST_KEY] = {
-    defending: document.getElementById('defending-team').value,
-    teamA: snapshotTeam('teamA'),
-    teamB: snapshotTeam('teamB')
-  };
-  writeStore(store);
+  try {
+    localStorage.setItem(LAST_KEY, JSON.stringify({
+      defending: document.getElementById('defending-team').value,
+      teamA: snapshotTeam('teamA'),
+      teamB: snapshotTeam('teamB')
+    }));
+  } catch (error) {}
 }
 
 function readTeam(prefix) {
