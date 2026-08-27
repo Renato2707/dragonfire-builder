@@ -29,10 +29,10 @@ let dragonsData = [];
 let currentBattle = null;
 let formationHeader = '';
 
-document.addEventListener('DOMContentLoaded', async () => {
+async function boot() {
   dragonsData = await loadDragons();
   if (!dragonsData) {
-    document.getElementById('error').textContent = 'Erro ao carregar dados dos dragões';
+    setStatus('Erro ao carregar dados dos dragões', true);
     return;
   }
   populateSlotSelects();
@@ -56,13 +56,21 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('btnDeleteFormation').addEventListener('click', deleteSelectedFormation);
   document.getElementById('saved-formation').addEventListener('change', () => {
     const name = document.getElementById('saved-formation').value;
-    if (name) document.getElementById('formation-name').value = name;
+    if (!name) return;
+    document.getElementById('formation-name').value = name;
+    loadNamed(name);
   });
   refreshFormationList();
   const last = readStore()[LAST_KEY];
   if (last) applyFormation(last);
   onFormationChange();
-});
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', boot);
+} else {
+  boot();
+}
 
 function fillTroopSelect(select) {
   select.innerHTML = '';
@@ -249,6 +257,17 @@ function applyFormation(data) {
   if (data.defending != null) document.getElementById('defending-team').value = String(data.defending);
 }
 
+function setStatus(text, isError) {
+  const box = document.getElementById('formation-status');
+  if (box) {
+    box.textContent = text || '';
+    box.style.color = isError ? '#b07070' : '#8a8a8a';
+  }
+  const error = document.getElementById('error');
+  if (error && isError) error.textContent = text || '';
+  else if (error && error.textContent === text) error.textContent = '';
+}
+
 function readStore() {
   try {
     return JSON.parse(localStorage.getItem(FORMATIONS_KEY) || '{}') || {};
@@ -258,13 +277,22 @@ function readStore() {
 }
 
 function writeStore(store) {
-  localStorage.setItem(FORMATIONS_KEY, JSON.stringify(store));
+  try {
+    localStorage.setItem(FORMATIONS_KEY, JSON.stringify(store));
+    return true;
+  } catch (error) {
+    setStatus('Não deu para salvar neste navegador (localStorage bloqueado).', true);
+    return false;
+  }
+}
+
+function namedKeys(store) {
+  return Object.keys(store || {}).filter(name => name !== LAST_KEY).sort((a, b) => a.localeCompare(b));
 }
 
 function refreshFormationList(selected) {
   const select = document.getElementById('saved-formation');
-  const store = readStore();
-  const names = Object.keys(store).filter(name => name !== LAST_KEY).sort((a, b) => a.localeCompare(b));
+  const names = namedKeys(readStore());
   select.innerHTML = '<option value="">—</option>';
   names.forEach(name => {
     const option = document.createElement('option');
@@ -275,40 +303,71 @@ function refreshFormationList(selected) {
   if (selected) select.value = selected;
 }
 
+function nextDefaultName() {
+  const names = namedKeys(readStore());
+  let n = names.length + 1;
+  let name = `Formação ${n}`;
+  while (names.includes(name)) {
+    n += 1;
+    name = `Formação ${n}`;
+  }
+  return name;
+}
+
+function pickName() {
+  return (document.getElementById('formation-name').value || '').trim()
+    || document.getElementById('saved-formation').value
+    || '';
+}
+
 function saveNamedFormation() {
-  const name = document.getElementById('formation-name').value.trim();
+  let name = pickName();
   if (!name) {
-    document.getElementById('error').textContent = 'Dê um nome para salvar a formação.';
-    return;
+    name = nextDefaultName();
+    document.getElementById('formation-name').value = name;
   }
   const store = readStore();
   store[name] = snapshotFormation();
   store[LAST_KEY] = store[name];
-  writeStore(store);
+  if (!writeStore(store)) return;
   refreshFormationList(name);
-  document.getElementById('error').textContent = '';
+  setStatus(`Formação "${name}" salva.`);
+}
+
+function loadNamed(name) {
+  const store = readStore();
+  if (!name || !store[name]) {
+    setStatus('Escolha uma formação na lista ou digite o nome salvo.', true);
+    return;
+  }
+  if (currentBattle) reset();
+  applyFormation(store[name]);
+  document.getElementById('formation-name').value = name;
+  refreshFormationList(name);
+  onFormationChange();
+  setStatus(`Formação "${name}" carregada.`);
 }
 
 function loadSelectedFormation() {
-  const name = document.getElementById('saved-formation').value;
-  const store = readStore();
-  if (!name || !store[name]) {
-    document.getElementById('error').textContent = 'Escolha uma formação salva.';
-    return;
-  }
-  applyFormation(store[name]);
-  document.getElementById('formation-name').value = name;
-  onFormationChange();
+  loadNamed(pickName());
 }
 
 function deleteSelectedFormation() {
-  const name = document.getElementById('saved-formation').value;
-  if (!name) return;
+  const name = pickName();
+  if (!name) {
+    setStatus('Escolha a formação para apagar.', true);
+    return;
+  }
   const store = readStore();
+  if (!store[name]) {
+    setStatus(`Não achei "${name}" para apagar.`, true);
+    return;
+  }
   delete store[name];
   writeStore(store);
   document.getElementById('formation-name').value = '';
   refreshFormationList();
+  setStatus(`Formação "${name}" apagada.`);
 }
 
 function persistLast() {
