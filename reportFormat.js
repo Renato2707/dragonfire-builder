@@ -5,6 +5,12 @@ import { healRateOf } from './healRate.js';
 const BAR = '═'.repeat(55);
 const DASH = '- '.repeat(27).trim();
 const CORE_STAT_NAMES = new Set(['Strength', 'Instinct', 'Intelligence', 'Initiative']);
+const ENHANCE_STAT = {
+  Strength: 'str',
+  Instinct: 'inst',
+  Intelligence: 'int',
+  Initiative: 'init'
+};
 const STAT_KEYS = {
   Strength: 'str',
   Instinct: 'inst',
@@ -54,7 +60,19 @@ function fromPhrase(battle, source, target) {
 function vanguardTitle(battle, actorName) {
   const character = findCharacter(battle, actorName);
   if (!character) return 'Vanguard';
-  return VANGUARD_NAMES[character.id] || 'Vanguard';
+  return character.vanguardName || VANGUARD_NAMES[character.id] || 'Vanguard';
+}
+
+function cleanSkillName(skillName) {
+  return String(skillName || '').replace(/\s*\(Vanguard\)$/i, '').trim();
+}
+
+function isVanguardSkill(battle, actor, skillName) {
+  const clean = cleanSkillName(skillName);
+  if (!clean || /^Vanguard$/i.test(clean)) return true;
+  const title = vanguardTitle(battle, actor);
+  if (title && title.toLowerCase() === clean.toLowerCase()) return true;
+  return Object.values(VANGUARD_NAMES).some(name => name.toLowerCase() === clean.toLowerCase());
 }
 
 function splitTarget(battle, raw) {
@@ -81,7 +99,7 @@ function kitList(character) {
 }
 
 function kitMatches(character, habit, skill) {
-  const want = String(skill || '').toLowerCase();
+  const want = cleanSkillName(skill).toLowerCase();
   if (!want) return false;
   const names = [
     habit && habit.name,
@@ -121,6 +139,13 @@ function signedPct(value) {
   const rounded = Math.round(amount * 100) / 100;
   if (rounded > 0) return `+${rounded}%`;
   return `${rounded}%`;
+}
+
+function scaledByStat(character, base, by) {
+  if (base == null || !character || !by) return null;
+  const key = ENHANCE_STAT[by];
+  if (!key || typeof character.getModifiedStat !== 'function') return null;
+  return Math.round(Number(base) * (1 + character.getModifiedStat(key) / 100) * 100) / 100;
 }
 
 function formatMagnitude(stat, rawValue, isVanguard, extra, battle, source, skill) {
@@ -177,18 +202,26 @@ function lastTeamSnapshot(rows) {
 
 function parseRecoveryLine(battle, actor, skill, raw) {
   const split = splitTarget(battle, raw);
-  const rate = skill && skill !== 'Basic Attack' ? healRateOf(findCharacter(battle, actor), skill) : null;
+  const caster = findCharacter(battle, actor);
+  const rate = skill && skill !== 'Basic Attack' ? healRateOf(caster, skill) : null;
   const amount = Number((split.rest.match(/\+?(\d+)\s+Troop Capacity/i) || [])[1] || 0);
   const by = (split.rest.match(/enhanced by (\w+)/i) || [])[1];
-  const bits = [rate != null ? `Recovery +${rate}%` : 'Recovery'];
-  if (by) bits.push(`enhanced by ${by}`);
+  const scaled = scaledByStat(caster, rate, by);
+  let detail = 'Recovery';
+  if (rate != null && scaled != null && by) {
+    detail = `Recovery +${rate}% (enhanced by ${by} → +${scaled}%)`;
+  } else if (rate != null && by) {
+    detail = `Recovery +${rate}%, enhanced by ${by}`;
+  } else if (rate != null) {
+    detail = `Recovery +${rate}%`;
+  }
   return {
     type: 'recover',
     actor: actor || split.name,
     skill: skill && skill !== 'Basic Attack' ? skill : 'Recovery',
     target: split.name,
     amount,
-    detail: bits.join(', '),
+    detail,
     tick: !skill || skill === 'Basic Attack'
   };
 }
@@ -321,8 +354,8 @@ function parseLog(battle) {
     match = line.match(/^(.+?) activates (.+)$/);
     if (match) {
       actor = match[1];
-      vanguard = /\(Vanguard\)$/i.test(match[2]) || match[2] === 'Vanguard';
-      skill = vanguard ? vanguardTitle(battle, actor) : match[2];
+      vanguard = isVanguardSkill(battle, actor, match[2]);
+      skill = vanguard ? vanguardTitle(battle, actor) : cleanSkillName(match[2]);
       if (!vanguard && phase === 'turns') {
         pushAction(actor, { type: 'uses', actor, skill });
       }
@@ -555,10 +588,9 @@ export function formatBattleReport(battle, formationText) {
         if (recovers.length) {
           for (const heal of recovers) {
             const left = applyHeal(heal.target, heal.amount);
-            const who = heal.actor === heal.target
-              ? 'on itself'
-              : `affecting ${nameTag(heal.target)}${laneSuffix(battle, heal.target)}`;
-            out.push(`  ${nameTag(heal.actor)} activates [ ${heal.skill} ] ${who}. Recovers ${heal.amount} total troops.`);
+            out.push(`  ${nameTag(heal.actor)} uses [ ${heal.skill} ].`);
+            out.push(`  ${nameTag(heal.target)} is under the effect of [ ${heal.skill} ] ${fromPhrase(battle, heal.actor, heal.target)}.`);
+            out.push(`  ${heal.detail}. +${heal.amount} Troop gained.`);
             out.push(`  ${nameTag(heal.target)} recovers ${heal.amount} troops (${left} remaining).`);
           }
         } else if (damages.length) {
