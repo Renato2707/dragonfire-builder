@@ -117,12 +117,12 @@
           "fixed": false
         }
       ],
-      "description": "Dawnsong gains: Rounds 2, 5, 8 apply Recovery (enhanced by Intelligence) to 2 other Allies.",
+      "description": "Dawnysong gains: Rounds 2, 5, 8 apply Recovery (enhanced by Intelligence) to 2 other Allies.",
       "structured": [
         {
           "phase": "turn",
           "rounds": [2, 5, 8],
-          "requires": { "command": "Dawnsong" },
+          "requires": { "command": "Dawnysong" },
           "actions": [
             {
               "t": "heal",
