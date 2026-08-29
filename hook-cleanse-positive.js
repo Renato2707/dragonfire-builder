@@ -1,7 +1,3 @@
-// Seasmoke Cleansing Wrath: Cleanse removes POSITIVE effects (Advantage,
-// Resistance, First-Strike, …), and Infectious Wrath stacks on each successful
-// strip (not last_cleanse once per round). Also implements tgt.hpAbove (Loyal Bond).
-
 function isCleanseAction(raw) {
   if (!raw) return false;
   if (raw.t === 'cleanse') return true;
@@ -35,28 +31,14 @@ function onCleanseStackActions(character, battle) {
   return out;
 }
 
-export function applyCleansePositive(Battle) {
-  if (Battle.prototype.__cleansePositiveHook) return;
-  Battle.prototype.__cleansePositiveHook = true;
-
-  const origResolve = Battle.prototype.resolveTargets;
-  Battle.prototype.resolveTargets = function (character, habit, action) {
-    let targets = origResolve.apply(this, arguments);
-    const tgt = (action && action.tgt) || (habit && habit.targetingParsed);
-    if (tgt && tgt.hpAbove != null) {
-      const floor = Number(tgt.hpAbove);
-      targets = targets.filter(c => {
-        if (!c || c.isDead) return false;
-        const pct = typeof c.getHealthPercentage === 'function' ? c.getHealthPercentage() : 100;
-        return pct > floor;
-      });
-    }
-    return targets;
-  };
+// Infectious Wrath: one stack per successful positive strip. Polaridade do cleanse
+// (remove:positive) já está em effects.cleanseCharacter.
+export function applyOnCleanseStack(Battle) {
+  if (Battle.prototype.__onCleanseStackHook) return;
+  Battle.prototype.__onCleanseStackHook = true;
 
   const origRun = Battle.prototype.runAction;
   Battle.prototype.runAction = function (character, habit, raw, round) {
-    // Stack-on-cleanse is applied per successful strip, not as a later last_cleanse.
     if (
       !this.__applyingOnCleanse
       && raw
@@ -84,12 +66,12 @@ export function applyCleansePositive(Battle) {
     const prevResolve = this.resolveTargets;
     try {
       this.resolveTargets = function () { return [target]; };
-      for (const spec of specs) {
-        origRun.call(this, character, spec.habit, spec.action, round);
-      }
+      for (const spec of specs) origRun.call(this, character, spec.habit, spec.action, round);
     } finally {
       this.resolveTargets = prevResolve;
       this.__applyingOnCleanse = false;
     }
   };
 }
+
+export { applyOnCleanseStack as applyCleansePositive };

@@ -1,7 +1,7 @@
 import { PHASES } from './habitParser.js';
 
-// executeKit clears lastDamageTarget, so after_basic_attack cannot select the BA target.
-// Official AM commands ("to the target") mean the Basic Attack target (lastBasicTarget).
+// executeKit clears lastDamageTarget. Official AM "to the target" is lastBasicTarget.
+// Restore that target inside withConfusion (after the clear) instead of cloning executeKit.
 export function applyAfterBasicTarget(Battle) {
   if (Battle.prototype.__afterBasicTargetHook) return;
   Battle.prototype.__afterBasicTargetHook = true;
@@ -19,27 +19,27 @@ export function applyAfterBasicTarget(Battle) {
   };
 
   const origKit = Battle.prototype.executeKit;
-  Battle.prototype.executeKit = function (character, habitLike, phase, round, label) {
-    if (phase !== PHASES.AFTER_BASIC_ATTACK) {
-      return origKit.apply(this, arguments);
+  Battle.prototype.executeKit = function (character, habitLike, phase) {
+    const prev = this._afterBasicTarget;
+    if (phase === PHASES.AFTER_BASIC_ATTACK && character && character.lastBasicTarget && !character.lastBasicTarget.isDead) {
+      this._afterBasicTarget = character.lastBasicTarget;
+    } else {
+      this._afterBasicTarget = null;
     }
-    if (!habitLike || typeof habitLike.getBlocksFor !== 'function') return false;
-    const blocks = habitLike.getBlocksFor(round, phase).filter(block => this.blockAllowed(character, block));
-    const pending = this.pendingBlocks(character, habitLike, blocks);
-    if (!pending.length) return false;
-    const ba = character.lastBasicTarget;
-    character.lastDamageTarget = ba && !ba.isDead ? ba : null;
-    character.lastDamageTargets = character.lastDamageTarget ? [character.lastDamageTarget] : [];
-    character.lastBuffTarget = null;
-    return this.withConfusion(character, () => {
-      this.logAction(`${character.name} activates ${label}`);
-      for (const block of pending) {
-        if ((block.oncePerRound || block.oncePerCombat) && block.onceWhen !== 'success') this.consumeOnce(character, habitLike, block);
-        if (!this.blockChanceHits(character, habitLike, block)) continue;
-        this.runBlockActions(character, habitLike, block, round);
-        if ((block.oncePerRound || block.oncePerCombat) && block.onceWhen === 'success') this.consumeOnce(character, habitLike, block);
-      }
-      return true;
-    });
+    try {
+      return origKit.apply(this, arguments);
+    } finally {
+      this._afterBasicTarget = prev || null;
+    }
+  };
+
+  const origConfuse = Battle.prototype.withConfusion;
+  Battle.prototype.withConfusion = function (character, fn) {
+    const ba = this._afterBasicTarget;
+    if (ba && character && !ba.isDead) {
+      character.lastDamageTarget = ba;
+      character.lastDamageTargets = [ba];
+    }
+    return origConfuse.call(this, character, fn);
   };
 }
