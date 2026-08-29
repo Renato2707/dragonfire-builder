@@ -20,7 +20,8 @@ export function snapshotFor(effects, name, atRound, beforeSeq) {
     if (effect.seq >= beforeSeq) continue;
     if (!stillActive(effect, atRound)) continue;
     if (isStackMag(effect.mag)) {
-      const key = [effect.target, effect.skill, effect.source, 'stack'].join('|');
+      const stackName = (String(effect.mag).match(/\d+ stacks? of ([^(]+)/) || [])[1];
+      const key = [effect.target, String(stackName || effect.skill).trim(), 'stack'].join('|');
       if (stackAt[key] != null) {
         out[stackAt[key]] = effect;
         continue;
