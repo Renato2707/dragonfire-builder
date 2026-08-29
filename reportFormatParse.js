@@ -108,7 +108,7 @@ export function parseLog(battle) {
 
     match = line.match(/^Applies Recovery to (.+)$/);
     if (match) {
-      const heal = parseRecoveryLine(battle, actor, skill, match[1]);
+      const heal = parseRecoveryLine(battle, actor, skill, match[1], round);
       if (heal.tick) ensureRound(round || 1).ticks.push(heal);
       else if (actor) pushAction(actor, heal);
       else ensureRound(round || 1).ticks.push(heal);
