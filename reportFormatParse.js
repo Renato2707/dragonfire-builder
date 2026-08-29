@@ -264,6 +264,21 @@ export function parseLog(battle) {
       continue;
     }
 
+    match = line.match(/^Cleanses (.+) from (.+)$/);
+    if (match) {
+      if (actor) {
+        pushAction(actor, {
+          type: 'cleanse',
+          actor,
+          skill,
+          target: match[2].trim(),
+          removed: match[1].trim()
+        });
+      }
+      i += 1;
+      continue;
+    }
+
     match = line.match(/^(.+?) gains (\d+) stacks? of (.+?) \(now (\d+)\)(.*)$/);
     if (match) {
       const n = Number(match[4]);
