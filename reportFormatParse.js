@@ -268,8 +268,10 @@ export function parseLog(battle) {
     if (match) {
       const n = Number(match[4]);
       actor = actor || match[1];
-      skill = skill || match[3];
-      pushEffect(match[1], stackMag(battle, actor, skill, match[3], n), match[5]);
+      const prevSkill = skill;
+      skill = match[3];
+      pushEffect(match[1], stackMag(battle, actor, prevSkill || match[3], match[3], n), match[5]);
+      skill = prevSkill;
       i += 1;
       continue;
     }
