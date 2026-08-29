@@ -40,8 +40,41 @@ export function formatMagnitude(stat, rawValue, isVanguard, extra, battle, sourc
 export function parseDuration(extra) {
   const text = String(extra || '');
   if (/until the end of combat/i.test(text) || /end of combat/i.test(text)) return 'combat';
+  if (/until the end of the round/i.test(text)) return 1;
   const rounds = text.match(/(\d+)\s+round/);
   return rounds ? Number(rounds[1]) : 'combat';
+}
+
+const PCT_MAG = /^([+\-]?\d+(?:\.\d+)?)(%?) (.+)$/;
+
+export function combinePctMag(a, b) {
+  const ma = String(a || '').match(PCT_MAG);
+  const mb = String(b || '').match(PCT_MAG);
+  if (!ma || !mb || ma[2] !== mb[2] || ma[3] !== mb[3]) return null;
+  const sum = Math.round((Number(ma[1]) + Number(mb[1])) * 100) / 100;
+  const signed = sum > 0 ? `+${sum}` : `${sum}`;
+  return `${signed}${ma[2]} ${ma[3]}`;
+}
+
+export function mergeMags(mags) {
+  const out = [];
+  for (const mag of mags || []) {
+    let merged = false;
+    for (let i = 0; i < out.length; i += 1) {
+      const combined = combinePctMag(out[i], mag);
+      if (combined) {
+        out[i] = combined;
+        merged = true;
+        break;
+      }
+      if (out[i] === mag) {
+        merged = true;
+        break;
+      }
+    }
+    if (!merged) out.push(mag);
+  }
+  return out;
 }
 
 export function effectKey(effect) {
@@ -67,7 +100,7 @@ export function lastTeamSnapshot(rows) {
 }
 
 export function parseRecoveryLine(battle, actor, skill, raw) {
-  const split = splitTarget(battle, raw);
+  const split = splitTarget(battle, actor && raw);
   const caster = findCharacter(battle, actor);
   const rate = skill && skill !== 'Basic Attack' ? healRateOf(caster, skill) : null;
   const amount = Number((split.rest.match(/\+?(\d+)\s+Troop Capacity/i) || [])[1] || 0);
