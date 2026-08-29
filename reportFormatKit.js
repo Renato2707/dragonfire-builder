@@ -101,15 +101,19 @@ export function kitList(character) {
 
 export function kitMatches(character, habit, skill) {
   const want = cleanSkillName(skill).toLowerCase();
-  if (!want) return false;
-  const names = [
-    habit && habit.name,
-    habit && habit.name && String(habit.name).replace(/ Vanguard$/i, ''),
-    character && character.commandName,
-    character && character.vanguardName,
-    character && VANGUARD_NAMES[character.id]
-  ];
-  return names.some(name => name && String(name).toLowerCase() === want);
+  if (!want || !habit) return false;
+  const habitName = String(habit.name || '');
+  if (habitName.toLowerCase() === want) return true;
+  const isVanguardKit = habit === (character && character.vanguardKit) || / Vanguard$/i.test(habitName);
+  if (isVanguardKit) {
+    const titles = [
+      character && character.vanguardName,
+      character && character.id && VANGUARD_NAMES[character.id]
+    ];
+    return titles.some(name => name && String(name).toLowerCase() === want);
+  }
+  const habitBare = habitName.replace(/ Vanguard$/i, '');
+  return habitBare.toLowerCase() === want;
 }
 
 export function basePctFor(battle, sourceName, skill, statLabel) {
@@ -141,6 +145,7 @@ export function signedPct(value) {
   if (rounded > 0) return `+${rounded}%`;
   return `${rounded}%`;
 }
+
 
 export function stackMag(battle, sourceName, skill, stackName, count) {
   const base = count === 1 ? `1 stack of ${stackName}` : `${count} stacks of ${stackName}`;
