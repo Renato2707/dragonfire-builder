@@ -130,8 +130,6 @@ export function formatBattleReport(battle, formationText) {
       for (const effect of snapshotFor(parsed.effects, name, pack.number, cut)) {
         out.push(formatEffect(battle, effect));
       }
-      if (bucket.cannot) out.push(`  ${name} cannot ${bucket.cannot}`);
-
       for (const group of groupActions(bucket.actions)) {
         const damages = group.items.filter(item => item.type === 'damage');
         const recovers = group.items.filter(item => item.type === 'recover');
@@ -176,6 +174,7 @@ export function formatBattleReport(battle, formationText) {
           out.push(`  ${nameTag(name)} activates [ ${group.skill} ].`);
         }
       }
+      if (bucket.cannot) out.push(`  ${name} cannot ${bucket.cannot}`);
     }
 
     if (pack.ticks && pack.ticks.length) {
