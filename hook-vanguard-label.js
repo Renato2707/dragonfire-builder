@@ -6,6 +6,7 @@ import { applyRetreatedPerTarget } from './hook-retreated-per-target.js';
 import { applyAfterBasicTarget } from './hook-after-basic-target.js';
 import { applyLinkProcOrder } from './hook-link-proc.js';
 import { applyRateFieldStackBonus } from './hook-ratefield-stacks.js';
+import { applyStatusDuration } from './hook-status-duration.js';
 
 export function applyVanguardLabel(Battle) {
   Battle.prototype.executeVanguard = function (character) {
@@ -23,4 +24,5 @@ export function applyVanguardLabel(Battle) {
   applyAfterBasicTarget(Battle);
   applyLinkProcOrder(Battle);
   applyRateFieldStackBonus(Battle);
+  applyStatusDuration(Battle);
 }
