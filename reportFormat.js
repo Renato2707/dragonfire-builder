@@ -271,10 +271,10 @@ function parseLog(battle) {
       phase,
       vanguard,
       dur: parseDuration(extra),
-      turn: phase === 'turns'
+      turn: phase === 'turns' || phase === 'round_start'
     };
     effects.push(effect);
-    if (phase === 'turns' && actor) {
+    if ((phase === 'turns' || phase === 'round_start') && actor) {
       actorBucket(round || 1, actor).actions.push({ type: 'effect', effect });
     }
   };
@@ -356,7 +356,7 @@ function parseLog(battle) {
       actor = match[1];
       vanguard = isVanguardSkill(battle, actor, match[2]);
       skill = vanguard ? vanguardTitle(battle, actor) : cleanSkillName(match[2]);
-      if (!vanguard && phase === 'turns') {
+      if (!vanguard && (phase === 'turns' || phase === 'round_start')) {
         pushAction(actor, { type: 'uses', actor, skill });
       }
       i += 1;
@@ -385,9 +385,9 @@ function parseLog(battle) {
       continue;
     }
 
-    match = line.match(/^(.+?) cannot act \((.+)\)/);
+    match = line.match(/^(.+?) cannot (act|activate Commands or Habits|launch a Basic Attack) \((.+)\)/);
     if (match) {
-      actorBucket(round || 1, match[1]).cannot = match[2];
+      actorBucket(round || 1, match[1]).cannot = `${match[2]} (${match[3]})`;
       i += 1;
       continue;
     }
@@ -425,12 +425,13 @@ function parseLog(battle) {
 
     match = line.match(/^(Increases|Reduces) (.+) of (.+?) by ([+\-][\d.]+%?)(?:\s+(.+))?$/);
     if (match) {
-      const stat = match[2].replace(/ \(excluding Basic Attacks\)/, '');
-      pushEffect(
-        match[3],
-        formatMagnitude(stat, match[4], vanguard, match[5], battle, actor, skill),
-        match[5]
-      );
+      const excludeBasic = /excluding Basic Attacks/i.test(match[2]);
+      const stat = match[2].replace(/ \(excluding Basic Attacks\)/i, '');
+      let mag = formatMagnitude(stat, match[4], vanguard, match[5], battle, actor, skill);
+      if (excludeBasic && !/excluding Basic Attacks/i.test(mag)) {
+        mag = `${mag} (excluding Basic Attacks)`;
+      }
+      pushEffect(match[3], mag, match[5]);
       i += 1;
       continue;
     }
@@ -447,6 +448,13 @@ function parseLog(battle) {
     if (match) {
       const split = splitTarget(battle, match[2]);
       pushEffect(split.name, [match[1], split.rest].filter(Boolean).join(' '), match[2]);
+      i += 1;
+      continue;
+    }
+
+    match = line.match(/^Copies (.+?) from (.+) to (.+?)(?:\s+((?:for|until) .+))?$/);
+    if (match) {
+      pushEffect(match[3].trim(), match[1].trim(), match[4] || '');
       i += 1;
       continue;
     }
@@ -468,6 +476,7 @@ function parseLog(battle) {
 }
 
 function stillActive(effect, atRound) {
+  if (effect.round > atRound) return false;
   if (effect.dur === 'combat') return true;
   if (typeof effect.dur === 'number') return effect.round + effect.dur - 1 >= atRound;
   return true;
@@ -573,7 +582,7 @@ export function formatBattleReport(battle, formationText) {
       for (const effect of snapshotFor(parsed.effects, name, pack.number, cut)) {
         out.push(formatEffect(battle, effect));
       }
-      if (bucket.cannot) out.push(`  ${name} cannot act (${bucket.cannot})`);
+      if (bucket.cannot) out.push(`  ${name} cannot ${bucket.cannot}`);
 
       for (const group of groupActions(bucket.actions)) {
         const damages = group.items.filter(item => item.type === 'damage');
@@ -610,6 +619,8 @@ export function formatBattleReport(battle, formationText) {
           out.push(`  ${nameTag(name)} activates [ ${group.skill} ] affecting ${list}.`);
           const mags = fx.map(item => item.effect.mag).filter((mag, index, arr) => arr.indexOf(mag) === index);
           if (mags.length) out.push(`  ${mags.join(' ')}`);
+        } else if (group.skill && group.skill !== 'Basic Attack') {
+          out.push(`  ${nameTag(name)} activates [ ${group.skill} ].`);
         }
       }
     }
