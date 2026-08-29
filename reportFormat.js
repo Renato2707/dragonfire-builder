@@ -136,10 +136,20 @@ export function formatBattleReport(battle, formationText) {
         const recovers = group.items.filter(item => item.type === 'recover');
         const rolls = group.items.filter(item => item.type === 'roll');
         const fx = group.items.filter(item => item.type === 'effect');
+        const cleanses = group.items.filter(item => item.type === 'cleanse');
+
+        const writeCleanses = () => {
+          for (const item of cleanses) {
+            if (item.removed === 'nothing') out.push('  Cleanses nothing');
+            else out.push(`  Cleanses ${item.removed}`);
+          }
+        };
 
         for (const roll of rolls) {
           out.push(`  [${roll.result}] ${roll.skill} → ${roll.target} (${roll.chance})`);
         }
+
+        if (cleanses.length && (damages.length || recovers.length)) writeCleanses();
 
         if (recovers.length) {
           for (const heal of recovers) {
@@ -159,13 +169,21 @@ export function formatBattleReport(battle, formationText) {
             out.push(`  ${nameTag(hit.target)} takes ${hit.amount} losses (${left} remaining).`);
           }
         }
-        if (fx.length && !recovers.length && !damages.length) {
+        if ((fx.length || cleanses.length) && !recovers.length && !damages.length) {
           const targets = [];
           for (const item of fx) {
-            if (!targets.includes(item.effect.target)) targets.push(item.effect.target);
+            if (item.effect && !targets.includes(item.effect.target)) targets.push(item.effect.target);
           }
-          const list = targets.map(target => `${nameTag(target)}${laneSuffix(battle, target)}`).join(', ');
-          out.push(`  ${nameTag(name)} activates [ ${group.skill} ] affecting ${list}.`);
+          for (const item of cleanses) {
+            if (item.target && !targets.includes(item.target)) targets.push(item.target);
+          }
+          if (targets.length) {
+            const list = targets.map(target => `${nameTag(target)}${laneSuffix(battle, target)}`).join(', ');
+            out.push(`  ${nameTag(name)} activates [ ${group.skill} ] affecting ${list}.`);
+          } else {
+            out.push(`  ${nameTag(name)} activates [ ${group.skill} ].`);
+          }
+          writeCleanses();
           const mags = activationMags(fx);
           if (mags.length) out.push(`  ${mags.join(' ')}`);
         } else if (fx.length && (recovers.length || damages.length)) {
