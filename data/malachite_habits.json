@@ -1,1 +1,228 @@
-PLACEHOLDER
+{
+  "dragonId": "malachite",
+  "habits": [
+    {
+      "dragonId": "malachite",
+      "slot": 1,
+      "unlockStar": 2,
+      "name": "Forest's Instinct",
+      "targeting": "2 other Allies",
+      "effectType": "Stat Modifier",
+      "duration": "2 Rounds",
+      "scalingRaw": "Chance: 35% ; PHYSICAL_DEALT: 8% | 9.6% | 11.2% | 13.6% | 16% ; TACTICAL_RECEIVED: -8% | -9.6% | -11.2% | -13.6% | -16%",
+      "scaling": [
+        {
+          "label": "Chance",
+          "values": [35],
+          "unit": "%",
+          "fixed": true
+        },
+        {
+          "label": "PHYSICAL_DEALT",
+          "values": [8, 9.6, 11.2, 13.6, 16],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "TACTICAL_RECEIVED",
+          "values": [-8, -9.6, -11.2, -13.6, -16],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Each Round: 35% chance to increase Physical Damage Dealt (excluding Basic Attacks) and reduce Tactical Damage Received of 2 other Allies for 2 rounds. Chance is fixed; only the percents scale. excludeBasic applies only to Physical Dealt.",
+      "structured": [
+        {
+          "phase": "turn",
+          "rounds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+          "chance": 35,
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                { "stat": "physical_dealt", "pct": [8, 9.6, 11.2, 13.6, 16] }
+              ],
+              "excludeBasic": true,
+              "dur": 2,
+              "tgt": { "side": "ally", "count": 2, "select": "any", "excludeSelf": true }
+            },
+            {
+              "t": "mod",
+              "mods": [
+                { "stat": "tactical_received", "pct": [-8, -9.6, -11.2, -13.6, -16] }
+              ],
+              "dur": 2,
+              "tgt": { "side": "ally", "count": 2, "select": "any", "excludeSelf": true }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "malachite",
+      "slot": 2,
+      "unlockStar": 4,
+      "name": "Wise Vigor",
+      "targeting": "1 Self",
+      "effectType": "Stat Modifier",
+      "duration": "Whole Combat",
+      "scalingRaw": "INST: 20% | 24% | 28% | 34% | 40% ; RECOVERY_DEALT: 20% | 24% | 28% | 34% | 40%",
+      "scaling": [
+        {
+          "label": "INST",
+          "values": [20, 24, 28, 34, 40],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "RECOVERY_DEALT",
+          "values": [20, 24, 28, 34, 40],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Start of Combat: Increase your Instinct and Recovery Dealt until the end of combat.",
+      "structured": [
+        {
+          "phase": "combat_start",
+          "rounds": [1],
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                { "stat": "inst", "pct": [20, 24, 28, 34, 40] },
+                { "stat": "recovery_dealt", "pct": [20, 24, 28, 34, 40] }
+              ],
+              "dur": "combat",
+              "tgt": { "side": "self" }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "malachite",
+      "slot": 3,
+      "unlockStar": 6,
+      "name": "Thunderous Roar",
+      "targeting": "2 other Allies",
+      "effectType": "Status Effect",
+      "duration": "2 Rounds",
+      "scalingRaw": "Advantage Chance: 10% | 12% | 14% | 17% | 20%",
+      "scaling": [
+        {
+          "label": "Advantage Chance",
+          "values": [10, 12, 14, 17, 20],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Each Round: chance to grant Advantage (+20%) to 2 other Allies for 2 rounds. One roll applies to both allies. Advantage increases Damage Dealt.",
+      "structured": [
+        {
+          "phase": "turn",
+          "rounds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+          "chance": [10, 12, 14, 17, 20],
+          "actions": [
+            {
+              "t": "status",
+              "st": "advantage",
+              "val": 20,
+              "dur": 2,
+              "tgt": { "side": "ally", "count": 2, "select": "any", "excludeSelf": true }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "malachite",
+      "slot": 4,
+      "unlockStar": 8,
+      "name": "Collective Might",
+      "targeting": "3 Allies",
+      "effectType": "Stat Modifier",
+      "duration": "Whole Combat",
+      "scalingRaw": "STR: 12.5% | 15% | 17.5% | 21.25% | 25%",
+      "scaling": [
+        {
+          "label": "STR",
+          "values": [12.5, 15, 17.5, 21.25, 25],
+          "unit": "%",
+          "fixed": false
+        }
+      ],
+      "description": "Start of Combat: Increase Strength (enhanced by Strength) of 3 Allies until the end of combat.",
+      "structured": [
+        {
+          "phase": "combat_start",
+          "rounds": [1],
+          "actions": [
+            {
+              "t": "mod",
+              "mods": [
+                { "stat": "str", "pct": [12.5, 15, 17.5, 21.25, 25] }
+              ],
+              "scaleStat": "str",
+              "dur": "combat",
+              "tgt": { "side": "ally", "count": 3, "select": "any" }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dragonId": "malachite",
+      "slot": 5,
+      "unlockStar": 10,
+      "name": "Lightning Strike",
+      "targeting": "1 other Ally (Adjacent)",
+      "effectType": "Stat Modifier, Status Effect",
+      "duration": "3 Rounds",
+      "scalingRaw": "Chance: 40% | 52% | 64% | 80% | 100% ; STR: 25%",
+      "scaling": [
+        {
+          "label": "Chance",
+          "values": [40, 52, 64, 80, 100],
+          "unit": "%",
+          "fixed": false
+        },
+        {
+          "label": "STR",
+          "values": [25],
+          "unit": "%",
+          "fixed": true
+        }
+      ],
+      "description": "Start of Round 1: chance to grant First-Strike, Double-Strike and Strength +25% (enhanced by Instinct) to 1 other Ally within adjacency for 3 rounds. One roll applies all three.",
+      "structured": [
+        {
+          "phase": "round_start",
+          "rounds": [1],
+          "chance": [40, 52, 64, 80, 100],
+          "actions": [
+            {
+              "t": "status",
+              "st": "first_strike",
+              "dur": 3,
+              "tgt": { "side": "ally", "count": 1, "select": "adjacency", "excludeSelf": true }
+            },
+            {
+              "t": "status",
+              "st": "double_strike",
+              "dur": 3,
+              "tgt": { "side": "ally", "count": 1, "select": "adjacency", "excludeSelf": true }
+            },
+            {
+              "t": "mod",
+              "mods": [{ "stat": "str", "pct": 25 }],
+              "scaleStat": "inst",
+              "dur": 3,
+              "tgt": { "side": "ally", "count": 1, "select": "adjacency", "excludeSelf": true }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
