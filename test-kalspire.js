@@ -87,3 +87,63 @@ function setup(randomFn, extras = {}) {
   });
   return { battle, kal, left, right, e0, e1, e2 };
 }
+
+function dumpEngine(label, kal, left, right, e0, e1, e2) {
+  const lines = [];
+  const snap = (c) => {
+    if (!c) return null;
+    return {
+      name: c.name,
+      str: c.getModifiedStat('str'),
+      inst: c.getModifiedStat('inst'),
+      int: c.getModifiedStat('int'),
+      init: c.getModifiedStat('init'),
+      strPct: c.getPercentTotal('str'),
+      instPct: c.getPercentTotal('inst'),
+      intPct: c.getPercentTotal('int'),
+      initPct: c.getPercentTotal('init'),
+      physDealt: c.getPercentTotal('physical_dealt'),
+      fireDealt: c.getPercentTotal('fire_dealt'),
+      dmgRecv: c.getPercentTotal('dmg_received'),
+      flat: { ...c.flatMods },
+      dealer: getDealerType(c),
+      breed: c.breed,
+      stun: hasEffect(c, 'stun'),
+      bleed: hasEffect(c, 'bleed'),
+      panic: hasEffect(c, 'panic'),
+      hp: Math.round(c.currentHealth) + '/' + Math.round(c.maxHealth)
+    };
+  };
+  lines.push('===== ' + label + ' =====');
+  for (const c of [kal, left, right, e0, e1, e2]) {
+    if (c) lines.push(JSON.stringify(snap(c)));
+  }
+  return lines.join('\n');
+}
+
+const checks = [];
+function check(name, ok, detail) {
+  checks.push({ name, ok, detail });
+  console.log((ok ? 'PASS' : 'FAIL') + ' ' + name + (detail ? ' :: ' + detail : ''));
+}
+
+function rN(raw, n) {
+  return (raw.split('Start of Round ' + n)[1] || '').split('Start of Round ' + (n + 1))[0] || '';
+}
+
+function rFmt(report, n) {
+  return (report.split('\u2022 Round ' + n)[1] || '').split('\u2022 Round ' + (n + 1))[0] || '';
+}
+
+function baTargetOf(raw, n) {
+  const chunk = rN(raw, n);
+  const m = chunk.match(/Kalspire launches a Basic Attack[\s\S]*?Deals \d+ \w+ Damage to (\w+)/);
+  return m ? m[1] : null;
+}
+
+function afterBa(raw, n, skill) {
+  const chunk = rN(raw, n);
+  const start = chunk.indexOf('Kalspire activates ' + skill);
+  if (start < 0) return '';
+  return chunk.slice(start);
+}
