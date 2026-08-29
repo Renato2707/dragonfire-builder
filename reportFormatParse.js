@@ -239,6 +239,15 @@ export function parseLog(battle) {
       continue;
     }
 
+    match = line.match(/^(.+?) gains: ([A-Za-z_]+) ([+\-][\d.]+%?)$/);
+    if (match) {
+      const field = String(match[2] || '').split('_').filter(Boolean)
+        .map(part => part.charAt(0).toUpperCase() + part.slice(1)).join(' ');
+      pushEffect(actor || match[1], `${field} ${match[3]}`, 'until the end of the round');
+      i += 1;
+      continue;
+    }
+
     match = line.match(/^(.+?) gains (\d+) stacks? of (.+?) \(now (\d+)\)(.*)$/);
     if (match) {
       const n = Number(match[4]);
