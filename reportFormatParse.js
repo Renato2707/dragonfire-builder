@@ -166,7 +166,7 @@ export function parseLog(battle) {
       continue;
     }
 
-    match = line.match(/^(.+?) cannot (act|activate Commands or Habits|launch a Basic Attack) \((.+)\)/);
+    match = line.match(/^(.+?) cannot (act|activate Commands or Habits|launch a (?:2nd )?Basic Attack) \((.+)\)/);
     if (match) {
       actorBucket(round || 1, match[1]).cannot = `${match[2]} (${match[3]})`;
       i += 1;
