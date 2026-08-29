@@ -150,7 +150,8 @@ export function formatBattleReport(battle, formationText) {
             out.push(`  ${heal.detail}. +${heal.amount} Troop gained.`);
             out.push(`  ${nameTag(heal.target)} recovers ${heal.amount} troops (${left} remaining).`);
           }
-        } else if (damages.length) {
+        }
+        if (damages.length) {
           for (const hit of damages) {
             const left = applyDamage(hit.target, hit.amount);
             const atk = hit.skill || group.skill || 'Basic Attack';
@@ -159,13 +160,16 @@ export function formatBattleReport(battle, formationText) {
             out.push(`  ${nameTag(hit.target)} takes ${hit.amount} losses (${left} remaining).`);
           }
         }
-        if (!recovers.length && fx.length) {
+        if (fx.length && !recovers.length && !damages.length) {
           const targets = [];
           for (const item of fx) {
             if (!targets.includes(item.effect.target)) targets.push(item.effect.target);
           }
           const list = targets.map(target => `${nameTag(target)}${laneSuffix(battle, target)}`).join(', ');
           out.push(`  ${nameTag(name)} activates [ ${group.skill} ] affecting ${list}.`);
+          const mags = activationMags(fx);
+          if (mags.length) out.push(`  ${mags.join(' ')}`);
+        } else if (fx.length && (recovers.length || damages.length)) {
           const mags = activationMags(fx);
           if (mags.length) out.push(`  ${mags.join(' ')}`);
         } else if (!recovers.length && !damages.length && group.skill && group.skill !== 'Basic Attack' && group.skill !== 'Confusion') {
