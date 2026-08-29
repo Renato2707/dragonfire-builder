@@ -4,10 +4,11 @@ function statusId(value) {
   return String(value || '').toLowerCase().replace(/-/g, '_');
 }
 
-// Per-target ifBonus.status:control on dmg (Rhysarion Dawnsong R2/5/8:
-// fire 20% → 30% / 1.5x). habitParser ifBonus.status also ORs the caster, so a
-// Staggered caster would 1.5x every target. Official: 1.5x only if THE TARGET
-// has Control (Stun, Stagger, Overwhelm, Confusion).
+// Per-target ifBonus on dmg.
+// Rhysarion Dawnsong: ifBonus.status:control (fire 20% → 30% / 1.5x) only if
+// THE TARGET has Control. habitParser ORs the caster, so a Staggered caster
+// would 1.5x every target.
+// Seasmoke Infectious Wrath: ifBonus.on:target status:panic (physical 30% → 60%).
 export function applyControlIfBonus(Battle) {
   if (Battle.prototype.__controlIfBonusHook) return;
   Battle.prototype.__controlIfBonusHook = true;
@@ -15,11 +16,15 @@ export function applyControlIfBonus(Battle) {
   const orig = Battle.prototype.runAction;
   Battle.prototype.runAction = function (character, habit, raw, round) {
     const bonus = raw && raw.ifBonus;
+    const want = bonus && statusId(bonus.status);
+    const perTarget = !!(bonus && (
+      want === 'control' || String(bonus.on || '').toLowerCase() === 'target'
+    ));
     if (
       !raw
       || raw.t !== 'dmg'
       || !bonus
-      || statusId(bonus.status) !== 'control'
+      || !perTarget
       || bonus.on === 'self'
       || (bonus.pct == null && bonus.mult == null)
     ) {
@@ -31,7 +36,7 @@ export function applyControlIfBonus(Battle) {
     for (const target of targets) {
       if (!target || target.isDead) continue;
       const copy = { ...raw, tgt: raw.tgt ? { ...raw.tgt } : raw.tgt };
-      if (!statusConditionMet(target, 'control')) delete copy.ifBonus;
+      if (!statusConditionMet(target, bonus.status)) delete copy.ifBonus;
       this.resolveTargets = function () { return [target]; };
       try {
         orig.call(this, character, habit, copy, round);
