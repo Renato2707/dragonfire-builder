@@ -22,10 +22,11 @@ export function parseLog(battle) {
   const ensureRound = number => {
     let found = rounds.find(r => r.number === number);
     if (!found) {
-      found = { number, turnOrder: [], actors: [], roster: [], ticks: [] };
+      found = { number, turnOrder: [], actors: [], roster: [], ticks: [], dots: [] };
       rounds.push(found);
     }
     if (!found.ticks) found.ticks = [];
+    if (!found.dots) found.dots = [];
     return found;
   };
 
@@ -190,13 +191,28 @@ export function parseLog(battle) {
 
     match = line.match(/^\[(hit|miss)\] (.+) → (.+) \(([\d.]+%)\)$/);
     if (match) {
-      if (actor) {
-        pushAction(actor, {
+      const rollActor = match[2] === 'Confusion' ? match[3] : actor;
+      if (rollActor) {
+        pushAction(rollActor, {
           type: 'roll',
           result: match[1],
           skill: match[2],
           target: match[3],
           chance: match[4]
+        });
+      }
+      i += 1;
+      continue;
+    }
+
+    match = line.match(/^(.+?) takes (\d+) (.+) from (.+)$/);
+    if (match) {
+      if (round) {
+        ensureRound(round).dots.push({
+          target: match[1],
+          amount: Number(match[2]),
+          dtype: match[3],
+          source: match[4]
         });
       }
       i += 1;

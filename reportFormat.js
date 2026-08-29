@@ -168,7 +168,7 @@ export function formatBattleReport(battle, formationText) {
           out.push(`  ${nameTag(name)} activates [ ${group.skill} ] affecting ${list}.`);
           const mags = activationMags(fx);
           if (mags.length) out.push(`  ${mags.join(' ')}`);
-        } else if (!recovers.length && !damages.length && group.skill && group.skill !== 'Basic Attack') {
+        } else if (!recovers.length && !damages.length && group.skill && group.skill !== 'Basic Attack' && group.skill !== 'Confusion') {
           out.push(`  ${nameTag(name)} activates [ ${group.skill} ].`);
         }
       }
@@ -179,6 +179,13 @@ export function formatBattleReport(battle, formationText) {
         const left = applyHeal(heal.target, heal.amount);
         out.push(`  ${nameTag(heal.target)} is under the effect of [ Recovery ] from itself. ${heal.detail}. +${heal.amount} Troop gained.`);
         out.push(`  ${nameTag(heal.target)} recovers ${heal.amount} troops (${left} remaining).`);
+      }
+    }
+
+    if (pack.dots && pack.dots.length) {
+      for (const dot of pack.dots) {
+        const left = applyDamage(dot.target, dot.amount);
+        out.push(`  ${nameTag(dot.target)} takes ${dot.amount} ${dot.dtype} from [ ${dot.source} ] (${left} remaining).`);
       }
     }
 
