@@ -77,6 +77,28 @@ export function mergeMags(mags) {
   return out;
 }
 
+// Sum same-target stacks (Blood Wyrm +8%/+8% → +16%) but do not sum the
+// same buff across different targets (Unlikely Hero +10% on 3 enemies is not +30%).
+export function activationMags(fx) {
+  const byTarget = {};
+  for (const item of fx || []) {
+    const target = item.effect && item.effect.target;
+    if (!target) continue;
+    if (!byTarget[target]) byTarget[target] = [];
+    byTarget[target].push(item.effect.mag);
+  }
+  const seen = new Set();
+  const out = [];
+  for (const mags of Object.values(byTarget)) {
+    for (const mag of mergeMags(mags)) {
+      if (seen.has(mag)) continue;
+      seen.add(mag);
+      out.push(mag);
+    }
+  }
+  return out;
+}
+
 export function effectKey(effect) {
   return [effect.target, effect.skill, effect.source, effect.mag].join('|');
 }

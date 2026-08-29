@@ -1,7 +1,7 @@
 import {
   BAR, DASH, nameTag, findCharacter, laneSuffix, fromPhrase
 } from './reportFormatKit.js';
-import { isStackMag, effectKey, lastTeamSnapshot, combinePctMag, mergeMags } from './reportFormatMisc.js';
+import { isStackMag, effectKey, lastTeamSnapshot, combinePctMag, activationMags } from './reportFormatMisc.js';
 import { parseLog } from './reportFormatParse.js';
 
 export function stillActive(effect, atRound) {
@@ -158,16 +158,17 @@ export function formatBattleReport(battle, formationText) {
             out.push(`  Deals ${hit.amount} ${hit.dtype} against ${nameTag(hit.target)}.`);
             out.push(`  ${nameTag(hit.target)} takes ${hit.amount} losses (${left} remaining).`);
           }
-        } else if (fx.length) {
+        }
+        if (!recovers.length && fx.length) {
           const targets = [];
           for (const item of fx) {
             if (!targets.includes(item.effect.target)) targets.push(item.effect.target);
           }
           const list = targets.map(target => `${nameTag(target)}${laneSuffix(battle, target)}`).join(', ');
           out.push(`  ${nameTag(name)} activates [ ${group.skill} ] affecting ${list}.`);
-          const mags = mergeMags(fx.map(item => item.effect.mag));
+          const mags = activationMags(fx);
           if (mags.length) out.push(`  ${mags.join(' ')}`);
-        } else if (group.skill && group.skill !== 'Basic Attack') {
+        } else if (!recovers.length && !damages.length && group.skill && group.skill !== 'Basic Attack') {
           out.push(`  ${nameTag(name)} activates [ ${group.skill} ].`);
         }
       }
