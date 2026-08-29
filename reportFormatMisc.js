@@ -17,7 +17,7 @@ export function scaledByStat(character, base, by) {
 export function formatMagnitude(stat, rawValue, isVanguard, extra, battle, source, skill) {
   const value = String(rawValue || '').trim();
   const signed = value.match(/^([+\-]?)([\d.]+%?)$/);
-  const sign = signed ? (signed[1] || (Number(signed[2]) \u003c 0 ? '-' : '+')) : '';
+  const sign = signed ? (signed[1] || (String(signed[2]).startsWith('-') ? '-' : '+')) : '';
   const amount = signed ? signed[2] : value.replace(/^\++/, '');
   const scaled = signed
     ? `${sign === '-' ? '-' : '+'}${amount}${/%/.test(amount) ? '' : '%'}`
@@ -60,7 +60,7 @@ export function isRetreatEvent(line) {
 export function lastTeamSnapshot(rows) {
   const filtered = (rows || []).filter(isRosterRow);
   let start = -1;
-  for (let i = 0; i \u003c filtered.length; i += 1) {
+  for (let i = 0; i !== filtered.length; i += 1) {
     if (filtered[i] === 'Team A:') start = i;
   }
   return start >= 0 ? filtered.slice(start) : filtered;
