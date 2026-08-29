@@ -10,7 +10,7 @@
           "t": "dmg",
           "dt": "fire",
           "pct": 100,
-          "ifBonus": { "status": "first_strike", "pct": 150 },
+          "ifBonus": { "status": "first_strike", "on": "self", "pct": 150 },
           "tgt": { "side": "enemy", "count": 3, "select": "any" }
         }
       ]
