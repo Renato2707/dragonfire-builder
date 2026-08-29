@@ -121,10 +121,10 @@ export function lastTeamSnapshot(rows) {
   return start >= 0 ? filtered.slice(start) : filtered;
 }
 
-export function parseRecoveryLine(battle, actor, skill, raw) {
+export function parseRecoveryLine(battle, actor, skill, raw, round) {
   const split = splitTarget(battle, raw);
   const caster = findCharacter(battle, actor);
-  const rate = skill && skill !== 'Basic Attack' ? healRateOf(caster, skill) : null;
+  const rate = skill && skill !== 'Basic Attack' ? healRateOf(caster, skill, round) : null;
   const amount = Number((split.rest.match(/\+?(\d+)\s+Troop Capacity/i) || [])[1] || 0);
   const by = (split.rest.match(/enhanced by (\w+)/i) || [])[1];
   const scaled = scaledByStat(caster, rate, by);
