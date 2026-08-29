@@ -1,6 +1,7 @@
 import { VANGUARD_NAMES } from './vanguardNames.js';
 import { POSITIONS } from './positionSystem.js';
 import { PHASES } from './habitParser.js';
+import { applyLinkedRetreated } from './hook-linked-retreated.js';
 
 export function applyVanguardLabel(Battle) {
   Battle.prototype.executeVanguard = function (character) {
@@ -13,4 +14,5 @@ export function applyVanguardLabel(Battle) {
       || 'Vanguard';
     this.executeKit(character, kit, PHASES.COMBAT_START, 1, label);
   };
+  applyLinkedRetreated(Battle);
 }

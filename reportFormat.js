@@ -1,189 +1,199 @@
-import { SLOT_NAMES } from './character.js';
-import { VANGUARD_NAMES } from './vanguardNames.js';
-import { healRateOf } from './healRate.js';
+import {
+  BAR, DASH, nameTag, findCharacter, laneSuffix, fromPhrase
+} from './reportFormatKit.js';
+import { isStackMag, effectKey, lastTeamSnapshot } from './reportFormatMisc.js';
+import { parseLog } from './reportFormatParse.js';
 
-const BAR = '═'.repeat(55);
-const DASH = '- '.repeat(27).trim();
-const CORE_STAT_NAMES = new Set(['Strength', 'Instinct', 'Intelligence', 'Initiative']);
-const ENHANCE_STAT = {
-  Strength: 'str',
-  Instinct: 'inst',
-  Intelligence: 'int',
-  Initiative: 'init'
-};
-const STAT_KEYS = {
-  Strength: 'str',
-  Instinct: 'inst',
-  Intelligence: 'int',
-  Initiative: 'init',
-  'Damage Dealt': 'dmg_dealt',
-  'Damage Received': 'dmg_received',
-  'Fire Damage Dealt': 'fire_dealt',
-  'Fire Damage Received': 'fire_received',
-  'Physical Damage Dealt': 'physical_dealt',
-  'Physical Damage Received': 'physical_received',
-  'Tactical Damage Dealt': 'tactical_dealt',
-  'Tactical Damage Received': 'tactical_received',
-  'Recovery Dealt': 'recovery_dealt',
-  'Recovery Received': 'recovery_received'
-};
-
-const STAT_LABELS = Object.fromEntries(Object.entries(STAT_KEYS).map(([label, key]) => [key, label]));
-
-function isBar(line) {
-  return /^═+$/.test(String(line || '').trim());
+export function stillActive(effect, atRound) {
+  if (effect.round > atRound) return false;
+  if (effect.dur === 'combat') return true;
+  if (typeof effect.dur === 'number') return effect.round + effect.dur - 1 >= atRound;
+  return true;
 }
 
-function nameTag(name) {
-  return `[ ${name} ]`;
-}
-
-function findCharacter(battle, name) {
-  if (!battle || !name) return null;
-  return (battle.allCharacters || []).find(c => c && c.name === name) || null;
-}
-
-function laneOf(battle, name) {
-  const character = findCharacter(battle, name);
-  return character ? (character.positionName || SLOT_NAMES[character.slotPosition] || '') : '';
-}
-
-function laneSuffix(battle, name) {
-  const lane = laneOf(battle, name);
-  return lane ? ` (${lane})` : '';
-}
-
-function fromPhrase(battle, source, target) {
-  if (!source) return '';
-  if (source === target) return 'from itself';
-  return `from ${nameTag(source)}${laneSuffix(battle, source)}`;
-}
-
-function vanguardTitle(battle, actorName) {
-  const character = findCharacter(battle, actorName);
-  if (!character) return 'Vanguard';
-  return character.vanguardName || VANGUARD_NAMES[character.id] || 'Vanguard';
-}
-
-function cleanSkillName(skillName) {
-  return String(skillName || '').replace(/\s*\(Vanguard\)$/i, '').trim();
-}
-
-function isVanguardSkill(battle, actor, skillName) {
-  const clean = cleanSkillName(skillName);
-  if (!clean || /^Vanguard$/i.test(clean)) return true;
-  const title = vanguardTitle(battle, actor);
-  if (title && title.toLowerCase() === clean.toLowerCase()) return true;
-  return Object.values(VANGUARD_NAMES).some(name => name.toLowerCase() === clean.toLowerCase());
-}
-
-function splitTarget(battle, raw) {
-  const text = String(raw || '').trim();
-  const names = ((battle && battle.allCharacters) || [])
-    .map(c => c && c.name)
-    .filter(Boolean)
-    .sort((a, b) => b.length - a.length);
-  for (const name of names) {
-    if (text === name) return { name, rest: '' };
-    if (text.startsWith(`${name} `)) return { name, rest: text.slice(name.length).trim() };
-  }
-  const match = text.match(/^([A-Za-z][A-Za-z'-]*)(?:\s+(.*))?$/);
-  return { name: match ? match[1] : text, rest: (match && match[2]) || '' };
-}
-
-function kitList(character) {
-  if (!character) return [];
-  return [
-    ...(character.parsedHabits || []),
-    character.commandKit,
-    character.vanguardKit
-  ].filter(Boolean);
-}
-
-function kitMatches(character, habit, skill) {
-  const want = cleanSkillName(skill).toLowerCase();
-  if (!want) return false;
-  const names = [
-    habit && habit.name,
-    habit && habit.name && String(habit.name).replace(/ Vanguard$/i, ''),
-    character && character.commandName,
-    character && character.vanguardName,
-    character && VANGUARD_NAMES[character.id]
-  ];
-  return names.some(name => name && String(name).toLowerCase() === want);
-}
-
-function basePctFor(battle, sourceName, skill, statLabel) {
-  const character = findCharacter(battle, sourceName);
-  const key = STAT_KEYS[statLabel] || String(statLabel || '').toLowerCase().replace(/\s+/g, '_');
-  if (!character || !key) return null;
-  const rankIndex = Math.max(0, Math.min(4, (character.habitRank || 1) - 1));
-  for (const habit of kitList(character)) {
-    if (!kitMatches(character, habit, skill)) continue;
-    const blocks = habit.blocks || habit.structured || [];
-    for (const block of blocks) {
-      for (const action of block.actions || []) {
-        for (const mod of action.mods || []) {
-          if (mod.stat !== key) continue;
-          const arr = mod.fixed != null ? mod.fixed : mod.pct;
-          if (Array.isArray(arr)) return arr[rankIndex];
-          if (typeof arr === 'number') return arr;
-        }
+export function snapshotFor(effects, name, atRound, beforeSeq) {
+  const seen = new Set();
+  const out = [];
+  const stackAt = {};
+  for (const effect of effects) {
+    if (effect.target !== name) continue;
+    if (effect.seq >= beforeSeq) continue;
+    if (!stillActive(effect, atRound)) continue;
+    if (isStackMag(effect.mag)) {
+      const key = [effect.target, effect.skill, effect.source, 'stack'].join('|');
+      if (stackAt[key] != null) {
+        out[stackAt[key]] = effect;
+        continue;
       }
+      stackAt[key] = out.length;
+      seen.add(key);
+      out.push(effect);
+      continue;
+    }
+    const key = effectKey(effect);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(effect);
+  }
+  return out;
+}
+
+export function minSeq(bucket, effects, name, round) {
+  let min = Infinity;
+  for (const action of bucket.actions || []) {
+    if (action.effect) min = Math.min(min, action.effect.seq);
+  }
+  for (const effect of effects) {
+    if (effect.source === name && effect.round === round && effect.turn) {
+      min = Math.min(min, effect.seq);
     }
   }
-  return null;
+  return min;
 }
 
-function signedPct(value) {
-  const amount = Number(value);
-  if (Number.isNaN(amount)) return String(value);
-  const rounded = Math.round(amount * 100) / 100;
-  if (rounded > 0) return `+${rounded}%`;
-  return `${rounded}%`;
+export function formatEffect(battle, effect) {
+  return `  ${nameTag(effect.target)} is under the effect of ${nameTag(effect.skill)} ${fromPhrase(battle, effect.source, effect.target)}. ${effect.mag}`;
 }
 
-function stackMag(battle, sourceName, skill, stackName, count) {
-  const base = count === 1 ? `1 stack of ${stackName}` : `${count} stacks of ${stackName}`;
-  const character = findCharacter(battle, sourceName);
-  if (!character) return base;
-  const rankIndex = Math.max(0, Math.min(4, (character.habitRank || 1) - 1));
-  const want = String(stackName || '').toLowerCase().replace(/\s+/g, '_');
-  const parts = [];
-  for (const habit of kitList(character)) {
-    if (!kitMatches(character, habit, skill) && String(habit && habit.name || '').toLowerCase() !== String(skill || '').toLowerCase()) continue;
-    for (const block of habit.blocks || habit.structured || []) {
-      for (const action of block.actions || []) {
-        if (action.t !== 'stack') continue;
-        const id = String(action.id || '').toLowerCase();
-        if (id && id !== want) continue;
-        for (const mod of action.mods || []) {
-          const arr = mod.fixed != null ? mod.fixed : mod.pct;
-          const per = Array.isArray(arr) ? arr[rankIndex] : arr;
-          if (typeof per !== 'number') continue;
-          const label = STAT_LABELS[mod.stat] || mod.stat;
-          const total = per * count;
-          const basic = action.excludeBasic || mod.excludeBasic ? ' (excluding Basic Attacks)' : '';
-          if (mod.fixed != null) {
-            parts.push(`${total > 0 ? '+' : ''}${total} ${label}${basic}`);
-          } else {
-            parts.push(`${signedPct(total)} ${label}${basic}`);
+export function groupActions(actions) {
+  const groups = [];
+  let current = null;
+  for (const action of actions || []) {
+    if (action.type === 'uses') {
+      current = { skill: action.skill, actor: action.actor, extra: action.extra, items: [] };
+      groups.push(current);
+      continue;
+    }
+    if (!current) {
+      current = { skill: action.skill || 'effect', actor: action.actor, items: [] };
+      groups.push(current);
+    }
+    current.items.push(action);
+  }
+  return groups;
+}
+
+export function orderForRound(pack) {
+  if (pack.turnOrder && pack.turnOrder.length) return pack.turnOrder;
+  return (pack.actors || []).map(actor => actor.name);
+}
+
+export function formatBattleReport(battle, formationText) {
+  const parsed = parseLog(battle);
+  const hp = {};
+  for (const character of battle.allCharacters || []) {
+    hp[character.name] = Math.round(character.maxHealth);
+  }
+
+  const applyDamage = (name, amount) => {
+    hp[name] = Math.max(0, (hp[name] || 0) - amount);
+    return hp[name];
+  };
+  const applyHeal = (name, amount) => {
+    const character = findCharacter(battle, name);
+    const cap = character ? Math.round(character.maxHealth) : 99999;
+    hp[name] = Math.min(cap, (hp[name] || 0) + amount);
+    return hp[name];
+  };
+
+  const out = [];
+  out.push(formationText || '');
+  out.push(BAR);
+  out.push('• Preparations');
+  out.push(DASH);
+  out.push('Any special global effects will be listed here, such as effects from City Upgrades, Boosts, etc.');
+  out.push(BAR);
+  out.push('Combat Phase (The Battle Itself)');
+  out.push(DASH);
+  out.push('Every action in each round of the battle is listed here, in the order they happened.');
+  out.push(DASH);
+
+  for (const pack of parsed.rounds) {
+    const order = orderForRound(pack);
+    out.push(BAR);
+    out.push(`• Round ${pack.number}`);
+    out.push(BAR);
+    if (order.length) out.push(`Turn order: ${order.join(' → ')}`);
+    for (const name of order) {
+      const bucket = pack.actors.find(a => a.name === name) || { name, actions: [], cannot: null };
+      const cut = minSeq(bucket, parsed.effects, name, pack.number);
+      out.push(DASH);
+      out.push(`${nameTag(name)}${laneSuffix(battle, name)}:`);
+      out.push(DASH);
+      for (const effect of snapshotFor(parsed.effects, name, pack.number, cut)) {
+        out.push(formatEffect(battle, effect));
+      }
+      if (bucket.cannot) out.push(`  ${name} cannot ${bucket.cannot}`);
+
+      for (const group of groupActions(bucket.actions)) {
+        const damages = group.items.filter(item => item.type === 'damage');
+        const recovers = group.items.filter(item => item.type === 'recover');
+        const rolls = group.items.filter(item => item.type === 'roll');
+        const fx = group.items.filter(item => item.type === 'effect');
+
+        for (const roll of rolls) {
+          out.push(`  [${roll.result}] ${roll.skill} → ${roll.target} (${roll.chance})`);
+        }
+
+        if (recovers.length) {
+          for (const heal of recovers) {
+            const left = applyHeal(heal.target, heal.amount);
+            out.push(`  ${nameTag(heal.actor)} uses [ ${heal.skill} ].`);
+            out.push(`  ${nameTag(heal.target)} is under the effect of [ ${heal.skill} ] ${fromPhrase(battle, heal.actor, heal.target)}.`);
+            out.push(`  ${heal.detail}. +${heal.amount} Troop gained.`);
+            out.push(`  ${nameTag(heal.target)} recovers ${heal.amount} troops (${left} remaining).`);
           }
+        } else if (damages.length) {
+          for (const hit of damages) {
+            const left = applyDamage(hit.target, hit.amount);
+            const atk = hit.skill || group.skill || 'Basic Attack';
+            out.push(`  ${nameTag(hit.actor || name)} uses [ ${atk} ] to attack ${nameTag(hit.target)}${laneSuffix(battle, hit.target)}.`);
+            out.push(`  Deals ${hit.amount} ${hit.dtype} against ${nameTag(hit.target)}.`);
+            out.push(`  ${nameTag(hit.target)} takes ${hit.amount} losses (${left} remaining).`);
+          }
+        } else if (fx.length) {
+          const targets = [];
+          for (const item of fx) {
+            if (!targets.includes(item.effect.target)) targets.push(item.effect.target);
+          }
+          const list = targets.map(target => `${nameTag(target)}${laneSuffix(battle, target)}`).join(', ');
+          out.push(`  ${nameTag(name)} activates [ ${group.skill} ] affecting ${list}.`);
+          const mags = fx.map(item => item.effect.mag).filter((mag, index, arr) => arr.indexOf(mag) === index);
+          if (mags.length) out.push(`  ${mags.join(' ')}`);
+        } else if (group.skill && group.skill !== 'Basic Attack') {
+          out.push(`  ${nameTag(name)} activates [ ${group.skill} ].`);
         }
-        if (parts.length) return `${base} (${parts.join(', ')})`;
       }
     }
+
+    if (pack.ticks && pack.ticks.length) {
+      for (const heal of pack.ticks) {
+        const left = applyHeal(heal.target, heal.amount);
+        out.push(`  ${nameTag(heal.target)} is under the effect of [ Recovery ] from itself. ${heal.detail}. +${heal.amount} Troop gained.`);
+        out.push(`  ${nameTag(heal.target)} recovers ${heal.amount} troops (${left} remaining).`);
+      }
+    }
+
+    const roster = lastTeamSnapshot(pack.roster);
+    if (roster.length) {
+      out.push(BAR);
+      for (const row of roster) out.push(`  ${row}`);
+    }
   }
-  return base;
-}
 
-function isStackMag(mag) {
-  return /\d+ stacks? of /.test(String(mag || ''));
-}
+  if (parsed.endKind) {
+    out.push(BAR);
+    out.push(parsed.endKind === 'stalemate' ? 'Stalemate' : 'Combat End');
+    out.push(BAR);
+    if (parsed.endKind === 'stalemate') {
+      out.push('  Maximum 10 rounds reached');
+      out.push('  Draw');
+    }
+    out.push('  Final Status:');
+    const last = parsed.rounds[parsed.rounds.length - 1];
+    const roster = last ? lastTeamSnapshot(last.roster) : [];
+    for (const row of roster) out.push(`  ${row}`);
+  }
 
-function scaledByStat(character, base, by) {
-  if (base == null || !character || !by) return null;
-  const key = ENHANCE_STAT[by];
-  if (!key || typeof character.getModifiedStat !== 'function') return null;
-  return Math.round(Number(base) * (1 + character.getModifiedStat(key) / 100) * 100) / 100;
+  return out.filter((line, index) => !(line === '' && index === 0)).join('\n');
 }

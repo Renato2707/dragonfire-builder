@@ -1,6 +1,8 @@
 // Official: "if the target Ally retreated in the previous round".
 // battle.js also treats a dead linked ally as retreated every later round.
 export function applyLinkedRetreated(Battle) {
+  if (Battle.prototype.__linkedRetreatedHook) return;
+  Battle.prototype.__linkedRetreatedHook = true;
   const original = Battle.prototype.blockAllowed;
   Battle.prototype.blockAllowed = function (character, block) {
     const req = block && block.requires;
