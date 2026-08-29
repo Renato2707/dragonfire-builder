@@ -153,30 +153,34 @@ export function stackMag(battle, sourceName, skill, stackName, count) {
   if (!character) return base;
   const rankIndex = Math.max(0, Math.min(4, (character.habitRank || 1) - 1));
   const want = String(stackName || '').toLowerCase().replace(/\s+/g, '_');
-  const parts = [];
-  for (const habit of kitList(character)) {
-    if (!kitMatches(character, habit, skill) && String(habit && habit.name || '').toLowerCase() !== String(skill || '').toLowerCase()) continue;
-    for (const block of habit.blocks || habit.structured || []) {
-      for (const action of block.actions || []) {
-        if (action.t !== 'stack') continue;
-        const id = String(action.id || '').toLowerCase();
-        if (id && id !== want) continue;
-        for (const mod of action.mods || []) {
-          const arr = mod.fixed != null ? mod.fixed : mod.pct;
-          const per = Array.isArray(arr) ? arr[rankIndex] : arr;
-          if (typeof per !== 'number') continue;
-          const label = STAT_LABELS[mod.stat] || mod.stat;
-          const total = per * count;
-          const basic = action.excludeBasic || mod.excludeBasic ? ' (excluding Basic Attacks)' : '';
-          if (mod.fixed != null) {
-            parts.push(`${total > 0 ? '+' : ''}${total} ${label}${basic}`);
-          } else {
-            parts.push(`${signedPct(total)} ${label}${basic}`);
+  const collect = (requireSkill) => {
+    const parts = [];
+    for (const habit of kitList(character)) {
+      const nameMatch = String(habit && habit.name || '').toLowerCase() === String(skill || '').toLowerCase();
+      if (requireSkill && !kitMatches(character, habit, skill) && !nameMatch) continue;
+      for (const block of habit.blocks || habit.structured || []) {
+        for (const action of block.actions || []) {
+          if (action.t !== 'stack') continue;
+          const id = String(action.id || '').toLowerCase();
+          if (id && id !== want) continue;
+          for (const mod of action.mods || []) {
+            const arr = mod.fixed != null ? mod.fixed : mod.pct;
+            const per = Array.isArray(arr) ? arr[rankIndex] : arr;
+            if (typeof per !== 'number') continue;
+            const label = STAT_LABELS[mod.stat] || mod.stat;
+            const total = per * count;
+            const basic = action.excludeBasic || mod.excludeBasic ? ' (excluding Basic Attacks)' : '';
+            if (mod.fixed != null) {
+              parts.push(`${total > 0 ? '+' : ''}${total} ${label}${basic}`);
+            } else {
+              parts.push(`${signedPct(total)} ${label}${basic}`);
+            }
           }
+          if (parts.length) return `${base} (${parts.join(', ')})`;
         }
-        if (parts.length) return `${base} (${parts.join(', ')})`;
       }
     }
-  }
-  return base;
+    return null;
+  };
+  return collect(true) || collect(false) || base;
 }
