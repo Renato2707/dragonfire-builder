@@ -100,7 +100,7 @@ export function lastTeamSnapshot(rows) {
 }
 
 export function parseRecoveryLine(battle, actor, skill, raw) {
-  const split = splitTarget(battle, actor && raw);
+  const split = splitTarget(battle, raw);
   const caster = findCharacter(battle, actor);
   const rate = skill && skill !== 'Basic Attack' ? healRateOf(caster, skill) : null;
   const amount = Number((split.rest.match(/\+?(\d+)\s+Troop Capacity/i) || [])[1] || 0);
