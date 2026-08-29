@@ -3,19 +3,15 @@
 import { loadDragons, getDragon, getAllDragons } from './data.js';
 import { Character, SLOT_NAMES, DEFAULT_LEVEL, DEFAULT_STARS, DEFAULT_HABIT_RANK } from './character.js';
 import { Battle } from './battle.js';
-import { applyInitiativeOrder } from './hook-initiative-order.js';
 import { applyVanguardLabel } from './hook-vanguard-label.js';
-import { applyLinkedRetreated } from './hook-linked-retreated.js';
-import { applyRetreatedPerTarget } from './hook-retreated-per-target.js';
+import { applyEngineHooks } from './hook-engine.js';
 import { loadDragonHabitsSync, loadCommandSync } from './habitParser.js';
 import { troopAdvantageSign, TROOP_ADVANTAGE_PCT } from './troopAdvantage.js';
 import { VANGUARD_NAMES } from './vanguardNames.js';
 import { formatBattleReport } from './reportFormat.js';
 
-applyInitiativeOrder(Battle);
+applyEngineHooks(Battle);
 applyVanguardLabel(Battle);
-applyLinkedRetreated(Battle);
-applyRetreatedPerTarget(Battle);
 
 const SLOTS = [0, 1, 2];
 const BAR = '═'.repeat(55);

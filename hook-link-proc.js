@@ -1,5 +1,5 @@
 // dealDamage notifies on_link_proc before the caller logs "Deals …".
-// Defer tactical procs until after that Deals line, without scanning log text.
+// Queue tactical procs while a Deals line is being written, then flush.
 export function applyLinkProcOrder(Battle) {
   if (Battle.prototype.__linkProcOrderHook) return;
   Battle.prototype.__linkProcOrderHook = true;
@@ -21,7 +21,7 @@ export function applyLinkProcOrder(Battle) {
     for (const [source, event] of pending) origNotify.call(this, source, event);
   };
 
-  function withDeferredTactical(battle, fn) {
+  function afterDeals(battle, fn) {
     const prev = battle._deferLinkProc;
     battle._deferLinkProc = true;
     try {
@@ -33,23 +33,15 @@ export function applyLinkProcOrder(Battle) {
     }
   }
 
-  const origDeal = Battle.prototype.dealDamage;
-  Battle.prototype.dealDamage = function () {
-    if (this._deferLinkProc) return origDeal.apply(this, arguments);
-    return withDeferredTactical(this, () => origDeal.apply(this, arguments));
-  };
-
   const origLogResult = Battle.prototype.logActionResult;
   Battle.prototype.logActionResult = function (character, habit, raw) {
-    if (raw && raw.t === 'dmg') {
-      return withDeferredTactical(this, () => origLogResult.apply(this, arguments));
-    }
+    if (raw && raw.t === 'dmg') return afterDeals(this, () => origLogResult.apply(this, arguments));
     return origLogResult.apply(this, arguments);
   };
 
   const origBasic = Battle.prototype.executeBasicAttack;
   Battle.prototype.executeBasicAttack = function () {
-    return withDeferredTactical(this, () => origBasic.apply(this, arguments));
+    return afterDeals(this, () => origBasic.apply(this, arguments));
   };
 
   const origAct = Battle.prototype.executeCharacterAction;
