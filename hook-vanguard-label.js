@@ -4,6 +4,8 @@ import { PHASES } from './habitParser.js';
 import { applyLinkedRetreated } from './hook-linked-retreated.js';
 import { applyRetreatedPerTarget } from './hook-retreated-per-target.js';
 import { applyAfterBasicTarget } from './hook-after-basic-target.js';
+import { applyLinkProcOrder } from './hook-link-proc.js';
+import { applyRateFieldStackBonus } from './hook-ratefield-stacks.js';
 
 export function applyVanguardLabel(Battle) {
   Battle.prototype.executeVanguard = function (character) {
@@ -19,4 +21,6 @@ export function applyVanguardLabel(Battle) {
   applyLinkedRetreated(Battle);
   applyRetreatedPerTarget(Battle);
   applyAfterBasicTarget(Battle);
+  applyLinkProcOrder(Battle);
+  applyRateFieldStackBonus(Battle);
 }
