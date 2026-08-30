@@ -13,6 +13,12 @@ function hasStatus(character, statusName) {
   });
 }
 
+function getStat(character, stat) {
+  if (!character) return 0;
+  if (typeof character.getModifiedStat === 'function') return character.getModifiedStat(stat);
+  return (character.stats && character.stats[stat]) || 0;
+}
+
 function preferStatusOf(tgt) {
   if (!tgt) return null;
   if (tgt.preferStatus) return String(tgt.preferStatus).toLowerCase().replace(/-/g, '_');
@@ -21,7 +27,19 @@ function preferStatusOf(tgt) {
   return null;
 }
 
+function lowestStatOf(tgt) {
+  const select = String((tgt && tgt.select) || '');
+  const match = select.match(/^lowest:?(str|int|inst|init)$/i);
+  return match ? match[1].toLowerCase() : null;
+}
+
+function wantsLeastTroops(tgt) {
+  const select = String((tgt && tgt.select) || '').toLowerCase();
+  return select === 'least_troops' || select === 'lowest_troops' || select === 'lowest:troops';
+}
+
 // tgt.hpAbove / hpBelow / hpAtLeast + preferStatus (Wild Hunt prioritize Prey).
+// lowest:stat + least_troops (Vermithor Vengeful Fury / Bronze Bulwark).
 export function applyTargetFilters(Battle) {
   if (Battle.prototype.__targetFiltersHook) return;
   Battle.prototype.__targetFiltersHook = true;
@@ -61,6 +79,21 @@ export function applyTargetFilters(Battle) {
     if (tgt.hpBelow != null) {
       const ceil = Number(tgt.hpBelow);
       targets = targets.filter(c => healthPct(c) < ceil);
+    }
+    const lowStat = lowestStatOf(tgt);
+    if (lowStat && targets.length > 1) {
+      targets = targets.slice().sort((a, b) => getStat(a, lowStat) - getStat(b, lowStat));
+      const n = tgt.count == null || tgt.count === 'all' ? targets.length : Number(tgt.count);
+      targets = targets.slice(0, n);
+    }
+    if (wantsLeastTroops(tgt) && targets.length > 1) {
+      targets = targets.slice().sort((a, b) => {
+        const diff = (Number(a.currentHealth) || 0) - (Number(b.currentHealth) || 0);
+        if (diff) return diff;
+        return (a.slotPosition || 0) - (b.slotPosition || 0);
+      });
+      const n = tgt.count == null || tgt.count === 'all' ? targets.length : Number(tgt.count);
+      targets = targets.slice(0, n);
     }
     return targets;
   };
