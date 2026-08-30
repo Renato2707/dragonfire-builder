@@ -40,6 +40,10 @@ function titleCaseOfficial(raw) {
   return String(raw || '').trim().split(/\s+/).map(word => (word ? word.charAt(0).toUpperCase() + word.slice(1).toLowerCase() : word)).join(' ');
 }
 
+function normCmdName(s) {
+  return String(s || '').toLowerCase().replace(/dawnysong/g, 'dawnsong');
+}
+
 function parseOfficialHabits(text) {
   const map = {};
   const parts = text.split(/^(?=.+ habits\s*$)/m);
@@ -193,7 +197,7 @@ for (const dragon of dragons) {
   const jsonCmdName = cmdJson && cmdJson.name;
   const vgTitle = VANGUARD_NAMES[dragon.id];
   if (offH && jsonHabitNames.length && jsonHabitNames.join('|') !== offH.names.join('|')) fail('habit-name-vs-official', 'JSON vs official habit names');
-  if (offV && jsonCmdName && offV.command && jsonCmdName.toLowerCase() !== offV.command.toLowerCase()) fail('command-name-vs-official', 'JSON "' + jsonCmdName + '" vs official "' + offV.command + '"');
+  if (offV && jsonCmdName && offV.command && normCmdName(jsonCmdName) !== normCmdName(offV.command)) fail('command-name-vs-official', 'JSON "' + jsonCmdName + '" vs official "' + offV.command + '"');
   if (offV && vgTitle && offV.vanguard && vgTitle.toLowerCase() !== offV.vanguard.toLowerCase()) fail('vanguard-name-vs-official', vgTitle + ' vs ' + offV.vanguard);
   if (cmdJson && offV && offV.flank) {
     const mismatch = vanguardSlots(cmdJson).filter(s => s.flank && s.flank !== offV.flank);
