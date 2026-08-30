@@ -1,4 +1,5 @@
 import fs from 'fs';
+import path from 'path';
 import { Character } from './character.js';
 import { Battle } from './battle.js';
 import { applyInitiativeOrder } from './hook-initiative-order.js';
@@ -13,8 +14,25 @@ applyVanguardLabel(Battle);
 Math.random = () => 0;
 
 const DATA_DIR = './data';
-const OFFICIAL_HABITS = '/workspace/official/Habits.txt';
-const OFFICIAL_VANGUARD = '/workspace/official/Vanguard and Commands.txt';
+const REPORT_DIR = './tmp/kit-reports';
+
+function firstExisting(candidates) {
+  for (const candidate of candidates) {
+    if (candidate && fs.existsSync(candidate)) return candidate;
+  }
+  return candidates[0];
+}
+
+const OFFICIAL_HABITS = firstExisting([
+  './Habits.txt',
+  path.join('official', 'Habits.txt'),
+  '/workspace/official/Habits.txt'
+]);
+const OFFICIAL_VANGUARD = firstExisting([
+  './Vanguard and Commands.txt',
+  path.join('official', 'Vanguard and Commands.txt'),
+  '/workspace/official/Vanguard and Commands.txt'
+]);
 const SKIP = new Set(['starshower', 'vermithor']);
 const SLOT_FLANK = { 0: 'left', 2: 'right' };
 
@@ -150,7 +168,7 @@ const officialHabits = parseOfficialHabits(fs.readFileSync(OFFICIAL_HABITS, 'utf
 const officialVanguard = parseOfficialVanguard(fs.readFileSync(OFFICIAL_VANGUARD, 'utf8'));
 const dragonsFile = JSON.parse(fs.readFileSync(DATA_DIR + '/dragons.json', 'utf8'));
 const dragons = (dragonsFile.dragons || []).slice().sort((a, b) => a.id.localeCompare(b.id));
-fs.mkdirSync('/tmp/kit-reports', { recursive: true });
+fs.mkdirSync(REPORT_DIR, { recursive: true });
 const results = [];
 
 for (const dragon of dragons) {
@@ -204,7 +222,7 @@ for (const dragon of dragons) {
     for (let i = 0; i < 10; i += 1) { if (battle.isFinished) break; battle.runRound(); }
     maxRound = battle.currentRound || 0;
     report = formatBattleReport(battle, 'Troop Formation');
-    fs.writeFileSync('/tmp/kit-reports/' + dragon.id + '.txt', report);
+    fs.writeFileSync(path.join(REPORT_DIR, dragon.id + '.txt'), report);
     row.notes.push('rounds=' + maxRound);
   } catch (err) { fail('sim-error', err.message); results.push(row); continue; }
   if (vgTitle) { if (!report.includes(vgTitle)) fail('vanguard-title-missing', vgTitle); } else fail('vanguard-title-missing', 'no VANGUARD_NAMES entry');
@@ -228,6 +246,8 @@ for (const dragon of dragons) {
 
 const summary = { generated: new Date().toISOString(), skipped: ['starshower', 'vermithor'], totals: { reviewed: results.length, pass: results.filter(r => r.pass).length, fail: results.filter(r => !r.pass).length }, results };
 fs.writeFileSync('./kit-review.json', JSON.stringify(summary, null, 2));
+console.log('official habits: ' + OFFICIAL_HABITS);
+console.log('official vanguard: ' + OFFICIAL_VANGUARD);
 console.log('reviewed=' + summary.totals.reviewed + ' pass=' + summary.totals.pass + ' fail=' + summary.totals.fail);
 for (const row of results) {
   const mark = row.pass ? 'PASS' : 'FAIL';
