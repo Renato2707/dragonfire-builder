@@ -15,7 +15,7 @@ Math.random = () => 0;
 const DATA_DIR = './data';
 const OFFICIAL_HABITS = '/workspace/official/Habits.txt';
 const OFFICIAL_VANGUARD = '/workspace/official/Vanguard and Commands.txt';
-const SKIP = new Set(['antares', 'arrax']);
+const SKIP = new Set(['starshower', 'vermithor']);
 const SLOT_FLANK = { 0: 'left', 2: 'right' };
 
 function titleCaseOfficial(raw) {
@@ -97,7 +97,6 @@ function describeGate(habit, maxRound) {
       const chance = actionChance(action);
       const cond = actionConditional(action);
       const tgt = action.tgt || {};
-      const select = String(tgt.select || '');
       const hpGate = tgt.hpBelow != null || tgt.hpAtLeast != null;
       const silent = action.t === 'mod_command' || action.t === 'copy_status';
       if (lateOnly) reasons.push(habit.name + ': rounds after last played ' + maxRound);
@@ -227,7 +226,7 @@ for (const dragon of dragons) {
   results.push(row);
 }
 
-const summary = { generated: new Date().toISOString(), skippedPassed: ['antares', 'arrax'], totals: { reviewed: results.length, pass: results.filter(r => r.pass).length, fail: results.filter(r => !r.pass).length }, results };
+const summary = { generated: new Date().toISOString(), skipped: ['starshower', 'vermithor'], totals: { reviewed: results.length, pass: results.filter(r => r.pass).length, fail: results.filter(r => !r.pass).length }, results };
 fs.writeFileSync('./kit-review.json', JSON.stringify(summary, null, 2));
 console.log('reviewed=' + summary.totals.reviewed + ' pass=' + summary.totals.pass + ' fail=' + summary.totals.fail);
 for (const row of results) {
