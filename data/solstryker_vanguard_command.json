@@ -10,14 +10,14 @@
           "t": "dmg",
           "dt": "physical",
           "pct": 30,
-          "tgt": { "side": "enemy", "count": 1, "select": "same_lane" }
+          "tgt": { "side": "enemy", "count": 1, "select": "last_basic" }
         },
         {
           "t": "mod",
           "mods": [{ "stat": "physical_dealt", "pct": -12 }],
           "dur": 2,
           "chance": 20,
-          "tgt": { "side": "enemy", "count": 1, "select": "same_lane" }
+          "tgt": { "side": "enemy", "count": 1, "select": "last_basic" }
         }
       ]
     },
