@@ -11,24 +11,9 @@
       "duration": "1 Round",
       "scalingRaw": "<75%: -5% | -6% | -7% | -8.5% | -10% ; <50%: -10% | -12% | -14% | -17% | -20% ; <25%: -15% | -18% | -21% | -25.5% | -30%",
       "scaling": [
-        {
-          "label": "<75%",
-          "values": [-5, -6, -7, -8.5, -10],
-          "unit": "%",
-          "fixed": false
-        },
-        {
-          "label": "<50%",
-          "values": [-10, -12, -14, -17, -20],
-          "unit": "%",
-          "fixed": false
-        },
-        {
-          "label": "<25%",
-          "values": [-15, -18, -21, -25.5, -30],
-          "unit": "%",
-          "fixed": false
-        }
+        { "label": "<75%", "values": [-5, -6, -7, -8.5, -10], "unit": "%", "fixed": false },
+        { "label": "<50%", "values": [-10, -12, -14, -17, -20], "unit": "%", "fixed": false },
+        { "label": "<25%", "values": [-15, -18, -21, -25.5, -30], "unit": "%", "fixed": false }
       ],
       "description": "Start of each round: reduce Fire Damage Received of allies below 75% HP until end of round. Doubled below 50%, tripled below 25%. Bands are exclusive.",
       "structured": [
@@ -68,18 +53,8 @@
       "duration": "Whole Combat",
       "scalingRaw": "INST: 18% | 21.6% | 25.2% | 30.6% | 36% ; INIT: 9% | 10.8% | 12.6% | 15.3% | 18%",
       "scaling": [
-        {
-          "label": "INST",
-          "values": [18, 21.6, 25.2, 30.6, 36],
-          "unit": "%",
-          "fixed": false
-        },
-        {
-          "label": "INIT",
-          "values": [9, 10.8, 12.6, 15.3, 18],
-          "unit": "%",
-          "fixed": false
-        }
+        { "label": "INST", "values": [18, 21.6, 25.2, 30.6, 36], "unit": "%", "fixed": false },
+        { "label": "INIT", "values": [9, 10.8, 12.6, 15.3, 18], "unit": "%", "fixed": false }
       ],
       "description": "Start of Combat: Increase Instinct and Initiative of the Ally with the highest Instinct (both enhanced by Strength) until the end of combat.",
       "structured": [
@@ -111,15 +86,36 @@
       "duration": "Whole Combat",
       "scalingRaw": "Chance: 50% | 60% | 70% | 85% | 100%",
       "scaling": [
-        {
-          "label": "Chance",
-          "values": [50, 60, 70, 85, 100],
-          "unit": "%",
-          "fixed": false
-        }
+        { "label": "Chance", "values": [50, 60, 70, 85, 100], "unit": "%", "fixed": false }
       ],
-      "description": "Start of Combat: for each enemy Fire dealer, chance to gain 1 Rallying Flame (max 4, +5% Physical Dealt) and chance to grant 1 Spreading Blaze to 1 Tactical ally (max 10, +2.5% Tactical Dealt).",
+      "description": "Start of Combat: 50% Rallying Flame on self and 50% Spreading Blaze on 1 Tactical ally. Repeat each chance per enemy Fire dealer.",
       "structured": [
+        {
+          "phase": "combat_start",
+          "rounds": [1],
+          "actions": [
+            {
+              "t": "stack",
+              "id": "rallying_flame",
+              "stacks": 1,
+              "maxStacks": 4,
+              "chance": [50, 60, 70, 85, 100],
+              "mods": [{ "stat": "physical_dealt", "pct": 5 }],
+              "dur": "combat",
+              "tgt": { "side": "self" }
+            },
+            {
+              "t": "stack",
+              "id": "spreading_blaze",
+              "stacks": 1,
+              "maxStacks": 10,
+              "chance": [50, 60, 70, 85, 100],
+              "mods": [{ "stat": "tactical_dealt", "pct": 2.5 }],
+              "dur": "combat",
+              "tgt": { "side": "ally", "count": 1, "select": "dealer:tactical" }
+            }
+          ]
+        },
         {
           "phase": "combat_start",
           "rounds": [1],
@@ -159,18 +155,8 @@
       "duration": "Whole Combat",
       "scalingRaw": "DMG_RECEIVED: -5% | -6% | -7% | -8.5% | -10% ; STR: 8.5% | 10.2% | 11.9% | 14.45% | 17%",
       "scaling": [
-        {
-          "label": "DMG_RECEIVED",
-          "values": [-5, -6, -7, -8.5, -10],
-          "unit": "%",
-          "fixed": false
-        },
-        {
-          "label": "STR",
-          "values": [8.5, 10.2, 11.9, 14.45, 17],
-          "unit": "%",
-          "fixed": false
-        }
+        { "label": "DMG_RECEIVED", "values": [-5, -6, -7, -8.5, -10], "unit": "%", "fixed": false },
+        { "label": "STR", "values": [8.5, 10.2, 11.9, 14.45, 17], "unit": "%", "fixed": false }
       ],
       "description": "Start of Combat: Reduce your Damage Received and increase your Strength until the end of combat.",
       "structured": [
@@ -201,12 +187,7 @@
       "duration": "2 Rounds",
       "scalingRaw": "Advantage Chance: 20% | 26% | 32% | 40% | 50%",
       "scaling": [
-        {
-          "label": "Advantage Chance",
-          "values": [20, 26, 32, 40, 50],
-          "unit": "%",
-          "fixed": false
-        }
+        { "label": "Advantage Chance", "values": [20, 26, 32, 40, 50], "unit": "%", "fixed": false }
       ],
       "description": "Start of each round: chance to grant yourself Advantage (+15%) for 2 rounds. Chance 1.5x if Weakened; on hit, remove Weakened.",
       "structured": [
