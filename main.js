@@ -5,6 +5,7 @@ import { Character, SLOT_NAMES, DEFAULT_LEVEL, DEFAULT_STARS, DEFAULT_HABIT_RANK
 import { Battle } from './battle.js';
 import { applyVanguardLabel } from './hook-vanguard-label.js';
 import { applyEngineHooks } from './hook-engine.js';
+import { applyPreparations } from './hook-preparations.js';
 import { loadDragonHabitsSync, loadCommandSync } from './habitParser.js';
 import { troopAdvantageSign, TROOP_ADVANTAGE_PCT } from './troopAdvantage.js';
 import { VANGUARD_NAMES } from './vanguardNames.js';
@@ -49,6 +50,8 @@ async function boot() {
   document.getElementById('teamA-troop').addEventListener('change', onFormationChange);
   document.getElementById('teamB-troop').addEventListener('change', onFormationChange);
   document.getElementById('defending-team').addEventListener('change', onFormationChange);
+  document.getElementById('teamA-prep').addEventListener('input', onFormationChange);
+  document.getElementById('teamB-prep').addEventListener('input', onFormationChange);
   document.getElementById('btnStartBattle').addEventListener('click', startBattle);
   document.getElementById('btnNextRound').addEventListener('click', nextRound);
   document.getElementById('btnReset').addEventListener('click', reset);
@@ -157,6 +160,11 @@ function readTroop(prefix) {
   return document.getElementById(`${prefix}-troop`).value || null;
 }
 
+function readPrep(prefix) {
+  const el = document.getElementById(`${prefix}-prep`);
+  return el ? el.value : '';
+}
+
 function troopLabel(id) {
   const found = TROOP_TYPES.find(troop => troop.id === id);
   return found && found.id ? found.label : '—';
@@ -215,6 +223,7 @@ function formatTroopFormation(battle) {
 function snapshotTeam(prefix) {
   return {
     troop: readTroop(prefix),
+    prep: readPrep(prefix),
     slots: SLOTS.map(slot => ({
       id: document.getElementById(`${prefix}-slot-${slot}`).value || '',
       level: document.getElementById(`${prefix}-level-${slot}`).value,
@@ -227,6 +236,10 @@ function snapshotTeam(prefix) {
 function applyTeam(prefix, data) {
   if (!data) return;
   if (data.troop != null) document.getElementById(`${prefix}-troop`).value = data.troop || '';
+  if (data.prep != null) {
+    const prep = document.getElementById(`${prefix}-prep`);
+    if (prep) prep.value = data.prep;
+  }
   (data.slots || []).forEach((slot, index) => {
     const id = document.getElementById(`${prefix}-slot-${index}`);
     const level = document.getElementById(`${prefix}-level-${index}`);
@@ -288,6 +301,8 @@ function setSlotsDisabled(disabled) {
   document.getElementById('teamA-troop').disabled = disabled;
   document.getElementById('teamB-troop').disabled = disabled;
   document.getElementById('defending-team').disabled = disabled;
+  document.getElementById('teamA-prep').disabled = disabled;
+  document.getElementById('teamB-prep').disabled = disabled;
   SLOTS.forEach(slot => {
     ['teamA', 'teamB'].forEach(prefix => {
       document.getElementById(`${prefix}-slot-${slot}`).disabled = disabled;
@@ -341,6 +356,8 @@ async function startBattle() {
   const teamB = buildTeam('teamB', 1);
   if (teamA.length !== 3 || teamB.length !== 3) return;
   for (const character of [...teamA, ...teamB]) await loadKit(character);
+  applyPreparations(teamA, readPrep('teamA'));
+  applyPreparations(teamB, readPrep('teamB'));
   currentBattle = new Battle(teamA, teamB, {
     teamTroop: [readTroop('teamA'), readTroop('teamB')],
     defendingTeam: Number(document.getElementById('defending-team').value)
@@ -404,7 +421,7 @@ function updateBattleDisplay() {
 function reset() {
   currentBattle = null;
   formationHeader = '';
-  document.getElementById('battleLog').textContent = 'Monte a formação. Tropa do time liga Affinity (+20%) só nos dragões que têm essa tropa.';
+  document.getElementById('battleLog').textContent = 'Monte a formação. Cola as Preparations de cada time.';
   document.getElementById('teamAStatus').innerHTML = '';
   document.getElementById('teamBStatus').innerHTML = '';
   setSlotsDisabled(false);
