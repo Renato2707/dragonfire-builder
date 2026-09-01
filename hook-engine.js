@@ -11,11 +11,13 @@ import { applyExtraStatuses } from './hook-extra-statuses.js';
 import { applySameLaneBasic } from './hook-basic-target.js';
 import { applyDamageTroopScale } from './hook-damage-scale.js';
 import { applyHealFormula } from './hook-heal-formula.js';
+import { applyHealCap } from './hook-heal-cap.js';
 
 export function applyEngineHooks(Battle) {
   if (Battle.prototype.__engineHooks) return;
   Battle.prototype.__engineHooks = true;
   applyExtraStatuses();
+  applyHealCap();
   applyInitiativeOrder(Battle);
   applyLinkedRetreated(Battle);
   applyRetreatedPerTarget(Battle);
