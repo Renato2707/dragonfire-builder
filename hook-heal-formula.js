@@ -1,4 +1,4 @@
-function scaleHealAmount(attacker, target, usedRate) {
+function healAmount(attacker, target, usedRate) {
   const inst = typeof attacker.getModifiedStat === 'function'
     ? attacker.getModifiedStat('inst')
     : 50;
@@ -16,17 +16,14 @@ export function applyHealFormula(Battle) {
   if (Battle.prototype.__healFormula) return;
   Battle.prototype.__healFormula = true;
   const orig = Battle.prototype.logActionResult;
-  if (typeof orig !== 'function') return;
   Battle.prototype.logActionResult = function (character, habit, raw, target, actionResult) {
-    if (raw && raw.t === 'heal' && actionResult && Array.isArray(actionResult.heals)) {
-      const rate = actionResult.heals[0] && actionResult.magnitude != null
-        ? actionResult.magnitude
-        : raw.pct;
+    if (raw && raw.t === 'heal' && actionResult && Array.isArray(actionResult.heals) && target) {
+      const rate = actionResult.magnitude != null ? actionResult.magnitude : raw.pct;
       actionResult.heals = actionResult.heals.map(heal => ({
         ...heal,
-        amount: scaleHealAmount(character, target, rate != null ? rate : 70)
+        amount: healAmount(character, target, rate != null ? rate : 70)
       }));
     }
-    return orig.call(this, character, habit, raw, target, actionResult);
+    return orig.apply(this, arguments);
   };
 }
