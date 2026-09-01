@@ -1,0 +1,8 @@
+.habit-slots {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 4px;
+  margin-top: 6px;
+  grid-column: 2 / -1;
+}
+.habit-slots select { padding: 4px; font-size: 0.72em; }
