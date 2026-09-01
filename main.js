@@ -207,7 +207,18 @@ function formatTeamFormation(title, team, enemyTroop) {
   return lines.join('\n');
 }
 
-function formatTroopFormation(battle) {
+function formatPrepBlock(title, result) {
+  const lines = [title + ' preparations: ' + (result.mods || []).length + ' lines / ' + (result.applied || []).length + ' applied'];
+  if (!(result.applied || []).length) {
+    lines.push('  (none — parser found 0 bonuses)');
+    return lines.join('\n');
+  }
+  result.applied.slice(0, 40).forEach(row => lines.push('  ' + row));
+  if (result.applied.length > 40) lines.push('  …');
+  return lines.join('\n');
+}
+
+function formatTroopFormation(battle, prepA, prepB) {
   return [
     BAR,
     '• Troop Formation',
@@ -216,6 +227,11 @@ function formatTroopFormation(battle) {
     BAR,
     formatTeamFormation('Team A', battle.teamA, teamTroopOf(battle.teamB)),
     formatTeamFormation('Team B', battle.teamB, teamTroopOf(battle.teamA)),
+    BAR,
+    '• Preparations',
+    DASH,
+    formatPrepBlock('Team A', prepA || { mods: [], applied: [] }),
+    formatPrepBlock('Team B', prepB || { mods: [], applied: [] }),
     ''
   ].join('\n');
 }
@@ -356,14 +372,14 @@ async function startBattle() {
   const teamB = buildTeam('teamB', 1);
   if (teamA.length !== 3 || teamB.length !== 3) return;
   for (const character of [...teamA, ...teamB]) await loadKit(character);
-  applyPreparations(teamA, readPrep('teamA'));
-  applyPreparations(teamB, readPrep('teamB'));
+  const prepA = applyPreparations(teamA, readPrep('teamA'));
+  const prepB = applyPreparations(teamB, readPrep('teamB'));
   currentBattle = new Battle(teamA, teamB, {
     teamTroop: [readTroop('teamA'), readTroop('teamB')],
     defendingTeam: Number(document.getElementById('defending-team').value)
   });
   currentBattle.start();
-  formationHeader = formatTroopFormation(currentBattle);
+  formationHeader = formatTroopFormation(currentBattle, prepA, prepB);
   currentBattle.runRound();
   updateBattleDisplay();
   setSlotsDisabled(true);
