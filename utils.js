@@ -1,6 +1,7 @@
 // utils.js
 
 import { troopAdvantageMultiplier } from './troopAdvantage.js';
+import { calculateTroopCapacity } from './troopCapacity.js';
 
 function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -70,10 +71,19 @@ function getDamageTypeConfig(damageType) {
   return type;
 }
 
+const DAMAGE_VARIANCE = 0;
+const TROOP_DAMAGE_REF = 2400;
+
+function attackerTroopCap(attacker) {
+  if (!attacker) return TROOP_DAMAGE_REF;
+  if (attacker.maxHealth > 0 && attacker.level == null) return Number(attacker.maxHealth) || TROOP_DAMAGE_REF;
+  return calculateTroopCapacity(attacker.level, attacker.stars);
+}
+
 function calculateBaseDamage(attacker, damageType) {
   const typeConfig = getDamageTypeConfig(damageType);
   const attackerStat = attacker.getModifiedStat(typeConfig.causedBy);
-  const variance = getRandomInt(-typeConfig.variance, typeConfig.variance);
+  const variance = DAMAGE_VARIANCE ? getRandomInt(-typeConfig.variance, typeConfig.variance) : 0;
   return Math.max(1, Math.round(attackerStat * 1.2 + variance));
 }
 
@@ -105,6 +115,8 @@ function calculateFinalDamage(attacker, defender, damageType, bonusPercent = 0, 
   const mitigation = calculateMitigation(defender, damageType);
   let damageMitigated = applyDamageMultipliers(baseDamage - mitigation, attacker, defender, damageType, options);
   if (bonusPercent) damageMitigated *= (1 + bonusPercent / 100);
+  const cap = attackerTroopCap(attacker);
+  if (cap > 0 && TROOP_DAMAGE_REF > 0) damageMitigated *= cap / TROOP_DAMAGE_REF;
   return Math.max(1, Math.round(damageMitigated));
 }
 
