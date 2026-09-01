@@ -9,7 +9,7 @@ import { applyIfBonusTarget } from './hook-ifbonus-target.js';
 import { applyOnCleanseStack } from './hook-cleanse-positive.js';
 import { applyExtraStatuses } from './hook-extra-statuses.js';
 import { applySameLaneBasic } from './hook-basic-target.js';
-import { applyDamageTroopScale } from './hook-damage-scale.js';
+import { applyPrintDamageScale } from './hook-print-scale.js';
 import { applyHealFormula } from './hook-heal-formula.js';
 import { applyHealCap } from './hook-heal-cap.js';
 
@@ -28,6 +28,6 @@ export function applyEngineHooks(Battle) {
   applyOnCleanseStack(Battle);
   applyLinkProcOrder(Battle);
   applySameLaneBasic(Battle);
-  applyDamageTroopScale(Battle);
+  applyPrintDamageScale(Battle);
   applyHealFormula(Battle);
 }
