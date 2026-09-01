@@ -7,24 +7,24 @@ const STAT_MAP = {
   instinct: 'inst'
 };
 
+const LINE_RE = /\[\s*([^\]]+?)\s*\]\s*\(\s*([+\-\u25b2\u25bc\u2191\u2193\u2197\u2198]?)\s*([0-9]+(?:\.[0-9]+)?)\s*%\s*\)/g;
+
 function norm(s) {
-  return String(s || '').toLowerCase().replace(/['’]/g, '').replace(/[^a-z]+/g, ' ').trim();
+  return String(s || '').toLowerCase().replace(/['\u2019]/g, '').replace(/[^a-z]+/g, ' ').trim();
 }
 
-function signOf(raw) {
-  const text = String(raw || '');
-  if (/[▼▼↓↘-]/.test(text)) return -1;
-  return 1;
+function signOf(mark) {
+  return /[\-\u25bc\u2193\u2198]/.test(String(mark || '')) ? -1 : 1;
 }
 
 export function parsePreparations(text) {
-  const lines = String(text || '').split(/\n+/);
   const mods = [];
-  for (const line of lines) {
-    const match = line.match(/\[\s*([^\]]+?)\s*\]\s*\(([^)]*?)([0-9]+(?:\.[0-9]+)?)\s*%\s*\)/);
-    if (!match) continue;
+  const blob = String(text || '');
+  LINE_RE.lastIndex = 0;
+  let match;
+  while ((match = LINE_RE.exec(blob))) {
     const label = norm(match[1]);
-    const value = signOf(match[2] + line) * Number(match[3]);
+    const value = signOf(match[2]) * Number(match[3]);
     if (!Number.isFinite(value) || !value) continue;
     if (/rss|non player|towns|castles|seats of power/.test(label)) continue;
     if (/^siege /.test(label) && /damage vs/.test(label)) continue;
@@ -75,7 +75,7 @@ export function applyPreparations(team, text) {
     for (const mod of mods) {
       if (!applies(mod, character)) continue;
       character.addStatModifier(mod.stat, mod.value, 'combat');
-      applied.push(character.name + ' ' + mod.stat + ' ' + mod.value + '%');
+      applied.push(character.name + ': ' + mod.raw + ' ' + (mod.value > 0 ? '+' : '') + mod.value + '%');
     }
   }
   return { mods, applied };
