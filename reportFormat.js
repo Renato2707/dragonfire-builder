@@ -86,6 +86,19 @@ export function orderForRound(pack) {
   return (pack.actors || []).map(actor => actor.name);
 }
 
+function formatPrepSide(title, result) {
+  const mods = (result && result.mods) || [];
+  const applied = (result && result.applied) || [];
+  const lines = [`${title} preparations: ${mods.length} lines / ${applied.length} applied`];
+  if (!applied.length) {
+    lines.push('  (none)');
+    return lines;
+  }
+  applied.slice(0, 40).forEach(row => lines.push('  ' + row));
+  if (applied.length > 40) lines.push('  …');
+  return lines;
+}
+
 export function formatBattleReport(battle, formationText) {
   const parsed = parseLog(battle);
   const hp = {};
@@ -105,11 +118,20 @@ export function formatBattleReport(battle, formationText) {
   };
 
   const out = [];
-  out.push(formationText || '');
-  out.push(BAR);
-  out.push('• Preparations');
-  out.push(DASH);
-  out.push('Any special global effects will be listed here, such as effects from City Upgrades, Boosts, etc.');
+  const header = String(formationText || '');
+  out.push(header);
+  if (!/• Preparations/.test(header)) {
+    out.push(BAR);
+    out.push('• Preparations');
+    out.push(DASH);
+    const prep = battle.prepApplied || {};
+    if ((prep.a && prep.a.applied && prep.a.applied.length) || (prep.b && prep.b.applied && prep.b.applied.length)) {
+      formatPrepSide('Team A', prep.a).forEach(line => out.push(line));
+      formatPrepSide('Team B', prep.b).forEach(line => out.push(line));
+    } else {
+      out.push('Any special global effects will be listed here, such as effects from City Upgrades, Boosts, etc.');
+    }
+  }
   out.push(BAR);
   out.push('Combat Phase (The Battle Itself)');
   out.push(DASH);
