@@ -1,6 +1,6 @@
 import { Character } from './character.js';
 
-const HEAL_CAP_FRACTION = 0.12;
+const HEAL_CAP_FRACTION = 0.08;
 
 export function applyHealCap() {
   if (Character.prototype.__healCap) return;
