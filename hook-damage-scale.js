@@ -1,4 +1,4 @@
-const TROOP_DAMAGE_REF = 3750;
+const TROOP_DAMAGE_REF = 2400;
 
 export function applyDamageTroopScale(Battle) {
   if (Battle.prototype.__damageTroopScale) return;
