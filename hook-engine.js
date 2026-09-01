@@ -12,12 +12,14 @@ import { applySameLaneBasic } from './hook-basic-target.js';
 import { applyPrintDamageScale } from './hook-print-scale.js';
 import { applyHealFormula } from './hook-heal-formula.js';
 import { applyHealCap } from './hook-heal-cap.js';
+import { applyHabitRanks } from './hook-habit-rank.js';
 
 export function applyEngineHooks(Battle) {
   if (Battle.prototype.__engineHooks) return;
   Battle.prototype.__engineHooks = true;
   applyExtraStatuses();
   applyHealCap();
+  applyHabitRanks(Battle);
   applyInitiativeOrder(Battle);
   applyLinkedRetreated(Battle);
   applyRetreatedPerTarget(Battle);
