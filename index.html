@@ -36,7 +36,6 @@
             margin-bottom: 10px;
         }
         .slot-row.troop-row { grid-template-columns: 110px minmax(0, 1fr); }
-        .slot-row.cap-row { grid-template-columns: 110px 1fr 1fr 1fr; }
         .slot-row label { font-size: 0.8em; color: #8a8a8a; }
         select, input[type="text"], textarea {
             width: 100%;
@@ -121,7 +120,6 @@
         @media (max-width: 1100px) {
             .battle-section, .setup-section { grid-template-columns: 1fr; }
             .slot-row { grid-template-columns: 90px 1fr 64px 52px 60px; }
-            .slot-row.cap-row { grid-template-columns: 90px 1fr 1fr 1fr; }
             .team-save { grid-template-columns: 1fr 1fr; }
         }
     </style>
@@ -138,12 +136,6 @@
                 <div class="slot-row troop-row">
                     <label for="teamA-troop">Tropa</label>
                     <select id="teamA-troop"></select>
-                </div>
-                <div class="slot-row cap-row">
-                    <label>Cap oficial</label>
-                    <input id="teamA-cap-0" type="text" inputmode="numeric" placeholder="Left" title="Troop Capacity Left" />
-                    <input id="teamA-cap-1" type="text" inputmode="numeric" placeholder="Vanguard" title="Troop Capacity Vanguard" />
-                    <input id="teamA-cap-2" type="text" inputmode="numeric" placeholder="Right" title="Troop Capacity Right" />
                 </div>
                 <div class="slot-row">
                     <label for="teamA-slot-0">Left Flank</label>
@@ -182,12 +174,6 @@
                 <div class="slot-row troop-row">
                     <label for="teamB-troop">Tropa</label>
                     <select id="teamB-troop"></select>
-                </div>
-                <div class="slot-row cap-row">
-                    <label>Cap oficial</label>
-                    <input id="teamB-cap-0" type="text" inputmode="numeric" placeholder="Left" title="Troop Capacity Left" />
-                    <input id="teamB-cap-1" type="text" inputmode="numeric" placeholder="Vanguard" title="Troop Capacity Vanguard" />
-                    <input id="teamB-cap-2" type="text" inputmode="numeric" placeholder="Right" title="Troop Capacity Right" />
                 </div>
                 <div class="slot-row">
                     <label for="teamB-slot-0">Left Flank</label>
@@ -303,8 +289,7 @@
               id: val(prefix + '-slot-' + slot),
               level: val(prefix + '-level-' + slot),
               stars: val(prefix + '-stars-' + slot),
-              habit: val(prefix + '-habit-' + slot),
-              cap: val(prefix + '-cap-' + slot)
+              habit: val(prefix + '-habit-' + slot)
             };
           })
         };
@@ -318,7 +303,6 @@
           setVal(prefix + '-level-' + index, slot.level || '');
           setVal(prefix + '-stars-' + index, slot.stars || '');
           setVal(prefix + '-habit-' + index, slot.habit || '');
-          setVal(prefix + '-cap-' + index, slot.cap || '');
         });
         var first = document.getElementById(prefix + '-slot-0');
         if (first) first.dispatchEvent(new Event('change'));
