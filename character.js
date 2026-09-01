@@ -34,7 +34,8 @@ class Character {
     this.positionName = SLOT_NAMES[slotPosition] || `Slot ${slotPosition}`;
     this.level = options.level != null ? options.level : DEFAULT_LEVEL;
     this.stars = options.stars != null ? options.stars : DEFAULT_STARS;
-    this.maxHealth = this.calculateMaxHealth();
+    const capOverride = Number(options.troopCap);
+    this.maxHealth = capOverride > 0 ? Math.round(capOverride) : this.calculateMaxHealth();
     this.currentHealth = this.maxHealth;
     this.isDead = false;
     this.retreatedLastRound = false;
