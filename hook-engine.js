@@ -8,8 +8,8 @@ import { applyRateFieldStackBonus } from './hook-ratefield-stacks.js';
 import { applyIfBonusTarget } from './hook-ifbonus-target.js';
 import { applyOnCleanseStack } from './hook-cleanse-positive.js';
 import { applyExtraStatuses } from './hook-extra-statuses.js';
+import { applySameLaneBasic } from './hook-basic-target.js';
 
-// Single boot for every engine hook. Each apply* is idempotent.
 export function applyEngineHooks(Battle) {
   if (Battle.prototype.__engineHooks) return;
   Battle.prototype.__engineHooks = true;
@@ -23,4 +23,5 @@ export function applyEngineHooks(Battle) {
   applyIfBonusTarget(Battle);
   applyOnCleanseStack(Battle);
   applyLinkProcOrder(Battle);
+  applySameLaneBasic(Battle);
 }
