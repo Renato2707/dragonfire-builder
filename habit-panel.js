@@ -6,6 +6,14 @@ const PREFIX = [
   { id: 'teamB', teamId: 1 }
 ];
 
+function injectCss() {
+  if (document.getElementById('dfb-habit-slots-css')) return;
+  const style = document.createElement('style');
+  style.id = 'dfb-habit-slots-css';
+  style.textContent = '.habit-slots{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;margin-top:6px;grid-column:2/-1}.habit-slots select{padding:4px;font-size:0.72em}';
+  document.head.appendChild(style);
+}
+
 function fillRank(select, selected) {
   select.innerHTML = '';
   for (let rank = 1; rank <= 5; rank += 1) {
@@ -82,7 +90,9 @@ function collect() {
 }
 
 function bootPanel() {
+  if (typeof document === 'undefined') return;
   if (!document.getElementById('teamA-habit-0')) return;
+  injectCss();
   PREFIX.forEach(({ id }) => SLOTS.forEach(slot => ensureBox(id, slot)));
   collect();
   ['teamA', 'teamB'].forEach(prefix => {
@@ -97,8 +107,10 @@ function bootPanel() {
   if (start) start.addEventListener('click', collect, true);
 }
 
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => setTimeout(bootPanel, 0));
-} else {
-  setTimeout(bootPanel, 0);
+if (typeof document !== 'undefined') {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => setTimeout(bootPanel, 0));
+  } else {
+    setTimeout(bootPanel, 0);
+  }
 }
