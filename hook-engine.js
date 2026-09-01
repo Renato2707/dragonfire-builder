@@ -9,6 +9,7 @@ import { applyIfBonusTarget } from './hook-ifbonus-target.js';
 import { applyOnCleanseStack } from './hook-cleanse-positive.js';
 import { applyExtraStatuses } from './hook-extra-statuses.js';
 import { applySameLaneBasic } from './hook-basic-target.js';
+import { applyDamageTroopScale } from './hook-damage-scale.js';
 
 export function applyEngineHooks(Battle) {
   if (Battle.prototype.__engineHooks) return;
@@ -24,4 +25,5 @@ export function applyEngineHooks(Battle) {
   applyOnCleanseStack(Battle);
   applyLinkProcOrder(Battle);
   applySameLaneBasic(Battle);
+  applyDamageTroopScale(Battle);
 }
