@@ -71,6 +71,14 @@ function getDamageTypeConfig(damageType) {
 }
 
 const DAMAGE_VARIANCE = 0;
+const TROOP_DAMAGE_REF = 2400;
+
+function commandTroopFactor(attacker) {
+  const troops = Number(attacker && attacker.currentHealth);
+  if (troops > 0) return troops / TROOP_DAMAGE_REF;
+  const cap = Number(attacker && attacker.maxHealth);
+  return cap > 0 ? cap / TROOP_DAMAGE_REF : 1;
+}
 
 function calculateBaseDamage(attacker, damageType) {
   const typeConfig = getDamageTypeConfig(damageType);
@@ -106,7 +114,8 @@ function calculateFinalDamage(attacker, defender, damageType, bonusPercent = 0, 
   const baseDamage = calculateBaseDamage(attacker, damageType);
   const mitigation = calculateMitigation(defender, damageType);
   let damageMitigated = applyDamageMultipliers(baseDamage - mitigation, attacker, defender, damageType, options);
-  if (bonusPercent) damageMitigated *= (1 + bonusPercent / 100);
+  // Damage Rate: +X% is X% of (base − mit), scaled by living troops. Basic attacks stay unscaled.
+  if (bonusPercent) damageMitigated *= (bonusPercent / 100) * commandTroopFactor(attacker);
   return Math.max(1, Math.round(damageMitigated));
 }
 

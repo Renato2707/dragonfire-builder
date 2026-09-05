@@ -1,3 +1,3 @@
-// Damage uses utils.calculateFinalDamage (stat × 1.2 − mit, then rates/mods).
-// No troop-cap multiplier: that made Dawnsong 211 vs official ~79.
+// Command hits: Damage Rate +X% → (base − mit) × X/100 × livingTroops/2400.
+// Basic attacks stay unscaled (official BA ~59 vs Dawnsong ~79).
 export function applyDamageTroopScale() {}
