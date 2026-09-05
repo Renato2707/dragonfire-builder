@@ -27,22 +27,25 @@ function loadKit(character) {
 function make(id, team, slot, stars, habitRank, habitRanks) {
   const data = byId[id];
   if (!data) throw new Error('missing ' + id);
-  const c = new Character(data, team, slot, { level: 50, stars, habitRank, habitRanks });
+  const opts = { level: 50, stars };
+  if (habitRank != null) opts.habitRank = habitRank;
+  if (habitRanks) opts.habitRanks = habitRanks;
+  const c = new Character(data, team, slot, opts);
   loadKit(c);
   return c;
 }
 
 const teamA = [
   make('rhysarion', 0, 0, 4, 1, { 'Ebbing Fury': 4, 'Sharp Resolve': 1 }),
-  make('malachite', 0, 1, 1, 1),
-  make('vhagar', 0, 2, 1, 1)
+  make('malachite', 0, 1, 1),
+  make('vhagar', 0, 2, 1)
 ];
 teamA.forEach(c => c.setTroopType('shieldbearers'));
 
 const teamB = [
-  make('syrax', 1, 0, 5, 1),
-  make('vaeldra', 1, 1, 7, 1),
-  make('daemoros', 1, 2, 4, 1)
+  make('syrax', 1, 0, 5),
+  make('vaeldra', 1, 1, 7),
+  make('daemoros', 1, 2, 4)
 ];
 teamB.forEach(c => c.setTroopType('archers'));
 
