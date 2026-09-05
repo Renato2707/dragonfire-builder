@@ -309,7 +309,7 @@ star6.battle.runRound();
 star6.battle.runRound();
 const rawStar6 = (star6.battle.battleLog || []).join('\n');
 const dmgR4 = physAmt(cmdPhysChunk(rawStar6, 4), 'EnemyL') || physAmt(cmdPhysChunk(rawStar6, 4), 'EnemyV');
-check('Full Moon 170% vs 85% even-round phys (~2.70/1.85)', dmgR2 && dmgR4 && Math.abs((dmgR4 / dmgR2) - (2.70 / 1.85)) < 0.2, 'R2=' + dmgR2 + ' R4=' + dmgR4);
+check('Full Moon 170% vs 85% even-round phys (2x rate)', dmgR2 && dmgR4 && Math.abs((dmgR4 / dmgR2) - 2) < 0.2, 'R2=' + dmgR2 + ' R4=' + dmgR4);
 check('below 8★ no Blood Moon', !/Blood Moon/.test(rawStar6));
 
 const lowStars = setup(() => 0, { stars: 5 });
@@ -331,8 +331,9 @@ check('engine R5 Rising Tide >= 6', (six.moon.stacks.rising_tide || 0) >= 6, 'st
 
 const least = setup(() => 0, { leftStats: { str: 80, inst: 30, int: 30, init: 20 } });
 least.battle.start();
+for (let i = 0; i < 5; i += 1) least.battle.runRound();
 least.moon.currentHealth = 50;
-for (let i = 0; i < 6; i += 1) least.battle.runRound();
+least.battle.runRound();
 const rawLeast = (least.battle.battleLog || []).join('\n');
 const fmGains = (rN(rawLeast, 6).match(/gains 1 stack of Rising Tide/g) || []).length;
 check('least troops extra Full Moon stack on R6', fmGains >= 2 || /gains 1 stack of Rising Tide \(now \d+\)/.test(rN(rawLeast, 6)), 'gains=' + fmGains + ' stacks=' + (least.moon.stacks.rising_tide || 0));

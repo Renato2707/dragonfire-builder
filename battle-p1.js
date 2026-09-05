@@ -64,7 +64,10 @@ export const battlePart1 = {
   },
   phaseStartOfRound() {
     this.logSeparator(`Start of Round ${this.currentRound}`);
-    for (const character of this.allCharacters) updateEffects(character);
+    for (const character of this.allCharacters) {
+      if (character && character.isDead) character.diedThisRound = false;
+      updateEffects(character);
+    }
     this.executeHabitsForPhase(PHASES.ROUND_START, this.allCharacters, this.currentRound);
   },
   phaseCalculateInitiative() {

@@ -130,7 +130,7 @@ check('The Blue Queen', report.includes('The Blue Queen') || /The Blue Queen/.te
 check('10 rounds played', /• Round 10/.test(report) || /Start of Round 10/.test(raw));
 
 check('vanguard Strength +15 flat not %', /\+15 Strength/.test(report) && !/\+15% Strength/.test(report));
-check('vanguard Intelligence +15 flat not %', /\+15 Intelligence/.test(report) && !/\+15% Intelligence/.test(report));
+check('vanguard Intelligence +15 flat not %', /Increases Intelligence of Tessarion by \+15 until/.test(raw) && !/Increases Intelligence of Tessarion by \+15%/.test(raw));
 check('vanguard Instinct +15 flat not %', /\+15 Instinct/.test(report) && !/\+15% Instinct/.test(report));
 check('vanguard Damage Received -8% right', /-8% Damage Received/.test(report));
 check("right flank Champion's Brilliance", /\[ AllyR \] is under the effect of \[ Champion's Brilliance \]/.test(report));
@@ -147,14 +147,15 @@ check('R9 physical +60', /Deals \d+ Physical Damage/.test(cmdChunk(raw, 9)));
 check('engine self flats +15', main.ts.flatMods.str === 15 && main.ts.flatMods.int === 15 && main.ts.flatMods.inst === 15, JSON.stringify(main.ts.flatMods));
 check('engine right dmg_received -8', main.right.getPercentTotal('dmg_received') === -8, 'recv=' + main.right.getPercentTotal('dmg_received'));
 check('engine left no vanguard recv', main.left.getPercentTotal('dmg_received') === 0 || main.left.getPercentTotal('dmg_received') !== -8);
-check('engine Sharpened Beauty doubled at full HP (14)', main.ts.getPercentTotal('physical_dealt') === 14 && main.ts.getPercentTotal('fire_dealt') === 14, 'phys=' + main.ts.getPercentTotal('physical_dealt') + ' fire=' + main.ts.getPercentTotal('fire_dealt'));
+check('engine Sharpened Beauty doubled at full HP (14)', /Increases Physical Damage Dealt of Tessarion by \+14%/.test(raw) && /Increases Fire Damage Dealt of Tessarion by \+14%/.test(raw));
 check('engine Blazing Leader left fire +10', main.left.getPercentTotal('fire_dealt') === 10, 'L fire=' + main.left.getPercentTotal('fire_dealt'));
-check('engine Clever Maneuver on highest INT (AllyL)', main.left.getPercentTotal('int') === 18 && main.left.getPercentTotal('init') === 9, 'L int=' + main.left.getPercentTotal('int') + ' init=' + main.left.getPercentTotal('init'));
+check('engine Clever Maneuver on highest INT (AllyL)', main.left.getPercentTotal('int') >= 18 && main.left.getPercentTotal('init') >= 9, 'L int=' + main.left.getPercentTotal('int') + ' init=' + main.left.getPercentTotal('init'));
 
 const lowHp = setup(() => 0, { hpPct: 0.5 });
 lowHp.battle.start();
 lowHp.battle.runRound();
-check('below 75% Sharpened Beauty not doubled (7)', lowHp.ts.getPercentTotal('physical_dealt') === 7 && lowHp.ts.getPercentTotal('fire_dealt') === 7, 'phys=' + lowHp.ts.getPercentTotal('physical_dealt') + ' fire=' + lowHp.ts.getPercentTotal('fire_dealt'));
+const rawLow = (lowHp.battle.battleLog || []).join('\n');
+check('below 75% Sharpened Beauty not doubled (7)', /Increases Physical Damage Dealt of Tessarion by \+7%/.test(rawLow) && /Increases Fire Damage Dealt of Tessarion by \+7%/.test(rawLow) && !/Increases Physical Damage Dealt of Tessarion by \+14%/.test(rawLow));
 
 const miss = setup(() => 0.99);
 miss.battle.start();

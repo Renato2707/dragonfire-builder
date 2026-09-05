@@ -25,7 +25,7 @@ export const battlePart2 = {
     if (req.troop && this.troopOf(character) !== String(req.troop).toLowerCase().replace(/[\s_-]/g, '')) return false;
     if (req.linkedRetreated) {
       const linked = character.links && character.links[req.linkedRetreated];
-      if (!linked || !(linked.retreatedLastRound || linked.isDead)) return false;
+      if (!linked || !linked.retreatedLastRound) return false;
     }
     const hp = typeof character.getHealthPercentage === 'function' ? character.getHealthPercentage() : 100;
     if (req.troopsBelow != null && !(hp < Number(req.troopsBelow))) return false;
