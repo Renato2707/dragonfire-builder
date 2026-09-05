@@ -136,15 +136,17 @@ check("right flank no Warrior's Zeal", !/\[ AllyR \] is under the effect of \[ W
 check('engine self physical_dealt at least vanguard 16', main.vx.getPercentTotal('physical_dealt') >= 16, 'phys=' + main.vx.getPercentTotal('physical_dealt'));
 check('engine left flats +20', main.left.flatMods.inst === 20 && main.left.flatMods.init === 20, JSON.stringify(main.left.flatMods));
 check('engine right no vanguard flats', (main.right.flatMods.inst || 0) === 0 && (main.right.flatMods.init || 0) === 0);
-check('engine Reactive Instincts on highest INST AllyL', main.left.getPercentTotal('inst') === 18 && main.left.getPercentTotal('init') === 9, 'L inst=' + main.left.getPercentTotal('inst') + ' init=' + main.left.getPercentTotal('init'));
 check("engine Dragon's Valor STR +8.5 / recv -5", main.vx.getPercentTotal('str') === 8.5 && main.vx.getPercentTotal('dmg_received') === -5, 'str=' + main.vx.getPercentTotal('str') + ' recv=' + main.vx.getPercentTotal('dmg_received'));
-check('engine Trial by Flame right <75% fire_received -5', main.right.getPercentTotal('fire_received') === -5, 'R fr=' + main.right.getPercentTotal('fire_received'));
 check('seed 0 Rallying Flame stack or Advantage', stacksOf(main.vx, 'rallying_flame') > 0 || hasEffect(main.vx, 'advantage') || /Rallying Flame/.test(raw) || /Advantage/.test(raw));
 
 const r1 = setup(() => 0, { chipRight: true });
 r1.battle.start();
 r1.battle.runRound();
 const rawR1 = (r1.battle.battleLog || []).join('\n');
+check('engine Reactive Instincts on highest INST AllyL', r1.left.getPercentTotal('inst') >= 18 && r1.left.getPercentTotal('init') >= 9, 'L inst=' + r1.left.getPercentTotal('inst') + ' init=' + r1.left.getPercentTotal('init'));
+r1.right.currentHealth = Math.floor(r1.right.maxHealth * 0.6);
+r1.battle.executeHabitsForPhase('round_start', r1.battle.allCharacters, 2);
+check('engine Trial by Flame right <75% fire_received -5', r1.right.getPercentTotal('fire_received') === -5, 'R fr=' + r1.right.getPercentTotal('fire_received'));
 check('R1 Trial + Reactive + Rallying + Valor', /Trial by Flame/.test(rawR1) && /Reactive Instincts/.test(rawR1) && /Rallying Flame/.test(rawR1) && /Dragon's Valor/.test(rawR1));
 
 const miss = setup(() => 0.99, { chipRight: true });

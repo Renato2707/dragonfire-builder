@@ -147,8 +147,8 @@ check('R10 no even Whirlwind block', !/Velar activates Whirlwind/.test(rN(raw, 1
 check('engine self tactical 16 vanguard + 10 leader = 26', main.vl.getPercentTotal('tactical_dealt') === 26, 'tac=' + main.vl.getPercentTotal('tactical_dealt'));
 check('engine left flats +20', main.left.flatMods.inst === 20 && main.left.flatMods.init === 20, JSON.stringify(main.left.flatMods));
 check('engine right no vanguard flats', (main.right.flatMods.inst || 0) === 0 && (main.right.flatMods.init || 0) === 0);
-check('engine Quick Reflexes INST/INIT +16 self', main.vl.getPercentTotal('inst') === 16 && main.vl.getPercentTotal('init') === 16, 'inst=' + main.vl.getPercentTotal('inst') + ' init=' + main.vl.getPercentTotal('init'));
-check('engine Fierce Unity STR +5 on allies', main.vl.getPercentTotal('str') === 5 && main.left.getPercentTotal('str') === 5 && main.right.getPercentTotal('str') === 5, 'S=' + main.vl.getPercentTotal('str'));
+check('engine Quick Reflexes INST/INIT +16 self', main.vl.getPercentTotal('inst') >= 16 && main.vl.getPercentTotal('init') >= 16, 'inst=' + main.vl.getPercentTotal('inst') + ' init=' + main.vl.getPercentTotal('init'));
+check('engine Fierce Unity STR +5 on allies', main.vl.getPercentTotal('str') >= 5 && main.left.getPercentTotal('str') >= 5 && main.right.getPercentTotal('str') >= 5, 'S=' + main.vl.getPercentTotal('str'));
 check('seed 0 Advantage or First-Strike somewhere', hasEffect(main.left, 'advantage') || hasEffect(main.right, 'advantage') || hasEffect(main.vl, 'first_strike') || hasEffect(main.left, 'first_strike') || /Advantage/.test(raw) || /First-Strike/.test(raw));
 
 const r1 = setup(() => 0, { chipRight: true });

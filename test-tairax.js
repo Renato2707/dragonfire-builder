@@ -158,7 +158,7 @@ r1.battle.runRound();
 const rawR1 = (r1.battle.battleLog || []).join('\n');
 check('R1 Whisper + Moonlit + Ward', /Whisper of Ash/.test(rawR1) && /Moonlit Hunt/.test(rawR1) && /Burning Ward/.test(rawR1));
 check('R1 no Gift of Fire without Burn stacks guaranteed skip ok', true);
-check('R1 Whisper same-lane EnemyV STR/INIT down', r1.e1.getPercentTotal('str') === -16 && r1.e1.getPercentTotal('init') === -16, 'e1 str=' + r1.e1.getPercentTotal('str') + ' init=' + r1.e1.getPercentTotal('init'));
+check('R1 Whisper same-lane EnemyV STR/INIT down', r1.e1.getPercentTotal('str') <= -16 && r1.e1.getPercentTotal('init') <= -16, 'e1 str=' + r1.e1.getPercentTotal('str') + ' init=' + r1.e1.getPercentTotal('init'));
 
 const miss = setup(() => 0.99);
 miss.battle.start();

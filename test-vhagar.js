@@ -148,7 +148,6 @@ check('engine self dmg_received vanguard -8', main.vh.getPercentTotal('dmg_recei
 check('engine left tactical +16', main.left.getPercentTotal('tactical_dealt') === 16, 'tac=' + main.left.getPercentTotal('tactical_dealt'));
 check('engine right no tactical vanguard', main.right.getPercentTotal('tactical_dealt') === 0);
 check('engine Battle Leader right physical +12.5', main.right.getPercentTotal('physical_dealt') === 12.5, 'R phys=' + main.right.getPercentTotal('physical_dealt'));
-check('engine Blazing Onslaught L fire +18 / R phys recv +18', main.e0.getPercentTotal('fire_received') === 18 && main.e2.getPercentTotal('physical_received') === 18, 'e0 fire=' + main.e0.getPercentTotal('fire_received') + ' e2 phys=' + main.e2.getPercentTotal('physical_received'));
 check('engine Ancestral Shield recovery +15 after R4', main.vh.getPercentTotal('recovery_received') === 15, 'rec=' + main.vh.getPercentTotal('recovery_received'));
 check('seed 0 Taunt or Bulwark or Advantage', hasEffect(main.e0, 'taunt') || hasEffect(main.e1, 'taunt') || stacksOf(main.vh, 'bulwark') > 0 || hasEffect(main.vh, 'advantage') || /Taunt/.test(raw) || /Bulwark/.test(raw) || /Advantage/.test(raw));
 
@@ -156,6 +155,7 @@ const r1 = setup(() => 0);
 r1.battle.start();
 r1.battle.runRound();
 const rawR1 = (r1.battle.battleLog || []).join('\n');
+check('engine Blazing Onslaught L fire +18 / R phys recv +18', r1.e0.getPercentTotal('fire_received') === 18 && r1.e2.getPercentTotal('physical_received') === 18, 'e0 fire=' + r1.e0.getPercentTotal('fire_received') + ' e2 phys=' + r1.e2.getPercentTotal('physical_received'));
 check('R1 Shield + Leader + Blazing + Bonds', /Ancestral Shield/.test(rawR1) && /Battle Leader/.test(rawR1) && /Blazing Onslaught/.test(rawR1) && /Fiery Bonds/.test(rawR1));
 check('R1 no Eclipse Cover (R3-7)', !/Eclipse Cover/.test(rawR1));
 

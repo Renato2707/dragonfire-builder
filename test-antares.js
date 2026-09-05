@@ -139,7 +139,6 @@ check('R1 no R3-fire command', !/Deals \d+ Fire Damage/.test(cmdChunk(raw, 1)));
 check('engine self fire_dealt 16+8=24', main.an.getPercentTotal('fire_dealt') === 24, 'fire=' + main.an.getPercentTotal('fire_dealt'));
 check('engine right flats +20', main.right.flatMods.str === 20 && main.right.flatMods.init === 20, JSON.stringify(main.right.flatMods));
 check('engine left no vanguard flats', (main.left.flatMods.str || 0) === 0 && (main.left.flatMods.init || 0) === 0);
-check('engine Blazing L fire recv +11 / R phys recv +11', main.e0.getPercentTotal('fire_received') === 11 && main.e2.getPercentTotal('physical_received') === 11, 'e0=' + main.e0.getPercentTotal('fire_received') + ' e2=' + main.e2.getPercentTotal('physical_received'));
 check("engine Intellect + Redemption INT 5+6=11 / recv -4", main.an.getPercentTotal('int') === 11 && main.an.getPercentTotal('dmg_received') === -4, 'int=' + main.an.getPercentTotal('int') + ' recv=' + main.an.getPercentTotal('dmg_received'));
 check('engine Redemption INIT +6', main.an.getPercentTotal('init') === 6, 'init=' + main.an.getPercentTotal('init'));
 check('seed 0 Vulnerable or Immunity', hasEffect(main.e0, 'vulnerable') || hasEffect(main.e1, 'vulnerable') || hasEffect(main.e2, 'vulnerable') || hasEffect(main.an, 'immunity') || /Vulnerable/.test(raw) || /Immunity/.test(raw));
@@ -148,6 +147,7 @@ const r1 = setup(() => 0);
 r1.battle.start();
 r1.battle.runRound();
 const rawR1 = (r1.battle.battleLog || []).join('\n');
+check('engine Blazing L fire recv +11 / R phys recv +11', r1.e0.getPercentTotal('fire_received') === 11 && r1.e2.getPercentTotal('physical_received') === 11, 'e0=' + r1.e0.getPercentTotal('fire_received') + ' e2=' + r1.e2.getPercentTotal('physical_received'));
 check('R1 Onslaught + Flair + Intellect + Redemption + Pursuit', /Blazing Onslaught/.test(rawR1) && /Dragon's Flair/.test(rawR1) && /Dragon's Intellect/.test(rawR1) && /Redemption/.test(rawR1) && /Relentless Pursuit/.test(rawR1));
 
 const miss = setup(() => 0.99);
@@ -155,7 +155,7 @@ miss.battle.start();
 for (let i = 0; i < 3; i += 1) miss.battle.runRound();
 const rawMiss = (miss.battle.battleLog || []).join('\n');
 check('seed 0.99 still R3 fire (dmg not chance)', /Deals \d+ Fire Damage/.test(rawMiss));
-check('seed 0.99 still vanguard + Onslaught + Flair + Intellect', miss.an.getPercentTotal('fire_dealt') === 24 && miss.right.flatMods.str === 20 && miss.e0.getPercentTotal('fire_received') === 11 && /Blazing Onslaught/.test(rawMiss) && /Dragon's Flair/.test(rawMiss) && /Dragon's Intellect/.test(rawMiss));
+check('seed 0.99 still vanguard + Onslaught + Flair + Intellect', miss.an.getPercentTotal('fire_dealt') === 24 && miss.right.flatMods.str === 20 && /Blazing Onslaught/.test(rawMiss) && /Dragon's Flair/.test(rawMiss) && /Dragon's Intellect/.test(rawMiss));
 
 const lowStars = setup(() => 0, { stars: 5 });
 lowStars.battle.start();

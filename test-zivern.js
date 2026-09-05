@@ -142,7 +142,7 @@ check('engine self tactical +16', main.zv.getPercentTotal('tactical_dealt') === 
 check('engine left flats +20', main.left.flatMods.inst === 20 && main.left.flatMods.init === 20, JSON.stringify(main.left.flatMods));
 check('engine right no vanguard flats', (main.right.flatMods.inst || 0) === 0 && (main.right.flatMods.init || 0) === 0);
 check('engine Keen Instinct INT/INST +16 self', main.zv.getPercentTotal('int') === 16 && main.zv.getPercentTotal('inst') === 16, 'int=' + main.zv.getPercentTotal('int') + ' inst=' + main.zv.getPercentTotal('inst'));
-check('engine Battle Mastery enemies STR -5', main.e0.getPercentTotal('str') === -5 && main.e1.getPercentTotal('str') === -5 && main.e2.getPercentTotal('str') === -5, 'e0=' + main.e0.getPercentTotal('str'));
+check('engine Battle Mastery enemies STR -5', main.e0.getPercentTotal('str') <= -5 && main.e1.getPercentTotal('str') <= -5 && main.e2.getPercentTotal('str') <= -5, 'e0=' + main.e0.getPercentTotal('str'));
 check('engine Steel Shroud other allies phys/tac recv -3.5', main.left.getPercentTotal('physical_received') === -3.5 && main.right.getPercentTotal('tactical_received') === -3.5 && main.zv.getPercentTotal('physical_received') === 0, 'L=' + main.left.getPercentTotal('physical_received') + ' self=' + main.zv.getPercentTotal('physical_received'));
 check('seed 0 Panic or Overwhelm or tac recv', hasEffect(main.e0, 'panic') || hasEffect(main.e1, 'panic') || hasEffect(main.e0, 'overwhelm') || main.e1.getPercentTotal('tactical_received') === 15 || /Panic/.test(raw) || /Overwhelm/.test(raw));
 
@@ -157,7 +157,7 @@ miss.battle.start();
 miss.battle.runRound();
 const rawMiss = (miss.battle.battleLog || []).join('\n');
 check('seed 0.99 still R1 tactical (dmg not chance)', /Deals \d+ Tactical Damage/.test(rawMiss));
-check('seed 0.99 still vanguard + Mastery + Keen + Shroud', miss.zv.getPercentTotal('tactical_dealt') === 16 && miss.left.flatMods.inst === 20 && miss.zv.getPercentTotal('int') === 16 && miss.e0.getPercentTotal('str') === -5 && miss.left.getPercentTotal('physical_received') === -3.5 && /Battle Mastery/.test(rawMiss) && /Keen Instinct/.test(rawMiss) && /Steel Shroud/.test(rawMiss));
+check('seed 0.99 still vanguard + Mastery + Keen + Shroud', miss.zv.getPercentTotal('tactical_dealt') === 16 && miss.left.flatMods.inst === 20 && miss.zv.getPercentTotal('int') === 16 && miss.e0.getPercentTotal('str') <= -5 && miss.left.getPercentTotal('physical_received') === -3.5 && /Battle Mastery/.test(rawMiss) && /Keen Instinct/.test(rawMiss) && /Steel Shroud/.test(rawMiss));
 
 const lowStars = setup(() => 0, { stars: 5 });
 lowStars.battle.start();

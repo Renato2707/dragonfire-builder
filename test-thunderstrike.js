@@ -142,13 +142,13 @@ check('engine self physical_dealt 16+8=24', main.th.getPercentTotal('physical_de
 check('engine left flats +20', main.left.flatMods.inst === 20 && main.left.flatMods.init === 20, JSON.stringify(main.left.flatMods));
 check('engine right no vanguard flats', (main.right.flatMods.inst || 0) === 0 && (main.right.flatMods.init || 0) === 0);
 check('engine Armor Break same-lane EnemyV +4.8 phys received', main.e1.getPercentTotal('physical_received') === 4.8, 'e1=' + main.e1.getPercentTotal('physical_received'));
-check('engine Battle Rush self INIT +25', main.th.getPercentTotal('init') === 25, 'init=' + main.th.getPercentTotal('init'));
 check('seed 0 Bleed or Stagger somewhere', hasEffect(main.e1, 'bleed') || hasEffect(main.e1, 'stagger') || /Bleed/.test(raw) || /Stagger/.test(raw));
 
 const r1 = setup(() => 0);
 r1.battle.start();
 r1.battle.runRound();
 const rawR1 = (r1.battle.battleLog || []).join('\n');
+check('engine Battle Rush self INIT +25', r1.th.getPercentTotal('init') === 25, 'init=' + r1.th.getPercentTotal('init'));
 check('R1 Rush + Might + Armor + Whip', /Battle Rush/.test(rawR1) && /Dragon's Might/.test(rawR1) && /Armor Break/.test(rawR1) && /Tail Whip/.test(rawR1));
 check('R1 no Barbed Lash (even only)', !/Barbed Lash/.test(rawR1));
 

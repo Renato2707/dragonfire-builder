@@ -145,9 +145,7 @@ check('R5 physical (odd extra)', /Deals \d+ Physical Damage/.test(cmdChunk(raw, 
 
 check('engine self dmg_received vanguard -8', main.ar.getPercentTotal('dmg_received') === -8, 'recv=' + main.ar.getPercentTotal('dmg_received'));
 check('engine left tactical +16', main.left.getPercentTotal('tactical_dealt') === 16, 'tac=' + main.left.getPercentTotal('tactical_dealt'));
-check('engine Headlong STR +25 INIT +10 phys +25 INST -40', main.ar.getPercentTotal('str') === 25 && main.ar.getPercentTotal('init') === 10 && main.ar.getPercentTotal('physical_dealt') === 25 && main.ar.getPercentTotal('inst') === -40, JSON.stringify({ str: main.ar.getPercentTotal('str'), init: main.ar.getPercentTotal('init'), phys: main.ar.getPercentTotal('physical_dealt'), inst: main.ar.getPercentTotal('inst') }));
 check('engine Stone Bulwark other allies tac/fire recv -2.5', main.left.getPercentTotal('tactical_received') === -2.5 && main.right.getPercentTotal('fire_received') === -2.5 && main.ar.getPercentTotal('tactical_received') !== -2.5, 'L=' + main.left.getPercentTotal('tactical_received') + ' self=' + main.ar.getPercentTotal('tactical_received'));
-check('engine Adaptive Guard archers tactical_received -9', main.ar.getPercentTotal('tactical_received') === -9 || main.left.getPercentTotal('tactical_received') === -11.5, 'self tacRecv=' + main.ar.getPercentTotal('tactical_received') + ' L=' + main.left.getPercentTotal('tactical_received'));
 check('engine Fire Ward stack on self', stacksOf(main.ar, 'fire_ward') >= 1 || main.ar.getPercentTotal('fire_received') === -5, 'stacks=' + stacksOf(main.ar, 'fire_ward') + ' fr=' + main.ar.getPercentTotal('fire_received'));
 check('seed 0 Weakened somewhere', hasEffect(main.e0, 'weakened') || hasEffect(main.e1, 'weakened') || hasEffect(main.e2, 'weakened') || /Weakened/.test(raw));
 
@@ -156,6 +154,12 @@ r1.battle.start();
 r1.battle.runRound();
 const rawR1 = (r1.battle.battleLog || []).join('\n');
 check('R1 Bulwark + Fire Ward no Headlong', /Stone Bulwark/.test(rawR1) && /Fire Ward/.test(rawR1) && !/Headlong Into Danger/.test(rawR1));
+
+const r4 = setup(() => 0);
+r4.battle.start();
+for (let i = 0; i < 4; i += 1) r4.battle.runRound();
+check('engine Headlong STR +25 INIT +10 phys +25 INST -40', r4.ar.getPercentTotal('str') === 25 && r4.ar.getPercentTotal('init') === 10 && r4.ar.getPercentTotal('physical_dealt') === 25 && r4.ar.getPercentTotal('inst') === -40, JSON.stringify({ str: r4.ar.getPercentTotal('str'), init: r4.ar.getPercentTotal('init'), phys: r4.ar.getPercentTotal('physical_dealt'), inst: r4.ar.getPercentTotal('inst') }));
+check('engine Adaptive Guard archers tactical_received -9', r4.ar.getPercentTotal('tactical_received') === -9 || r4.left.getPercentTotal('tactical_received') === -11.5, 'self tacRecv=' + r4.ar.getPercentTotal('tactical_received') + ' L=' + r4.left.getPercentTotal('tactical_received'));
 
 const miss = setup(() => 0.99);
 miss.battle.start();

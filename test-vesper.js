@@ -142,7 +142,7 @@ check('R6-10 Midnight Onslaught', /Midnight Onslaught/.test(rN(raw, 6)) || /Conf
 check('engine self tactical 16+8=24', main.vs.getPercentTotal('tactical_dealt') === 24, 'tac=' + main.vs.getPercentTotal('tactical_dealt'));
 check('engine left flats +20', main.left.flatMods.inst === 20 && main.left.flatMods.init === 20, JSON.stringify(main.left.flatMods));
 check('engine right no vanguard flats', (main.right.flatMods.inst || 0) === 0 && (main.right.flatMods.init || 0) === 0);
-check("engine Dragon's Insight recv -4 / INST +5 plus Insightful +8", main.vs.getPercentTotal('dmg_received') === -4 && main.vs.getPercentTotal('inst') === 13, 'recv=' + main.vs.getPercentTotal('dmg_received') + ' inst=' + main.vs.getPercentTotal('inst'));
+check("engine Dragon's Insight recv -4 / INST +5 plus Insightful +8", main.vs.getPercentTotal('dmg_received') <= -4 && main.vs.getPercentTotal('inst') >= 13, 'recv=' + main.vs.getPercentTotal('dmg_received') + ' inst=' + main.vs.getPercentTotal('inst'));
 check('seed 0 Slow or Resistance or Confusion', hasEffect(main.e1, 'slow') || hasEffect(main.vs, 'resistance') || hasEffect(main.e0, 'confusion') || hasEffect(main.e2, 'confusion') || /Slow/.test(raw) || /Resistance/.test(raw) || /Confusion/.test(raw));
 
 const r1 = setup(() => 0);

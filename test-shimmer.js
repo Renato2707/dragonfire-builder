@@ -144,14 +144,14 @@ check('engine self rec dealt +15 INST flat 25', main.sh.getPercentTotal('recover
 check('engine left fire_dealt +16', main.left.getPercentTotal('fire_dealt') === 16, 'Lfire=' + main.left.getPercentTotal('fire_dealt'));
 check('engine right fire_dealt 0', main.right.getPercentTotal('fire_dealt') === 0, 'Rfire=' + main.right.getPercentTotal('fire_dealt'));
 check("engine Dragon's Insight recv -4 inst +5", main.sh.getPercentTotal('dmg_received') === -4 && main.sh.getPercentTotal('inst') === 5, 'recv=' + main.sh.getPercentTotal('dmg_received') + ' inst=' + main.sh.getPercentTotal('inst'));
-check('engine Crushing Force physical on left not right', main.left.getPercentTotal('physical_dealt') === 9 && main.right.getPercentTotal('physical_dealt') !== 9, 'Lphys=' + main.left.getPercentTotal('physical_dealt') + ' Rphys=' + main.right.getPercentTotal('physical_dealt'));
-check('engine Crushing Force tactical prefers right', main.right.getPercentTotal('tactical_dealt') === 9, 'Rtac=' + main.right.getPercentTotal('tactical_dealt') + ' Ltac=' + main.left.getPercentTotal('tactical_dealt'));
 check('engine Unbroken Devotion rec received on others not self', main.left.getPercentTotal('recovery_received') === 15 && main.right.getPercentTotal('recovery_received') === 15 && main.sh.getPercentTotal('recovery_received') === 0, 'L=' + main.left.getPercentTotal('recovery_received') + ' R=' + main.right.getPercentTotal('recovery_received') + ' S=' + main.sh.getPercentTotal('recovery_received'));
 
 const r1 = setup(() => 0);
 r1.battle.start();
 r1.battle.runRound();
 const rawR1 = (r1.battle.battleLog || []).join('\n');
+check('engine Crushing Force physical on left not right', r1.left.getPercentTotal('physical_dealt') === 9 && r1.right.getPercentTotal('physical_dealt') !== 9, 'Lphys=' + r1.left.getPercentTotal('physical_dealt') + ' Rphys=' + r1.right.getPercentTotal('physical_dealt'));
+check('engine Crushing Force tactical prefers right', r1.right.getPercentTotal('tactical_dealt') === 9, 'Rtac=' + r1.right.getPercentTotal('tactical_dealt') + ' Ltac=' + r1.left.getPercentTotal('tactical_dealt'));
 check('R1 Crushing Force fires', /Crushing Force/.test(rawR1));
 check("R1 Dragon's Insight fires", /Dragon's Insight/.test(rawR1));
 check('R1 Unbroken Devotion fires', /Unbroken Devotion/.test(rawR1));
@@ -161,6 +161,8 @@ check('R1 First-Strike on highest STR other ally', hasEffect(r1.right, 'first_st
 check('R1 no Loyal Shield (not R2/4/7/9)', !/Loyal Shield/.test(rawR1) && !/Applies Recovery to /.test(rawR1.split('Shimmer launches')[0] || ''));
 
 const resist = setup(() => 0);
+resist.left.currentHealth = Math.floor(resist.left.maxHealth * 0.4);
+resist.right.currentHealth = Math.floor(resist.right.maxHealth * 0.4);
 resist.battle.start();
 try { applyEffect(resist.left, 'RESISTANCE', 1, 'seed', { duration: 10, damageReduction: 20 }); } catch (e) {}
 try { applyEffect(resist.right, 'resistance', 1, 'seed', { duration: 10, damageReduction: 20 }); } catch (e) {}
@@ -169,13 +171,15 @@ resist.battle.runRound();
 const rawResist = (resist.battle.battleLog || []).join('\n');
 const rawPlain = (() => {
   const p = setup(() => 0);
+  p.left.currentHealth = Math.floor(p.left.maxHealth * 0.4);
+  p.right.currentHealth = Math.floor(p.right.maxHealth * 0.4);
   p.battle.start();
   p.battle.runRound();
   p.battle.runRound();
   return (p.battle.battleLog || []).join('\n');
 })();
-const recResist = [...rN(rawResist, 2).matchAll(/Recovery \+(\d+(?:\.\d+)?)%/g)].map(m => Number(m[1]));
-const recPlain = [...rN(rawPlain, 2).matchAll(/Recovery \+(\d+(?:\.\d+)?)%/g)].map(m => Number(m[1]));
+const recResist = [...rN(rawResist, 2).matchAll(/\+(\d+) Troop Capacity/g)].map(m => Number(m[1]));
+const recPlain = [...rN(rawPlain, 2).matchAll(/\+(\d+) Troop Capacity/g)].map(m => Number(m[1]));
 check('Loyal Shield resistance doubles recovery vs base', recResist.length && recPlain.length && Math.max(...recResist) > Math.max(...recPlain), 'resist=' + recResist.join(',') + ' base=' + recPlain.join(','));
 
 const miss = setup(() => 0.99);
