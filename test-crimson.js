@@ -120,8 +120,9 @@ for (let i = 0; i < 10; i += 1) main.battle.runRound();
 
 const report = formatBattleReport(main.battle, '═══════════════════════════════════════════════════════\n• Troop Formation\n');
 const raw = (main.battle.battleLog || []).join('\n');
-fs.writeFileSync('/workspace/dragonfire-builder/crimson-report.txt', report);
-fs.writeFileSync('/workspace/dragonfire-builder/crimson-raw.txt', raw);
+fs.mkdirSync('./tmp', { recursive: true });
+fs.writeFileSync('./tmp/crimson-report.txt', report);
+fs.writeFileSync('./tmp/crimson-raw.txt', raw);
 
 console.log(report);
 console.log('\n===== RAW LOG (Crimson lines) =====');

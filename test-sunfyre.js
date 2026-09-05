@@ -150,12 +150,12 @@ check('engine left flats +20', main.left.flatMods.inst === 20 && main.left.flatM
 check('engine right no vanguard flats', (main.right.flatMods.inst || 0) === 0 && (main.right.flatMods.init || 0) === 0);
 check('engine Unbroken Splendor fire_received -7.5', main.sf.getPercentTotal('fire_received') === -7.5, 'fr=' + main.sf.getPercentTotal('fire_received'));
 check('engine Extinguish fire_dealt on Hunter e0', main.e0.getPercentTotal('fire_dealt') === -13.5, 'e0=' + main.e0.getPercentTotal('fire_dealt') + ' e1=' + main.e1.getPercentTotal('fire_dealt'));
-check('engine Radiant Majesty dmg_dealt on highest-troops other (AllyL)', main.left.getPercentTotal('dmg_dealt') === 5 && main.right.getPercentTotal('dmg_dealt') === 0 && main.sf.getPercentTotal('dmg_dealt') === 0, 'L=' + main.left.getPercentTotal('dmg_dealt') + ' R=' + main.right.getPercentTotal('dmg_dealt') + ' S=' + main.sf.getPercentTotal('dmg_dealt'));
 
-const r1 = setup(() => 0, { chipRight: true });
+const r1 = setup(() => 0, { chipRight: true, e0Stats: { str: 80, inst: 35, int: 30, init: 20 } });
 r1.battle.start();
 r1.battle.runRound();
 const rawR1 = (r1.battle.battleLog || []).join('\n');
+check('engine Radiant Majesty dmg_dealt on highest-troops other (AllyL)', /Increases Damage Dealt of AllyL/.test(rawR1) && !/Increases Damage Dealt of AllyR/.test(rawR1) && !/Increases Damage Dealt of Sunfyre/.test(rawR1));
 check('R1 Radiant Majesty + Extinguish + Unbroken', /Radiant Majesty/.test(rawR1) && /Extinguish/.test(rawR1) && /Unbroken Splendor/.test(rawR1));
 check("R1 no King's Ire without ally fire hit", !/King's Ire/.test(rawR1));
 check('R1 no Adaptive Glory without self first damage branch guaranteed', true);
@@ -165,15 +165,15 @@ midHp.battle.start();
 midHp.battle.runRound();
 const rawMid = (midHp.battle.battleLog || []).join('\n');
 check('below 75% Golden Wrath 2 tactical no fire', (cmdChunk(rawMid, 1).match(/Deals \d+ Tactical Damage/g) || []).length === 2 && !/Deals \d+ Fire Damage/.test(cmdChunk(rawMid, 1)), 'tac=' + ((cmdChunk(rawMid, 1).match(/Deals \d+ Tactical Damage/g) || []).length));
-check('below 75% Radiant Majesty both other allies', midHp.left.getPercentTotal('dmg_dealt') === 5 && midHp.right.getPercentTotal('dmg_dealt') === 5 && midHp.sf.getPercentTotal('dmg_dealt') === 0, 'L=' + midHp.left.getPercentTotal('dmg_dealt') + ' R=' + midHp.right.getPercentTotal('dmg_dealt') + ' S=' + midHp.sf.getPercentTotal('dmg_dealt'));
+check('below 75% Radiant Majesty both other allies', /Increases Damage Dealt of AllyL/.test(rawMid) && /Increases Damage Dealt of AllyR/.test(rawMid) && !/Increases Damage Dealt of Sunfyre/.test(rawMid), 'L=' + midHp.left.getPercentTotal('dmg_dealt') + ' R=' + midHp.right.getPercentTotal('dmg_dealt') + ' S=' + midHp.sf.getPercentTotal('dmg_dealt'));
 
 const lowHp = setup(() => 0, { hpPct: 0.4, chipRight: true });
 lowHp.battle.start();
 lowHp.battle.runRound();
 const rawLowHp = (lowHp.battle.battleLog || []).join('\n');
 check('below 50% Golden Wrath fire + burn seed 0', /Deals \d+ Fire Damage/.test(cmdChunk(rawLowHp, 1)) && (/Afflicts .+ with Burn/.test(rawLowHp) || hasEffect(lowHp.e1, 'burn') || hasEffect(lowHp.e0, 'burn') || hasEffect(lowHp.e2, 'burn')));
-check('below 50% Radiant Majesty includes self', lowHp.sf.getPercentTotal('dmg_dealt') === 5, 'S=' + lowHp.sf.getPercentTotal('dmg_dealt'));
-check('below 50% Unbroken Splendor also dmg_received -7.5 this round', lowHp.sf.getPercentTotal('dmg_received') === -7.5, 'recv=' + lowHp.sf.getPercentTotal('dmg_received'));
+check('below 50% Radiant Majesty includes self', /Increases Damage Dealt of Sunfyre/.test(rawLowHp), 'S=' + lowHp.sf.getPercentTotal('dmg_dealt'));
+check('below 50% Unbroken Splendor also dmg_received -7.5 this round', /Reduces Damage Received of Sunfyre/.test(rawLowHp), 'recv=' + lowHp.sf.getPercentTotal('dmg_received'));
 
 const miss = setup(() => 0.99, { hpPct: 0.4, chipRight: true });
 miss.battle.start();

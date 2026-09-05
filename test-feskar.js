@@ -30,8 +30,9 @@ for (let i = 0; i < 10; i += 1) main.battle.runRound();
 
 const report = formatBattleReport(main.battle, '═══════════════════════════════════════════════════════\n• Troop Formation\n');
 const raw = (main.battle.battleLog || []).join('\n');
-fs.writeFileSync('/workspace/dragonfire-builder/feskar-report.txt', report);
-fs.writeFileSync('/workspace/dragonfire-builder/feskar-raw.txt', raw);
+fs.mkdirSync('./tmp', { recursive: true });
+fs.writeFileSync('./tmp/feskar-report.txt', report);
+fs.writeFileSync('./tmp/feskar-raw.txt', raw);
 
 console.log(report);
 console.log('\n===== RAW LOG (Feskar lines) =====');
@@ -156,7 +157,7 @@ withBurn.battle.runRound();
 const rawBurn = (withBurn.battle.battleLog || []).join('\n');
 const dmgBurn = fireAmt(infernoChunk(rawBurn, 3), 'EnemyV');
 check('Burn 1.5x Emerald Inferno fire vs no Burn', dmgNoBurn != null && dmgBurn != null && dmgBurn > dmgNoBurn, 'noBurn=' + dmgNoBurn + ' burn=' + dmgBurn);
-check('Burn raises fire rate 40% to 60%', dmgNoBurn && dmgBurn && Math.abs((dmgBurn / dmgNoBurn) - (1.6 / 1.4)) < 0.08, 'ratio=' + (dmgNoBurn ? (dmgBurn / dmgNoBurn).toFixed(3) : 'n/a') + ' expect~' + (1.6 / 1.4).toFixed(3));
+check('Burn raises fire rate 40% to 60%', dmgNoBurn && dmgBurn && Math.abs((dmgBurn / dmgNoBurn) - 1.5) < 0.08, 'ratio=' + (dmgNoBurn ? (dmgBurn / dmgNoBurn).toFixed(3) : 'n/a') + ' expect~1.5');
 
 // ---- Extra: linked ally retreatedLastRound extra stack ----
 const retreat = setup(() => 0);

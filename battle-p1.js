@@ -177,8 +177,8 @@ export const battlePart1 = {
         this.executeHabitsForPhase(PHASES.ON_SELF_FIRST_DAMAGE, [target], this.currentRound);
       }
       if (type === 'fire') {
-        const allies = this.alliesOf(target).filter(c => c && !c.isDead);
-        this.executeHabitsForPhase(PHASES.ON_ALLY_FIRE_DAMAGE, allies, this.currentRound);
+        const team = [...this.alliesOf(target), target].filter(c => c && !c.isDead);
+        this.executeHabitsForPhase(PHASES.ON_ALLY_FIRE_DAMAGE, team, this.currentRound);
       }
     } finally {
       this.damageContext = prev || null;

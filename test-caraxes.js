@@ -117,8 +117,9 @@ for (let i = 0; i < 10; i += 1) main.battle.runRound();
 
 const report = formatBattleReport(main.battle, '═══════════════════════════════════════════════════════\n• Troop Formation\n');
 const raw = (main.battle.battleLog || []).join('\n');
-fs.writeFileSync('/workspace/dragonfire-builder/caraxes-report.txt', report);
-fs.writeFileSync('/workspace/dragonfire-builder/caraxes-raw.txt', raw);
+fs.mkdirSync('./tmp', { recursive: true });
+fs.writeFileSync('./tmp/caraxes-report.txt', report);
+fs.writeFileSync('./tmp/caraxes-raw.txt', raw);
 
 console.log(report);
 console.log('\n===== RAW LOG (Caraxes lines) =====');

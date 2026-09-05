@@ -183,8 +183,9 @@ for (let i = 0; i < 10; i += 1) main.battle.runRound();
 
 const report = formatBattleReport(main.battle, '═══════════════════════════════════════════════════════\n• Troop Formation\n');
 const raw = (main.battle.battleLog || []).join('\n');
-fs.writeFileSync('/workspace/dragonfire-builder/seasmoke-report.txt', report);
-fs.writeFileSync('/workspace/dragonfire-builder/seasmoke-raw.txt', raw);
+fs.mkdirSync('./tmp', { recursive: true });
+fs.writeFileSync('./tmp/seasmoke-report.txt', report);
+fs.writeFileSync('./tmp/seasmoke-raw.txt', raw);
 
 console.log(report);
 console.log('\n===== RAW LOG (Seasmoke lines) =====');
@@ -327,7 +328,7 @@ function physOnR3(statusId) {
 const noPanic = physOnR3(null);
 const withPanic = physOnR3('PANIC');
 check('Panic 2x Infectious Wrath physical vs no Panic', noPanic.eL != null && withPanic.eL != null && withPanic.eL > noPanic.eL, 'noPanicL=' + noPanic.eL + ' panicL=' + withPanic.eL);
-check('Panic doubles rate 30% to 60%', noPanic.eL && withPanic.eL && Math.abs((withPanic.eL / noPanic.eL) - (1.6 / 1.3)) < 0.08, 'ratio=' + (noPanic.eL ? (withPanic.eL / noPanic.eL).toFixed(3) : 'n/a') + ' expect~' + (1.6 / 1.3).toFixed(3));
+check('Panic doubles rate 30% to 60%', noPanic.eL && withPanic.eL && Math.abs((withPanic.eL / noPanic.eL) - 2) < 0.08, 'ratio=' + (noPanic.eL ? (withPanic.eL / noPanic.eL).toFixed(3) : 'n/a') + ' expect~2');
 
 const mixPanic = setup(() => 0);
 mixPanic.battle.start();

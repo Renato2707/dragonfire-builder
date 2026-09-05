@@ -181,8 +181,9 @@ for (let i = 0; i < 10; i += 1) main.battle.runRound();
 
 const report = formatBattleReport(main.battle, '═══════════════════════════════════════════════════════\n• Troop Formation\n');
 const raw = (main.battle.battleLog || []).join('\n');
-fs.writeFileSync('/workspace/dragonfire-builder/rhysarion-report.txt', report);
-fs.writeFileSync('/workspace/dragonfire-builder/rhysarion-raw.txt', raw);
+fs.mkdirSync('./tmp', { recursive: true });
+fs.writeFileSync('./tmp/rhysarion-report.txt', report);
+fs.writeFileSync('./tmp/rhysarion-raw.txt', raw);
 
 console.log(report);
 console.log('\n===== RAW LOG (Rhysarion lines) =====');
@@ -328,11 +329,11 @@ function fireOnR2(statusId) {
 const noCtrl = fireOnR2(null);
 const withStun = fireOnR2('STUN');
 check('Stun 1.5x Dawnsong fire vs no Control', noCtrl.dmg != null && withStun.dmg != null && withStun.dmg > noCtrl.dmg, 'noCtrl=' + noCtrl.dmg + ' stun=' + withStun.dmg);
-check('Stun raises fire rate 20% to 30%', noCtrl.dmg && withStun.dmg && Math.abs((withStun.dmg / noCtrl.dmg) - (1.3 / 1.2)) < 0.08, 'ratio=' + (noCtrl.dmg ? (withStun.dmg / noCtrl.dmg).toFixed(3) : 'n/a') + ' expect~' + (1.3 / 1.2).toFixed(3));
+check('Stun raises fire rate 20% to 30%', noCtrl.dmg && withStun.dmg && Math.abs((withStun.dmg / noCtrl.dmg) - 1.5) < 0.08, 'ratio=' + (noCtrl.dmg ? (withStun.dmg / noCtrl.dmg).toFixed(3) : 'n/a') + ' expect~1.5');
 
 for (const st of ['STAGGER', 'OVERWHELM', 'CONFUSION']) {
   const withSt = fireOnR2(st);
-  check(st + ' counts as Control 1.5x fire', noCtrl.dmg != null && withSt.dmg != null && Math.abs((withSt.dmg / noCtrl.dmg) - (1.3 / 1.2)) < 0.08, 'noCtrl=' + noCtrl.dmg + ' ' + st + '=' + withSt.dmg);
+  check(st + ' counts as Control 1.5x fire', noCtrl.dmg != null && withSt.dmg != null && Math.abs((withSt.dmg / noCtrl.dmg) - 1.5) < 0.08, 'noCtrl=' + noCtrl.dmg + ' ' + st + '=' + withSt.dmg);
 }
 
 // Burn is NOT Control — stay 1.0x

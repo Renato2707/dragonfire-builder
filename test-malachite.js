@@ -158,8 +158,9 @@ for (let i = 0; i < 10; i += 1) main.battle.runRound();
 
 const report = formatBattleReport(main.battle, '═'.repeat(55) + '\n• Troop Formation\n');
 const raw = (main.battle.battleLog || []).join('\n');
-fs.writeFileSync('/workspace/dragonfire-builder/malachite-report.txt', report);
-fs.writeFileSync('/workspace/dragonfire-builder/malachite-raw.txt', raw);
+fs.mkdirSync('./tmp', { recursive: true });
+fs.writeFileSync('./tmp/malachite-report.txt', report);
+fs.writeFileSync('./tmp/malachite-raw.txt', raw);
 
 console.log(report);
 console.log('\n===== RAW LOG (Malachite lines) =====');

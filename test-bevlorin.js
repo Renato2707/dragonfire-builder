@@ -72,8 +72,9 @@ main.battle.start();
 for (let i = 0; i < 10; i += 1) main.battle.runRound();
 
 const report = formatBattleReport(main.battle, '═'.repeat(55) + '\n• Troop Formation\n');
-fs.writeFileSync('/workspace/dragonfire-builder/bevlorin-report.txt', report);
-fs.writeFileSync('/workspace/dragonfire-builder/bevlorin-raw.txt', (main.battle.battleLog || []).join('\n'));
+fs.mkdirSync('./tmp', { recursive: true });
+fs.writeFileSync('./tmp/bevlorin-report.txt', report);
+fs.writeFileSync('./tmp/bevlorin-raw.txt', (main.battle.battleLog || []).join('\n'));
 console.log(report);
 
 check("vanguard Champion's Vigor", report.includes("Champion's Vigor"));

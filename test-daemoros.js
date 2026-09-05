@@ -132,8 +132,9 @@ for (let i = 0; i < 10; i += 1) main.battle.runRound();
 
 const report = formatBattleReport(main.battle, '═══════════════════════════════════════════════════════\n• Troop Formation\n');
 const raw = (main.battle.battleLog || []).join('\n');
-fs.writeFileSync('/workspace/dragonfire-builder/daemoros-report.txt', report);
-fs.writeFileSync('/workspace/dragonfire-builder/daemoros-raw.txt', raw);
+fs.mkdirSync('./tmp', { recursive: true });
+fs.writeFileSync('./tmp/daemoros-report.txt', report);
+fs.writeFileSync('./tmp/daemoros-raw.txt', raw);
 
 console.log(dumpEngine('ENGINE AFTER 10 ROUNDS (seed 0)', main.dae, main.left, main.right, main.e0, main.e1, main.e2));
 

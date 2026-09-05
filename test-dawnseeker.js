@@ -137,8 +137,9 @@ for (let i = 0; i < 10; i += 1) main.battle.runRound();
 
 const report = formatBattleReport(main.battle, '═'.repeat(55) + '\n• Troop Formation\n');
 const raw = (main.battle.battleLog || []).join('\n');
-fs.writeFileSync('/workspace/dragonfire-builder/dawnseeker-report.txt', report);
-fs.writeFileSync('/workspace/dragonfire-builder/dawnseeker-raw.txt', raw);
+fs.mkdirSync('./tmp', { recursive: true });
+fs.writeFileSync('./tmp/dawnseeker-report.txt', report);
+fs.writeFileSync('./tmp/dawnseeker-raw.txt', raw);
 
 console.log(dumpEngine('ENGINE AFTER 10 ROUNDS (seed 0)', main.dawn, main.left, main.right, main.e0, main.e1, main.e2));
 

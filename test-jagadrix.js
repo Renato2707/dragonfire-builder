@@ -173,8 +173,9 @@ for (let i = 0; i < 10; i += 1) main.battle.runRound();
 
 const report = formatBattleReport(main.battle, '═══════════════════════════════════════════════════════\n• Troop Formation\n');
 const raw = (main.battle.battleLog || []).join('\n');
-fs.writeFileSync('/workspace/dragonfire-builder/jagadrix-report.txt', report);
-fs.writeFileSync('/workspace/dragonfire-builder/jagadrix-raw.txt', raw);
+fs.mkdirSync('./tmp', { recursive: true });
+fs.writeFileSync('./tmp/jagadrix-report.txt', report);
+fs.writeFileSync('./tmp/jagadrix-raw.txt', raw);
 
 console.log(report);
 console.log('\n===== RAW LOG (Jagadrix lines) =====');
@@ -304,7 +305,7 @@ withPanic.battle.runRound();
 const rawPanic = (withPanic.battle.battleLog || []).join('\n');
 const dmgPanic = (fireHits(echoesChunk(rawPanic, 3)).find(h => h.who === 'EnemyR') || {}).amt;
 check('Panic 2x Echoes fire vs no Panic', dmgNoPanic != null && dmgPanic != null && dmgPanic > dmgNoPanic, 'noPanic=' + dmgNoPanic + ' panic=' + dmgPanic);
-check('Panic raises fire rate 30% to 60%', dmgNoPanic && dmgPanic && Math.abs((dmgPanic / dmgNoPanic) - (1.6 / 1.3)) < 0.08, 'ratio=' + (dmgNoPanic ? (dmgPanic / dmgNoPanic).toFixed(3) : 'n/a') + ' expect~' + (1.6 / 1.3).toFixed(3));
+check('Panic raises fire rate 30% to 60%', dmgNoPanic && dmgPanic && Math.abs((dmgPanic / dmgNoPanic) - 2) < 0.08, 'ratio=' + (dmgNoPanic ? (dmgPanic / dmgNoPanic).toFixed(3) : 'n/a') + ' expect~2');
 
 const allTac = setup(() => 0, {
   e0Stats: { str: 20, inst: 90, int: 20, init: 20 },
