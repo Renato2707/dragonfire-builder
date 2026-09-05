@@ -17,12 +17,34 @@ function enhancedNote(stat) {
 }
 
 export const battlePart1 = {
+  stampTeamTroops() {
+    const troops = this.teamTroop || [];
+    for (const character of this.allCharacters) {
+      if (!character) continue;
+      const troop = troops[character.teamId];
+      if (!troop) continue;
+      if (typeof character.setTroopType === 'function') character.setTroopType(troop);
+      else character.troopType = troop;
+    }
+  },
+  logTroopAffinity() {
+    for (const character of this.allCharacters) {
+      if (!character || character.isDead) continue;
+      const pct = typeof character.getTroopAffinityPct === 'function' ? character.getTroopAffinityPct() : 0;
+      if (!pct) continue;
+      const label = pct > 0 ? 'Troop Affinity' : 'Troop Weakness';
+      const signed = pct > 0 ? `+${pct}%` : `${pct}%`;
+      this.logAction(`${character.name} ${label} ${signed} to Dragon Stats`);
+    }
+  },
   initialize() {
     this.isActive = true;
     this.currentRound = 0;
+    this.stampTeamTroops();
     this.logSeparator('Start of Combat');
     this.logTeamStatus('Team A', this.teamA);
     this.logTeamStatus('Team B', this.teamB);
+    this.logTroopAffinity();
     this.logSeparator();
     for (const character of this.allCharacters) this.executeVanguard(character);
     this.executeHabitsForPhase(PHASES.COMBAT_START, this.allCharacters, 1);

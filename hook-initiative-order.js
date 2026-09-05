@@ -12,9 +12,11 @@ export function applyInitiativeOrder(Battle) {
   Battle.prototype.initialize = function () {
     this.isActive = true;
     this.currentRound = 0;
+    if (typeof this.stampTeamTroops === 'function') this.stampTeamTroops();
     this.logSeparator('Start of Combat');
     this.logTeamStatus('Team A', this.teamA);
     this.logTeamStatus('Team B', this.teamB);
+    if (typeof this.logTroopAffinity === 'function') this.logTroopAffinity();
     this.logSeparator();
     const order = living(this.allCharacters);
     for (const character of order) this.executeVanguard(character);

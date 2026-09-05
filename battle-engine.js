@@ -38,6 +38,7 @@ class Battle {
     this.endReason = '';
     this.battleLog = [];
     this.damageContext = null;
+    this.stampTeamTroops();
   }
 }
 Object.assign(Battle.prototype, battlePart1, battlePart2, battlePart3, battlePart4, battlePart5);
