@@ -310,7 +310,8 @@ check('Panic raises fire rate 30% to 60%', dmgNoPanic && dmgPanic && Math.abs((d
 const allTac = setup(() => 0, {
   e0Stats: { str: 20, inst: 90, int: 20, init: 20 },
   e1Stats: { str: 20, inst: 90, int: 20, init: 20 },
-  e2Stats: { str: 20, inst: 90, int: 20, init: 20 }
+  e2Stats: { str: 20, inst: 90, int: 20, init: 20 },
+  e0Breed: 'Sentinel', e1Breed: 'Sentinel', e2Breed: 'Sentinel'
 });
 allTac.battle.start();
 allTac.battle.runRound();
@@ -323,7 +324,8 @@ check('3 tactical dealers: Echoes fire hits 3', tacHits.length === 3, 'count=' +
 const noTac = setup(() => 0, {
   e0Stats: { str: 20, inst: 20, int: 90, init: 20 },
   e1Stats: { str: 90, inst: 20, int: 20, init: 20 },
-  e2Stats: { str: 20, inst: 20, int: 90, init: 20 }
+  e2Stats: { str: 20, inst: 20, int: 90, init: 20 },
+  e0Breed: 'Hunter', e1Breed: 'Warrior', e2Breed: 'Hunter'
 });
 noTac.battle.start();
 noTac.battle.runRound();

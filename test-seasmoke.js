@@ -224,7 +224,7 @@ check('R3 command fire same lane', /Deals \d+ Fire Damage/.test(cmdChunk(raw, 3)
 check('R6 command fire', /Deals \d+ Fire Damage/.test(cmdChunk(raw, 6)));
 check('R9 command fire', /Deals \d+ Fire Damage/.test(cmdChunk(raw, 9)));
 check('R1 no command fire', !/Deals \d+ Fire Damage/.test(cmdChunk(raw, 1)));
-check('R3 Infectious Wrath physical 2 adj', (rN(raw, 3).match(/Deals \d+ Physical Damage to Enemy/g) || []).length === 2);
+check('R3 Infectious Wrath physical 2 adj', ((rN(raw, 3).split('Seasmoke activates Infectious Wrath')[1] || '').split('Seasmoke launches')[0].match(/Deals \d+ Physical Damage to Enemy/g) || []).length === 2);
 check('R6 Infectious Wrath physical', /Deals \d+ Physical Damage/.test(rN(raw, 6)));
 check('R9 Infectious Wrath physical', /Deals \d+ Physical Damage/.test(rN(raw, 9)));
 check('R1 no Infectious Wrath activate', !/Seasmoke activates Infectious Wrath/.test(rN(raw, 1)));

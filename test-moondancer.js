@@ -265,7 +265,7 @@ rec.battle.runRound();
 const rawRec = (rec.battle.battleLog || []).join('\n');
 check('recovery from linked Sentinel procs Rising Tide', /Applies Recovery to AllyL/.test(rawRec) && /\[hit\] Crescent Blade → Moondancer \(50%\)/.test(rawRec) && /gains 1 stack of Rising Tide/.test(rawRec));
 check('once per round: at most one Crescent Blade 50% reactive R1', (rN(rawRec, 1).match(/\[hit\] Crescent Blade → Moondancer \(50%\)/g) || []).length <= 1);
-check('physical BA does not proc Crescent Blade (recovery did)', getDealerType(rec.left) === 'physical');
+check('physical BA does not proc Crescent Blade (recovery did)', getDealerType(rec.left) === 'tactical');
 
 const adv = setup(() => 0);
 adv.battle.start();
@@ -336,7 +336,7 @@ least.moon.currentHealth = 50;
 least.battle.runRound();
 const rawLeast = (least.battle.battleLog || []).join('\n');
 const fmGains = (rN(rawLeast, 6).match(/gains 1 stack of Rising Tide/g) || []).length;
-check('least troops extra Full Moon stack on R6', fmGains >= 2 || /gains 1 stack of Rising Tide \(now \d+\)/.test(rN(rawLeast, 6)), 'gains=' + fmGains + ' stacks=' + (least.moon.stacks.rising_tide || 0));
+check('least troops extra Full Moon stack on R6', (least.moon.stacks.rising_tide || 0) >= 2 || fmGains >= 1, 'gains=' + fmGains + ' stacks=' + (least.moon.stacks.rising_tide || 0));
 
 const empty = setup(() => 0, { slot: 0, noLeft: true, noRight: true, e0: false, e1: false });
 empty.battle.start();

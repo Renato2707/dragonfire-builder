@@ -64,13 +64,13 @@ function mockFx(ids) {
 }
 
 {
-  const dragon = (id, stats) => ({
-    id, name: id, breed: 'Hunter', rarity: 'Rare',
+  const dragon = (id, stats, breed) => ({
+    id, name: id, breed: breed || 'Hunter', rarity: 'Rare',
     stats: stats || { str: 10, inst: 10, int: 80, init: 10 }
   });
   const caster = new Character(dragon('caster'), 0, 0);
-  const physical = new Character(dragon('physical', { str: 90, inst: 10, int: 10, init: 10 }), 1, 0);
-  const fireEnemy = new Character(dragon('fireE'), 1, 1);
+  const physical = new Character(dragon('physical', { str: 90, inst: 10, int: 10, init: 10 }, 'Warrior'), 1, 0);
+  const fireEnemy = new Character(dragon('fireE', { str: 10, inst: 10, int: 80, init: 10 }, 'Hunter'), 1, 1);
   caster.currentHealth = 40;
   caster.maxHealth = 100;
   const btl = new Battle([caster], [physical, fireEnemy], { verbose: false });
@@ -241,8 +241,8 @@ function mockFx(ids) {
 }
 
 {
-  const mk = (id, team, slot, stats) => new Character({
-    id, name: id, breed: 'Hunter', rarity: 'Rare',
+  const mk = (id, team, slot, stats, breed) => new Character({
+    id, name: id, breed: breed || 'Hunter', rarity: 'Rare',
     stats: stats || { str: 10, inst: 10, int: 10, init: 10 }
   }, team, slot);
   const tairax = mk('tairax', 0, 1);
@@ -286,8 +286,8 @@ function mockFx(ids) {
   locked.setStars(6);
   locked.setHabits([habit]);
   if (locked.getHabitsForPhase(1, 'round_start').length) throw new Error('Gift of Fire should stay locked below 8 stars');
-  const fire = mk('fire', 1, 0, { str: 10, inst: 10, int: 80, init: 10 });
-  const phys = mk('phys', 1, 1, { str: 80, inst: 10, int: 10, init: 10 });
+  const fire = mk('fire', 1, 0, { str: 10, inst: 10, int: 80, init: 10 }, 'Hunter');
+  const phys = mk('phys', 1, 1, { str: 80, inst: 10, int: 10, init: 10 }, 'Warrior');
   const rally = new Battle([mk('vermax', 0, 1)], [fire, phys], { verbose: false });
   const dealers = rally.matchingPerTarget(rally.teamA[0], { side: 'enemy', dealer: 'fire' });
   if (dealers.length !== 1 || dealers[0] !== fire) throw new Error('repeatPer dealer:fire should count one');
@@ -296,12 +296,12 @@ function mockFx(ids) {
 
 {
   const mk = (id, team, slot, stats, opts) => new Character({
-    id, name: id, breed: 'Sentinel', rarity: 'Rare',
+    id, name: id, breed: (opts && opts.breed) || 'Sentinel', rarity: 'Rare',
     stats: stats || { str: 10, inst: 10, int: 10, init: 10 }
   }, team, slot, opts);
   const sun = mk('sunfyre', 0, 1, { str: 10, inst: 10, int: 10, init: 10 }, { stars: 6 });
   const ally = mk('ally', 0, 0);
-  const fire = mk('fire', 1, 1, { str: 10, inst: 10, int: 80, init: 10 });
+  const fire = mk('fire', 1, 1, { str: 10, inst: 10, int: 80, init: 10 }, { breed: 'Hunter' });
   ally.maxHealth = 5000;
   ally.currentHealth = 5000;
   fire.maxHealth = 5000;
@@ -456,8 +456,8 @@ function mockFx(ids) {
 }
 
 {
-  const mk = (id, team, slot, stats) => new Character({
-    id, name: id, breed: 'Hunter', rarity: 'Rare',
+  const mk = (id, team, slot, stats, breed) => new Character({
+    id, name: id, breed: breed || 'Hunter', rarity: 'Rare',
     stats: stats || { str: 10, inst: 10, int: 80, init: 10 }
   }, team, slot, { stars: 4 });
   const habit = new Habit({
@@ -476,7 +476,7 @@ function mockFx(ids) {
   }, 'sunfyre');
   const sun = mk('sunfyre', 0, 1, { str: 10, inst: 80, int: 10, init: 10 });
   const fire = mk('caraxes', 1, 1);
-  const phys = mk('vhagar', 1, 0, { str: 80, inst: 10, int: 10, init: 10 });
+  const phys = mk('vhagar', 1, 0, { str: 80, inst: 10, int: 10, init: 10 }, 'Warrior');
   const fire2 = mk('antares', 1, 2);
   sun.setHabits([habit]);
   const btl = new Battle([sun], [fire, phys, fire2], { verbose: false });
@@ -485,7 +485,7 @@ function mockFx(ids) {
   if (shredded.length !== 1) throw new Error(`Extinguish should hit exactly 1 Fire dealer, got ${shredded.length}`);
   if (phys.getPercentTotal('fire_dealt') !== 0) throw new Error('Extinguish must not hit a Physical dealer');
   const none = mk('sun3', 0, 1, { str: 10, inst: 80, int: 10, init: 10 });
-  const onlyPhys = mk('tank', 1, 1, { str: 80, inst: 10, int: 10, init: 10 });
+  const onlyPhys = mk('tank', 1, 1, { str: 80, inst: 10, int: 10, init: 10 }, 'Warrior');
   const empty = new Battle([none], [onlyPhys], { verbose: false });
   empty.executeHabit(none, habit, 'combat_start', 1);
   if (onlyPhys.getPercentTotal('fire_dealt') !== 0) throw new Error('no Fire dealer should skip Extinguish');
@@ -971,8 +971,8 @@ function mockFx(ids) {
 }
 
 {
-  const mk = (id, team, slot, stats, stars) => new Character({
-    id, name: id, breed: 'Hunter', rarity: 'Rare',
+  const mk = (id, team, slot, stats, stars, breed) => new Character({
+    id, name: id, breed: breed || 'Hunter', rarity: 'Rare',
     stats: stats || { str: 10, inst: 10, int: 80, init: 10 }
   }, team, slot, { stars: stars || 6 });
   const habit = new Habit({
@@ -984,9 +984,9 @@ function mockFx(ids) {
     ]
   }, 'tashix');
   const tashix = mk('tashix', 0, 1);
-  const tac = mk('tac', 1, 0, { str: 10, inst: 80, int: 10, init: 10 });
+  const tac = mk('tac', 1, 0, { str: 10, inst: 80, int: 10, init: 10 }, 6, 'Sentinel');
   const fire = mk('fire', 1, 1);
-  const phys = mk('phys', 1, 2, { str: 80, inst: 10, int: 10, init: 10 });
+  const phys = mk('phys', 1, 2, { str: 80, inst: 10, int: 10, init: 10 }, 6, 'Warrior');
   tashix.setHabits([habit]);
   const btl = new Battle([tashix], [tac, fire, phys], { verbose: false });
   for (let i = 0; i < 3; i += 1) btl.executeHabit(tashix, habit, 'round_start', 1);
@@ -1953,6 +1953,25 @@ function mockFx(ids) {
   if (hasEffect(fresh, 'stagger')) throw new Error('clean enemy should not be Staggered');
   if (vaeldra.lastTauntTarget !== fresh) throw new Error('fresh Taunt should set lastTauntTarget');
   console.log('✓ ifAlready Taunt → Stagger Siren\'s Call\n');
+}
+
+{
+  const mk = (id, breed, stats) => new Character({
+    id, name: id, breed, rarity: 'Rare',
+    stats: stats || { str: 10, inst: 10, int: 10, init: 10 }
+  }, 0, 1);
+  const btl = new Battle([mk('w', 'Warrior')], [mk('h', 'Hunter')], { verbose: false });
+  const warriorInt = mk('wInt', 'Warrior', { str: 10, inst: 10, int: 90, init: 10 });
+  const hunterStr = mk('hStr', 'Hunter', { str: 90, inst: 10, int: 10, init: 10 });
+  const sentinelStr = mk('sStr', 'Sentinel', { str: 90, inst: 10, int: 10, init: 10 });
+  const champFire = mk('cFire', 'Champion', { str: 10, inst: 10, int: 80, init: 10 });
+  const champPhys = mk('cPhys', 'Champion', { str: 80, inst: 10, int: 10, init: 10 });
+  if (btl.selectDamageType(warriorInt) !== 'PHYSICAL') throw new Error('Warrior BA stays Physical even with highest INT');
+  if (btl.selectDamageType(hunterStr) !== 'FIRE') throw new Error('Hunter BA stays Fire even with highest STR');
+  if (btl.selectDamageType(sentinelStr) !== 'TACTICAL') throw new Error('Sentinel BA stays Tactical even with highest STR');
+  if (btl.selectDamageType(champFire) !== 'FIRE') throw new Error('Champion BA follows highest stat (INT → Fire)');
+  if (btl.selectDamageType(champPhys) !== 'PHYSICAL') throw new Error('Champion BA follows highest stat (STR → Physical)');
+  console.log('✓ dealer type from class (Champion uses highest stat)\n');
 }
 
 try {

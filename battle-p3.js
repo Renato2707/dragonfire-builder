@@ -61,12 +61,10 @@ export const battlePart3 = {
     if (defender.isDead) this.logAction(`${defender.name} retreated`);
   },
   selectDamageType(attacker) {
-    const str = attacker.getModifiedStat('str');
-    const inst = attacker.getModifiedStat('inst');
-    const int = attacker.getModifiedStat('int');
-    if (str >= inst && str >= int) return 'PHYSICAL';
-    if (int >= str && int >= inst) return 'FIRE';
-    return 'TACTICAL';
+    const dealer = getDealerType(attacker);
+    if (dealer === 'fire') return 'FIRE';
+    if (dealer === 'tactical') return 'TACTICAL';
+    return 'PHYSICAL';
   },
   alliesOf(character) {
     return character.teamId === 0 ? this.teamA : this.teamB;

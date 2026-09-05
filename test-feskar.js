@@ -210,7 +210,8 @@ check('Warrior on Right Flank is prioritized for Stagger', /Afflicts EnemyR with
 const allPhys = setup(() => 0, {
   e0Stats: { str: 90, inst: 20, int: 20, init: 20 },
   e1Stats: { str: 90, inst: 20, int: 20, init: 20 },
-  e2Stats: { str: 90, inst: 20, int: 20, init: 20 }
+  e2Stats: { str: 90, inst: 20, int: 20, init: 20 },
+  e0Breed: 'Warrior', e1Breed: 'Warrior', e2Breed: 'Warrior'
 });
 allPhys.battle.start();
 allPhys.battle.runRound();
@@ -223,7 +224,8 @@ check('3 physical dealers: Emerald Inferno hits 3', fireHits.length === 3, 'coun
 const noPhys = setup(() => 0, {
   e0Stats: { str: 20, inst: 20, int: 90, init: 20 },
   e1Stats: { str: 20, inst: 90, int: 20, init: 20 },
-  e2Stats: { str: 20, inst: 20, int: 90, init: 20 }
+  e2Stats: { str: 20, inst: 20, int: 90, init: 20 },
+  e0Breed: 'Hunter', e1Breed: 'Sentinel', e2Breed: 'Hunter'
 });
 noPhys.battle.start();
 noPhys.battle.runRound();

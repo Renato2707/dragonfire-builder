@@ -242,7 +242,16 @@ function statusConditionMet(character, key) {
 }
 
 function getDealerType(character) {
-  if (!character || typeof character.getModifiedStat !== 'function') return 'physical';
+  if (!character || typeof character.getModifiedStat !== 'function') {
+    const breed = String((character && character.breed) || '').toLowerCase();
+    if (breed === 'hunter') return 'fire';
+    if (breed === 'sentinel') return 'tactical';
+    return 'physical';
+  }
+  const breed = String(character.breed || '').toLowerCase();
+  if (breed === 'warrior') return 'physical';
+  if (breed === 'hunter') return 'fire';
+  if (breed === 'sentinel') return 'tactical';
   const str = character.getModifiedStat('str');
   const inst = character.getModifiedStat('inst');
   const int = character.getModifiedStat('int');

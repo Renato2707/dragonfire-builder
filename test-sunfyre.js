@@ -151,7 +151,7 @@ check('engine right no vanguard flats', (main.right.flatMods.inst || 0) === 0 &&
 check('engine Unbroken Splendor fire_received -7.5', main.sf.getPercentTotal('fire_received') === -7.5, 'fr=' + main.sf.getPercentTotal('fire_received'));
 check('engine Extinguish fire_dealt on Hunter e0', main.e0.getPercentTotal('fire_dealt') === -13.5, 'e0=' + main.e0.getPercentTotal('fire_dealt') + ' e1=' + main.e1.getPercentTotal('fire_dealt'));
 
-const r1 = setup(() => 0, { chipRight: true, e0Stats: { str: 80, inst: 35, int: 30, init: 20 } });
+const r1 = setup(() => 0, { chipRight: true, e0Stats: { str: 80, inst: 35, int: 30, init: 20 }, e0Breed: 'Warrior' });
 r1.battle.start();
 r1.battle.runRound();
 const rawR1 = (r1.battle.battleLog || []).join('\n');
