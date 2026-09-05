@@ -9,7 +9,10 @@ function bonusOnTarget(bonus) {
   if (String(bonus.on || '').toLowerCase() === 'target') return true;
   if (bonus.dur != null && bonus.status != null) return true;
   const want = statusId(bonus.status);
-  return want === 'control' || want === 'burn' || want === 'panic' || want === 'bleed';
+  return want === 'control' || want === 'burn' || want === 'panic' || want === 'bleed'
+    || want === 'prey' || want === 'vulnerable' || want === 'weakened'
+    || want === 'taunt' || want === 'stun' || want === 'stagger'
+    || want === 'overwhelm' || want === 'confusion' || want === 'slow';
 }
 
 function needsSplit(raw) {

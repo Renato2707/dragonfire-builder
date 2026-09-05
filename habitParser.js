@@ -78,9 +78,16 @@ function ifBonusApplies(ifBonus, attacker, target, extras = {}) {
     checks.push(!!target && getDealerType(target) === String(ifBonus.dealer).toLowerCase());
   }
   if (ifBonus.status) {
-    const who = ifBonus.on === 'self' ? attacker : null;
-    if (who) checks.push(statusConditionMet(who, ifBonus.status));
-    else checks.push(statusConditionMet(target, ifBonus.status) || statusConditionMet(attacker, ifBonus.status));
+    const status = String(ifBonus.status).toLowerCase().replace(/-/g, '_');
+    const on = String(ifBonus.on || '').toLowerCase();
+    const targetStatuses = new Set([
+      'burn', 'panic', 'bleed', 'control', 'prey', 'vulnerable', 'weakened',
+      'taunt', 'stun', 'stagger', 'overwhelm', 'confusion', 'slow'
+    ]);
+    if (on === 'self') checks.push(statusConditionMet(attacker, status));
+    else if (on === 'target') checks.push(!!target && statusConditionMet(target, status));
+    else if (targetStatuses.has(status)) checks.push(!!target && statusConditionMet(target, status));
+    else checks.push(statusConditionMet(attacker, status) || (!!target && statusConditionMet(target, status)));
   }
   if (ifBonus.selfStatus) checks.push(statusConditionMet(attacker, ifBonus.selfStatus));
   if (ifBonus.selfHpAbove != null) checks.push(casterHpPct(attacker) > Number(ifBonus.selfHpAbove));

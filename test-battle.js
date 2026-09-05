@@ -33,6 +33,10 @@ function mockFx(ids) {
   if (!ifBonusApplies({ status: 'panic', pct: 150 }, clean, targetPanic)) throw new Error('ifBonus panic on target failed');
   if (!ifBonusApplies({ status: 'control', pct: 30 }, clean, mockFx(['stagger']))) throw new Error('ifBonus control failed');
   if (ifBonusApplies({ status: 'panic', pct: 150 }, clean, clean)) throw new Error('ifBonus panic miss should be false');
+  if (ifBonusApplies({ status: 'panic', pct: 150 }, targetPanic, clean)) throw new Error('caster Panic must not 2x a clean target');
+  if (ifBonusApplies({ status: 'vulnerable', pct: 25 }, mockFx(['vulnerable']), clean)) throw new Error('caster Vulnerable must not raise damage on a clean target');
+  if (!ifBonusApplies({ status: 'vulnerable', pct: 25 }, clean, mockFx(['vulnerable']))) throw new Error('target Vulnerable should raise damage');
+  if (ifBonusApplies({ status: 'first_strike', pct: 150, on: 'self' }, clean, attacker)) throw new Error('on:self must ignore target First-Strike');
   if (!ifBonusApplies({ defending: true, mult: 2 }, clean, clean, { defending: true })) throw new Error('ifBonus defending should apply');
   if (ifBonusApplies({ defending: true, mult: 2 }, clean, clean, { defending: false })) throw new Error('ifBonus defending miss should be false');
   const moon = {
