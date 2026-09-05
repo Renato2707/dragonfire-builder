@@ -10,12 +10,14 @@
           "t": "status",
           "st": "taunt",
           "dur": 2,
+          "chance": 25,
           "tgt": { "side": "enemy", "count": 3, "select": "any" }
         },
         {
           "t": "mod",
           "mods": [{ "stat": "dmg_received", "pct": 8.4 }],
           "dur": 2,
+          "chance": 25,
           "tgt": { "side": "enemy", "count": 3, "select": "any" }
         }
       ]
