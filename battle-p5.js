@@ -1,7 +1,7 @@
 import {
   calculateFinalDamage, sortByInitiative, isTeamAlive, rollChance,
   formatStatName, formatDamageTypeName, formatStatusName, formatDuration,
-  formatSignedPercent, formatTroopCapacity, isGrantedStatus, formatStackName,
+  formatSignedPercent, formatSignedMod, formatTroopCapacity, isGrantedStatus, formatStackName,
   applyChanceIf
 } from './utils.js';
 import {
@@ -38,7 +38,7 @@ export const battlePart5 = {
         } else {
           const verb = Number(effect.value) < 0 ? 'Reduces' : 'Increases';
           const basic = effect.excludeBasic ? ' (excluding Basic Attacks)' : '';
-          this.logAction(`${verb} ${formatStatName(effect.stat)}${basic} of ${effect.target} by ${formatSignedPercent(effect.value)} ${formatDuration(effect.duration)}${enhancedNote(effect.enhancedBy)}`);
+          this.logAction(`${verb} ${formatStatName(effect.stat)}${basic} of ${effect.target} by ${formatSignedMod(effect.value, effect.fixed)} ${formatDuration(effect.duration)}${enhancedNote(effect.enhancedBy)}`);
         }
       }
     } else if (actionType === 'status') {

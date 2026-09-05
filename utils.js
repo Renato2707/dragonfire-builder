@@ -184,6 +184,16 @@ function formatSignedPercent(value) {
   return `${rounded}%`;
 }
 
+function formatSignedMod(value, fixed) {
+  if (fixed) {
+    const amount = Number(value);
+    if (Number.isNaN(amount)) return String(value);
+    const rounded = Math.round(amount * 100) / 100;
+    return rounded > 0 ? `+${rounded}` : `${rounded}`;
+  }
+  return formatSignedPercent(value);
+}
+
 function formatTroopCapacity(character) {
   if (!character || character.isDead) return 'retreated';
   return `${Math.round(character.currentHealth)}/${Math.round(character.maxHealth)} Troop Capacity`;
@@ -306,6 +316,7 @@ export {
   formatStatusName,
   formatDuration,
   formatSignedPercent,
+  formatSignedMod,
   formatTroopCapacity,
   isGrantedStatus,
   formatStackName,

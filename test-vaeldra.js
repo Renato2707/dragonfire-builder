@@ -78,7 +78,7 @@ function rN(raw, n) {
 function cmdChunk(raw, n) {
   const chunk = rN(raw, n);
   const after = chunk.split('Vaeldra activates Lure')[1] || '';
-  return after.split('Vaeldra launches')[0].split('Vaeldra activates')[0];
+  return after.split('Vaeldra launches')[0];
 }
 
 function anyStatus(ctx, st) {
@@ -143,8 +143,6 @@ check('engine self dmg_received includes vanguard -8 + valor -5', main.va.getPer
 check("engine Dragon's Valor STR +8.5", main.va.getPercentTotal('str') === 8.5, 'str=' + main.va.getPercentTotal('str'));
 check('engine left tactical_dealt +16', main.left.getPercentTotal('tactical_dealt') === 16, 'tac=' + main.left.getPercentTotal('tactical_dealt'));
 check('engine right no tactical vanguard', main.right.getPercentTotal('tactical_dealt') === 0);
-check('engine Infernal Force L fire / R physical +12', main.left.getPercentTotal('fire_dealt') === 12 && main.right.getPercentTotal('physical_dealt') === 12, 'L fire=' + main.left.getPercentTotal('fire_dealt') + ' R phys=' + main.right.getPercentTotal('physical_dealt'));
-check('engine Siren physical_received -10 self', main.va.getPercentTotal('physical_received') === -10, 'physRecv=' + main.va.getPercentTotal('physical_received'));
 check('seed 0 Taunt or Stagger somewhere', anyStatus(main, 'taunt') || anyStatus(main, 'stagger') || /Taunt/.test(raw) || /Stagger/.test(raw));
 
 const r1 = setup(() => 0);
@@ -152,6 +150,8 @@ r1.battle.start();
 r1.battle.runRound();
 const rawR1 = (r1.battle.battleLog || []).join('\n');
 check('R1 Valor + Ensnare + Infernal + Siren + Lure', /Dragon's Valor/.test(rawR1) && /Ensnare/.test(rawR1) && /Infernal Force/.test(rawR1) && /Siren's Call/.test(rawR1) && /Lure/.test(rawR1));
+check('engine Infernal Force L fire / R physical +12', r1.left.getPercentTotal('fire_dealt') === 12 && r1.right.getPercentTotal('physical_dealt') === 12, 'L fire=' + r1.left.getPercentTotal('fire_dealt') + ' R phys=' + r1.right.getPercentTotal('physical_dealt'));
+check('engine Siren physical_received -10 self', r1.va.getPercentTotal('physical_received') === -10, 'physRecv=' + r1.va.getPercentTotal('physical_received'));
 
 const miss = setup(() => 0.99);
 miss.battle.start();

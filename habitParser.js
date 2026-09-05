@@ -379,7 +379,8 @@ function executeModAction(habit, actionData, attacker, targets, scalingValue, ra
           value: value[stat],
           duration,
           excludeBasic: !!raw.excludeBasic,
-          enhancedBy: raw.scaleStat || null
+          enhancedBy: raw.scaleStat || null,
+          fixed: !!valueFlags[stat]
         });
       }
     }
