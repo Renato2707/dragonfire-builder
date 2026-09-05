@@ -70,10 +70,12 @@ function getDamageTypeConfig(damageType) {
   return type;
 }
 
+const DAMAGE_VARIANCE = 0;
+
 function calculateBaseDamage(attacker, damageType) {
   const typeConfig = getDamageTypeConfig(damageType);
   const attackerStat = attacker.getModifiedStat(typeConfig.causedBy);
-  const variance = getRandomInt(-typeConfig.variance, typeConfig.variance);
+  const variance = DAMAGE_VARIANCE ? getRandomInt(-typeConfig.variance, typeConfig.variance) : 0;
   return Math.max(1, Math.round(attackerStat * 1.2 + variance));
 }
 

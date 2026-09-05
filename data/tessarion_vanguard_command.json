@@ -10,7 +10,7 @@
           "t": "dmg",
           "dt": "fire",
           "pct": 95,
-          "tgt": { "side": "enemy", "count": 1, "select": "dealer:physical" }
+          "tgt": { "side": "enemy", "count": 1, "select": "prefer_dealer:physical" }
         },
         {
           "t": "mod",
@@ -18,7 +18,7 @@
           "ifBonus": { "dealer": "physical", "pct": -20 },
           "dur": 2,
           "chance": 50,
-          "tgt": { "side": "enemy", "count": 1, "select": "dealer:physical" }
+          "tgt": { "side": "enemy", "count": 1, "select": "last_dmg" }
         }
       ]
     },

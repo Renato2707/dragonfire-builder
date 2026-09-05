@@ -6,7 +6,7 @@
       "slot": 1,
       "unlockStar": 2,
       "name": "Crushing Force",
-      "targeting": "1 Ally (Left Flank), 1 Ally (Right Flank)",
+      "targeting": "Left Flank Physical; 1 Ally Tactical (prefer Right Flank)",
       "effectType": "Stat Modifier",
       "duration": "3 Rounds",
       "scalingRaw": "PHYSICAL_DEALT: 9% | 10.8% | 12.6% | 15.3% | 18% ; TACTICAL_DEALT: 9% | 10.8% | 12.6% | 15.3% | 18%",
@@ -24,7 +24,7 @@
           "fixed": false
         }
       ],
-      "description": "Start of Round 1: Increase Physical Damage Dealt of 1 Ally (prioritizes Left Flank) and Tactical Damage Dealt of 1 Ally (prioritizes Right Flank) for 3 rounds.",
+      "description": "Start of Round 1: Increase Physical Damage Dealt of the Left Flank and Tactical Damage Dealt of 1 Ally (prioritizes Right Flank) for 3 rounds.",
       "structured": [
         {
           "phase": "round_start",
@@ -34,7 +34,7 @@
               "t": "mod",
               "mods": [{ "stat": "physical_dealt", "pct": [9, 10.8, 12.6, 15.3, 18] }],
               "dur": 3,
-              "tgt": { "side": "ally", "count": 1, "select": "prefer_lane:L" }
+              "tgt": { "side": "ally", "count": 1, "slot": 0, "excludeSelf": true }
             },
             {
               "t": "mod",

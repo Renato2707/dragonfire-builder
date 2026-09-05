@@ -11,18 +11,8 @@
       "duration": "3 Rounds",
       "scalingRaw": "INST: -18% | -21.6% | -25.2% | -30.6% | -36% ; INIT: -18% | -21.6% | -25.2% | -30.6% | -36%",
       "scaling": [
-        {
-          "label": "INST",
-          "values": [-18, -21.6, -25.2, -30.6, -36],
-          "unit": "%",
-          "fixed": false
-        },
-        {
-          "label": "INIT",
-          "values": [-18, -21.6, -25.2, -30.6, -36],
-          "unit": "%",
-          "fixed": false
-        }
+        { "label": "INST", "values": [-18, -21.6, -25.2, -30.6, -36], "unit": "%", "fixed": false },
+        { "label": "INIT", "values": [-18, -21.6, -25.2, -30.6, -36], "unit": "%", "fixed": false }
       ],
       "description": "Round 1: Reduce Instinct and Initiative (enhanced by Intelligence) of 2 Enemies within adjacency for 3 rounds.",
       "structured": [
@@ -54,18 +44,8 @@
       "duration": "3 Rounds",
       "scalingRaw": "FIRE_RECEIVED: 15% | 18% | 21% | 25.5% | 30% ; PHYSICAL_RECEIVED: 15% | 18% | 21% | 25.5% | 30%",
       "scaling": [
-        {
-          "label": "FIRE_RECEIVED",
-          "values": [15, 18, 21, 25.5, 30],
-          "unit": "%",
-          "fixed": false
-        },
-        {
-          "label": "PHYSICAL_RECEIVED",
-          "values": [15, 18, 21, 25.5, 30],
-          "unit": "%",
-          "fixed": false
-        }
+        { "label": "FIRE_RECEIVED", "values": [15, 18, 21, 25.5, 30], "unit": "%", "fixed": false },
+        { "label": "PHYSICAL_RECEIVED", "values": [15, 18, 21, 25.5, 30], "unit": "%", "fixed": false }
       ],
       "description": "Start of Round 1: Increase Fire Damage Received of 1 Enemy (prioritizes Left Flank) and Physical Damage Received excluding Basic Attacks of 1 Enemy (prioritizes Right Flank) for 3 rounds.",
       "structured": [
@@ -100,12 +80,7 @@
       "duration": "2 Rounds",
       "scalingRaw": "Vulnerable Chance: 10% | 12% | 14% | 17% | 20%",
       "scaling": [
-        {
-          "label": "Vulnerable Chance",
-          "values": [10, 12, 14, 17, 20],
-          "unit": "%",
-          "fixed": false
-        }
+        { "label": "Vulnerable Chance", "values": [10, 12, 14, 17, 20], "unit": "%", "fixed": false }
       ],
       "description": "Each Round: chance to afflict Vulnerable (+15%) on 2 Enemies within adjacency for 2 rounds. Chance doubled vs Panic.",
       "structured": [
@@ -119,7 +94,7 @@
               "val": 15,
               "dur": 2,
               "chance": [10, 12, 14, 17, 20],
-              "chanceIf": { "targetStatus": "panic", "mult": 2 },
+              "chanceIf": { "panic": 2 },
               "tgt": { "side": "enemy", "count": 2, "select": "adjacency" }
             }
           ]
@@ -136,18 +111,8 @@
       "duration": "Whole Combat",
       "scalingRaw": "DMG_RECEIVED: -5% | -6% | -7% | -8.5% | -10% ; INT: 8.5% | 10.2% | 11.9% | 14.45% | 17%",
       "scaling": [
-        {
-          "label": "DMG_RECEIVED",
-          "values": [-5, -6, -7, -8.5, -10],
-          "unit": "%",
-          "fixed": false
-        },
-        {
-          "label": "INT",
-          "values": [8.5, 10.2, 11.9, 14.45, 17],
-          "unit": "%",
-          "fixed": false
-        }
+        { "label": "DMG_RECEIVED", "values": [-5, -6, -7, -8.5, -10], "unit": "%", "fixed": false },
+        { "label": "INT", "values": [8.5, 10.2, 11.9, 14.45, 17], "unit": "%", "fixed": false }
       ],
       "description": "Start of Combat: Reduce your Damage Received and increase your Intelligence until the end of combat.",
       "structured": [
@@ -178,30 +143,10 @@
       "duration": "2 Rounds",
       "scalingRaw": "Rate1: 60% | 78% | 96% | 120% | 150% ; Burn1: 40% | 52% | 64% | 80% | 100% ; Rate2: 30% | 39% | 48% | 60% | 75% ; Burn2: 20% | 26% | 32% | 40% | 50%",
       "scaling": [
-        {
-          "label": "Rate1",
-          "values": [60, 78, 96, 120, 150],
-          "unit": "%",
-          "fixed": false
-        },
-        {
-          "label": "Burn1",
-          "values": [40, 52, 64, 80, 100],
-          "unit": "%",
-          "fixed": false
-        },
-        {
-          "label": "Rate2",
-          "values": [30, 39, 48, 60, 75],
-          "unit": "%",
-          "fixed": false
-        },
-        {
-          "label": "Burn2",
-          "values": [20, 26, 32, 40, 50],
-          "unit": "%",
-          "fixed": false
-        }
+        { "label": "Rate1", "values": [60, 78, 96, 120, 150], "unit": "%", "fixed": false },
+        { "label": "Burn1", "values": [40, 52, 64, 80, 100], "unit": "%", "fixed": false },
+        { "label": "Rate2", "values": [30, 39, 48, 60, 75], "unit": "%", "fixed": false },
+        { "label": "Burn2", "values": [20, 26, 32, 40, 50], "unit": "%", "fixed": false }
       ],
       "description": "Breath of Fire gains: Rounds 2, 5, 8 deal Fire Damage to 1 Enemy then a different Enemy, with a Burn chance on each.",
       "structured": [

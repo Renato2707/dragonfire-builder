@@ -6,91 +6,32 @@
       "slot": 1,
       "unlockStar": 2,
       "name": "Night Guardian",
-      "trigger": "Each Action / Round",
       "targeting": "2 Allies",
       "effectType": "Cleanse, Status Effect",
       "duration": "Instant / 1 Rounds",
-      "scalingRaw": "Cleanse: 1 negative effect ; Chance: 15% | 18% | 21% | 25.5% | 30% ; evade (10%) ; Chance: 15% | 18% | 21% | 25.5% | 30%",
+      "scalingRaw": "Chance: 15% | 18% | 21% | 25.5% | 30%",
       "scaling": [
-        {
-          "label": "Cleanse",
-          "values": [
-            "1 negative effect"
-          ],
-          "unit": null,
-          "fixed": true
-        },
-        {
-          "label": "Chance",
-          "values": [
-            15,
-            18,
-            21,
-            25.5,
-            30
-          ],
-          "unit": "%",
-          "fixed": false
-        },
-        {
-          "label": "Value",
-          "values": [
-            "evade (10%)"
-          ],
-          "unit": "%",
-          "fixed": true
-        },
-        {
-          "label": "Chance",
-          "values": [
-            15,
-            18,
-            21,
-            25.5,
-            30
-          ],
-          "unit": "%",
-          "fixed": false
-        }
+        { "label": "Chance", "values": [15, 18, 21, 25.5, 30], "unit": "%", "fixed": false }
       ],
-      "description": "Each Action / Round: Cleanse: 1 negative effect ; Chance: 15% | 18% | 21% | 25.5% | 30% ; evade (10%) ; Chance: 15% | 18% | 21% | 25.5% | 30% on 2 Allies for Instant / 1 Rounds.",
+      "description": "Each round: chance to cleanse 1 negative effect and grant Evade 10% to 2 Allies for 1 round.",
       "structured": [
         {
-          "when": "each",
+          "phase": "turn",
+          "rounds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
           "actions": [
             {
               "t": "cleanse",
               "count": 1,
-              "chanceEach": [
-                15,
-                18,
-                21,
-                25.5,
-                30
-              ],
-              "tgt": {
-                "side": "ally",
-                "count": 2,
-                "select": "any"
-              }
+              "chance": [15, 18, 21, 25.5, 30],
+              "tgt": { "side": "ally", "count": 2, "select": "any" }
             },
             {
               "t": "status",
               "st": "evade",
               "val": 10,
               "dur": 1,
-              "chance": [
-                15,
-                18,
-                21,
-                25.5,
-                30
-              ],
-              "tgt": {
-                "side": "ally",
-                "count": 2,
-                "select": "any"
-              }
+              "chance": [15, 18, 21, 25.5, 30],
+              "tgt": { "side": "ally", "count": 2, "select": "any" }
             }
           ]
         }
@@ -101,72 +42,28 @@
       "slot": 2,
       "unlockStar": 4,
       "name": "Battle Subversion",
-      "trigger": "Start of Combat",
       "targeting": "3 Enemies",
-      "effectType": "Stat Modifier (Debuff)",
+      "effectType": "Stat Modifier",
       "duration": "Whole Combat",
       "scalingRaw": "INT: -5% | -6% | -7% | -8.85% | -10.5% ; INIT: -5% | -6% | -7% | -8.85% | -10.5%",
       "scaling": [
-        {
-          "label": "INT",
-          "values": [
-            -5,
-            -6,
-            -7,
-            -8.85,
-            -10.5
-          ],
-          "unit": "%",
-          "fixed": false
-        },
-        {
-          "label": "INIT",
-          "values": [
-            -5,
-            -6,
-            -7,
-            -8.85,
-            -10.5
-          ],
-          "unit": "%",
-          "fixed": false
-        }
+        { "label": "INT", "values": [-5, -6, -7, -8.85, -10.5], "unit": "%", "fixed": false },
+        { "label": "INIT", "values": [-5, -6, -7, -8.85, -10.5], "unit": "%", "fixed": false }
       ],
-      "description": "Start of Combat: INT: -5% | -6% | -7% | -8.85% | -10.5% ; INIT: -5% | -6% | -7% | -8.85% | -10.5% on 3 Enemies for Whole Combat.",
+      "description": "Start of Combat: Reduce Intelligence and Initiative of 3 Enemies until the end of combat.",
       "structured": [
         {
-          "when": "combat_start",
+          "phase": "combat_start",
+          "rounds": [1],
           "actions": [
             {
               "t": "mod",
               "mods": [
-                {
-                  "stat": "int",
-                  "pct": [
-                    -5,
-                    -6,
-                    -7,
-                    -8.85,
-                    -10.5
-                  ]
-                },
-                {
-                  "stat": "init",
-                  "pct": [
-                    -5,
-                    -6,
-                    -7,
-                    -8.85,
-                    -10.5
-                  ]
-                }
+                { "stat": "int", "pct": [-5, -6, -7, -8.85, -10.5] },
+                { "stat": "init", "pct": [-5, -6, -7, -8.85, -10.5] }
               ],
               "dur": "combat",
-              "tgt": {
-                "side": "enemy",
-                "count": 3,
-                "select": "any"
-              }
+              "tgt": { "side": "enemy", "count": 3, "select": "any" }
             }
           ]
         }
@@ -177,79 +74,37 @@
       "slot": 3,
       "unlockStar": 6,
       "name": "Ill Portents",
-      "trigger": "Each Action / Round / Rounds 6",
-      "targeting": "1 Enemies (prefer status:solar flare), 3 Enemies",
-      "effectType": "Damage, Status Effect",
+      "targeting": "1 Enemy with Solar Flare; 3 Enemies",
+      "effectType": "Direct Damage, Status Effect",
       "duration": "Instant / Whole Combat",
-      "scalingRaw": "Tactical Dmg: 30% | 44% | 58% | 79% | 100% ; Chance: 50% ; solar flare",
+      "scalingRaw": "Tactical Dmg: 30% | 44% | 58% | 79% | 100%",
       "scaling": [
-        {
-          "label": "Tactical Dmg",
-          "values": [
-            30,
-            44,
-            58,
-            79,
-            100
-          ],
-          "unit": "%",
-          "fixed": false
-        },
-        {
-          "label": "Chance",
-          "values": [
-            50
-          ],
-          "unit": "%",
-          "fixed": true
-        },
-        {
-          "label": "Value",
-          "values": [
-            "solar flare"
-          ],
-          "unit": null,
-          "fixed": true
-        }
+        { "label": "Tactical Dmg", "values": [30, 44, 58, 79, 100], "unit": "%", "fixed": false }
       ],
-      "description": "Each Action / Round / Rounds 6: Tactical Dmg: 30% | 44% | 58% | 79% | 100% ; Chance: 50% ; solar flare on 1 Enemies (prefer status:solar flare), 3 Enemies for Instant / Whole Combat.",
+      "description": "Each round: 50% chance to deal Tactical Damage to 1 Enemy with Solar Flare. Round 6: mark 3 Enemies with Solar Flare.",
       "structured": [
         {
-          "when": "each",
+          "phase": "turn",
+          "rounds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
           "actions": [
             {
               "t": "dmg",
               "dt": "tactical",
-              "pct": [
-                30,
-                44,
-                58,
-                79,
-                100
-              ],
+              "pct": [30, 44, 58, 79, 100],
               "chance": 50,
-              "tgt": {
-                "side": "enemy",
-                "count": 1,
-                "select": "prefer_status:solar_flare"
-              }
+              "tgt": { "side": "enemy", "count": 1, "select": "prefer_status:solar_flare" }
             }
           ]
         },
         {
-          "when": "rounds",
-          "rounds": [
-            6
-          ],
+          "phase": "round_start",
+          "rounds": [6],
           "actions": [
             {
               "t": "status",
               "st": "solar_flare",
               "dur": "combat",
-              "tgt": {
-                "side": "enemy",
-                "count": 3
-              }
+              "tgt": { "side": "enemy", "count": 3, "select": "any" }
             }
           ]
         }
@@ -260,50 +115,24 @@
       "slot": 4,
       "unlockStar": 8,
       "name": "Tactical Breach",
-      "trigger": "Start of Combat",
-      "targeting": "1 Enemies (same lane)",
-      "effectType": "Stat Modifier (Buff)",
+      "targeting": "1 Enemy (Same Lane)",
+      "effectType": "Stat Modifier",
       "duration": "Whole Combat",
-      "scalingRaw": "Tactical Dmg Received: 10% | 12% | 14% | 17% | 20%",
+      "scalingRaw": "TACTICAL_RECEIVED: 10% | 12% | 14% | 17% | 20%",
       "scaling": [
-        {
-          "label": "Tactical Dmg Received",
-          "values": [
-            10,
-            12,
-            14,
-            17,
-            20
-          ],
-          "unit": "%",
-          "fixed": false
-        }
+        { "label": "TACTICAL_RECEIVED", "values": [10, 12, 14, 17, 20], "unit": "%", "fixed": false }
       ],
-      "description": "Start of Combat: Tactical Dmg Received: 10% | 12% | 14% | 17% | 20% on 1 Enemies (same lane) for Whole Combat.",
+      "description": "Start of Combat: Increase Tactical Damage Received of 1 Enemy in the same lane until the end of combat.",
       "structured": [
         {
-          "when": "combat_start",
+          "phase": "combat_start",
+          "rounds": [1],
           "actions": [
             {
               "t": "mod",
-              "mods": [
-                {
-                  "stat": "tactical_received",
-                  "pct": [
-                    10,
-                    12,
-                    14,
-                    17,
-                    20
-                  ]
-                }
-              ],
+              "mods": [{ "stat": "tactical_received", "pct": [10, 12, 14, 17, 20] }],
               "dur": "combat",
-              "tgt": {
-                "side": "enemy",
-                "count": 1,
-                "select": "same_lane"
-              }
+              "tgt": { "side": "enemy", "count": 1, "select": "same_lane" }
             }
           ]
         }
@@ -314,59 +143,25 @@
       "slot": 5,
       "unlockStar": 10,
       "name": "Wishkeeper's Grace",
-      "trigger": "Each Action / Round",
-      "targeting": "2 Allies (adjacency)",
-      "effectType": "Stat Modifier (Debuff)",
-      "duration": "1 Rounds",
-      "scalingRaw": "Dmg Received: -6% | -7.8% | -9.6% | -12% | -15% ; Chance: 50%",
+      "targeting": "2 Allies (Adjacent)",
+      "effectType": "Stat Modifier",
+      "duration": "1 Round",
+      "scalingRaw": "DMG_RECEIVED: -6% | -7.8% | -9.6% | -12% | -15%",
       "scaling": [
-        {
-          "label": "Dmg Received",
-          "values": [
-            -6,
-            -7.8,
-            -9.6,
-            -12,
-            -15
-          ],
-          "unit": "%",
-          "fixed": false
-        },
-        {
-          "label": "Chance",
-          "values": [
-            50
-          ],
-          "unit": "%",
-          "fixed": true
-        }
+        { "label": "DMG_RECEIVED", "values": [-6, -7.8, -9.6, -12, -15], "unit": "%", "fixed": false }
       ],
-      "description": "Each Action / Round: Dmg Received: -6% | -7.8% | -9.6% | -12% | -15% ; Chance: 50% on 2 Allies (adjacency) for 1 Rounds.",
+      "description": "Each round: 50% chance to reduce Damage Received of 2 adjacent Allies for 1 round.",
       "structured": [
         {
-          "when": "each",
+          "phase": "turn",
+          "rounds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
           "actions": [
             {
               "t": "mod",
-              "mods": [
-                {
-                  "stat": "dmg_received",
-                  "pct": [
-                    -6,
-                    -7.8,
-                    -9.6,
-                    -12,
-                    -15
-                  ]
-                }
-              ],
+              "mods": [{ "stat": "dmg_received", "pct": [-6, -7.8, -9.6, -12, -15] }],
               "dur": 1,
-              "tgt": {
-                "side": "ally",
-                "count": 2,
-                "select": "adjacency"
-              },
-              "chance": 50
+              "chance": 50,
+              "tgt": { "side": "ally", "count": 2, "select": "adjacency" }
             }
           ]
         }
