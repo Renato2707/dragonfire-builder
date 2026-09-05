@@ -43,9 +43,9 @@ const teamA = [
 teamA.forEach(c => c.setTroopType('shieldbearers'));
 
 const teamB = [
-  make('syrax', 1, 0, 5),
-  make('vaeldra', 1, 1, 7),
-  make('daemoros', 1, 2, 4)
+  make('syrax', 1, 0, 5, 5),
+  make('vaeldra', 1, 1, 7, 5),
+  make('daemoros', 1, 2, 4, 5)
 ];
 teamB.forEach(c => c.setTroopType('archers'));
 

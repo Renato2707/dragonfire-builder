@@ -1,5 +1,5 @@
-function aliveEnemies(battle, character) {
-  return battle.enemiesOf(character).filter(c => c && !c.isDead && c !== character);
+function aliveFrom(pool, character) {
+  return (pool || []).filter(c => c && !c.isDead && c !== character);
 }
 
 function tauntSource(character, alive) {
@@ -19,10 +19,15 @@ export function applySameLaneBasic(Battle) {
   if (Battle.prototype.__sameLaneBasic) return;
   Battle.prototype.__sameLaneBasic = true;
   Battle.prototype.selectBasicAttackTarget = function (character) {
-    const alive = aliveEnemies(this, character);
+    const pools = typeof this.teamPools === 'function'
+      ? this.teamPools(character)
+      : { enemies: this.enemiesOf(character) };
+    const alive = aliveFrom(pools.enemies, character);
     if (!alive.length) return null;
-    const taunt = tauntSource(character, alive);
-    if (taunt) return taunt;
+    if (!character.confusedThisActivation) {
+      const taunt = tauntSource(character, alive);
+      if (taunt) return taunt;
+    }
     const same = alive.find(c => c.slotPosition === character.slotPosition);
     if (same) return same;
     const vanguard = alive.find(c => c.slotPosition === 1);

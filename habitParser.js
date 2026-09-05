@@ -418,8 +418,19 @@ function executeHealAction(habit, actionData, attacker, targets, scalingValue, e
   }
   for (const target of targets) {
     if (!target || target.isDead) continue;
-    const usedRate = resolveIfBonusRate(rate, bonusSpec(raw), attacker, target, extras);
-    let amount = target.maxHealth * (usedRate / 100);
+    let usedRate = rate;
+    const bonus = bonusSpec(raw);
+    if (bonus && bonus.pct != null && ifBonusApplies(bonus, attacker, target, extras)) {
+      usedRate = scaleByStat(bonus.pct, attacker, bonus.scaleStat);
+    }
+    const statName = raw.scaleStat || 'inst';
+    const stat = typeof attacker.getModifiedStat === 'function'
+      ? attacker.getModifiedStat(statName)
+      : 50;
+    let amount = Math.max(1, Number(stat) * 1.2) * (1 + Number(usedRate || 0) / 100);
+    if (bonus && bonus.mult != null && ifBonusApplies(bonus, attacker, target, extras)) {
+      amount *= Number(bonus.mult);
+    }
     if (typeof attacker.getRecoveryDealtMultiplier === 'function') amount *= attacker.getRecoveryDealtMultiplier();
     if (typeof target.getRecoveryReceivedMultiplier === 'function') amount *= target.getRecoveryReceivedMultiplier();
     heals.push({ target: target.name, amount: Math.max(1, Math.round(amount)) });

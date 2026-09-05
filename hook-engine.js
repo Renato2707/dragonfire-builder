@@ -11,7 +11,6 @@ import { applyExtraStatuses } from './hook-extra-statuses.js';
 import { applySameLaneBasic } from './hook-basic-target.js';
 import { applyPrintDamageScale } from './hook-print-scale.js';
 import { applyHealFormula } from './hook-heal-formula.js';
-import { applyHealCap } from './hook-heal-cap.js';
 import { applyHabitRanks } from './hook-habit-rank.js';
 
 function applyPanelRanks(Battle) {
@@ -30,7 +29,6 @@ export function applyEngineHooks(Battle) {
   if (Battle.prototype.__engineHooks) return;
   Battle.prototype.__engineHooks = true;
   applyExtraStatuses();
-  applyHealCap();
   applyHabitRanks(Battle);
   applyPanelRanks(Battle);
   applyInitiativeOrder(Battle);

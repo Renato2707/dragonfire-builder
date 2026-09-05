@@ -74,10 +74,10 @@ const DAMAGE_VARIANCE = 0;
 const TROOP_DAMAGE_REF = 2400;
 
 function commandTroopFactor(attacker) {
-  const troops = Number(attacker && attacker.currentHealth);
-  if (troops > 0) return troops / TROOP_DAMAGE_REF;
   const cap = Number(attacker && attacker.maxHealth);
-  return cap > 0 ? cap / TROOP_DAMAGE_REF : 1;
+  if (cap > 0) return cap / TROOP_DAMAGE_REF;
+  const troops = Number(attacker && attacker.currentHealth);
+  return troops > 0 ? troops / TROOP_DAMAGE_REF : 1;
 }
 
 function calculateBaseDamage(attacker, damageType) {

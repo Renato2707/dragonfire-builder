@@ -135,7 +135,7 @@ function fillHabitSelect(select) {
     const option = document.createElement('option');
     option.value = String(rank);
     option.textContent = `Lvl ${rank}`;
-    if (rank === DEFAULT_HABIT_RANK) option.selected = true;
+    if (rank === 5) option.selected = true;
     select.appendChild(option);
   }
 }
