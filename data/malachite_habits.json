@@ -30,7 +30,7 @@
           "fixed": false
         }
       ],
-      "description": "Each Round: 35% chance to increase Physical Damage Dealt (excluding Basic Attacks) and reduce Tactical Damage Received of 2 other Allies for 2 rounds. Chance is fixed; only the percents scale.",
+      "description": "Each Round: 35% chance to increase Physical Damage Dealt (excluding Basic Attacks) and reduce Tactical Damage Received of 2 other Allies for 2 rounds. Chance is fixed; only the percents scale. excludeBasic applies only to Physical Dealt.",
       "structured": [
         {
           "phase": "turn",
@@ -40,10 +40,17 @@
             {
               "t": "mod",
               "mods": [
-                { "stat": "physical_dealt", "pct": [8, 9.6, 11.2, 13.6, 16] },
-                { "stat": "tactical_received", "pct": [-8, -9.6, -11.2, -13.6, -16] }
+                { "stat": "physical_dealt", "pct": [8, 9.6, 11.2, 13.6, 16] }
               ],
               "excludeBasic": true,
+              "dur": 2,
+              "tgt": { "side": "ally", "count": 2, "select": "any", "excludeSelf": true }
+            },
+            {
+              "t": "mod",
+              "mods": [
+                { "stat": "tactical_received", "pct": [-8, -9.6, -11.2, -13.6, -16] }
+              ],
               "dur": 2,
               "tgt": { "side": "ally", "count": 2, "select": "any", "excludeSelf": true }
             }
@@ -110,18 +117,18 @@
           "fixed": false
         }
       ],
-      "description": "Each Round: chance to grant Advantage (+20%) to 2 other Allies for 2 rounds.",
+      "description": "Each Round: chance to grant Advantage (+20%) to 2 other Allies for 2 rounds. One roll applies to both allies. Advantage increases Damage Dealt.",
       "structured": [
         {
           "phase": "turn",
           "rounds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+          "chance": [10, 12, 14, 17, 20],
           "actions": [
             {
               "t": "status",
               "st": "advantage",
               "val": 20,
               "dur": 2,
-              "chance": [10, 12, 14, 17, 20],
               "tgt": { "side": "ally", "count": 2, "select": "any", "excludeSelf": true }
             }
           ]

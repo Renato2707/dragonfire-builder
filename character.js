@@ -34,7 +34,8 @@ class Character {
     this.positionName = SLOT_NAMES[slotPosition] || `Slot ${slotPosition}`;
     this.level = options.level != null ? options.level : DEFAULT_LEVEL;
     this.stars = options.stars != null ? options.stars : DEFAULT_STARS;
-    this.maxHealth = this.calculateMaxHealth();
+    const capOverride = Number(options.troopCap);
+    this.maxHealth = capOverride > 0 ? Math.round(capOverride) : this.calculateMaxHealth();
     this.currentHealth = this.maxHealth;
     this.isDead = false;
     this.retreatedLastRound = false;
@@ -58,6 +59,7 @@ class Character {
     this.defensePenalty = 0;
     this.parsedHabits = [];
     this.habitRank = options.habitRank != null ? options.habitRank : DEFAULT_HABIT_RANK;
+    this.habitRanks = { ...(options.habitRanks || {}) };
     this.commandKit = null;
     this.vanguardKit = null;
     this.commandName = null;
@@ -243,6 +245,18 @@ class Character {
 
   setHabitRank(rank) {
     this.habitRank = Math.max(1, Math.min(5, rank));
+  }
+
+  setHabitRankFor(name, rank) {
+    if (!name) return;
+    this.habitRanks[name] = Math.max(1, Math.min(5, Number(rank) || 1));
+  }
+
+  rankFor(habit) {
+    const name = habit && habit.name;
+    const specific = name != null ? this.habitRanks[name] : null;
+    const value = specific != null ? specific : this.habitRank;
+    return Math.max(1, Math.min(5, Number(value) || 1));
   }
 
   setStars(stars) {

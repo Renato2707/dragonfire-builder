@@ -33,12 +33,22 @@
             {
               "t": "mod",
               "mods": [
-                { "stat": "int", "pct": [22, 26.4, 30.8, 37.4, 44] },
-                { "stat": "init", "pct": [12.5, 15, 17.5, 21.25, 25] }
+                {
+                  "stat": "int",
+                  "pct": [22, 26.4, 30.8, 37.4, 44]
+                },
+                {
+                  "stat": "init",
+                  "pct": [12.5, 15, 17.5, 21.25, 25]
+                }
               ],
               "scaleStat": "inst",
               "dur": "combat",
-              "tgt": { "side": "ally", "count": 1, "select": "highest:int" }
+              "tgt": {
+                "side": "ally",
+                "count": 1,
+                "select": "highest:int"
+              }
             }
           ]
         }
@@ -69,10 +79,19 @@
           "actions": [
             {
               "t": "mod",
-              "mods": [{ "stat": "init", "pct": [12.5, 15, 17.5, 21.25, 25] }],
+              "mods": [
+                {
+                  "stat": "init",
+                  "pct": [12.5, 15, 17.5, 21.25, 25]
+                }
+              ],
               "scaleStat": "init",
               "dur": "combat",
-              "tgt": { "side": "ally", "count": 3, "select": "any" }
+              "tgt": {
+                "side": "ally",
+                "count": 3,
+                "select": "any"
+              }
             }
           ]
         }
@@ -104,32 +123,53 @@
       "description": "Cleansing Wrath gains: when you Cleanse an enemy, 1 stack of Infectious Wrath (max 3, 3 rounds). Rounds 3, 6, 9: Physical Damage to 2 adjacent Enemies, doubled vs Panic.",
       "structured": [
         {
-          "phase": "turn",
+          "phase": "on_cleanse",
           "rounds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-          "requires": { "command": "Cleansing Wrath" },
+          "requires": {
+            "command": "Cleansing Wrath"
+          },
           "actions": [
             {
               "t": "stack",
               "id": "infectious_wrath",
               "stacks": 1,
               "maxStacks": 3,
-              "mods": [{ "stat": "recovery_received", "pct": [-15, -18, -21, -25.5, -30] }],
+              "mods": [
+                {
+                  "stat": "recovery_received",
+                  "pct": [-15, -18, -21, -25.5, -30]
+                }
+              ],
               "dur": 3,
-              "tgt": { "side": "enemy", "count": 1, "select": "last_cleanse" }
+              "tgt": {
+                "side": "enemy",
+                "count": 1,
+                "select": "last_cleanse"
+              }
             }
           ]
         },
         {
           "phase": "turn",
           "rounds": [3, 6, 9],
-          "requires": { "command": "Cleansing Wrath" },
+          "requires": {
+            "command": "Cleansing Wrath"
+          },
           "actions": [
             {
               "t": "dmg",
               "dt": "physical",
               "pct": [30, 36, 42, 51, 60],
-              "ifBonus": { "on": "target", "status": "panic", "mult": 2 },
-              "tgt": { "side": "enemy", "count": 2, "select": "adjacency" }
+              "ifBonus": {
+                "on": "target",
+                "status": "panic",
+                "mult": 2
+              },
+              "tgt": {
+                "side": "enemy",
+                "count": 2,
+                "select": "adjacency"
+              }
             }
           ]
         }
@@ -140,7 +180,7 @@
       "slot": 4,
       "unlockStar": 8,
       "name": "Cunning Ferocity",
-      "targeting": "2 other Allies (Adjacent)",
+      "targeting": "2 Allies (Adjacent)",
       "effectType": "Stat Modifier",
       "duration": "Whole Combat",
       "scalingRaw": "INT: 7.5% | 9% | 10.5% | 12.75% | 15% ; FIRE_DEALT: 5% | 6% | 7% | 8.5% | 10%",
@@ -158,7 +198,7 @@
           "fixed": false
         }
       ],
-      "description": "Start of Combat: Increase Intelligence (enhanced by Instinct) and Fire Damage Dealt of 2 other adjacent Allies until the end of combat.",
+      "description": "Start of Combat: Increase Intelligence by +7.5% (enhanced by Instinct) and Fire Damage Dealt by +5% of 2 Allies within adjacency until the end of combat.",
       "structured": [
         {
           "phase": "combat_start",
@@ -167,12 +207,35 @@
             {
               "t": "mod",
               "mods": [
-                { "stat": "int", "pct": [7.5, 9, 10.5, 12.75, 15] },
-                { "stat": "fire_dealt", "pct": [5, 6, 7, 8.5, 10] }
+                {
+                  "stat": "int",
+                  "pct": [7.5, 9, 10.5, 12.75, 15]
+                }
               ],
               "scaleStat": "inst",
               "dur": "combat",
-              "tgt": { "side": "ally", "count": 2, "select": "adjacency", "excludeSelf": true }
+              "tgt": {
+                "side": "ally",
+                "count": 2,
+                "select": "adjacency",
+                "excludeSelf": true
+              }
+            },
+            {
+              "t": "mod",
+              "mods": [
+                {
+                  "stat": "fire_dealt",
+                  "pct": [5, 6, 7, 8.5, 10]
+                }
+              ],
+              "dur": "combat",
+              "tgt": {
+                "side": "ally",
+                "count": 2,
+                "select": "adjacency",
+                "excludeSelf": true
+              }
             }
           ]
         }
@@ -201,7 +264,7 @@
           "fixed": false
         }
       ],
-      "description": "Each Round: chance to grant Advantage to 2 other Allies above 50% troop capacity, and chance to grant Resistance to 2 other Allies below 50%, each for 2 rounds. Separate rolls.",
+      "description": "Each Round: chance to grant Advantage to 2 other Allies above 50% troop, and chance to grant Resistance to 2 other Allies below 50%, each for 2 rounds. Separate rolls.",
       "structured": [
         {
           "phase": "turn",
@@ -213,7 +276,13 @@
               "st": "advantage",
               "val": 20,
               "dur": 2,
-              "tgt": { "side": "ally", "count": 2, "select": "any", "excludeSelf": true, "hpAbove": 50 }
+              "tgt": {
+                "side": "ally",
+                "count": 2,
+                "select": "any",
+                "excludeSelf": true,
+                "hpAbove": 50
+              }
             }
           ]
         },
@@ -225,9 +294,15 @@
             {
               "t": "status",
               "st": "resistance",
-              "val": 20,
+              "val": -20,
               "dur": 2,
-              "tgt": { "side": "ally", "count": 2, "select": "any", "excludeSelf": true, "hpBelow": 50 }
+              "tgt": {
+                "side": "ally",
+                "count": 2,
+                "select": "any",
+                "excludeSelf": true,
+                "hpBelow": 50
+              }
             }
           ]
         }

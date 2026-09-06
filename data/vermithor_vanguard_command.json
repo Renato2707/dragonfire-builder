@@ -1,0 +1,67 @@
+{
+  "dragonId": "vermithor",
+  "name": "Bronze Assault",
+  "source": "data/dragons.json commandText — not in Habits.txt / Vanguard and Commands.txt",
+  "command": [
+    {
+      "phase": "turn",
+      "rounds": [2, 4, 6, 8],
+      "actions": [
+        {
+          "t": "dmg",
+          "dt": "physical",
+          "pct": 30,
+          "tgt": { "side": "enemy", "count": 2, "select": "adjacency" }
+        },
+        {
+          "t": "dmg",
+          "dt": "tactical",
+          "pct": 60,
+          "tgt": { "side": "enemy", "count": 2, "select": "adjacency" }
+        }
+      ]
+    },
+    {
+      "phase": "turn",
+      "rounds": [1, 3, 5, 7, 9],
+      "actions": [
+        {
+          "t": "status",
+          "st": "protect",
+          "dur": 2,
+          "chance": 30,
+          "tgt": {
+            "side": "ally",
+            "count": 1,
+            "select": "adjacency",
+            "excludeSelf": true
+          }
+        }
+      ]
+    }
+  ],
+  "vanguard": [
+    {
+      "phase": "combat_start",
+      "rounds": [1],
+      "actions": [
+        {
+          "t": "mod",
+          "mods": [
+            { "stat": "str", "fixed": 15 },
+            { "stat": "int", "fixed": 15 },
+            { "stat": "inst", "fixed": 15 }
+          ],
+          "dur": "combat",
+          "tgt": { "side": "self" }
+        },
+        {
+          "t": "mod",
+          "mods": [{ "stat": "dmg_received", "pct": -8 }],
+          "dur": "combat",
+          "tgt": { "side": "ally", "count": 1, "slot": 2, "excludeSelf": true }
+        }
+      ]
+    }
+  ]
+}

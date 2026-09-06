@@ -1,494 +1,52 @@
-import { SLOT_NAMES } from './character.js';
-import { VANGUARD_NAMES } from './vanguardNames.js';
-import { healRateOf } from './healRate.js';
+import {
+  BAR, DASH, nameTag, findCharacter, laneSuffix, fromPhrase
+} from './reportFormatKit.js';
+import { isStackMag, effectKey, lastTeamSnapshot, combinePctMag, activationMags } from './reportFormatMisc.js';
+import { parseLog } from './reportFormatParse.js';
 
-const BAR = '═'.repeat(55);
-const DASH = '- '.repeat(27).trim();
-const CORE_STAT_NAMES = new Set(['Strength', 'Instinct', 'Intelligence', 'Initiative']);
-const ENHANCE_STAT = {
-  Strength: 'str',
-  Instinct: 'inst',
-  Intelligence: 'int',
-  Initiative: 'init'
-};
-const STAT_KEYS = {
-  Strength: 'str',
-  Instinct: 'inst',
-  Intelligence: 'int',
-  Initiative: 'init',
-  'Damage Dealt': 'dmg_dealt',
-  'Damage Received': 'dmg_received',
-  'Fire Damage Dealt': 'fire_dealt',
-  'Fire Damage Received': 'fire_received',
-  'Physical Damage Dealt': 'physical_dealt',
-  'Physical Damage Received': 'physical_received',
-  'Tactical Damage Dealt': 'tactical_dealt',
-  'Tactical Damage Received': 'tactical_received',
-  'Recovery Dealt': 'recovery_dealt',
-  'Recovery Received': 'recovery_received'
-};
-
-function isBar(line) {
-  return /^═+$/.test(String(line || '').trim());
-}
-
-function nameTag(name) {
-  return `[ ${name} ]`;
-}
-
-function findCharacter(battle, name) {
-  if (!battle || !name) return null;
-  return (battle.allCharacters || []).find(c => c && c.name === name) || null;
-}
-
-function laneOf(battle, name) {
-  const character = findCharacter(battle, name);
-  return character ? (character.positionName || SLOT_NAMES[character.slotPosition] || '') : '';
-}
-
-function laneSuffix(battle, name) {
-  const lane = laneOf(battle, name);
-  return lane ? ` (${lane})` : '';
-}
-
-function fromPhrase(battle, source, target) {
-  if (!source) return '';
-  if (source === target) return 'from itself';
-  return `from ${nameTag(source)}${laneSuffix(battle, source)}`;
-}
-
-function vanguardTitle(battle, actorName) {
-  const character = findCharacter(battle, actorName);
-  if (!character) return 'Vanguard';
-  return character.vanguardName || VANGUARD_NAMES[character.id] || 'Vanguard';
-}
-
-function cleanSkillName(skillName) {
-  return String(skillName || '').replace(/\s*\(Vanguard\)$/i, '').trim();
-}
-
-function isVanguardSkill(battle, actor, skillName) {
-  const clean = cleanSkillName(skillName);
-  if (!clean || /^Vanguard$/i.test(clean)) return true;
-  const title = vanguardTitle(battle, actor);
-  if (title && title.toLowerCase() === clean.toLowerCase()) return true;
-  return Object.values(VANGUARD_NAMES).some(name => name.toLowerCase() === clean.toLowerCase());
-}
-
-function splitTarget(battle, raw) {
-  const text = String(raw || '').trim();
-  const names = ((battle && battle.allCharacters) || [])
-    .map(c => c && c.name)
-    .filter(Boolean)
-    .sort((a, b) => b.length - a.length);
-  for (const name of names) {
-    if (text === name) return { name, rest: '' };
-    if (text.startsWith(`${name} `)) return { name, rest: text.slice(name.length).trim() };
-  }
-  const match = text.match(/^([A-Za-z][A-Za-z'-]*)(?:\s+(.*))?$/);
-  return { name: match ? match[1] : text, rest: (match && match[2]) || '' };
-}
-
-function kitList(character) {
-  if (!character) return [];
-  return [
-    ...(character.parsedHabits || []),
-    character.commandKit,
-    character.vanguardKit
-  ].filter(Boolean);
-}
-
-function kitMatches(character, habit, skill) {
-  const want = cleanSkillName(skill).toLowerCase();
-  if (!want) return false;
-  const names = [
-    habit && habit.name,
-    habit && habit.name && String(habit.name).replace(/ Vanguard$/i, ''),
-    character && character.commandName,
-    character && character.vanguardName,
-    character && VANGUARD_NAMES[character.id]
-  ];
-  return names.some(name => name && String(name).toLowerCase() === want);
-}
-
-function basePctFor(battle, sourceName, skill, statLabel) {
-  const character = findCharacter(battle, sourceName);
-  const key = STAT_KEYS[statLabel] || String(statLabel || '').toLowerCase().replace(/\s+/g, '_');
-  if (!character || !key) return null;
-  const rankIndex = Math.max(0, Math.min(4, (character.habitRank || 1) - 1));
-  for (const habit of kitList(character)) {
-    if (!kitMatches(character, habit, skill)) continue;
-    const blocks = habit.blocks || habit.structured || [];
-    for (const block of blocks) {
-      for (const action of block.actions || []) {
-        for (const mod of action.mods || []) {
-          if (mod.stat !== key) continue;
-          const arr = mod.fixed != null ? mod.fixed : mod.pct;
-          if (Array.isArray(arr)) return arr[rankIndex];
-          if (typeof arr === 'number') return arr;
-        }
-      }
-    }
-  }
-  return null;
-}
-
-function signedPct(value) {
-  const amount = Number(value);
-  if (Number.isNaN(amount)) return String(value);
-  const rounded = Math.round(amount * 100) / 100;
-  if (rounded > 0) return `+${rounded}%`;
-  return `${rounded}%`;
-}
-
-function scaledByStat(character, base, by) {
-  if (base == null || !character || !by) return null;
-  const key = ENHANCE_STAT[by];
-  if (!key || typeof character.getModifiedStat !== 'function') return null;
-  return Math.round(Number(base) * (1 + character.getModifiedStat(key) / 100) * 100) / 100;
-}
-
-function formatMagnitude(stat, rawValue, isVanguard, extra, battle, source, skill) {
-  const value = String(rawValue || '').trim();
-  const signed = value.match(/^([+\-]?)([\d.]+%?)$/);
-  const sign = signed ? (signed[1] || (Number(signed[2]) < 0 ? '-' : '+')) : '';
-  const amount = signed ? signed[2] : value.replace(/^\++/, '');
-  const scaled = signed
-    ? `${sign === '-' ? '-' : '+'}${amount}${/%/.test(amount) ? '' : '%'}`
-    : value;
-  const enhance = String(extra || '').match(/enhanced by ([A-Za-z]+)/i);
-  if (isVanguard && CORE_STAT_NAMES.has(stat) && !enhance) {
-    return `+${String(amount).replace('%', '')} ${stat}`;
-  }
-  if (enhance) {
-    const base = basePctFor(battle, source, skill, stat);
-    if (base != null) {
-      return `${signedPct(base)} ${stat} (enhanced by ${enhance[1]} → ${scaled})`;
-    }
-    return `${scaled} ${stat} (enhanced by ${enhance[1]})`;
-  }
-  if (signed) return `${sign === '-' ? '-' : '+'}${amount} ${stat}`;
-  return `${value} ${stat}`;
-}
-
-function parseDuration(extra) {
-  const text = String(extra || '');
-  if (/until the end of combat/i.test(text) || /end of combat/i.test(text)) return 'combat';
-  const rounds = text.match(/(\d+)\s+round/);
-  return rounds ? Number(rounds[1]) : 'combat';
-}
-
-function effectKey(effect) {
-  return [effect.target, effect.skill, effect.source, effect.mag].join('|');
-}
-
-function isRosterRow(line) {
-  if (/^Team [AB]:$/.test(line) || /^Final Status/.test(line)) return true;
-  return /^(Left Flank|Vanguard|Right Flank) · /.test(line);
-}
-
-function isRetreatEvent(line) {
-  return /^[A-Za-z][A-Za-z' -]* retreated$/.test(line);
-}
-
-function lastTeamSnapshot(rows) {
-  const filtered = (rows || []).filter(isRosterRow);
-  let start = -1;
-  for (let i = 0; i < filtered.length; i += 1) {
-    if (filtered[i] === 'Team A:') start = i;
-  }
-  return start >= 0 ? filtered.slice(start) : filtered;
-}
-
-function parseRecoveryLine(battle, actor, skill, raw) {
-  const split = splitTarget(battle, raw);
-  const caster = findCharacter(battle, actor);
-  const rate = skill && skill !== 'Basic Attack' ? healRateOf(caster, skill) : null;
-  const amount = Number((split.rest.match(/\+?(\d+)\s+Troop Capacity/i) || [])[1] || 0);
-  const by = (split.rest.match(/enhanced by (\w+)/i) || [])[1];
-  const scaled = scaledByStat(caster, rate, by);
-  let detail = 'Recovery';
-  if (rate != null && scaled != null && by) {
-    detail = `Recovery +${rate}% (enhanced by ${by} → +${scaled}%)`;
-  } else if (rate != null && by) {
-    detail = `Recovery +${rate}%, enhanced by ${by}`;
-  } else if (rate != null) {
-    detail = `Recovery +${rate}%`;
-  }
-  return {
-    type: 'recover',
-    actor: actor || split.name,
-    skill: skill && skill !== 'Basic Attack' ? skill : 'Recovery',
-    target: split.name,
-    amount,
-    detail,
-    tick: !skill || skill === 'Basic Attack'
-  };
-}
-
-function parseLog(battle) {
-  const lines = battle.battleLog || [];
-  const effects = [];
-  const rounds = [];
-  let phase = 'combat_start';
-  let round = 0;
-  let actor = null;
-  let skill = null;
-  let vanguard = false;
-  let seq = 0;
-  let endKind = null;
-  let skipRoster = false;
-
-  const ensureRound = number => {
-    let found = rounds.find(r => r.number === number);
-    if (!found) {
-      found = { number, turnOrder: [], actors: [], roster: [], ticks: [] };
-      rounds.push(found);
-    }
-    if (!found.ticks) found.ticks = [];
-    return found;
-  };
-
-  const actorBucket = (number, name) => {
-    const pack = ensureRound(number);
-    let bucket = pack.actors.find(a => a.name === name);
-    if (!bucket) {
-      bucket = { name, actions: [], cannot: null };
-      pack.actors.push(bucket);
-    }
-    return bucket;
-  };
-
-  const pushEffect = (target, mag, extra) => {
-    if (!target || !skill) return;
-    const effect = {
-      seq: seq += 1,
-      target,
-      skill,
-      source: actor || target,
-      mag,
-      round: round || 1,
-      phase,
-      vanguard,
-      dur: parseDuration(extra),
-      turn: phase === 'turns'
-    };
-    effects.push(effect);
-    if (phase === 'turns' && actor) {
-      actorBucket(round || 1, actor).actions.push({ type: 'effect', effect });
-    }
-  };
-
-  const pushAction = (name, action) => {
-    if (!name) return;
-    actorBucket(round || 1, name).actions.push(action);
-  };
-
-  let i = 0;
-  while (i < lines.length) {
-    const line = String(lines[i] || '').trim();
-    const next = String(lines[i + 1] || '').trim();
-
-    if (isBar(line) && next === 'Start of Combat') {
-      phase = 'combat_start';
-      round = 0;
-      skipRoster = true;
-      i += 3;
-      continue;
-    }
-    if (isBar(line) && /^Start of Round /.test(next)) {
-      round = Number((next.match(/Round (\d+)/) || [])[1] || 0);
-      phase = 'round_start';
-      skipRoster = false;
-      i += 3;
-      continue;
-    }
-    if (isBar(line) && next === 'Combat End') {
-      const ahead = lines.slice(i, i + 10).join('\n');
-      endKind = /Maximum \d+ rounds reached/.test(ahead) ? 'stalemate' : 'end';
-      phase = 'end';
-      i += 3;
-      continue;
-    }
-    if (isBar(line) || !line) {
-      skipRoster = false;
-      i += 1;
-      continue;
-    }
-
-    let match = line.match(/^Turn order: (.+)$/);
-    if (match) {
-      const names = match[1].split(/\s*→\s*/).map(s => s.trim()).filter(Boolean);
-      if (round) ensureRound(round).turnOrder = names;
-      if (phase === 'round_start') phase = 'turns';
-      i += 1;
-      continue;
-    }
-
-    match = line.match(/^Applies Recovery to (.+)$/);
-    if (match) {
-      const heal = parseRecoveryLine(battle, actor, skill, match[1]);
-      if (heal.tick) ensureRound(round || 1).ticks.push(heal);
-      else if (actor) pushAction(actor, heal);
-      else ensureRound(round || 1).ticks.push(heal);
-      i += 1;
-      continue;
-    }
-
-    if (isRetreatEvent(line)) {
-      i += 1;
-      continue;
-    }
-
-    if (skipRoster && isRosterRow(line)) {
-      i += 1;
-      continue;
-    }
-
-    if (isRosterRow(line)) {
-      if (round) ensureRound(round).roster.push(line);
-      i += 1;
-      continue;
-    }
-
-    match = line.match(/^(.+?) activates (.+)$/);
-    if (match) {
-      actor = match[1];
-      vanguard = isVanguardSkill(battle, actor, match[2]);
-      skill = vanguard ? vanguardTitle(battle, actor) : cleanSkillName(match[2]);
-      if (!vanguard && phase === 'turns') {
-        pushAction(actor, { type: 'uses', actor, skill });
-      }
-      i += 1;
-      continue;
-    }
-
-    match = line.match(/^(.+?) launches a 2nd Basic Attack/);
-    if (match) {
-      actor = match[1];
-      skill = 'Basic Attack';
-      vanguard = false;
-      phase = 'turns';
-      pushAction(actor, { type: 'uses', actor, skill: 'Basic Attack', extra: 'Double-Strike' });
-      i += 1;
-      continue;
-    }
-
-    match = line.match(/^(.+?) launches a Basic Attack/);
-    if (match) {
-      actor = match[1];
-      skill = 'Basic Attack';
-      vanguard = false;
-      phase = 'turns';
-      pushAction(actor, { type: 'uses', actor, skill: 'Basic Attack' });
-      i += 1;
-      continue;
-    }
-
-    match = line.match(/^(.+?) cannot act \((.+)\)/);
-    if (match) {
-      actorBucket(round || 1, match[1]).cannot = match[2];
-      i += 1;
-      continue;
-    }
-
-    match = line.match(/^Deals (\d+) (.+) to (.+)$/);
-    if (match) {
-      if (actor) {
-        pushAction(actor, {
-          type: 'damage',
-          actor,
-          skill,
-          target: match[3],
-          amount: Number(match[1]),
-          dtype: match[2]
-        });
-      }
-      i += 1;
-      continue;
-    }
-
-    match = line.match(/^\[(hit|miss)\] (.+) → (.+) \(([\d.]+%)\)$/);
-    if (match) {
-      if (actor) {
-        pushAction(actor, {
-          type: 'roll',
-          result: match[1],
-          skill: match[2],
-          target: match[3],
-          chance: match[4]
-        });
-      }
-      i += 1;
-      continue;
-    }
-
-    match = line.match(/^(Increases|Reduces) (.+) of (.+?) by ([+\-][\d.]+%?)(?:\s+(.+))?$/);
-    if (match) {
-      const stat = match[2].replace(/ \(excluding Basic Attacks\)/, '');
-      pushEffect(
-        match[3],
-        formatMagnitude(stat, match[4], vanguard, match[5], battle, actor, skill),
-        match[5]
-      );
-      i += 1;
-      continue;
-    }
-
-    match = line.match(/^Afflicts (.+) with (.+)$/);
-    if (match) {
-      const split = splitTarget(battle, match[1]);
-      pushEffect(split.name, [match[2], split.rest].filter(Boolean).join(' '), match[2]);
-      i += 1;
-      continue;
-    }
-
-    match = line.match(/^Grants (.+) to (.+)$/);
-    if (match) {
-      const split = splitTarget(battle, match[2]);
-      pushEffect(split.name, [match[1], split.rest].filter(Boolean).join(' '), match[2]);
-      i += 1;
-      continue;
-    }
-
-    match = line.match(/^(.+?) gains (\d+) stacks? of (.+?) \(now (\d+)\)(.*)$/);
-    if (match) {
-      const n = Number(match[4]);
-      actor = actor || match[1];
-      skill = skill || match[3];
-      pushEffect(match[1], n === 1 ? `1 stack of ${match[3]}` : `${n} stacks of ${match[3]}`, match[5]);
-      i += 1;
-      continue;
-    }
-
-    i += 1;
-  }
-
-  return { effects, rounds, endKind };
-}
-
-function stillActive(effect, atRound) {
+export function stillActive(effect, atRound) {
+  if (effect.round > atRound) return false;
   if (effect.dur === 'combat') return true;
   if (typeof effect.dur === 'number') return effect.round + effect.dur - 1 >= atRound;
   return true;
 }
 
-function snapshotFor(effects, name, atRound, beforeSeq) {
+export function snapshotFor(effects, name, atRound, beforeSeq) {
   const seen = new Set();
   const out = [];
+  const stackAt = {};
   for (const effect of effects) {
     if (effect.target !== name) continue;
     if (effect.seq >= beforeSeq) continue;
     if (!stillActive(effect, atRound)) continue;
+    if (isStackMag(effect.mag)) {
+      const stackName = (String(effect.mag).match(/\d+ stacks? of ([^(]+)/) || [])[1];
+      const key = [effect.target, String(stackName || effect.skill).trim(), 'stack'].join('|');
+      if (stackAt[key] != null) {
+        out[stackAt[key]] = effect;
+        continue;
+      }
+      stackAt[key] = out.length;
+      seen.add(key);
+      out.push(effect);
+      continue;
+    }
     const key = effectKey(effect);
-    if (seen.has(key)) continue;
+    if (seen.has(key)) {
+      const idx = out.findIndex(item => item.target === effect.target && item.skill === effect.skill && item.source === effect.source && item.round === effect.round);
+      if (idx >= 0 && out[idx].round === effect.round) {
+        const combined = combinePctMag(out[idx].mag, effect.mag);
+        if (combined) out[idx] = { ...out[idx], mag: combined };
+      }
+      continue;
+    }
     seen.add(key);
     out.push(effect);
   }
   return out;
 }
 
-function minSeq(bucket, effects, name, round) {
+export function minSeq(bucket, effects, name, round) {
   let min = Infinity;
   for (const action of bucket.actions || []) {
     if (action.effect) min = Math.min(min, action.effect.seq);
@@ -501,11 +59,11 @@ function minSeq(bucket, effects, name, round) {
   return min;
 }
 
-function formatEffect(battle, effect) {
+export function formatEffect(battle, effect) {
   return `  ${nameTag(effect.target)} is under the effect of ${nameTag(effect.skill)} ${fromPhrase(battle, effect.source, effect.target)}. ${effect.mag}`;
 }
 
-function groupActions(actions) {
+export function groupActions(actions) {
   const groups = [];
   let current = null;
   for (const action of actions || []) {
@@ -523,9 +81,22 @@ function groupActions(actions) {
   return groups;
 }
 
-function orderForRound(pack) {
+export function orderForRound(pack) {
   if (pack.turnOrder && pack.turnOrder.length) return pack.turnOrder;
   return (pack.actors || []).map(actor => actor.name);
+}
+
+function formatPrepSide(title, result) {
+  const mods = (result && result.mods) || [];
+  const applied = (result && result.applied) || [];
+  const lines = [`${title} preparations: ${mods.length} lines / ${applied.length} applied`];
+  if (!applied.length) {
+    lines.push('  (none)');
+    return lines;
+  }
+  applied.slice(0, 40).forEach(row => lines.push('  ' + row));
+  if (applied.length > 40) lines.push('  …');
+  return lines;
 }
 
 export function formatBattleReport(battle, formationText) {
@@ -547,11 +118,20 @@ export function formatBattleReport(battle, formationText) {
   };
 
   const out = [];
-  out.push(formationText || '');
-  out.push(BAR);
-  out.push('• Preparations');
-  out.push(DASH);
-  out.push('Any special global effects will be listed here, such as effects from City Upgrades, Boosts, etc.');
+  const header = String(formationText || '');
+  out.push(header);
+  if (!/• Preparations/.test(header)) {
+    out.push(BAR);
+    out.push('• Preparations');
+    out.push(DASH);
+    const prep = battle.prepApplied || {};
+    if ((prep.a && prep.a.applied && prep.a.applied.length) || (prep.b && prep.b.applied && prep.b.applied.length)) {
+      formatPrepSide('Team A', prep.a).forEach(line => out.push(line));
+      formatPrepSide('Team B', prep.b).forEach(line => out.push(line));
+    } else {
+      out.push('Any special global effects will be listed here, such as effects from City Upgrades, Boosts, etc.');
+    }
+  }
   out.push(BAR);
   out.push('Combat Phase (The Battle Itself)');
   out.push(DASH);
@@ -573,17 +153,25 @@ export function formatBattleReport(battle, formationText) {
       for (const effect of snapshotFor(parsed.effects, name, pack.number, cut)) {
         out.push(formatEffect(battle, effect));
       }
-      if (bucket.cannot) out.push(`  ${name} cannot act (${bucket.cannot})`);
-
       for (const group of groupActions(bucket.actions)) {
         const damages = group.items.filter(item => item.type === 'damage');
         const recovers = group.items.filter(item => item.type === 'recover');
         const rolls = group.items.filter(item => item.type === 'roll');
         const fx = group.items.filter(item => item.type === 'effect');
+        const cleanses = group.items.filter(item => item.type === 'cleanse');
+
+        const writeCleanses = () => {
+          for (const item of cleanses) {
+            if (item.removed === 'nothing') out.push('  Cleanses nothing');
+            else out.push(`  Cleanses ${item.removed}`);
+          }
+        };
 
         for (const roll of rolls) {
           out.push(`  [${roll.result}] ${roll.skill} → ${roll.target} (${roll.chance})`);
         }
+
+        if (cleanses.length && (damages.length || recovers.length)) writeCleanses();
 
         if (recovers.length) {
           for (const heal of recovers) {
@@ -593,7 +181,8 @@ export function formatBattleReport(battle, formationText) {
             out.push(`  ${heal.detail}. +${heal.amount} Troop gained.`);
             out.push(`  ${nameTag(heal.target)} recovers ${heal.amount} troops (${left} remaining).`);
           }
-        } else if (damages.length) {
+        }
+        if (damages.length) {
           for (const hit of damages) {
             const left = applyDamage(hit.target, hit.amount);
             const atk = hit.skill || group.skill || 'Basic Attack';
@@ -601,17 +190,32 @@ export function formatBattleReport(battle, formationText) {
             out.push(`  Deals ${hit.amount} ${hit.dtype} against ${nameTag(hit.target)}.`);
             out.push(`  ${nameTag(hit.target)} takes ${hit.amount} losses (${left} remaining).`);
           }
-        } else if (fx.length) {
+        }
+        if ((fx.length || cleanses.length) && !recovers.length && !damages.length) {
           const targets = [];
           for (const item of fx) {
-            if (!targets.includes(item.effect.target)) targets.push(item.effect.target);
+            if (item.effect && !targets.includes(item.effect.target)) targets.push(item.effect.target);
           }
-          const list = targets.map(target => `${nameTag(target)}${laneSuffix(battle, target)}`).join(', ');
-          out.push(`  ${nameTag(name)} activates [ ${group.skill} ] affecting ${list}.`);
-          const mags = fx.map(item => item.effect.mag).filter((mag, index, arr) => arr.indexOf(mag) === index);
+          for (const item of cleanses) {
+            if (item.target && !targets.includes(item.target)) targets.push(item.target);
+          }
+          if (targets.length) {
+            const list = targets.map(target => `${nameTag(target)}${laneSuffix(battle, target)}`).join(', ');
+            out.push(`  ${nameTag(name)} activates [ ${group.skill} ] affecting ${list}.`);
+          } else {
+            out.push(`  ${nameTag(name)} activates [ ${group.skill} ].`);
+          }
+          writeCleanses();
+          const mags = activationMags(fx);
           if (mags.length) out.push(`  ${mags.join(' ')}`);
+        } else if (fx.length && (recovers.length || damages.length)) {
+          const mags = activationMags(fx);
+          if (mags.length) out.push(`  ${mags.join(' ')}`);
+        } else if (!recovers.length && !damages.length && group.skill && group.skill !== 'Basic Attack' && group.skill !== 'Confusion') {
+          out.push(`  ${nameTag(name)} activates [ ${group.skill} ].`);
         }
       }
+      if (bucket.cannot) out.push(`  ${name} cannot ${bucket.cannot}`);
     }
 
     if (pack.ticks && pack.ticks.length) {
@@ -619,6 +223,13 @@ export function formatBattleReport(battle, formationText) {
         const left = applyHeal(heal.target, heal.amount);
         out.push(`  ${nameTag(heal.target)} is under the effect of [ Recovery ] from itself. ${heal.detail}. +${heal.amount} Troop gained.`);
         out.push(`  ${nameTag(heal.target)} recovers ${heal.amount} troops (${left} remaining).`);
+      }
+    }
+
+    if (pack.dots && pack.dots.length) {
+      for (const dot of pack.dots) {
+        const left = applyDamage(dot.target, dot.amount);
+        out.push(`  ${nameTag(dot.target)} takes ${dot.amount} ${dot.dtype} from [ ${dot.source} ] (${left} remaining).`);
       }
     }
 

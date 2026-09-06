@@ -114,7 +114,7 @@
             {
               "t": "status",
               "st": "weakened",
-              "val": 10,
+              "val": -10,
               "dur": 2,
               "chance": [25, 30, 35, 42.5, 50],
               "tgt": { "side": "enemy", "count": 1, "select": "same_lane" }

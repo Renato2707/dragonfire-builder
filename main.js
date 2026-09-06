@@ -3,14 +3,14 @@
 import { loadDragons, getDragon, getAllDragons } from './data.js';
 import { Character, SLOT_NAMES, DEFAULT_LEVEL, DEFAULT_STARS, DEFAULT_HABIT_RANK } from './character.js';
 import { Battle } from './battle.js';
-import { applyInitiativeOrder } from './hook-initiative-order.js';
 import { applyVanguardLabel } from './hook-vanguard-label.js';
+import { applyEngineHooks } from './hook-engine.js';
 import { loadDragonHabitsSync, loadCommandSync } from './habitParser.js';
 import { troopAdvantageSign, TROOP_ADVANTAGE_PCT } from './troopAdvantage.js';
 import { VANGUARD_NAMES } from './vanguardNames.js';
 import { formatBattleReport } from './reportFormat.js';
 
-applyInitiativeOrder(Battle);
+applyEngineHooks(Battle);
 applyVanguardLabel(Battle);
 
 const SLOTS = [0, 1, 2];
@@ -208,6 +208,10 @@ function formatTroopFormation(battle) {
     BAR,
     formatTeamFormation('Team A', battle.teamA, teamTroopOf(battle.teamB)),
     formatTeamFormation('Team B', battle.teamB, teamTroopOf(battle.teamA)),
+    BAR,
+    '• Preparations',
+    DASH,
+    'Any special global effects will be listed here, such as effects from City Upgrades, Boosts, etc.',
     ''
   ].join('\n');
 }
@@ -404,7 +408,7 @@ function updateBattleDisplay() {
 function reset() {
   currentBattle = null;
   formationHeader = '';
-  document.getElementById('battleLog').textContent = 'Monte a formação. Tropa do time liga Affinity (+20%) só nos dragões que têm essa tropa.';
+  document.getElementById('battleLog').textContent = 'Monte a formação. Cola as Preparations de cada time.';
   document.getElementById('teamAStatus').innerHTML = '';
   document.getElementById('teamBStatus').innerHTML = '';
   setSlotsDisabled(false);

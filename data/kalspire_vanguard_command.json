@@ -10,7 +10,7 @@
           "t": "dmg",
           "dt": "tactical",
           "pct": 50,
-          "tgt": { "side": "enemy", "count": 1, "select": "same_lane" }
+          "tgt": { "side": "enemy", "count": 1, "select": "last_basic" }
         },
         {
           "t": "status",
@@ -18,7 +18,8 @@
           "rate": 20,
           "dur": 2,
           "chance": 30,
-          "tgt": { "side": "enemy", "count": 1, "select": "adjacency" }
+          "chancePerTarget": true,
+          "tgt": { "side": "enemy", "count": 1, "select": "last_basic" }
         },
         {
           "t": "status",
@@ -26,7 +27,8 @@
           "rate": 20,
           "dur": 2,
           "chance": 30,
-          "tgt": { "side": "enemy", "count": 1, "select": "adjacency" }
+          "chancePerTarget": true,
+          "tgt": { "side": "enemy", "count": 1, "select": "adjacency", "excludeLastBasic": true }
         }
       ]
     }

@@ -11,24 +11,9 @@
       "duration": "Combat / 2 Rounds",
       "scalingRaw": "Rising Tide Chance: 25% | 30% | 35% | 42.5% | 50% ; INST: 9% | 10.8% | 12.6% | 15.3% | 18% ; TACTICAL_DEALT: 6% | 7.2% | 8.4% | 10.2% | 12%",
       "scaling": [
-        {
-          "label": "Rising Tide Chance",
-          "values": [25, 30, 35, 42.5, 50],
-          "unit": "%",
-          "fixed": false
-        },
-        {
-          "label": "INST",
-          "values": [9, 10.8, 12.6, 15.3, 18],
-          "unit": "%",
-          "fixed": false
-        },
-        {
-          "label": "TACTICAL_DEALT",
-          "values": [6, 7.2, 8.4, 10.2, 12],
-          "unit": "%",
-          "fixed": false
-        }
+        {"label": "Rising Tide Chance", "values": [25, 30, 35, 42.5, 50], "unit": "%", "fixed": false},
+        {"label": "INST", "values": [9, 10.8, 12.6, 15.3, 18], "unit": "%", "fixed": false},
+        {"label": "TACTICAL_DEALT", "values": [6, 7.2, 8.4, 10.2, 12], "unit": "%", "fixed": false}
       ],
       "description": "Rounds 1, 3, 5: chance to gain 1 Rising Tide (doubled if any ally has Advantage). Odd rounds: buff 1 other Ally Sentinel for 2 rounds; 1.5x with 4+ stacks.",
       "structured": [
@@ -42,8 +27,10 @@
               "stacks": 1,
               "dur": "combat",
               "chance": [25, 30, 35, 42.5, 50],
-              "chanceIf": { "allyStatus": "advantage", "mult": 2 },
-              "tgt": { "side": "self" }
+              "chanceIf": {"allyStatus": "advantage", "mult": 2},
+              "tgt": {"side": "self"},
+              "maxStacks": 8,
+              "mods": [ {"stat": "dmg_received", "pct": -2} ]
             }
           ]
         },
@@ -53,14 +40,18 @@
           "actions": [
             {
               "t": "mod",
-              "mods": [
-                { "stat": "inst", "pct": [9, 10.8, 12.6, 15.3, 18] },
-                { "stat": "tactical_dealt", "pct": [6, 7.2, 8.4, 10.2, 12] }
-              ],
+              "mods": [ {"stat": "inst", "pct": [9, 10.8, 12.6, 15.3, 18]} ],
               "scaleStat": "init",
-              "ifStacks": { "id": "rising_tide", "min": 4, "mult": 1.5 },
+              "ifStacks": {"id": "rising_tide", "min": 4, "mult": 1.5},
               "dur": 2,
-              "tgt": { "side": "ally", "count": 1, "select": "class:sentinel", "excludeSelf": true }
+              "tgt": {"side": "ally", "count": 1, "select": "class:sentinel", "excludeSelf": true}
+            },
+            {
+              "t": "mod",
+              "mods": [ {"stat": "tactical_dealt", "pct": [6, 7.2, 8.4, 10.2, 12]} ],
+              "ifStacks": {"id": "rising_tide", "min": 4, "mult": 1.5},
+              "dur": 2,
+              "tgt": {"side": "ally", "count": 1, "select": "class:sentinel", "excludeSelf": true}
             }
           ]
         }
@@ -75,20 +66,7 @@
       "effectType": "Stat Modifier",
       "duration": "Whole Combat",
       "scalingRaw": "INST: 22% | 26.4% | 30.8% | 37.4% | 44% ; INIT: 11% | 13.2% | 15.4% | 18.7% | 22%",
-      "scaling": [
-        {
-          "label": "INST",
-          "values": [22, 26.4, 30.8, 37.4, 44],
-          "unit": "%",
-          "fixed": false
-        },
-        {
-          "label": "INIT",
-          "values": [11, 13.2, 15.4, 18.7, 22],
-          "unit": "%",
-          "fixed": false
-        }
-      ],
+      "scaling": [ {"label": "INST", "values": [22, 26.4, 30.8, 37.4, 44], "unit": "%", "fixed": false}, {"label": "INIT", "values": [11, 13.2, 15.4, 18.7, 22], "unit": "%", "fixed": false} ],
       "description": "Start of Combat: Increase Instinct and Initiative of the Ally with the highest Instinct (both enhanced by Strength) until the end of combat.",
       "structured": [
         {
@@ -97,13 +75,10 @@
           "actions": [
             {
               "t": "mod",
-              "mods": [
-                { "stat": "inst", "pct": [22, 26.4, 30.8, 37.4, 44] },
-                { "stat": "init", "pct": [11, 13.2, 15.4, 18.7, 22] }
-              ],
+              "mods": [ {"stat": "inst", "pct": [22, 26.4, 30.8, 37.4, 44]}, {"stat": "init", "pct": [11, 13.2, 15.4, 18.7, 22]} ],
               "scaleStat": "str",
               "dur": "combat",
-              "tgt": { "side": "ally", "count": 1, "select": "highest:inst" }
+              "tgt": {"side": "ally", "count": 1, "select": "highest:inst"}
             }
           ]
         }
@@ -118,20 +93,7 @@
       "effectType": "Stack, Command Modifier",
       "duration": "Combat",
       "scalingRaw": "Damage Rate: 85% | 92% | 99% | 109.5% | 120% ; Rising Tide Chance: 25% | 30% | 35% | 42.5% | 50%",
-      "scaling": [
-        {
-          "label": "Damage Rate",
-          "values": [85, 92, 99, 109.5, 120],
-          "unit": "%",
-          "fixed": false
-        },
-        {
-          "label": "Rising Tide Chance",
-          "values": [25, 30, 35, 42.5, 50],
-          "unit": "%",
-          "fixed": false
-        }
-      ],
+      "scaling": [ {"label": "Damage Rate", "values": [85, 92, 99, 109.5, 120], "unit": "%", "fixed": false}, {"label": "Rising Tide Chance", "values": [25, 30, 35, 42.5, 50], "unit": "%", "fixed": false} ],
       "description": "Rounds 6, 8, 10: chance to gain Rising Tide (doubled if ally Advantage); extra stack if you have the least troops. Crescent Blade Physical Rate becomes the rank value, doubled with 4+ stacks.",
       "structured": [
         {
@@ -144,31 +106,27 @@
               "stacks": 1,
               "dur": "combat",
               "chance": [25, 30, 35, 42.5, 50],
-              "chanceIf": { "allyStatus": "advantage", "mult": 2 },
-              "tgt": { "side": "self" }
+              "chanceIf": {"allyStatus": "advantage", "mult": 2},
+              "tgt": {"side": "self"},
+              "maxStacks": 8,
+              "mods": [ {"stat": "dmg_received", "pct": -2} ]
             },
             {
               "t": "stack",
               "id": "rising_tide",
               "stacks": 1,
               "dur": "combat",
-              "requires": { "leastTroops": true },
-              "tgt": { "side": "self" }
+              "requires": {"leastTroops": true},
+              "tgt": {"side": "self"},
+              "maxStacks": 8,
+              "mods": [ {"stat": "dmg_received", "pct": -2} ]
             }
           ]
         },
         {
           "phase": "combat_start",
           "rounds": [1],
-          "actions": [
-            {
-              "t": "mod_command",
-              "command": "Crescent Blade",
-              "field": "physical_rate",
-              "pct": [85, 92, 99, 109.5, 120],
-              "dur": "combat"
-            }
-          ]
+          "actions": [ {"t": "mod_command", "command": "Crescent Blade", "field": "physical_rate", "pct": [85, 92, 99, 109.5, 120], "dur": "combat"} ]
         }
       ]
     },
@@ -181,32 +139,21 @@
       "effectType": "Stat Modifier, Status Effect",
       "duration": "1 Round / 2 Rounds",
       "scalingRaw": "PHYSICAL_DEALT: 12.5% | 15% | 17.5% | 21.25% | 25% ; Bleed Chance: 25% | 30% | 35% | 42.5% | 50%",
-      "scaling": [
-        {
-          "label": "PHYSICAL_DEALT",
-          "values": [12.5, 15, 17.5, 21.25, 25],
-          "unit": "%",
-          "fixed": false
-        },
-        {
-          "label": "Bleed Chance",
-          "values": [25, 30, 35, 42.5, 50],
-          "unit": "%",
-          "fixed": false
-        }
-      ],
+      "scaling": [ {"label": "PHYSICAL_DEALT", "values": [12.5, 15, 17.5, 21.25, 25], "unit": "%", "fixed": false}, {"label": "Bleed Chance", "values": [25, 30, 35, 42.5, 50], "unit": "%", "fixed": false} ],
       "description": "Each Round: if 4+ Rising Tide, increase Physical Damage Dealt until end of round. Odd rounds: chance to Bleed 2 adjacent Enemies (doubled at 6+ stacks).",
       "structured": [
         {
           "phase": "round_start",
           "rounds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-          "requires": { "stacks": { "id": "rising_tide", "min": 4 } },
+          "requires": {
+            "stacks": {"id": "rising_tide", "min": 4}
+          },
           "actions": [
             {
               "t": "mod",
-              "mods": [{ "stat": "physical_dealt", "pct": [12.5, 15, 17.5, 21.25, 25] }],
+              "mods": [ {"stat": "physical_dealt", "pct": [12.5, 15, 17.5, 21.25, 25]} ],
               "dur": 1,
-              "tgt": { "side": "self" }
+              "tgt": {"side": "self"}
             }
           ]
         },
@@ -219,8 +166,11 @@
               "st": "bleed",
               "dur": 2,
               "chance": [25, 30, 35, 42.5, 50],
-              "chanceIf": { "stacks": { "id": "rising_tide", "min": 6 }, "mult": 2 },
-              "tgt": { "side": "enemy", "count": 2, "select": "adjacency" }
+              "chanceIf": {
+                "stacks": {"id": "rising_tide", "min": 6},
+                "mult": 2
+              },
+              "tgt": {"side": "enemy", "count": 2, "select": "adjacency"}
             }
           ]
         }
@@ -236,24 +186,9 @@
       "duration": "2 Rounds",
       "scalingRaw": "Chance: 20% | 26% | 32% | 40% | 50% ; DMG_DEALT: -18% ; INIT: -25%",
       "scaling": [
-        {
-          "label": "Chance",
-          "values": [20, 26, 32, 40, 50],
-          "unit": "%",
-          "fixed": false
-        },
-        {
-          "label": "DMG_DEALT",
-          "values": [-18],
-          "unit": "%",
-          "fixed": true
-        },
-        {
-          "label": "INIT",
-          "values": [-25],
-          "unit": "%",
-          "fixed": true
-        }
+        {"label": "Chance", "values": [20, 26, 32, 40, 50], "unit": "%", "fixed": false},
+        {"label": "DMG_DEALT", "values": [-18], "unit": "%", "fixed": true},
+        {"label": "INIT", "values": [-25], "unit": "%", "fixed": true}
       ],
       "description": "Each Round: chance to reduce Damage Dealt of the Enemy with the most troops for 2 rounds. With 6+ Rising Tide, chance doubles and also reduce Initiative (enhanced by Initiative).",
       "structured": [
@@ -261,21 +196,26 @@
           "phase": "turn",
           "rounds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
           "chance": [20, 26, 32, 40, 50],
-          "chanceIf": { "stacks": { "id": "rising_tide", "min": 6 }, "mult": 2 },
+          "chanceIf": {
+            "stacks": {"id": "rising_tide", "min": 6},
+            "mult": 2
+          },
           "actions": [
             {
               "t": "mod",
-              "mods": [{ "stat": "dmg_dealt", "pct": -18 }],
+              "mods": [ {"stat": "dmg_dealt", "pct": -18} ],
               "dur": 2,
-              "tgt": { "side": "enemy", "count": 1, "select": "highest:troops" }
+              "tgt": {"side": "enemy", "count": 1, "select": "highest:troops"}
             },
             {
               "t": "mod",
-              "mods": [{ "stat": "init", "pct": -25 }],
+              "mods": [ {"stat": "init", "pct": -25} ],
               "scaleStat": "init",
               "dur": 2,
-              "requires": { "stacks": { "id": "rising_tide", "min": 6 } },
-              "tgt": { "side": "enemy", "count": 1, "select": "highest:troops" }
+              "requires": {
+                "stacks": {"id": "rising_tide", "min": 6}
+              },
+              "tgt": {"side": "enemy", "count": 1, "select": "highest:troops"}
             }
           ]
         }

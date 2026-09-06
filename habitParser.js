@@ -1,6 +1,6 @@
 // habitParser.js
 
-import { rollChance, calculateFinalDamage, scaleByStat, statusConditionMet, roundScaled } from './utils.js';
+import { rollChance, calculateFinalDamage, calculateRecovery, scaleByStat, statusConditionMet, roundScaled } from './utils.js';
 import { getDealerType } from './positionSystem.js';
 import { hasEffect } from './effects.js';
 
@@ -78,9 +78,16 @@ function ifBonusApplies(ifBonus, attacker, target, extras = {}) {
     checks.push(!!target && getDealerType(target) === String(ifBonus.dealer).toLowerCase());
   }
   if (ifBonus.status) {
-    const who = ifBonus.on === 'self' ? attacker : null;
-    if (who) checks.push(statusConditionMet(who, ifBonus.status));
-    else checks.push(statusConditionMet(target, ifBonus.status) || statusConditionMet(attacker, ifBonus.status));
+    const status = String(ifBonus.status).toLowerCase().replace(/-/g, '_');
+    const on = String(ifBonus.on || '').toLowerCase();
+    const targetStatuses = new Set([
+      'burn', 'panic', 'bleed', 'control', 'prey', 'vulnerable', 'weakened',
+      'taunt', 'stun', 'stagger', 'overwhelm', 'confusion', 'slow'
+    ]);
+    if (on === 'self') checks.push(statusConditionMet(attacker, status));
+    else if (on === 'target') checks.push(!!target && statusConditionMet(target, status));
+    else if (targetStatuses.has(status)) checks.push(!!target && statusConditionMet(target, status));
+    else checks.push(statusConditionMet(attacker, status) || (!!target && statusConditionMet(target, status)));
   }
   if (ifBonus.selfStatus) checks.push(statusConditionMet(attacker, ifBonus.selfStatus));
   if (ifBonus.selfHpAbove != null) checks.push(casterHpPct(attacker) > Number(ifBonus.selfHpAbove));
@@ -379,7 +386,8 @@ function executeModAction(habit, actionData, attacker, targets, scalingValue, ra
           value: value[stat],
           duration,
           excludeBasic: !!raw.excludeBasic,
-          enhancedBy: raw.scaleStat || null
+          enhancedBy: raw.scaleStat || null,
+          fixed: !!valueFlags[stat]
         });
       }
     }
@@ -418,11 +426,16 @@ function executeHealAction(habit, actionData, attacker, targets, scalingValue, e
   }
   for (const target of targets) {
     if (!target || target.isDead) continue;
-    const usedRate = resolveIfBonusRate(rate, bonusSpec(raw), attacker, target, extras);
-    let amount = target.maxHealth * (usedRate / 100);
-    if (typeof attacker.getRecoveryDealtMultiplier === 'function') amount *= attacker.getRecoveryDealtMultiplier();
-    if (typeof target.getRecoveryReceivedMultiplier === 'function') amount *= target.getRecoveryReceivedMultiplier();
-    heals.push({ target: target.name, amount: Math.max(1, Math.round(amount)) });
+    let usedRate = rate;
+    const bonus = bonusSpec(raw);
+    if (bonus && bonus.pct != null && ifBonusApplies(bonus, attacker, target, extras)) {
+      usedRate = scaleByStat(bonus.pct, attacker, bonus.scaleStat);
+    }
+    let amount = calculateRecovery(attacker, target, usedRate);
+    if (bonus && bonus.mult != null && ifBonusApplies(bonus, attacker, target, extras)) {
+      amount = Math.max(1, Math.round(amount * Number(bonus.mult)));
+    }
+    heals.push({ target: target.name, amount });
   }
   return heals;
 }

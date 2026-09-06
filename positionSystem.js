@@ -103,6 +103,13 @@ function hasStatus(character, statusName) {
 }
 
 function getDealerType(character) {
+  const breed = String((character && character.breed) || '').toLowerCase();
+  if (breed === 'warrior') return 'physical';
+  if (breed === 'hunter') return 'fire';
+  if (breed === 'sentinel') return 'tactical';
+  if (!character || typeof character.getModifiedStat !== 'function') {
+    return 'physical';
+  }
   const str = character.getModifiedStat('str');
   const inst = character.getModifiedStat('inst');
   const int = character.getModifiedStat('int');

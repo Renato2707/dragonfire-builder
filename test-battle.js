@@ -6,7 +6,7 @@ import { Battle } from './battle.js';
 import { loadDragonHabitsSync, loadCommandSync, ifBonusApplies, executeModAction, executeHabitAction, resolveChance, Habit } from './habitParser.js';
 import { applyEffect, hasEffect, cleanseCharacter, getEffect, isImmuneTo, processHealingEffects } from './effects.js';
 import { selectTargets } from './positionSystem.js';
-import { applyChanceIf, statusConditionMet, sortByInitiative } from './utils.js';
+import { applyChanceIf, statusConditionMet, sortByInitiative, calculateFinalDamage, calculateRecovery } from './utils.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -33,6 +33,10 @@ function mockFx(ids) {
   if (!ifBonusApplies({ status: 'panic', pct: 150 }, clean, targetPanic)) throw new Error('ifBonus panic on target failed');
   if (!ifBonusApplies({ status: 'control', pct: 30 }, clean, mockFx(['stagger']))) throw new Error('ifBonus control failed');
   if (ifBonusApplies({ status: 'panic', pct: 150 }, clean, clean)) throw new Error('ifBonus panic miss should be false');
+  if (ifBonusApplies({ status: 'panic', pct: 150 }, targetPanic, clean)) throw new Error('caster Panic must not 2x a clean target');
+  if (ifBonusApplies({ status: 'vulnerable', pct: 25 }, mockFx(['vulnerable']), clean)) throw new Error('caster Vulnerable must not raise damage on a clean target');
+  if (!ifBonusApplies({ status: 'vulnerable', pct: 25 }, clean, mockFx(['vulnerable']))) throw new Error('target Vulnerable should raise damage');
+  if (ifBonusApplies({ status: 'first_strike', pct: 150, on: 'self' }, clean, attacker)) throw new Error('on:self must ignore target First-Strike');
   if (!ifBonusApplies({ defending: true, mult: 2 }, clean, clean, { defending: true })) throw new Error('ifBonus defending should apply');
   if (ifBonusApplies({ defending: true, mult: 2 }, clean, clean, { defending: false })) throw new Error('ifBonus defending miss should be false');
   const moon = {
@@ -64,13 +68,13 @@ function mockFx(ids) {
 }
 
 {
-  const dragon = (id, stats) => ({
-    id, name: id, breed: 'Hunter', rarity: 'Rare',
+  const dragon = (id, stats, breed) => ({
+    id, name: id, breed: breed || 'Hunter', rarity: 'Rare',
     stats: stats || { str: 10, inst: 10, int: 80, init: 10 }
   });
   const caster = new Character(dragon('caster'), 0, 0);
-  const physical = new Character(dragon('physical', { str: 90, inst: 10, int: 10, init: 10 }), 1, 0);
-  const fireEnemy = new Character(dragon('fireE'), 1, 1);
+  const physical = new Character(dragon('physical', { str: 90, inst: 10, int: 10, init: 10 }, 'Warrior'), 1, 0);
+  const fireEnemy = new Character(dragon('fireE', { str: 10, inst: 10, int: 80, init: 10 }, 'Hunter'), 1, 1);
   caster.currentHealth = 40;
   caster.maxHealth = 100;
   const btl = new Battle([caster], [physical, fireEnemy], { verbose: false });
@@ -241,8 +245,8 @@ function mockFx(ids) {
 }
 
 {
-  const mk = (id, team, slot, stats) => new Character({
-    id, name: id, breed: 'Hunter', rarity: 'Rare',
+  const mk = (id, team, slot, stats, breed) => new Character({
+    id, name: id, breed: breed || 'Hunter', rarity: 'Rare',
     stats: stats || { str: 10, inst: 10, int: 10, init: 10 }
   }, team, slot);
   const tairax = mk('tairax', 0, 1);
@@ -286,8 +290,8 @@ function mockFx(ids) {
   locked.setStars(6);
   locked.setHabits([habit]);
   if (locked.getHabitsForPhase(1, 'round_start').length) throw new Error('Gift of Fire should stay locked below 8 stars');
-  const fire = mk('fire', 1, 0, { str: 10, inst: 10, int: 80, init: 10 });
-  const phys = mk('phys', 1, 1, { str: 80, inst: 10, int: 10, init: 10 });
+  const fire = mk('fire', 1, 0, { str: 10, inst: 10, int: 80, init: 10 }, 'Hunter');
+  const phys = mk('phys', 1, 1, { str: 80, inst: 10, int: 10, init: 10 }, 'Warrior');
   const rally = new Battle([mk('vermax', 0, 1)], [fire, phys], { verbose: false });
   const dealers = rally.matchingPerTarget(rally.teamA[0], { side: 'enemy', dealer: 'fire' });
   if (dealers.length !== 1 || dealers[0] !== fire) throw new Error('repeatPer dealer:fire should count one');
@@ -296,12 +300,12 @@ function mockFx(ids) {
 
 {
   const mk = (id, team, slot, stats, opts) => new Character({
-    id, name: id, breed: 'Sentinel', rarity: 'Rare',
+    id, name: id, breed: (opts && opts.breed) || 'Sentinel', rarity: 'Rare',
     stats: stats || { str: 10, inst: 10, int: 10, init: 10 }
   }, team, slot, opts);
   const sun = mk('sunfyre', 0, 1, { str: 10, inst: 10, int: 10, init: 10 }, { stars: 6 });
   const ally = mk('ally', 0, 0);
-  const fire = mk('fire', 1, 1, { str: 10, inst: 10, int: 80, init: 10 });
+  const fire = mk('fire', 1, 1, { str: 10, inst: 10, int: 80, init: 10 }, { breed: 'Hunter' });
   ally.maxHealth = 5000;
   ally.currentHealth = 5000;
   fire.maxHealth = 5000;
@@ -456,8 +460,8 @@ function mockFx(ids) {
 }
 
 {
-  const mk = (id, team, slot, stats) => new Character({
-    id, name: id, breed: 'Hunter', rarity: 'Rare',
+  const mk = (id, team, slot, stats, breed) => new Character({
+    id, name: id, breed: breed || 'Hunter', rarity: 'Rare',
     stats: stats || { str: 10, inst: 10, int: 80, init: 10 }
   }, team, slot, { stars: 4 });
   const habit = new Habit({
@@ -476,7 +480,7 @@ function mockFx(ids) {
   }, 'sunfyre');
   const sun = mk('sunfyre', 0, 1, { str: 10, inst: 80, int: 10, init: 10 });
   const fire = mk('caraxes', 1, 1);
-  const phys = mk('vhagar', 1, 0, { str: 80, inst: 10, int: 10, init: 10 });
+  const phys = mk('vhagar', 1, 0, { str: 80, inst: 10, int: 10, init: 10 }, 'Warrior');
   const fire2 = mk('antares', 1, 2);
   sun.setHabits([habit]);
   const btl = new Battle([sun], [fire, phys, fire2], { verbose: false });
@@ -485,7 +489,7 @@ function mockFx(ids) {
   if (shredded.length !== 1) throw new Error(`Extinguish should hit exactly 1 Fire dealer, got ${shredded.length}`);
   if (phys.getPercentTotal('fire_dealt') !== 0) throw new Error('Extinguish must not hit a Physical dealer');
   const none = mk('sun3', 0, 1, { str: 10, inst: 80, int: 10, init: 10 });
-  const onlyPhys = mk('tank', 1, 1, { str: 80, inst: 10, int: 10, init: 10 });
+  const onlyPhys = mk('tank', 1, 1, { str: 80, inst: 10, int: 10, init: 10 }, 'Warrior');
   const empty = new Battle([none], [onlyPhys], { verbose: false });
   empty.executeHabit(none, habit, 'combat_start', 1);
   if (onlyPhys.getPercentTotal('fire_dealt') !== 0) throw new Error('no Fire dealer should skip Extinguish');
@@ -971,8 +975,8 @@ function mockFx(ids) {
 }
 
 {
-  const mk = (id, team, slot, stats, stars) => new Character({
-    id, name: id, breed: 'Hunter', rarity: 'Rare',
+  const mk = (id, team, slot, stats, stars, breed) => new Character({
+    id, name: id, breed: breed || 'Hunter', rarity: 'Rare',
     stats: stats || { str: 10, inst: 10, int: 80, init: 10 }
   }, team, slot, { stars: stars || 6 });
   const habit = new Habit({
@@ -984,9 +988,9 @@ function mockFx(ids) {
     ]
   }, 'tashix');
   const tashix = mk('tashix', 0, 1);
-  const tac = mk('tac', 1, 0, { str: 10, inst: 80, int: 10, init: 10 });
+  const tac = mk('tac', 1, 0, { str: 10, inst: 80, int: 10, init: 10 }, 6, 'Sentinel');
   const fire = mk('fire', 1, 1);
-  const phys = mk('phys', 1, 2, { str: 80, inst: 10, int: 10, init: 10 });
+  const phys = mk('phys', 1, 2, { str: 80, inst: 10, int: 10, init: 10 }, 6, 'Warrior');
   tashix.setHabits([habit]);
   const btl = new Battle([tashix], [tac, fire, phys], { verbose: false });
   for (let i = 0; i < 3; i += 1) btl.executeHabit(tashix, habit, 'round_start', 1);
@@ -1437,7 +1441,7 @@ function mockFx(ids) {
     const btl = new Battle([sun], foes, { verbose: false });
     btl.currentRound = 1;
     btl.executeKit(sun, kit, 'turn', 1, 'Golden Wrath');
-    return { sun, foes };
+    return { sun, foes, btl };
   };
   const healthy = run(80);
   if (healthy.sun.lastDamageTargets.length !== 1) throw new Error('>=75% Golden Wrath hits only same-lane');
@@ -1449,13 +1453,16 @@ function mockFx(ids) {
   if (mid.sun.lastDamageTargets.length !== 2) throw new Error('<75% should hit a 2nd adjacent enemy');
   if (mid.sun.lastDamageTargets.includes(mid.foes[1]) === false) throw new Error('2nd hit must keep the same-lane target');
   if (hasEffect(mid.foes[1], 'burn')) throw new Error('<75% but >=50% should not Burn');
+  if (mid.btl.battleLog.some(line => /Fire Damage/.test(line))) {
+    throw new Error('<75% but >=50% should not deal Fire');
+  }
   const low = run(40);
   if (low.sun.lastDamageTargets.length !== 2) throw new Error('<50% still two targets');
   const burned = low.foes.filter(f => hasEffect(f, 'burn'));
   if (burned.length !== 2) throw new Error('<50% Burn on the same two targets');
-  const midDmg = 10000 - mid.foes[1].currentHealth;
-  const lowDmg = 10000 - low.foes[1].currentHealth;
-  if (lowDmg <= midDmg) throw new Error('<50% should add Fire on the same targets');
+  if (!low.btl.battleLog.some(line => /Fire Damage/.test(line))) {
+    throw new Error('<50% should add Fire on the same targets');
+  }
   console.log('✓ Golden Wrath same-lane / 2nd adjacent / Fire+Burn\n');
 }
 
@@ -1953,6 +1960,118 @@ function mockFx(ids) {
   if (hasEffect(fresh, 'stagger')) throw new Error('clean enemy should not be Staggered');
   if (vaeldra.lastTauntTarget !== fresh) throw new Error('fresh Taunt should set lastTauntTarget');
   console.log('✓ ifAlready Taunt → Stagger Siren\'s Call\n');
+}
+
+{
+  const mk = (id, breed, stats) => new Character({
+    id, name: id, breed, rarity: 'Rare',
+    stats: stats || { str: 10, inst: 10, int: 10, init: 10 }
+  }, 0, 1);
+  const btl = new Battle([mk('w', 'Warrior')], [mk('h', 'Hunter')], { verbose: false });
+  const warriorInt = mk('wInt', 'Warrior', { str: 10, inst: 10, int: 90, init: 10 });
+  const hunterStr = mk('hStr', 'Hunter', { str: 90, inst: 10, int: 10, init: 10 });
+  const sentinelStr = mk('sStr', 'Sentinel', { str: 90, inst: 10, int: 10, init: 10 });
+  const champFire = mk('cFire', 'Champion', { str: 10, inst: 10, int: 80, init: 10 });
+  const champPhys = mk('cPhys', 'Champion', { str: 80, inst: 10, int: 10, init: 10 });
+  if (btl.selectDamageType(warriorInt) !== 'PHYSICAL') throw new Error('Warrior BA stays Physical even with highest INT');
+  if (btl.selectDamageType(hunterStr) !== 'FIRE') throw new Error('Hunter BA stays Fire even with highest STR');
+  if (btl.selectDamageType(sentinelStr) !== 'TACTICAL') throw new Error('Sentinel BA stays Tactical even with highest STR');
+  if (btl.selectDamageType(champFire) !== 'FIRE') throw new Error('Champion BA follows highest stat (INT → Fire)');
+  if (btl.selectDamageType(champPhys) !== 'PHYSICAL') throw new Error('Champion BA follows highest stat (STR → Physical)');
+  console.log('✓ dealer type from class (Champion uses highest stat)\n');
+}
+
+{
+  const atk = new Character({
+    id: 'atk', name: 'Atk', breed: 'Warrior', rarity: 'Rare',
+    stats: { str: 80, inst: 10, int: 10, init: 10 }
+  }, 0, 1);
+  const def = new Character({
+    id: 'def', name: 'Def', breed: 'Warrior', rarity: 'Rare',
+    stats: { str: 10, inst: 40, int: 10, init: 10 }
+  }, 1, 1);
+  atk.maxHealth = 4800;
+  atk.currentHealth = 4800;
+  def.maxHealth = 4800;
+  def.currentHealth = 4800;
+  const fullCmd = calculateFinalDamage(atk, def, 'PHYSICAL', 70);
+  const fullBa = calculateFinalDamage(atk, def, 'PHYSICAL', 0, { basic: true });
+  atk.currentHealth = 2400;
+  const halfCmd = calculateFinalDamage(atk, def, 'PHYSICAL', 70);
+  const halfBa = calculateFinalDamage(atk, def, 'PHYSICAL', 0, { basic: true });
+  if (!(fullCmd > 0)) throw new Error('full command damage should land');
+  if (Math.abs(halfCmd - fullCmd / 2) > 1) {
+    throw new Error(`living troops should halve command damage, full ${fullCmd} half ${halfCmd}`);
+  }
+  if (halfBa !== fullBa) throw new Error(`Basic Attack must stay unscaled, full ${fullBa} half ${halfBa}`);
+  atk.currentHealth = 0;
+  atk.isDead = true;
+  const deadDot = calculateFinalDamage(atk, def, 'PHYSICAL', 20);
+  if (!(deadDot > 0)) throw new Error('DoT from retreated inflictor should still tick via cap');
+  console.log('✓ command damage scales with living troops; BA unscaled\n');
+}
+
+{
+  const mk = (level, hp, max) => {
+    const c = new Character({
+      id: 'healer', name: 'Healer', breed: 'Sentinel', rarity: 'Rare',
+      stats: { str: 10, inst: 80, int: 10, init: 10 }
+    }, 0, 1, { level, stars: 2, habitRank: 1 });
+    c.maxHealth = max;
+    c.currentHealth = hp;
+    return c;
+  };
+  const ally = new Character({
+    id: 'ally', name: 'Ally', breed: 'Warrior', rarity: 'Rare',
+    stats: { str: 10, inst: 10, int: 10, init: 10 }
+  }, 0, 0, { level: 16, stars: 2, habitRank: 1 });
+  const full = mk(50, 4800, 4800);
+  const halfHp = mk(50, 2400, 4800);
+  const halfLv = mk(25, 4800, 4800);
+  const fullHeal = calculateRecovery(full, ally, 70);
+  const halfHpHeal = calculateRecovery(halfHp, ally, 70);
+  const halfLvHeal = calculateRecovery(halfLv, ally, 70);
+  if (!(fullHeal > 0)) throw new Error('recovery should land');
+  if (Math.abs(halfHpHeal - fullHeal / 2) > 1) {
+    throw new Error(`living troops should halve Recovery, full ${fullHeal} half ${halfHpHeal}`);
+  }
+  if (Math.abs(halfLvHeal - fullHeal / 2) > 1) {
+    throw new Error(`Level should scale Recovery, L50 ${fullHeal} L25 ${halfLvHeal}`);
+  }
+  const habit = new Habit({ name: "Warden's Rally", structured: [] }, 'malachite');
+  const acted = executeHabitAction(habit, { t: 'heal', pct: 70, scaleStat: 'inst' }, full, [ally], 1, { skipChance: true });
+  if (!(acted.heals[0].amount > 0)) throw new Error('heal action should restore troops');
+  console.log('✓ Recovery scales with Level and living troops\n');
+}
+
+{
+  const mk = (level) => new Character({
+    id: 'mal', name: 'Malachite', breed: 'Sentinel', rarity: 'Legendary',
+    stats: { str: 10, inst: 60, int: 10, init: 10 }
+  }, 0, 1, { level, stars: 2, habitRank: 1 });
+  const kit = new Habit({
+    name: "Sentinel's Presence",
+    structured: [{
+      phase: 'combat_start',
+      rounds: [1],
+      actions: [{ t: 'mod', mods: [{ stat: 'recovery_dealt', pct: 15 }], dur: 'combat', tgt: { side: 'self' } }]
+    }]
+  }, 'malachite');
+  const low = mk(15);
+  low.setVanguardKit(kit);
+  const high = mk(16);
+  high.setVanguardKit(kit);
+  const foe = new Character({
+    id: 'foe', name: 'Foe', breed: 'Warrior', rarity: 'Rare',
+    stats: { str: 10, inst: 10, int: 10, init: 10 }
+  }, 1, 1);
+  const btlLow = new Battle([low], [foe], { verbose: false });
+  btlLow.executeVanguard(low);
+  if (low.getPercentTotal('recovery_dealt') !== 0) throw new Error('Vanguard must not fire below Level 16');
+  const btlHigh = new Battle([high], [foe], { verbose: false });
+  btlHigh.executeVanguard(high);
+  if (high.getPercentTotal('recovery_dealt') !== 15) throw new Error('Vanguard at Level 16+ should apply');
+  console.log('✓ Vanguard requires Level 16+\n');
 }
 
 try {

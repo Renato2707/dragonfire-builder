@@ -6,118 +6,39 @@
       "slot": 1,
       "unlockStar": 2,
       "name": "Noble Sacrifice",
-      "trigger": "Rounds 1",
-      "targeting": "1 Self, 1 Enemies (prefer dealer:physical), 1 Enemies (prefer dealer:fire)",
-      "effectType": "Stat Modifier (Buff), Stat Modifier (Debuff)",
+      "targeting": "1 Self; 1 Enemy (Physical Dealer); 1 Enemy (Fire Dealer)",
+      "effectType": "Stat Modifier",
       "duration": "5 Rounds",
-      "scalingRaw": "Tactical Dmg Received: 20% | 16% | 12% | 6% | 0% ; Physical Dmg: -13% | -13.4% | -13.8% | -14.4% | -15% ; Fire Dmg: -13% | -13.4% | -13.8% | -14.4% | -15%",
+      "scalingRaw": "TACTICAL_RECEIVED: 20% | 16% | 12% | 6% | 0% ; PHYSICAL_DEALT: -13% | -13.4% | -13.8% | -14.4% | -15% ; FIRE_DEALT: -13% | -13.4% | -13.8% | -14.4% | -15%",
       "scaling": [
-        {
-          "label": "Tactical Dmg Received",
-          "values": [
-            20,
-            16,
-            12,
-            6,
-            0
-          ],
-          "unit": "%",
-          "fixed": false
-        },
-        {
-          "label": "Physical Dmg",
-          "values": [
-            -13,
-            -13.4,
-            -13.8,
-            -14.4,
-            -15
-          ],
-          "unit": "%",
-          "fixed": false
-        },
-        {
-          "label": "Fire Dmg",
-          "values": [
-            -13,
-            -13.4,
-            -13.8,
-            -14.4,
-            -15
-          ],
-          "unit": "%",
-          "fixed": false
-        }
+        { "label": "TACTICAL_RECEIVED", "values": [20, 16, 12, 6, 0], "unit": "%", "fixed": false },
+        { "label": "PHYSICAL_DEALT", "values": [-13, -13.4, -13.8, -14.4, -15], "unit": "%", "fixed": false },
+        { "label": "FIRE_DEALT", "values": [-13, -13.4, -13.8, -14.4, -15], "unit": "%", "fixed": false }
       ],
-      "description": "Rounds 1: Tactical Dmg Received: 20% | 16% | 12% | 6% | 0% ; Physical Dmg: -13% | -13.4% | -13.8% | -14.4% | -15% ; Fire Dmg: -13% | -13.4% | -13.8% | -14.4% | -15% on 1 Self, 1 Enemies (prefer dealer:physical), 1 Enemies (prefer dealer:fire) for 5 Rounds.",
+      "description": "Round 1: Increase your Tactical Received for 5 rounds. Reduce Physical Dealt of 1 physical dealer and Fire Dealt of 1 fire dealer for 5 rounds.",
       "structured": [
         {
-          "when": "rounds",
+          "phase": "round_start",
+          "rounds": [1],
           "actions": [
             {
               "t": "mod",
-              "mods": [
-                {
-                  "stat": "tactical_received",
-                  "pct": [
-                    20,
-                    16,
-                    12,
-                    6,
-                    0
-                  ]
-                }
-              ],
+              "mods": [{ "stat": "tactical_received", "pct": [20, 16, 12, 6, 0] }],
               "dur": 5,
-              "tgt": {
-                "side": "self"
-              }
+              "tgt": { "side": "self" }
             },
             {
               "t": "mod",
-              "mods": [
-                {
-                  "stat": "physical_dealt",
-                  "pct": [
-                    -13,
-                    -13.4,
-                    -13.8,
-                    -14.4,
-                    -15
-                  ]
-                }
-              ],
+              "mods": [{ "stat": "physical_dealt", "pct": [-13, -13.4, -13.8, -14.4, -15] }],
               "dur": 5,
-              "tgt": {
-                "side": "enemy",
-                "count": 1,
-                "select": "prefer_dealer:physical"
-              }
+              "tgt": { "side": "enemy", "count": 1, "select": "prefer_dealer:physical" }
             },
             {
               "t": "mod",
-              "mods": [
-                {
-                  "stat": "fire_dealt",
-                  "pct": [
-                    -13,
-                    -13.4,
-                    -13.8,
-                    -14.4,
-                    -15
-                  ]
-                }
-              ],
+              "mods": [{ "stat": "fire_dealt", "pct": [-13, -13.4, -13.8, -14.4, -15] }],
               "dur": 5,
-              "tgt": {
-                "side": "enemy",
-                "count": 1,
-                "select": "prefer_dealer:fire"
-              }
+              "tgt": { "side": "enemy", "count": 1, "select": "prefer_dealer:fire" }
             }
-          ],
-          "rounds": [
-            1
           ]
         }
       ]
@@ -127,70 +48,28 @@
       "slot": 2,
       "unlockStar": 4,
       "name": "Nimble Resilience",
-      "trigger": "Start of Combat",
       "targeting": "1 Self",
-      "effectType": "Stat Modifier (Debuff)",
+      "effectType": "Stat Modifier",
       "duration": "Whole Combat",
-      "scalingRaw": "Dmg Received: -6% | -7.2% | -8.4% | -10.2% | -12% ; INIT: 12% | 14.4% | 16.8% | 20.4% | 24%",
+      "scalingRaw": "DMG_RECEIVED: -6% | -7.2% | -8.4% | -10.2% | -12% ; INIT: 12% | 14.4% | 16.8% | 20.4% | 24%",
       "scaling": [
-        {
-          "label": "Dmg Received",
-          "values": [
-            -6,
-            -7.2,
-            -8.4,
-            -10.2,
-            -12
-          ],
-          "unit": "%",
-          "fixed": false
-        },
-        {
-          "label": "INIT",
-          "values": [
-            12,
-            14.4,
-            16.8,
-            20.4,
-            24
-          ],
-          "unit": "%",
-          "fixed": false
-        }
+        { "label": "DMG_RECEIVED", "values": [-6, -7.2, -8.4, -10.2, -12], "unit": "%", "fixed": false },
+        { "label": "INIT", "values": [12, 14.4, 16.8, 20.4, 24], "unit": "%", "fixed": false }
       ],
-      "description": "Start of Combat: Dmg Received: -6% | -7.2% | -8.4% | -10.2% | -12% ; INIT: 12% | 14.4% | 16.8% | 20.4% | 24% on 1 Self for Whole Combat.",
+      "description": "Start of Combat: Reduce your Damage Received and increase your Initiative until the end of combat.",
       "structured": [
         {
-          "when": "combat_start",
+          "phase": "combat_start",
+          "rounds": [1],
           "actions": [
             {
               "t": "mod",
               "mods": [
-                {
-                  "stat": "dmg_received",
-                  "pct": [
-                    -6,
-                    -7.2,
-                    -8.4,
-                    -10.2,
-                    -12
-                  ]
-                },
-                {
-                  "stat": "init",
-                  "pct": [
-                    12,
-                    14.4,
-                    16.8,
-                    20.4,
-                    24
-                  ]
-                }
+                { "stat": "dmg_received", "pct": [-6, -7.2, -8.4, -10.2, -12] },
+                { "stat": "init", "pct": [12, 14.4, 16.8, 20.4, 24] }
               ],
               "dur": "combat",
-              "tgt": {
-                "side": "self"
-              }
+              "tgt": { "side": "self" }
             }
           ]
         }
@@ -201,193 +80,55 @@
       "slot": 3,
       "unlockStar": 6,
       "name": "Bronze Bulwark",
-      "trigger": "Rounds 2, 4, 6, 8 / Odd Rounds",
-      "targeting": "2 Enemies (adjacency), 1 Allies (least troops), Self",
-      "effectType": "Damage, Status Effect, Stat Modifier (Debuff)",
+      "targeting": "2 Enemies (Adjacent); 1 Ally (Least Troops); Self",
+      "effectType": "Direct Damage, Status Effect, Stat Modifier",
       "duration": "Instant / 2 Rounds",
-      "scalingRaw": "Physical Dmg: 7.5% | 9% | 10.5% | 12.75% | 15% ; Tactical Dmg: 15% | 18% | 21% | 25.5% | 30% ; protect ; Chance: 10% | 12% | 14% | 17% | 20% ; Physical Dmg Received: -5% | -6% | -7% | -8.5% | -10% ; Fire Dmg Received: -5% | -6% | -7% | -8.5% | -10% ; Chance: 40% | 42% | 44% | 47% | 50%",
+      "scalingRaw": "Physical: 7.5% | 9% | 10.5% | 12.75% | 15% ; Tactical: 15% | 18% | 21% | 25.5% | 30% ; Protect Chance: 10% | 12% | 14% | 17% | 20%",
       "scaling": [
-        {
-          "label": "Physical Dmg",
-          "values": [
-            7.5,
-            9,
-            10.5,
-            12.75,
-            15
-          ],
-          "unit": "%",
-          "fixed": false
-        },
-        {
-          "label": "Tactical Dmg",
-          "values": [
-            15,
-            18,
-            21,
-            25.5,
-            30
-          ],
-          "unit": "%",
-          "fixed": false
-        },
-        {
-          "label": "Value",
-          "values": [
-            "protect"
-          ],
-          "unit": null,
-          "fixed": true
-        },
-        {
-          "label": "Chance",
-          "values": [
-            10,
-            12,
-            14,
-            17,
-            20
-          ],
-          "unit": "%",
-          "fixed": false
-        },
-        {
-          "label": "Physical Dmg Received",
-          "values": [
-            -5,
-            -6,
-            -7,
-            -8.5,
-            -10
-          ],
-          "unit": "%",
-          "fixed": false
-        },
-        {
-          "label": "Fire Dmg Received",
-          "values": [
-            -5,
-            -6,
-            -7,
-            -8.5,
-            -10
-          ],
-          "unit": "%",
-          "fixed": false
-        },
-        {
-          "label": "Chance",
-          "values": [
-            40,
-            42,
-            44,
-            47,
-            50
-          ],
-          "unit": "%",
-          "fixed": false
-        }
+        { "label": "Physical", "values": [7.5, 9, 10.5, 12.75, 15], "unit": "%", "fixed": false },
+        { "label": "Tactical", "values": [15, 18, 21, 25.5, 30], "unit": "%", "fixed": false },
+        { "label": "Protect Chance", "values": [10, 12, 14, 17, 20], "unit": "%", "fixed": false }
       ],
-      "description": "Rounds 2, 4, 6, 8 / Odd Rounds: Physical Dmg: 7.5% | 9% | 10.5% | 12.75% | 15% ; Tactical Dmg: 15% | 18% | 21% | 25.5% | 30% ; protect ; Chance: 10% | 12% | 14% | 17% | 20% ; Physical Dmg Received: -5% | -6% | -7% | -8.5% | -10% ; Fire Dmg Received: -5% | -6% | -7% | -8.5% | -10% ; Chance: 40% | 42% | 44% | 47% | 50% on 2 Enemies (adjacency), 1 Allies (least troops) and Self for Instant / 2 Rounds.",
+      "description": "Even rounds: Physical and Tactical Damage to 2 adjacent Enemies. Odd rounds: chance to Protect 1 Ally with least troops and reduce own Physical/Fire Received.",
       "structured": [
         {
-          "when": "rounds",
-          "rounds": [
-            2,
-            4,
-            6,
-            8
-          ],
+          "phase": "turn",
+          "rounds": [2, 4, 6, 8],
           "actions": [
             {
               "t": "dmg",
               "dt": "physical",
-              "pct": [
-                7.5,
-                9,
-                10.5,
-                12.75,
-                15
-              ],
-              "tgt": {
-                "side": "enemy",
-                "count": 2,
-                "select": "adjacency"
-              }
+              "pct": [7.5, 9, 10.5, 12.75, 15],
+              "tgt": { "side": "enemy", "count": 2, "select": "adjacency" }
             },
             {
               "t": "dmg",
               "dt": "tactical",
-              "pct": [
-                15,
-                18,
-                21,
-                25.5,
-                30
-              ],
-              "tgt": {
-                "side": "enemy",
-                "count": 2,
-                "select": "adjacency"
-              }
+              "pct": [15, 18, 21, 25.5, 30],
+              "tgt": { "side": "enemy", "count": 2, "select": "adjacency" }
             }
           ]
         },
         {
-          "when": "odd",
+          "phase": "turn",
+          "rounds": [1, 3, 5, 7, 9],
           "actions": [
             {
               "t": "status",
               "st": "protect",
               "dur": 2,
-              "chance": [
-                10,
-                12,
-                14,
-                17,
-                20
-              ],
-              "tgt": {
-                "side": "ally",
-                "count": 1,
-                "select": "least_troops"
-              }
+              "chance": [10, 12, 14, 17, 20],
+              "tgt": { "side": "ally", "count": 1, "select": "least_troops", "excludeSelf": true }
             },
             {
               "t": "mod",
               "mods": [
-                {
-                  "stat": "physical_received",
-                  "pct": [
-                    -5,
-                    -6,
-                    -7,
-                    -8.5,
-                    -10
-                  ]
-                },
-                {
-                  "stat": "fire_received",
-                  "pct": [
-                    -5,
-                    -6,
-                    -7,
-                    -8.5,
-                    -10
-                  ]
-                }
+                { "stat": "physical_received", "pct": [-5, -6, -7, -8.5, -10] },
+                { "stat": "fire_received", "pct": [-5, -6, -7, -8.5, -10] }
               ],
               "dur": 2,
-              "chance": [
-                40,
-                42,
-                44,
-                47,
-                50
-              ],
-              "tgt": {
-                "side": "self"
-              }
+              "chance": [40, 42, 44, 47, 50],
+              "tgt": { "side": "self" }
             }
           ]
         }
@@ -398,79 +139,28 @@
       "slot": 4,
       "unlockStar": 8,
       "name": "Fury's Poise",
-      "trigger": "Start of Combat",
       "targeting": "1 Self",
-      "effectType": "Stat Modifier (Debuff)",
+      "effectType": "Stat Modifier",
       "duration": "Whole Combat",
-      "scalingRaw": "Physical Dmg Received: -7.5% | -9% | -10.5% | -12.75% | -15% ; Fire Dmg Received: -7.5% | -9% | -10.5% | -12.75% | -15%",
+      "scalingRaw": "PHYSICAL_RECEIVED: -7.5% | -9% | -10.5% | -12.75% | -15% ; FIRE_RECEIVED: -7.5% | -9% | -10.5% | -12.75% | -15%",
       "scaling": [
-        {
-          "label": "Physical Dmg Received",
-          "values": [
-            -7.5,
-            -9,
-            -10.5,
-            -12.75,
-            -15
-          ],
-          "unit": "%",
-          "fixed": false
-        },
-        {
-          "label": "Fire Dmg Received",
-          "values": [
-            -7.5,
-            -9,
-            -10.5,
-            -12.75,
-            -15
-          ],
-          "unit": "%",
-          "fixed": false
-        }
+        { "label": "PHYSICAL_RECEIVED", "values": [-7.5, -9, -10.5, -12.75, -15], "unit": "%", "fixed": false },
+        { "label": "FIRE_RECEIVED", "values": [-7.5, -9, -10.5, -12.75, -15], "unit": "%", "fixed": false }
       ],
-      "description": "Start of Combat: Physical Dmg Received: -7.5% | -9% | -10.5% | -12.75% | -15% ; Fire Dmg Received: -7.5% | -9% | -10.5% | -12.75% | -15% on 1 Self for Whole Combat.",
+      "description": "Start of Combat: Reduce your Physical and Fire Damage Received until the end of combat.",
       "structured": [
         {
-          "when": "combat_start",
+          "phase": "combat_start",
+          "rounds": [1],
           "actions": [
             {
               "t": "mod",
               "mods": [
-                {
-                  "stat": "physical_received",
-                  "pct": [
-                    -7.5,
-                    -9,
-                    -10.5,
-                    -12.75,
-                    -15
-                  ]
-                }
+                { "stat": "physical_received", "pct": [-7.5, -9, -10.5, -12.75, -15] },
+                { "stat": "fire_received", "pct": [-7.5, -9, -10.5, -12.75, -15] }
               ],
               "dur": "combat",
-              "tgt": {
-                "side": "self"
-              }
-            },
-            {
-              "t": "mod",
-              "mods": [
-                {
-                  "stat": "fire_received",
-                  "pct": [
-                    -7.5,
-                    -9,
-                    -10.5,
-                    -12.75,
-                    -15
-                  ]
-                }
-              ],
-              "dur": "combat",
-              "tgt": {
-                "side": "self"
-              }
+              "tgt": { "side": "self" }
             }
           ]
         }
@@ -481,77 +171,35 @@
       "slot": 5,
       "unlockStar": 10,
       "name": "Vengeful Fury",
-      "trigger": "Each Action / Round (once per combat)",
-      "targeting": "1 Enemies (lowest:inst), 1 Enemies (lowest:int)",
-      "effectType": "Damage",
+      "targeting": "1 Enemy (lowest Instinct); 1 Enemy (lowest Intelligence)",
+      "effectType": "Direct Damage",
       "duration": "Instant",
-      "scalingRaw": "Physical Dmg: 60% | 78% | 96% | 120% | 150% ; Tactical Dmg: 100% | 130% | 160% | 200% | 250%",
+      "scalingRaw": "Physical: 60% | 78% | 96% | 120% | 150% ; Tactical: 100% | 130% | 160% | 200% | 250%",
       "scaling": [
-        {
-          "label": "Physical Dmg",
-          "values": [
-            60,
-            78,
-            96,
-            120,
-            150
-          ],
-          "unit": "%",
-          "fixed": false
-        },
-        {
-          "label": "Tactical Dmg",
-          "values": [
-            100,
-            130,
-            160,
-            200,
-            250
-          ],
-          "unit": "%",
-          "fixed": false
-        }
+        { "label": "Physical", "values": [60, 78, 96, 120, 150], "unit": "%", "fixed": false },
+        { "label": "Tactical", "values": [100, 130, 160, 200, 250], "unit": "%", "fixed": false }
       ],
-      "description": "Each Round, while you are below 50% of Max Troop Capacity: Physical Dmg: 60% | 78% | 96% | 120% | 150% on 1 Enemies (lowest:inst) ; Tactical Dmg: 100% | 130% | 160% | 200% | 250% on 1 Enemies (lowest:int), for Instant. This effect only triggers once per combat.",
+      "description": "Each round while below 50% troop capacity: Physical to lowest Instinct and Tactical to lowest Intelligence. Once per combat.",
       "structured": [
         {
-          "when": "each",
-          "onlyIf": "self:troops_below_50",
+          "phase": "turn",
+          "rounds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+          "oncePerCombat": true,
+          "requires": { "selfHpBelow": 50 },
           "actions": [
             {
               "t": "dmg",
               "dt": "physical",
-              "pct": [
-                60,
-                78,
-                96,
-                120,
-                150
-              ],
-              "tgt": {
-                "side": "enemy",
-                "count": 1,
-                "select": "lowest:inst"
-              }
+              "pct": [60, 78, 96, 120, 150],
+              "tgt": { "side": "enemy", "count": 1, "select": "lowest:inst" }
             },
             {
               "t": "dmg",
               "dt": "tactical",
-              "pct": [
-                100,
-                130,
-                160,
-                200,
-                250
-              ],
-              "tgt": {
-                "side": "enemy",
-                "count": 1,
-                "select": "lowest:int"
-              }
+              "pct": [100, 130, 160, 200, 250],
+              "tgt": { "side": "enemy", "count": 1, "select": "lowest:int" }
             }
-          ],
-          "once": true
+          ]
         }
       ]
     }

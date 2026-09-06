@@ -70,10 +70,21 @@ function getDamageTypeConfig(damageType) {
   return type;
 }
 
+const DAMAGE_VARIANCE = 0;
+const TROOP_DAMAGE_REF = 2400;
+
+function commandTroopFactor(attacker) {
+  const living = Number(attacker && attacker.currentHealth);
+  if (living > 0) return living / TROOP_DAMAGE_REF;
+  // Dead inflictor (DoT): keep cap so ticks do not vanish after retreat.
+  const cap = Number(attacker && attacker.maxHealth);
+  return cap > 0 ? cap / TROOP_DAMAGE_REF : 1;
+}
+
 function calculateBaseDamage(attacker, damageType) {
   const typeConfig = getDamageTypeConfig(damageType);
   const attackerStat = attacker.getModifiedStat(typeConfig.causedBy);
-  const variance = getRandomInt(-typeConfig.variance, typeConfig.variance);
+  const variance = DAMAGE_VARIANCE ? getRandomInt(-typeConfig.variance, typeConfig.variance) : 0;
   return Math.max(1, Math.round(attackerStat * 1.2 + variance));
 }
 
@@ -104,8 +115,21 @@ function calculateFinalDamage(attacker, defender, damageType, bonusPercent = 0, 
   const baseDamage = calculateBaseDamage(attacker, damageType);
   const mitigation = calculateMitigation(defender, damageType);
   let damageMitigated = applyDamageMultipliers(baseDamage - mitigation, attacker, defender, damageType, options);
-  if (bonusPercent) damageMitigated *= (1 + bonusPercent / 100);
+  // Damage Rate: +X% is X% of (base − mit), scaled by living troops. Basic attacks stay unscaled.
+  if (bonusPercent) damageMitigated *= (bonusPercent / 100) * commandTroopFactor(attacker);
   return Math.max(1, Math.round(damageMitigated));
+}
+
+function calculateRecovery(attacker, target, ratePercent) {
+  const level = Math.max(1, Number(attacker && attacker.level) || 1);
+  let amount = level * 1.2 * (Number(ratePercent || 0) / 100) * commandTroopFactor(attacker);
+  if (attacker && typeof attacker.getRecoveryDealtMultiplier === 'function') {
+    amount *= attacker.getRecoveryDealtMultiplier();
+  }
+  if (target && typeof target.getRecoveryReceivedMultiplier === 'function') {
+    amount *= target.getRecoveryReceivedMultiplier();
+  }
+  return Math.max(1, Math.round(amount));
 }
 
 function hasActiveId(character, id) {
@@ -173,6 +197,16 @@ function formatSignedPercent(value) {
   return `${rounded}%`;
 }
 
+function formatSignedMod(value, fixed) {
+  if (fixed) {
+    const amount = Number(value);
+    if (Number.isNaN(amount)) return String(value);
+    const rounded = Math.round(amount * 100) / 100;
+    return rounded > 0 ? `+${rounded}` : `${rounded}`;
+  }
+  return formatSignedPercent(value);
+}
+
 function formatTroopCapacity(character) {
   if (!character || character.isDead) return 'retreated';
   return `${Math.round(character.currentHealth)}/${Math.round(character.maxHealth)} Troop Capacity`;
@@ -221,7 +255,16 @@ function statusConditionMet(character, key) {
 }
 
 function getDealerType(character) {
-  if (!character || typeof character.getModifiedStat !== 'function') return 'physical';
+  if (!character || typeof character.getModifiedStat !== 'function') {
+    const breed = String((character && character.breed) || '').toLowerCase();
+    if (breed === 'hunter') return 'fire';
+    if (breed === 'sentinel') return 'tactical';
+    return 'physical';
+  }
+  const breed = String(character.breed || '').toLowerCase();
+  if (breed === 'warrior') return 'physical';
+  if (breed === 'hunter') return 'fire';
+  if (breed === 'sentinel') return 'tactical';
   const str = character.getModifiedStat('str');
   const inst = character.getModifiedStat('inst');
   const int = character.getModifiedStat('int');
@@ -283,6 +326,7 @@ export {
   calculateMitigation,
   applyDamageMultipliers,
   calculateFinalDamage,
+  calculateRecovery,
   hasActiveId,
   hasControl,
   statusConditionMet,
@@ -295,6 +339,7 @@ export {
   formatStatusName,
   formatDuration,
   formatSignedPercent,
+  formatSignedMod,
   formatTroopCapacity,
   isGrantedStatus,
   formatStackName,

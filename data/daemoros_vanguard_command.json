@@ -18,7 +18,7 @@
           "rate": 20,
           "dur": 2,
           "chance": 20,
-          "tgt": { "side": "enemy", "count": 1, "select": "adjacency" }
+          "tgt": { "side": "enemy", "count": 1, "select": "last_dmg" }
         }
       ]
     }

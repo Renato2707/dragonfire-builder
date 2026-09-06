@@ -1,0 +1,1714 @@
+Antares habits
+Blazing Onslaught (unlocks at 2 stars)
+Dragon's Flair (unlocks at 4 stars)
+Fiery Precision (unlocks at 6 stars)
+Dragon's Intellect (unlocks at 8 stars)
+Redemption (unlocks at 10 stars)
+Blazing Onslaught
+Start of Round 1: Increase Fire Damage Received of 1 Enemy in any lane (prioritizes the Left Flank) and Physical Damage Received (excluding Basic Attacks) of 1 Enemy in any lane (prioritizes the Right Flank) by +11% for 3 round(s).
+Habit levels:
+1 (default when habit unlocked): Damage Received: 11%
+2: Damage Received: 13.2%
+3: Damage Received: 15.4%
+4: Damage Received: 18.7%
+5: Damage Received: 22%
+Dragon's Flair
+Start of Combat: Increase your Fire Damage Dealt by +8% until the end of combat.
+Habit levels:
+1 (default when habit unlocked): Damage Dealt: 8%
+2: Damage Dealt: 9.6%
+3: Damage Dealt: 11.2%
+4: Damage Dealt: 13.6%
+5: Damage Dealt: 16%
+Fiery Precision
+Relentless Pursuit gains:
+Each round, deal Fire Damage to 3 Enemies in any lane afflicted with Slow (Damage Rate: +20%).
+Habit levels:
+1 (default when habit unlocked): Damage Rate: 20%
+2: Damage Rate: 24%
+3: Damage Rate: 28%
+4: Damage Rate: 34%
+5: Damage Rate: 40%
+Dragon's Intellect
+Start of Combat: Reduce your Damage Received by -4% and increase your Intelligence by +5% until the end of combat.
+Habit levels:
+1 (default when habit unlocked): Damage Received: -4%, Intelligence: 5%
+2: Damage Received: -4.8%, Intelligence: 6%
+3: Damage Received: -5.6%, Intelligence: 7%
+4: Damage Received: -6.8%, Intelligence: 8.5%
+5: Damage Received: -8%, Intelligence: 10%
+Redemption
+Start of Combat: Increase your Intelligence and Initiative by +6% until the end of combat.
+Start of Each Round: 10% chance to grant yourself Immunity to both Vulnerable and Weakened for 2 round(s).
+Habit levels:
+1 (default when habit unlocked): Intelligence & Initiative: 6%, Immunity Chance: 10%
+2: Intelligence & Initiative: 7.8%, Immunity Chance: 13%
+3: Intelligence & Initiative: 9.6%, Immunity Chance: 16%
+4: Intelligence & Initiative: 12%, Immunity Chance: 20%
+5: Intelligence & Initiative: 15%, Immunity Chance: 25%
+
+Arrax habits
+Headlong Into Danger (unlocks at 2 stars)
+Stone Bulwark (unlocks at 4 stars)
+Adaptive Guard (unlocks at 6 stars)
+Fire Ward (unlocks at 8 stars)
+Turn the Line (unlocks at 10 stars)
+Headlong Into Danger
+Start of Round 4: Increase your Strength by +25%, Initiative by +10%, and Physical Damage Dealt by +25% for 4 round(s).
+However, also increase your Physical Damage Received by +10% and reduce your Instinct by -40% for 4 round(s).
+Habit levels:
+1 (default when habit unlocked): Damage Received (Self): 10%, Instinct (Self): -40%
+2: Damage Received (Self): 8%, Instinct (Self): -32%
+3: Damage Received (Self): 6%, Instinct (Self): -24%
+4: Damage Received (Self): 3%, Instinct (Self): -12%
+5: Damage Received (Self): 0%, Instinct (Self): 0%
+Stone Bulwark
+Start of Combat: Reduce the Tactical and Fire Damage Received of 2 other Allies in any lane by -2% until the end of combat.
+Habit levels:
+1 (default when habit unlocked): Damage Received: -2.5%
+2: Damage Received: -3%
+3: Damage Received: -3.5%
+4: Damage Received: -4.25%
+5: Damage Received: -5%
+Adaptive Guard
+When leading Archers
+Start of Round 4: Reduce the Tactical Damage Received of 3 Allies in any lane by -9% for 4 round(s).
+When leading Shieldbearers
+Start of Round 4: Reduce the Fire Damage Received of 3 Allies in any lane by -9% for 4 round(s).
+Habit levels:
+1 (default when habit unlocked): Damage Received: -9%
+2: Damage Received: -10.8%
+3: Damage Received: -12.6%
+4: Damage Received: -15.3%
+5: Damage Received: -18%
+Fire Ward
+Start of Combat: Grant yourself and 1 other Ally within adjacency 1 stack of Fire Ward. At the start of each round, if the target Ally retreated in the previous round, grant yourself 1 stack of Fire Ward.
+Each stack of Fire Ward reduces the target's Fire Damage Received by -5% until the end of combat.
+Habit levels:
+1 (default when habit unlocked): Damage Received (per Stack): -5%
+2: Damage Received (per Stack): -6%
+3: Damage Received (per Stack): -7%
+4: Damage Received (per Stack): -8.5%
+5: Damage Received (per Stack): -10%
+Turn the Line
+Start of Round 4: Increase the Physical Damage Received of 2 Enemies within adjacency by +9% for 4 round(s).
+Habit levels:
+1 (default when habit unlocked): Damage Received: 9%
+2: Damage Received: 11.7%
+3: Damage Received: 14.4%
+4: Damage Received: 18%
+5: Damage Received: 22.5%
+
+Arulix habits
+Hypnotic Helix (unlocks at 2 stars)
+Battle Cunning (unlocks at 4 stars)
+Spiral Surge (unlocks at 6 stars)
+Iron Shell (unlocks at 8 stars)
+Mimicry (unlocks at 10 stars)
+Hypnotic Helix
+Rounds 1, 3, 6, 8: 13% chance to Overwhelm 1 Enemy in any lane for 2 round(s) (prioritize Fire Damage dealers).
+Overwhelm prevents the target from using Active Commands and Habits on their turn.
+Rounds 2, 4, 7, 9: 13% chance to Stagger 1 Enemy in any lane for 2 round(s) (prioritize Physical Damage dealers).
+Stagger prevents the target from using Attack Modifier Commands or launching Basic Attacks on their turn.
+Habit levels:
+1 (default when habit unlocked): Stagger & Overwhelm Chance: 12.5%
+2: Stagger & Overwhelm Chance: 15%
+3: Stagger & Overwhelm Chance: 17.5%
+4: Stagger & Overwhelm Chance: 21.3%
+5: Stagger & Overwhelm Chance: 25%
+Battle Cunning
+Start of Combat: Reduce Strength and Intelligence by -4% (enhanced by Instinct) of 3 Enemies in any lane until the end of combat.
+Habit levels:
+1 (default when habit unlocked): Strength & Intelligence: -4%
+2: Strength & Intelligence: -4.8%
+3: Strength & Intelligence: -5.6%
+4: Strength & Intelligence: -6.8%
+5: Strength & Intelligence: -8%
+Spiral Surge
+Rounds 1, 2, 3, 5, 8: Deal Physical Damage to 2 Enemies in any lane (Damage Rate:+20%). This damage is increased by 1.5x (+30%) on Round 5 and by 2x (+40%) on Round 8.
+Habit levels:
+1 (default when habit unlocked): Damage Rate: 20%
+2: Damage Rate: 24%
+3: Damage Rate: 28%
+4: Damage Rate: 34%
+5: Damage Rate: 40%
+Iron Shell
+Start of Combat: Reduce Physical Damage Received (excluding Basic Attacks) and Fire Damage Received of 2 other Allies in any lane by -2% until the end of combat.
+Habit levels:
+1 (default when habit unlocked): Damage Received: -2.5%
+2: Damage Received: -3%
+3: Damage Received: -3.5%
+4: Damage Received: -4.25%
+5: Damage Received: -5%
+Mimicry
+Start of each Round: If any ally is afflicted with Weakened or Vulnerable, there is a 25% chance to apply that same effect to 1 Enemy in any lane for 2 round(s).
+Start of each Round: If any enemy is enhanced by Advantage or Resistance, there is a 25% chance to apply that same effect to 1 Ally in any lane for 2 round(s).
+Habit levels:
+1 (default when habit unlocked): Mimicry Chance: 25%
+2: Mimicry Chance: 32.5%
+3: Mimicry Chance: 40%
+4: Mimicry Chance: 50%
+5: Mimicry Chance: 62.5%
+
+Bevlorin habits
+Fire Ward (unlocks at 2 stars)
+Dragon's Fury (unlocks at 4 stars)
+Renewal (unlocks at 6 stars)
+Vital Essence (unlocks at 8 stars)
+Bountiful Gifts (unlocks at 10 stars)
+Fire Ward
+Start of Combat: Grant yourself and 1 other Ally within adjacency 1 stack of Fire Ward. At the start of each round, if the target Ally retreated in the previous round, grant yourself 1 stack of Fire Ward.
+Each stack of Fire Ward reduces the target's Fire Damage Received by -5% until the end of combat.
+Habit levels:
+1 (default when habit unlocked): Damage Received (per Stack): -5%
+2: Damage Received (per Stack): -6%
+3: Damage Received (per Stack): -7%
+4: Damage Received (per Stack): -8.5%
+5: Damage Received (per Stack): -10%
+Dragon's Fury
+At the start of combat, increase your Physical Damage Dealt and Fire Damage Dealt by +4% until the end of combat.
+Habit levels:
+1 (default when habit unlocked): Damage Dealt: 4%
+2: Damage Dealt: 4.8%
+3: Damage Dealt: 5.6%
+4: Damage Dealt: 6.8%
+5: Damage Dealt: 8%
+Renewal
+Nature's Reckoning gains:
+Odd-numbered rounds: Apply Recovery (enhanced by Strength) to 3 Allies in any lane (Recovery Rate: +17.5%).
+Habit levels:
+1 (default when habit unlocked): Rate: 17.5%
+2: Rate: 21%
+3: Rate: 24.5%
+4: Rate: 29.75%
+5: Rate: 35%
+Vital Essence
+At the start of combat, increase your Strength by +10% and your Recovery Dealt by +15% until the end of combat.
+Habit levels:
+1 (default when habit unlocked): Strength: 10%, Dealt: 15%
+2: Strength: 12%, Dealt: 18%
+3: Strength: 14%, Dealt: 21%
+4: Strength: 17%, Dealt: 25.5%
+5: Strength: 20%, Dealt: 30%
+Bountiful Gifts
+Each round, 20% chance to increase the Strength of the Ally with the highest Strength, the Intelligence of the Ally with the highest Intelligence, the Instinct of the Ally with the highest Instinct, and the Initiative of the Ally with the highest Initiative by +16% (enhanced by Intelligence) for 2 round(s). The chance is checked separately per target.
+Habit levels:
+1 (default when habit unlocked): Strength & Intelligence & Instinct & Initiative: 16%
+2: Strength & Intelligence & Instinct & Initiative: 20.8%
+3: Strength & Intelligence & Instinct & Initiative: 25.6%
+4: Strength & Intelligence & Instinct & Initiative: 32%
+5: Strength & Intelligence & Instinct & Initiative: 40%
+
+Caraxes habits
+Battle Dread (unlocks at 2 stars)
+Dragon's Flair (unlocks at 4 stars)
+Crippling Inferno (unlocks at 6 stars)
+Mass Enfeeble (unlocks at 8 stars)
+Blood Wyrm (unlocks at 10 stars)
+Battle Dread
+Start of Combat: Reduce the Strength and Initiative (enhanced by Intelligence) of 3 Enemies in any lane by -6.5% until the end of combat.
+Habit levels:
+1 (default when habit unlocked): Strength & Initiative: -6.5%
+2: Strength & Initiative: -7.8%
+3: Strength & Initiative: -9.1%
+4: Strength & Initiative: -11.05%
+5: Strength & Initiative: -13%
+Dragon's Flair
+Start of Combat: Increase your Fire Damage Dealt by +12.5% until the end of combat.
+Habit levels:
+1 (default when habit unlocked): Damage Dealt: 12.5%
+2: Damage Dealt: 15%
+3: Damage Dealt: 17.5%
+4: Damage Dealt: 21.25%
+5: Damage Dealt: 25%
+Crippling Inferno
+Each Round: 10% chance to afflict Slow and Burn (Damage Rate: +20%) on 3 Enemies in any lane. Each effect is checked separately for each target and last for 2 round(s).
+Burn deals Fire Damage to the target each round.
+Slow causes the target to attack after all other combatants each round.
+Habit levels:
+1 (default when habit unlocked): Slow & Burn Chance: 10%
+2: Slow & Burn Chance: 12%
+3: Slow & Burn Chance: 14%
+4: Slow & Burn Chance: 17%
+5: Slow & Burn Chance: 20%
+Mass Enfeeble
+Start of Combat: Reduce Physical Damage Dealt (excluding Basic Attacks) by -5.5% of 3 Enemies in any lane until the end of combat.
+Habit levels:
+1 (default when habit unlocked): Damage Dealt: -5.5%
+2: Damage Dealt: -6.6%
+3: Damage Dealt: -7.7%
+4: Damage Dealt: -9.35%
+5: Damage Dealt: -11%
+Blood Wyrm
+Start of each Round: For each Enemy that is below 50% max troop capacity, increase your Fire Damage Dealt by +8%.
+Start of each Round: For each Enemy that retreated in the previous round, apply Recovery (Recovery Rate: +40%, enhanced by Initiative) to yourself.
+Habit levels:
+1 (default when habit unlocked): Rate: 40%, Damage Dealt: 8%
+2: Rate: 52%, Damage Dealt: 10.4%
+3: Rate: 64%, Damage Dealt: 12.8%
+4: Rate: 80%, Damage Dealt: 16%
+5: Rate: 100%, Damage Dealt: 20%
+
+Crimson habits
+Enervate (unlocks at 2 stars)
+Dragon's Intellect (unlocks at 4 stars)
+Bloodscale Fury (unlocks at 6 stars)
+Unlikely Hero (unlocks at 8 stars)
+Vermin's Bane (unlocks at 10 stars)
+Enervate
+At the start of combat, reduce Tactical Damage Dealt by -13.5% of 1 Enemy that deals Tactical Damage until the end of combat.
+Habit levels:
+1 (default when habit unlocked): Damage Dealt: -13.5%
+2: Damage Dealt: -16.2%
+3: Damage Dealt: -18.9%
+4: Damage Dealt: -22.95%
+5: Damage Dealt: -27%
+Dragon's Intellect
+Start of Combat: Reduce your Damage Received by -6% and increase your Intelligence by +12% until the end of combat.
+Habit levels:
+1 (default when habit unlocked): Damage Received: -6%, Intelligence: 12%
+2: Damage Received: -7.2%, Intelligence: 14.4%
+3: Damage Received: -8.4%, Intelligence: 16.8%
+4: Damage Received: -10.2%, Intelligence: 20.4%
+5: Damage Received: -12%, Intelligence: 24%
+Bloodscale Fury
+Each Round: 18% chance to afflict Weakened (-20%) on 1 Enemy in any lane (prioritize targets NOT afflicted with Stun) for 2 round(s). This chance is doubled (35%) against targets afflicted with Taunt.
+Weakened reduces the target's Damage Dealt.
+Habit levels:
+1 (default when habit unlocked): Weakened Chance: 17.5%
+2: Weakened Chance: 21%
+3: Weakened Chance: 24.5%
+4: Weakened Chance: 29.75%
+5: Weakened Chance: 35%
+Unlikely Hero
+Start of Each Round: Increase Physical Damage Received (excluding Basic Attacks) and Fire Damage Received by +10% for all Enemies above 75% max troop capacity until the end of the round.
+Start of Each Round: Reduce Recovery Received by -20% for all Enemies below 25% max troop capacity until the end of the round.
+Habit levels:
+1 (default when habit unlocked): Damage Dealt: 10%, Received: -20%
+2: Damage Dealt: 12%, Received: -24%
+3: Damage Dealt: 14%, Received: -28%
+4: Damage Dealt: 17%, Received: -34%
+5: Damage Dealt: 20%, Received: -40%
+Vermin's Bane
+Bloodscale Terror gains:
+Even-numbered Rounds: 50% chance to reduce Instinct and Initiative by -12% (enhanced by Intelligence) of the enemy with the highest Instinct for 2 round(s).
+Round 1: The chance to Stun is increased to 40%.
+Habit levels:
+1 (default when habit unlocked): Stun Chance: 40%, Instinct & Initiative: -12%
+2: Stun Chance: 52%, Instinct & Initiative: -15.6%
+3: Stun Chance: 64%, Instinct & Initiative: -19.2%
+4: Stun Chance: 80%, Instinct & Initiative: -24%
+5: Stun Chance: 100%, Instinct & Initiative: -30%
+
+Daemoros habits
+Instill Fear (unlocks at 2 stars)
+Powerful Reflexes (unlocks at 4 stars)
+Shroud of Shadows (unlocks at 6 stars)
+Darkening Fear (unlocks at 8 stars)
+Phantom's Veil (unlocks at 10 stars)
+Instill Fear
+Each Round: 30% chance to reduce Intelligence and Instinct by -25% (enhanced by Strength) and afflict Panic (Damage Rate: +20%) on 1 Enemy in any lane (prioritizes the Right Flank). Each effect lasts for 2 round(s).
+Panic deals Tactical Damage to the target each round.
+Habit levels:
+1 (default when habit unlocked): Instill Fear Chance: 25%
+2: Instill Fear Chance: 30%
+3: Instill Fear Chance: 35%
+4: Instill Fear Chance: 42.5%
+5: Instill Fear Chance: 50%
+Powerful Reflexes
+Start of Combat: Increase your Strength and Initiative by +16% until the end of combat.
+Habit levels:
+1 (default when habit unlocked): Strength & Initiative: 16%
+2: Strength & Initiative: 19.2%
+3: Strength & Initiative: 22.4%
+4: Strength & Initiative: 27.2%
+5: Strength & Initiative: 32%
+Shroud of Shadows
+Odd-numbered Rounds: 15% chance to afflict Confusion on 1 Enemy within adjacency for 2 round(s).
+Confusion causes the target to have a 50% chance to mistake Allies for Enemies and vice versa each time they activate a Command or Habit, or launch a Basic Attack on their turn.
+Habit levels:
+1 (default when habit unlocked): Confusion Chance: 15%
+2: Confusion Chance: 18%
+3: Confusion Chance: 21%
+4: Confusion Chance: 25.5%
+5: Confusion Chance: 30%
+Darkening Fear
+Each Round: 25% chance to reduce Intelligence and Instinct by -25% (enhanced by Strength) and afflict Panic (Damage Rate: +20%) on 1 Enemy in any lane (prioritizes the Left Flank). Each effect lasts for 2 round(s).
+Panic deals Tactical Damage to the target each round.
+Habit levels:
+1 (default when habit unlocked): Darkening Fear Chance: 25%
+2: Darkening Fear Chance: 30%
+3: Darkening Fear Chance: 35%
+4: Darkening Fear Chance: 42.5%
+5: Darkening Fear Chance: 50%
+Phantom's Veil
+Start of Each Round Reduce either your Physical, Tactical, OR Fire Damage Received by -15% until the end of the round.
+Habit levels:
+1 (default when habit unlocked): Damage Received: -15%
+2: Damage Received: -19.5%
+3: Damage Received: -24%
+4: Damage Received: -30%
+5: Damage Received: -37.5%
+
+Dawnseeker habits
+Tactical Inferno (unlocks at 2 stars)
+Unbroken Devotion (unlocks at 4 stars)
+Sunbreak (unlocks at 6 stars)
+Wind's Favor (unlocks at 8 stars)
+First Light (unlocks at 10 stars)
+Tactical Inferno
+Start of Round 1: Increase the Tactical Damage Dealt of 1 Ally in any lane (prioritizes the Left Flank) and the Fire Damage Dealt of 1 Ally in any lane (prioritizes the Right Flank) by +9% for 3 round(s).
+Habit levels:
+1 (default when habit unlocked): Damage Dealt: 9%
+2: Damage Dealt: 10.8%
+3: Damage Dealt: 12.6%
+4: Damage Dealt: 15.3%
+5: Damage Dealt: 18%
+Unbroken Devotion
+Start of Combat: Increase Recovery Received by +15% of 2 other Allies in any lane until the end of combat.
+Habit levels:
+1 (default when habit unlocked): Received: 15%
+2: Received: 18%
+3: Received: 21%
+4: Received: 25.5%
+5: Received: 30%
+Sunbreak
+Radiant Wings gains:
+Rounds 1, 2: Increase the Tactical Damage Rate to +100%, and increase the Recovery Rate to +60%.
+Habit levels:
+1 (default when habit unlocked): Damage Rate: 100%, Rate: 60%
+2: Damage Rate: 110%, Rate: 66%
+3: Damage Rate: 120%, Rate: 72%
+4: Damage Rate: 135%, Rate: 81%
+5: Damage Rate: 150%, Rate: 90%
+Wind's Favor
+Start of Combat: Increase Initiative by +8% (enhanced by Initiative) of 3 Allies in any lane until the end of combat.
+Habit levels:
+1 (default when habit unlocked): Initiative: 8%
+2: Initiative: 9.6%
+3: Initiative: 11.2%
+4: Initiative: 13.6%
+5: Initiative: 16%
+First Light
+Start of Round 1: Increase Intelligence and Instinct (enhanced by Initiative) by +5% of 3 Allies in any lane for 3 round(s).
+Start of Rounds 1-3: 20% chance to grant First-Strike to 2 other Allies in any lane until the end of the round.
+First-Strike causes the target to attack before all other combatants each round.
+Habit levels:
+1 (default when habit unlocked): Intelligence & Instinct: 5%, First-Strike Chance: 20%
+2: Intelligence & Instinct: 6.5%, First-Strike Chance: 26%
+3: Intelligence & Instinct: 8%, First-Strike Chance: 32%
+4: Intelligence & Instinct: 10%, First-Strike Chance: 40%
+5: Intelligence & Instinct: 12.5%, First-Strike Chance: 50%
+
+Feskar habits
+Resilient Bond (unlocks at 2 stars)
+Insightful Allies (unlocks at 4 stars)
+Emerald Inferno (unlocks at 6 stars)
+Quick-Witted (unlocks at 8 stars)
+Unyielding Grasp (unlocks at 10 stars)
+Resilient Bond
+Start of Combat: Grant yourself and 1 other Ally within adjacency 1 stack of Resilient Bond. At the start of each round, if the target Ally retreated in the previous round, grant yourself 1 stack of Resilient Bond.
+Each stack of Resilient Bond reduces the target's Physical Damage Received (excluding Basic Attacks) by -7% until the end of combat.
+Habit levels:
+1 (default when habit unlocked): Damage Received (per Stack): -6.5%
+2: Damage Received (per Stack): -7.8%
+3: Damage Received (per Stack): -9.1%
+4: Damage Received (per Stack): -11.05%
+5: Damage Received (per Stack): -13%
+Insightful Allies
+Start of Combat: Increase Instinct by +10% (enhanced by Instinct) of 3 Allies in any lane until the end of combat.
+Habit levels:
+1 (default when habit unlocked): Instinct: 10%
+2: Instinct: 12%
+3: Instinct: 14%
+4: Instinct: 17%
+5: Instinct: 20%
+Emerald Inferno
+Calculated Assault gains:
+Rounds 3, 5, 8, 10: Deal Fire Damage to all Enemies that deal Physical Damage (excluding Basic Attacks) (Damage Rate: +40%). This damage is increased by 1.5x against targets afflicted with Burn (Damage Rate: +60%).
+Habit levels:
+1 (default when habit unlocked): Damage Rate: 40%
+2: Damage Rate: 48%
+3: Damage Rate: 56%
+4: Damage Rate: 68%
+5: Damage Rate: 80%
+Quick-Witted
+Start of Combat: Increase your Intelligence and Initiative by +16% until the end of combat.
+Habit levels:
+1 (default when habit unlocked): Intelligence & Initiative: 16%
+2: Intelligence & Initiative: 19.2%
+3: Intelligence & Initiative: 22.4%
+4: Intelligence & Initiative: 27.2%
+5: Intelligence & Initiative: 32%
+Unyielding Grasp
+Each Round: 10% chance to Stagger 1 Enemy in any lane (prioritizes Warriors) for 3 round(s).
+Stagger prevents the target from using Attack Modifier Commands or launching Basic Attacks on their turn.
+Habit levels:
+1 (default when habit unlocked): Stagger Chance: 10%
+2: Stagger Chance: 13%
+3: Stagger Chance: 16%
+4: Stagger Chance: 20%
+5: Stagger Chance: 25%
+
+Jagadrix habits
+Enervate (unlocks at 2 stars)
+Second Wind (unlocks at 4 stars)
+Whispering Sabotage (unlocks at 6 stars)
+Quick-Witted (unlocks at 8 stars)
+Echoes of Deceit (unlocks at 10 stars)
+Enervate
+Start of Combat: Reduce Tactical Damage Dealt by -8% of 1 Enemy that deals Tactical Damage until the end of combat.
+Habit levels:
+1 (default when habit unlocked): Damage Dealt: -8%
+2: Damage Dealt: -9.6%
+3: Damage Dealt: -11.2%
+4: Damage Dealt: -13.6%
+5: Damage Dealt: -16%
+Second Wind
+Round 6: Increase your Damage Dealt by +12% until the end of combat. Additionally, apply Recovery (Recovery Rate: +180%) to yourself. Then, afflict yourself with Nullify Recovery until the end of combat. Nullify Recovery prevents the target from receiving Recovery.
+Habit levels:
+1 (default when habit unlocked): Damage Dealt: 10%, Rate: 150%
+2: Damage Dealt: 12%, Rate: 180%
+3: Damage Dealt: 14%, Rate: 210%
+4: Damage Dealt: 17%, Rate: 255%
+5: Damage Dealt: 20%, Rate: 300%
+Whispering Sabotage
+Each Round: 25% chance to afflict 1 Enemy in the same lane with Weakened (-10%) for 2 round(s).
+Weakened reduces the target's Damage Dealt.
+Habit levels:
+1 (default when habit unlocked): Weakened Chance: 25%
+2: Weakened Chance: 30%
+3: Weakened Chance: 35%
+4: Weakened Chance: 42.5%
+5: Weakened Chance: 50%
+Quick-Witted
+Start of Combat: Increase your Intelligence and Initiative by +12.5% until the end of combat.
+Habit levels:
+1 (default when habit unlocked): Intelligence & Initiative: 12.5%
+2: Intelligence & Initiative: 15%
+3: Intelligence & Initiative: 17.5%
+4: Intelligence & Initiative: 21.25%
+5: Intelligence & Initiative: 25%
+Echoes of Deceit
+Cunning Whispers gains:
+Round 1: Reduce the Instinct and Initiative by -6% (enhanced by Initiative) of the enemy with the highest Instinct until the end of combat.
+Rounds 3, 6, 9: Deal Fire Damage to all enemies that deal Tactical Damage (Damage Rate: +30%). This damage is doubled if the target is afflicted with Panic.
+Habit levels:
+1 (default when habit unlocked): Instinct & Initiative: -6%, Damage Rate: 30%
+2: Instinct & Initiative: -7.8%, Damage Rate: 39%
+3: Instinct & Initiative: -9.6%, Damage Rate: 48%
+4: Instinct & Initiative: -12%, Damage Rate: 60%
+5: Instinct & Initiative: -15%, Damage Rate: 75%
+
+Kalspire habits
+Robust Insight (unlocks at 2 stars)
+Battle Cunning (unlocks at 4 stars)
+Tactical Assault (unlocks at 6 stars)
+Dragon's Insight (unlocks at 8 stars)
+Radiant Conqueror (unlocks at 10 stars)
+Robust Insight
+Start of Combat: Increase your Strength and Instinct by +20% until the end of combat.
+Habit levels:
+1 (default when habit unlocked): Strength & Instinct: 20%
+2: Strength & Instinct: 24%
+3: Strength & Instinct: 28%
+4: Strength & Instinct: 34%
+5: Strength & Instinct: 40%
+Battle Cunning
+Start of Combat: Reduce Strength and Intelligence by -6.5% (enhanced by Instinct) of 3 Enemies in any lane until the end of combat.
+Habit levels:
+1 (default when habit unlocked): Strength & Intelligence: -6.5%
+2: Strength & Intelligence: -7.8%
+3: Strength & Intelligence: -9.1%
+4: Strength & Intelligence: -11.05%
+5: Strength & Intelligence: -13%
+Tactical Assault
+Tactical Strike gains:
+After each Basic Attack: Deal Physical Damage to 1 Enemy within adjacency that was not the target of your Basic Attack (Damage Rate: +25%). Additionally, there is a 15% chance to afflict the target and 1 other Enemy within adjacency with Panic for 2 round(s). Chance is checked separately for each target.
+Panic deals Tactical Damage to the target each round.
+Habit levels:
+1 (default when habit unlocked): Panic Chance: 15%, Damage Rate: 25%
+2: Panic Chance: 18%, Damage Rate: 30%
+3: Panic Chance: 21%, Damage Rate: 35%
+4: Panic Chance: 25.5%, Damage Rate: 42.5%
+5: Panic Chance: 30%, Damage Rate: 50%
+Dragon's Insight
+Start of Combat: Reduce your Damage Received by -6% and increase your Instinct by +12% until the end of combat.
+Habit levels:
+1 (default when habit unlocked): Damage Received: -6%, Instinct: 12%
+2: Damage Received: -7.2%, Instinct: 14.4%
+3: Damage Received: -8.4%, Instinct: 16.8%
+4: Damage Received: -10.2%, Instinct: 20.4%
+5: Damage Received: -12%, Instinct: 24%
+Radiant Conqueror
+Start of Round 1: Reduce your Damage Received by -50% for 1 round(s). However, you are also afflicted with Stun for 1 round(s).
+Stun prevents the target from using Commands and Habits, or launching Basic Attacks on their turn.
+Start of Round 2: Reduce the Physical Damage Dealt (excluding Basic Attacks) of the Enemy with the highest Strength, and the Fire Damage Dealt of the Enemy with the highest Intelligence by -10% for 5 round(s).
+Habit levels:
+1 (default when habit unlocked): Damage Dealt: -10%
+2: Damage Dealt: -13%
+3: Damage Dealt: -16%
+4: Damage Dealt: -20%
+5: Damage Dealt: -25%
+
+Malachite habits
+Forest's Instinct (unlocks at 2 stars)
+Wise Vigor (unlocks at 4 stars)
+Thunderous Roar (unlocks at 6 stars)
+Collective Might (unlocks at 8 stars)
+Lightning Strike (unlocks at 10 stars)
+Forest's Instinct
+Each Round: 35% chance to increase the Physical Damage Dealt (excluding Basic Attacks) by +8% and reduce the Tactical Damage Received by -8% of 2 other Allies in any lane for 2 round(s).
+Habit levels:
+1 (default when habit unlocked): Damage Dealt: 8%, Damage Received: -8%
+2: Damage Dealt: 9.6%, Damage Received: -9.6%
+3: Damage Dealt: 11.2%, Damage Received: -11.2%
+4: Damage Dealt: 13.6%, Damage Received: -13.6%
+5: Damage Dealt: 16%, Damage Received: -16%
+Wise Vigor
+Start of Combat: Increase your Instinct by +20% and Recovery Dealt by +20% until the end of combat.
+Habit levels:
+1 (default when habit unlocked): Instinct: 20%, Dealt: 20%
+2: Instinct: 24%, Dealt: 24%
+3: Instinct: 28%, Dealt: 28%
+4: Instinct: 34%, Dealt: 34%
+5: Instinct: 40%, Dealt: 40%
+Thunderous Roar
+Each Round: 10% chance to grant Advantage (+20%) to 2 other Allies in any lane for 2 round(s).
+Advantage increases the target's Damage Dealt.
+Habit levels:
+1 (default when habit unlocked): Advantage Chance: 10%
+2: Advantage Chance: 12%
+3: Advantage Chance: 14%
+4: Advantage Chance: 17%
+5: Advantage Chance: 20%
+Collective Might
+Start of Combat: Increase Strength by +12.5% (enhanced by Strength) of 3 Allies in any lane until the end of combat.
+Habit levels:
+1 (default when habit unlocked): Strength: 12.5%
+2: Strength: 15%
+3: Strength: 17.5%
+4: Strength: 21.25%
+5: Strength: 25%
+Lightning Strike
+Start of Round 1: 40% chance to grant First-Strike, Double-Strike, and increase Strength by +25% (enhanced by Instinct) of 1 other Ally within adjacency for 3 round(s).
+First-Strike causes the target to act before all other combatants each round.
+Double-Strike grants the target a 2nd Basic Attack each round.
+Habit levels:
+1 (default when habit unlocked): Lightning Strike Chance: 40%
+2: Lightning Strike Chance: 52%
+3: Lightning Strike Chance: 64%
+4: Lightning Strike Chance: 80%
+5: Lightning Strike Chance: 100%
+
+Moondancer habits
+New Moon (unlocks at 2 stars)
+Reactive Instincts (unlocks at 4 stars)
+Full Moon (unlocks at 6 stars)
+Blood Moon (unlocks at 8 stars)
+Eclipsing Strike (unlocks at 10 stars)
+New Moon
+Rounds 1, 3, 5: 25% chance to gain 1 stack of Rising Tide. Double this chance (50%) if any ally has Advantage.
+Odd-numbered Rounds: Increase the Instinct (enhanced by Initiative) by +9% and the Tactical Damage Dealt by +6% of 1 other Ally Sentinel for 2 round(s).
+If you have 4+ stacks of Rising Tide, increase these effects by 1.5x, (+13.5% Instinct and +9% Tactical Damage Dealt).
+Habit levels:
+1 (default when habit unlocked): Rising Tide Chance: 25%, Instinct: 9%, Damage Dealt: 6%
+2: Rising Tide Chance: 30%, Instinct: 10.8%, Damage Dealt: 7.2%
+3: Rising Tide Chance: 35%, Instinct: 12.6%, Damage Dealt: 8.4%
+4: Rising Tide Chance: 42.5%, Instinct: 15.3%, Damage Dealt: 10.2%
+5: Rising Tide Chance: 50%, Instinct: 18%, Damage Dealt: 12%
+Reactive Instincts
+Start of Combat: Increase Instinct by +22% and Initiative by +11% of the Ally with the highest Instinct until the end of combat. Both effects are enhanced by Strength.
+Habit levels:
+1 (default when habit unlocked): Instinct: 22%, Initiative: 11%
+2: Instinct: 26.4%, Initiative: 13.2%
+3: Instinct: 30.8%, Initiative: 15.4%
+4: Instinct: 37.4%, Initiative: 18.7%
+5: Instinct: 44%, Initiative: 22%
+Full Moon
+Rounds 6, 8, 10: 25% chance to gain 1 stack of Rising Tide. Double this chance (50%) if any Ally has Advantage. Additionally, gain 1 stack if you have the least troops of all combatants.
+Crescent Blade gains:
+Increase the Physical Damage dealt to +85%. Additionally, double this damage (+170%) when you have 4+ stacks of Rising Tide.
+Habit levels:
+1 (default when habit unlocked): Damage Rate: 85%, Rising Tide Chance: 25%
+2: Damage Rate: 92%, Rising Tide Chance: 30%
+3: Damage Rate: 99%, Rising Tide Chance: 35%
+4: Damage Rate: 109.5%, Rising Tide Chance: 42.5%
+5: Damage Rate: 120%, Rising Tide Chance: 50%
+Blood Moon
+Each Round: If you have 4+ stacks of Rising Tide, increase your Physical Damage Dealt by +12.5% until the end of the round.
+Odd-numbered Rounds: 25% chance to afflict Bleed on 2 Enemies within adjacency for 2 round(s). Double this chance (50%) if you have 6+ stacks of Rising Tide.
+Habit levels:
+1 (default when habit unlocked): Damage Dealt: 12.5%, Bleed Chance: 25%
+2: Damage Dealt: 15%, Bleed Chance: 30%
+3: Damage Dealt: 17.5%, Bleed Chance: 35%
+4: Damage Dealt: 21.25%, Bleed Chance: 42.5%
+5: Damage Dealt: 25%, Bleed Chance: 50%
+Eclipsing Strike
+Each Round: 20% chance to reduce the Damage Dealt of the Enemy with the Most Troops by -18% for 2 round(s). If you have 6+ stacks of Rising Tide, double this chance (40%) and also reduce the target's Initiative by -25% (enhanced by Initiative).
+Habit levels:
+1 (default when habit unlocked): Eclipsing Strike Chance: 20%
+2: Eclipsing Strike Chance: 26%
+3: Eclipsing Strike Chance: 32%
+4: Eclipsing Strike Chance: 40%
+5: Eclipsing Strike Chance: 50%
+
+Nyrena habits
+Battle Dread (unlocks at 2 stars)
+Mindful Synergy (unlocks at 4 stars)
+Deepen the Breach (unlocks at 6 stars)
+Dragon's Ire (unlocks at 8 stars)
+The Long Siege (unlocks at 10 stars)
+Battle Dread
+Start of Combat: Reduce the Strength and Initiative (enhanced by Intelligence) of 3 Enemies in any lane by -4% until the end of combat.
+Habit levels:
+1 (default when habit unlocked): Strength & Initiative: -4%
+2: Strength & Initiative: -4.8%
+3: Strength & Initiative: -5.6%
+4: Strength & Initiative: -6.8%
+5: Strength & Initiative: -8%
+Mindful Synergy
+Start of Combat: Increase the Intelligence and Instinct (enhanced by Initiative) of 3 Allies in any lane by +4% until the end of combat.
+Habit levels:
+1 (default when habit unlocked): Intelligence & Instinct: 4%
+2: Intelligence & Instinct: 4.8%
+3: Intelligence & Instinct: 5.6%
+4: Intelligence & Instinct: 6.8%
+5: Intelligence & Instinct: 8%
+Deepen the Breach
+Start of Round 1: Increase your Fire Damage Dealt by +8% for 5 round(s).
+Start of Round 6: Increase the Fire Damage Dealt of 1 other Ally within adjacency by +12% for 5 round(s).
+After Combat: Increase your Tile Damage Dealt to the tile's durability.
+Habit levels:
+1 (default when habit unlocked): Tile Damage Dealt: 10%, Damage Dealt (Self): 8%, Damage Dealt: 12%
+2: Tile Damage Dealt: 12%, Damage Dealt (Self): 9.6%, Damage Dealt: 14.4%
+3: Tile Damage Dealt: 14%, Damage Dealt (Self): 11.2%, Damage Dealt: 16.8%
+4: Tile Damage Dealt: 17%, Damage Dealt (Self): 13.6%, Damage Dealt: 20.4%
+5: Tile Damage Dealt: 20%, Damage Dealt (Self): 16%, Damage Dealt: 24%
+Dragon's Ire
+Start of Combat: Increase your Tactical and Fire Damage Dealt by +4% until the end of combat.
+Habit levels:
+1 (default when habit unlocked): Damage Dealt: 4%
+2: Damage Dealt: 4.8%
+3: Damage Dealt: 5.6%
+4: Damage Dealt: 6.8%
+5: Damage Dealt: 8%
+The Long Siege
+Start of Rounds 6-10: Reduce the Physical Damage Received of 3 Allies in any lane by -5% until the end of the round. When Defending, double this effect (-10%).
+Habit levels:
+1 (default when habit unlocked): Damage Received: -5%
+2: Damage Received: -6.5%
+3: Damage Received: -8%
+4: Damage Received: -10%
+5: Damage Received: -12.5%
+
+Rhysarion habits
+Ebbing Fury (unlocks at 2 stars)
+Sharp Resolve (unlocks at 4 stars)
+Echoing Melody (unlocks at 6 stars)
+Unbroken Devotion (unlocks at 8 stars)
+Inspiring Melody (unlocks at 10 stars)
+Ebbing Fury
+Start of Round 1: Reduce Damage Dealt of all Enemies AND Allies by -27.5% for 3 rounds.
+Start of Round 4: Apply Recovery (Recovery Rate: +25%, enhanced by Strength) to 3 Allies in any lane.
+Habit levels:
+1 (default when habit unlocked): Damage Dealt: -27.5%, Rate: 25%
+2: Damage Dealt: -33%, Rate: 30%
+3: Damage Dealt: -38.5%, Rate: 35%
+4: Damage Dealt: -46.75%, Rate: 42.5%
+5: Damage Dealt: -55%, Rate: 50%
+Sharp Resolve
+Start of Combat: Increase your Strength and Intelligence by +16% until the end of combat.
+Habit levels:
+1 (default when habit unlocked): Strength & Intelligence: 16%
+2: Strength & Intelligence: 19.2%
+3: Strength & Intelligence: 22.4%
+4: Strength & Intelligence: 27.2%
+5: Strength & Intelligence: 32%
+Echoing Melody
+Dawnsong gains:
+Rounds 2, 5, 8: Apply Recovery to 2 other Allies in any lane (Recovery Rate: +60%, enhanced by Intelligence).
+Habit levels:
+1 (default when habit unlocked): Rate: 60%
+2: Rate: 72%
+3: Rate: 84%
+4: Rate: 102%
+5: Rate: 120%
+Unbroken Devotion
+Start of Combat: Increase Recovery Received by +20% of 2 other Allies in any lane until the end of combat.
+Habit levels:
+1 (default when habit unlocked): Received: 20%
+2: Received: 24%
+3: Received: 28%
+4: Received: 34%
+5: Received: 40%
+Inspiring Melody
+Each Round: 20% chance to increase Initiative by +20% (enhanced by Intelligence) and grant Resistance (-15%) to 1 other Ally within adjacency for 3 round(s).
+Resistance reduces the target's Damage Received.
+Habit levels:
+1 (default when habit unlocked): Inspiring Melody Chance: 20%
+2: Inspiring Melody Chance: 26%
+3: Inspiring Melody Chance: 32%
+4: Inspiring Melody Chance: 40%
+5: Inspiring Melody Chance: 50%
+
+Seasmoke habits
+Clever Maneuver (unlocks at 2 stars)
+Wind's Favor (unlocks at 4 stars)
+Infectious Wrath (unlocks at 6 stars)
+Cunning Ferocity (unlocks at 8 stars)
+Loyal Bond (unlocks at 10 stars)
+Clever Maneuver
+Start of Combat: Increase Intelligence by +22% and Initiative by +12.5% of the Ally with the highest Intelligence until the end of combat. Both effects are enhanced by Instinct.
+Habit levels:
+1 (default when habit unlocked): Intelligence: 22%, Initiative: 12.5%
+2: Intelligence: 26.4%, Initiative: 15%
+3: Intelligence: 30.8%, Initiative: 17.5%
+4: Intelligence: 37.4%, Initiative: 21.25%
+5: Intelligence: 44%, Initiative: 25%
+Wind's Favor
+Start of Combat: Increase Initiative by +12.5% (enhanced by Initiative) of 3 Allies in any lane until the end of combat.
+Habit levels:
+1 (default when habit unlocked): Initiative: 12.5%
+2: Initiative: 15%
+3: Initiative: 17.5%
+4: Initiative: 21.25%
+5: Initiative: 25%
+Infectious Wrath
+Cleansing Wrath gains:
+Each Round: When you Cleanse an enemy, afflict the target with 1 stack of Infectious Wrath (Max 3 stacks) for 3 round(s).
+Each stack of Infectious Wrath reduces the target's Recovery Received by -15%.
+Rounds 3, 6, 9: Deal Physical Damage to 2 Enemies within adjacency (Damage Rate: +30%). This damage is doubled (+60%) if the target is afflicted with Panic.
+Habit levels:
+1 (default when habit unlocked): Received: -15%, Damage Rate: 30%
+2: Received: -18%, Damage Rate: 36%
+3: Received: -21%, Damage Rate: 42%
+4: Received: -25.5%, Damage Rate: 51%
+5: Received: -30%, Damage Rate: 60%
+Cunning Ferocity
+Start of Combat: Increase the Intelligence by +7.5% (enhanced by Instinct) and the Fire Damage Dealt by +5% of 2 Allies within adjacency until the end of combat.
+Habit levels:
+1 (default when habit unlocked): Intelligence: 7.5%, Damage Dealt: 5%
+2: Intelligence: 9%, Damage Dealt: 6%
+3: Intelligence: 10.5%, Damage Dealt: 7%
+4: Intelligence: 12.75%, Damage Dealt: 8.5%
+5: Intelligence: 15%, Damage Dealt: 10%
+Loyal Bond
+Each Round: 10% chance to grant Advantage (+20%) to 2 other Allies in any lane that are above 50% troop capacity for 2 round(s).
+Each Round: 10% chance to grant Resistance (-20%) to 2 other Allies in any lane that are below 50% troop capacity for 2 round(s).
+Habit levels:
+1 (default when habit unlocked): Advantage Chance: 10%, Resistance Chance: 10%
+2: Advantage Chance: 13%, Resistance Chance: 13%
+3: Advantage Chance: 16%, Resistance Chance: 16%
+4: Advantage Chance: 20%, Resistance Chance: 20%
+5: Advantage Chance: 25%, Resistance Chance: 25%
+
+Shadowsong habits
+Ensnare (unlocks at 2 stars)
+Blazing Onslaught (unlocks at 4 stars)
+Scorched Earth (unlocks at 6 stars)
+Dragon's Intellect (unlocks at 8 stars)
+Blazing Conductor (unlocks at 10 stars)
+Ensnare
+Round 1: Reduce Instinct and Initiative by -18% (enhanced by Intelligence) of 2 Enemies within adjacency for 3 round(s).
+Habit levels:
+1 (default when habit unlocked): Instinct & Initiative: -18%
+2: Instinct & Initiative: -21.6%
+3: Instinct & Initiative: -25.2%
+4: Instinct & Initiative: -30.6%
+5: Instinct & Initiative: -36%
+Blazing Onslaught
+Start of Round 1: Increase Fire Damage Received of 1 Enemy in any lane (prioritizes the Left Flank) and Physical Damage Received (excluding Basic Attacks) of 1 Enemy in any lane (prioritizes the Right Flank) by +15% for 3 round(s).
+Habit levels:
+1 (default when habit unlocked): Damage Received: 15%
+2: Damage Received: 18%
+3: Damage Received: 21%
+4: Damage Received: 25.5%
+5: Damage Received: 30%
+Scorched Earth
+Each Round: 10% chance to afflict Vulnerable (+15%) on 2 Enemies within adjacency for 2 round(s). This chance is doubled (20%) against targets afflicted with Panic.
+Vulnerable increases the target's Damage Received.
+Habit levels:
+1 (default when habit unlocked): Vulnerable Chance: 10%
+2: Vulnerable Chance: 12%
+3: Vulnerable Chance: 14%
+4: Vulnerable Chance: 17%
+5: Vulnerable Chance: 20%
+Dragon's Intellect
+Start of Combat: Reduce your Damage Received by -5% and increase your Intelligence by +8.5% until the end of combat.
+Habit levels:
+1 (default when habit unlocked): Damage Received: -5%, Intelligence: 8.5%
+2: Damage Received: -6%, Intelligence: 10.2%
+3: Damage Received: -7%, Intelligence: 11.9%
+4: Damage Received: -8.5%, Intelligence: 14.45%
+5: Damage Received: -10%, Intelligence: 17%
+Blazing Conductor
+Breath of Fire gains:
+Rounds 2, 5, 8: Deal Fire Damage to 1 Enemy in any lane (Damage Rate: +60%) and there is a 40% chance to afflict the target with Burn for 2 round(s). Then deal Fire Damage to a different Enemy in any lane (Damage Rate: +30%) and there is a 20% chance to afflict the target with Burn for 2 round(s).
+Burn deals Fire Damage to the target each round.
+Habit levels:
+1 (default when habit unlocked): Burn Chance (Target 1): 40%, Burn Chance (Target 2): 20%, Damage Rate (1st Target): 60%, Damage Rate (2nd Target): 30%
+2: Burn Chance (Target 1): 52%, Burn Chance (Target 2): 26%, Damage Rate (1st Target): 78%, Damage Rate (2nd Target): 39%
+3: Burn Chance (Target 1): 64%, Burn Chance (Target 2): 32%, Damage Rate (1st Target): 96%, Damage Rate (2nd Target): 48%
+4: Burn Chance (Target 1): 80%, Burn Chance (Target 2): 40%, Damage Rate (1st Target): 120%, Damage Rate (2nd Target): 60%
+5: Burn Chance (Target 1): 100%, Burn Chance (Target 2): 50%, Damage Rate (1st Target): 150%, Damage Rate (2nd Target): 75%
+
+Shadowrend habits
+Midnight Aura (unlocks at 2 stars)
+Nimble Resilience (unlocks at 4 stars)
+Fueled by Darkness (unlocks at 6 stars)
+Midnight Mastery (unlocks at 8 stars)
+Event Horizon (unlocks at 10 stars)
+Midnight Aura
+Start of Rounds 7-10: Increase Strength, and Instinct by +40% (enhanced by Initiative) of 3 Allies in any lane until the end of the round.
+Habit levels:
+1 (default when habit unlocked): Strength & Instinct: 40%
+2: Strength & Instinct: 48%
+3: Strength & Instinct: 56%
+4: Strength & Instinct: 68%
+5: Strength & Instinct: 80%
+Nimble Resilience
+Start of Combat: Reduce your Damage Received by -4% and increase your Initiative by +5% until the end of combat.
+Habit levels:
+1 (default when habit unlocked): Damage Received: -4%, Initiative: 5%
+2: Damage Received: -4.8%, Initiative: 6%
+3: Damage Received: -5.6%, Initiative: 7%
+4: Damage Received: -6.8%, Initiative: 8.5%
+5: Damage Received: -8%, Initiative: 10%
+Fueled by Darkness
+Each Round: 10% chance to grant Advantage (+10%) to 2 Allies in any lane for 2 round(s). This chance is doubled (20%) when Midnight Aura is active (Rounds 7-10).
+Habit levels:
+1 (default when habit unlocked): Advantage Chance: 10%
+2: Advantage Chance: 12%
+3: Advantage Chance: 14%
+4: Advantage Chance: 17%
+5: Advantage Chance: 20%
+Midnight Mastery
+Start of Rounds 7-10: Increase the Physical and Tactical Damage Dealt by +7% of 3 Allies in any lane until the end of the round.
+Habit levels:
+1 (default when habit unlocked): Damage Dealt: 7%
+2: Damage Dealt: 8.4%
+3: Damage Dealt: 9.8%
+4: Damage Dealt: 11.9%
+5: Damage Dealt: 14%
+Event Horizon
+Eclipse Fervor gains:
+On Round 9: Deal Physical and Tactical Damage to 3 Enemies in any lane (Damage Rate: +100% per type).
+Habit levels:
+1 (default when habit unlocked): Damage Rate: 100%
+2: Damage Rate: 130%
+3: Damage Rate: 160%
+4: Damage Rate: 200%
+5: Damage Rate: 250%
+
+Sheepstealer habits
+Stolen Flock (unlocks at 2 stars)
+Dragon's Cunning (unlocks at 4 stars)
+Baited Kill (unlocks at 6 stars)
+Wary Beast (unlocks at 8 stars)
+Savage Claim (unlocks at 10 stars)
+Stolen Flock
+Start of Combat: Increase your Fire Damage Dealt by +10% when battling non-player armies at Food Tiles and when battling Encounters against Beasts until the end of combat.
+Each Round: 50% chance to gain 1 stack of Stolen Flock (Max 10 Stacks).
+When your Prey receives Recovery: Gain 1 stack of Stolen Flock (Max 10 Stacks).
+Each stack of Stolen Flock increases your Fire Damage Dealt by +3% until the end of combat.
+Habit levels:
+1 (default when habit unlocked): Damage Dealt (Non-player): 10%, Damage Dealt (per Stack): 3%
+2: Damage Dealt (Non-player): 12%, Damage Dealt (per Stack): 3.6%
+3: Damage Dealt (Non-player): 14%, Damage Dealt (per Stack): 4.2%
+4: Damage Dealt (Non-player): 17%, Damage Dealt (per Stack): 5.1%
+5: Damage Dealt (Non-player): 20%, Damage Dealt (per Stack): 6%
+Dragon's Cunning
+Start of Combat: Increase your Intelligence by +16% and reduce Instinct by -12% (enhanced by Initiative) of 2 Enemies within adjacency. Each effect lasts until the end of combat.
+Habit levels:
+1 (default when habit unlocked): Intelligence: 16%, Instinct: -12%
+2: Intelligence: 19.2%, Instinct: -14.4%
+3: Intelligence: 22.4%, Instinct: -16.8%
+4: Intelligence: 27.2%, Instinct: -20.4%
+5: Intelligence: 32%, Instinct: -24%
+Baited Kill
+Each Round: 25% chance to afflict your Prey with Vulnerable (+20%). This chance is doubled (50%) if the target received Recovery within the last 1 round.
+Vulnerable increases the target's Damage Received.
+Each Round: If your Prey is above 50% Troop Capacity, 50% chance to Cleanse yourself of 1 Negative effect applied by an enemy that reduces your Damage Dealt.
+Habit levels:
+1 (default when habit unlocked): Vulnerable Chance: 25%, Cleanse Chance: 50%
+2: Vulnerable Chance: 30%, Cleanse Chance: 60%
+3: Vulnerable Chance: 35%, Cleanse Chance: 70%
+4: Vulnerable Chance: 42.5%, Cleanse Chance: 85%
+5: Vulnerable Chance: 50%, Cleanse Chance: 100%
+Wary Beast
+Start of Each Round: If your Prey is above 50% Troop Capacity, gain Evade until the end of the round.
+Evade causes each instance of damage against the target to have a chance to be ignored.
+Start of Combat: Reduce the Recovery Received by -10% of 3 Enemies in any lane until the end of combat.
+Habit levels:
+1 (default when habit unlocked): Evade Rate: 10%, Received: -10%
+2: Evade Rate: 12%, Received: -12%
+3: Evade Rate: 14%, Received: -14%
+4: Evade Rate: 17%, Received: -17%
+5: Evade Rate: 20%, Received: -20%
+Savage Claim
+Wild Hunt gains:
+Each Round: If you have a Prey, Deal Fire Damage to them (Damage Rate: +24%) and apply Recovery to yourself (Recovery Rate: +10%, enhanced by Intelligence). If your Prey received Recovery within the last round, triple the Damage (+72%) and Recovery (+30%).
+Habit levels:
+1 (default when habit unlocked): Damage Rate: 24%, Rate: 10%
+2: Damage Rate: 31.2%, Rate: 13%
+3: Damage Rate: 38.4%, Rate: 16%
+4: Damage Rate: 48%, Rate: 20%
+5: Damage Rate: 60%, Rate: 25%
+
+Shimmer habits
+Crushing Force (unlocks at 2 stars)
+Dragon's Insight (unlocks at 4 stars)
+Loyal Shield (unlocks at 6 stars)
+Unbroken Devotion (unlocks at 8 stars)
+Sneak Attack (unlocks at 10 stars)
+Crushing Force
+Start of Round 1: Increase the Physical Damage Dealt (Left Flank) and the Tactical Damage Dealt of 1 Ally in any lane (prioritizes the Right Flank) by +9% for 3 round(s).
+Habit levels:
+1 (default when habit unlocked): Damage Dealt: 9%
+2: Damage Dealt: 10.8%
+3: Damage Dealt: 12.6%
+4: Damage Dealt: 15.3%
+5: Damage Dealt: 18%
+Dragon's Insight
+Start of Combat: Reduce your Damage Received by -4% and increase your Instinct by +5% until the end of combat.
+Habit levels:
+1 (default when habit unlocked): Damage Received: -4%, Instinct: 5%
+2: Damage Received: -4.8%, Instinct: 6%
+3: Damage Received: -5.6%, Instinct: 7%
+4: Damage Received: -6.8%, Instinct: 8.5%
+5: Damage Received: -8%, Instinct: 10%
+Loyal Shield
+Unbreakable Loyalty gains:
+Rounds 2, 4, 7, 9: Apply Recovery to 2 other Allies in any lane (Recovery Rate: +30%, enhanced by Instinct). The amount of Recovery is doubled if the target has Resistance (Recovery Rate: +60%, enhanced by Instinct).
+Habit levels:
+1 (default when habit unlocked): Rate: 30%
+2: Rate: 36%
+3: Rate: 42%
+4: Rate: 51%
+5: Rate: 60%
+Unbroken Devotion
+Start of Combat: Increase Recovery Received by +15% of 2 other Allies in any lane until the end of combat.
+Habit levels:
+1 (default when habit unlocked): Received: 15%
+2: Received: 18%
+3: Received: 21%
+4: Received: 25.5%
+5: Received: 30%
+Sneak Attack
+Each Round: 14% chance to increase Physical Damage Dealt by +10% and grant First-Strike to the Other Ally with the highest Strength for 2 round(s). First-Strike causes the target to attack before all other combatants each round.
+Habit levels:
+1 (default when habit unlocked): Sneak Attack Chance: 14%
+2: Sneak Attack Chance: 18.2%
+3: Sneak Attack Chance: 22.4%
+4: Sneak Attack Chance: 28%
+5: Sneak Attack Chance: 35%
+
+Solstryker habits
+Steady Erosion (unlocks at 2 stars)
+Energy Drain (unlocks at 4 stars)
+Oppressive Onslaught (unlocks at 6 stars)
+Robust Insight (unlocks at 8 stars)
+Amplified Drain (unlocks at 10 stars)
+Steady Erosion
+At the start of each round, add 1 Stack of Steady Erosion (Max 10 Stacks) to all Enemies.
+Each Stack of Steady Erosion reduces the target's Strength by -2% (enhanced by Strength) until the end of combat.
+Habit levels:
+1 (default when habit unlocked): Strength (per Stack): -2%
+2: Strength (per Stack): -2.4%
+3: Strength (per Stack): -2.8%
+4: Strength (per Stack): -3.4%
+5: Strength (per Stack): -4%
+Energy Drain
+Round 1: Reduce Strength and Initiative by -15% of 2 Enemies within adjacency (enhanced by Instinct) for 3 round(s).
+Habit levels:
+1 (default when habit unlocked): Strength / Initiative: -15%
+2: Strength / Initiative: -18%
+3: Strength / Initiative: -21%
+4: Strength / Initiative: -25.5%
+5: Strength / Initiative: -30%
+Oppressive Onslaught
+Each Round: 10% chance to afflict Overwhelm on 1 Enemy in any lane for 2 round(s).
+Overwhelm prevents the target from using Active Commands and Habits on their turn.
+Habit levels:
+1 (default when habit unlocked): Overwhelm Chance: 10%
+2: Overwhelm Chance: 12%
+3: Overwhelm Chance: 14%
+4: Overwhelm Chance: 17%
+5: Overwhelm Chance: 20%
+Robust Insight
+Start of Combat: Increase your Strength and Instinct by +12.5% until the end of combat.
+Habit levels:
+1 (default when habit unlocked): Strength / Instinct: 12.5%
+2: Strength / Instinct: 15%
+3: Strength / Instinct: 17.5%
+4: Strength / Instinct: 21.25%
+5: Strength / Instinct: 25%
+Amplified Drain
+Round 4: Reduce Strength and Initiative by -15% of 2 Enemies within adjacency (enhanced by Instinct) for 5 round(s).
+Habit levels:
+1 (default when habit unlocked): Strength / Initiative: -15%
+2: Strength / Initiative: -19.5%
+3: Strength / Initiative: -24%
+4: Strength / Initiative: -30%
+5: Strength / Initiative: -37.5%
+
+Sunfyre habits
+Radiant Majesty (unlocks at 2 stars)
+Extinguish (unlocks at 4 stars)
+The King's Ire (unlocks at 6 stars)
+Unbroken Splendor (unlocks at 8 stars)
+Adaptive Glory (unlocks at 10 stars)
+Radiant Majesty
+Start of Each Round: Increase the Damage Dealt by +5% of the other ally with the most troops until the end of the round.
+If you are below 75% Troop Capacity, apply this effect to both other allies instead.
+If you are below 50% Troop Capacity, also apply this effect to yourself.
+Habit levels:
+1 (default when habit unlocked): Damage Dealt: 5%
+2: Damage Dealt: 6%
+3: Damage Dealt: 7%
+4: Damage Dealt: 8.5%
+5: Damage Dealt: 10%
+Extinguish
+Start of Combat: Reduce Fire Damage Dealt by -13% of 1 Enemy that deals Fire Damage until the end of combat.
+Habit levels:
+1 (default when habit unlocked): Damage Dealt: -13.5%
+2: Damage Dealt: -16.2%
+3: Damage Dealt: -18.9%
+4: Damage Dealt: -22.95%
+5: Damage Dealt: -27%
+The King's Ire
+Each Round: The first time any ally receives Fire Damage, deal Tactical Damage to 1 Enemy in any lane that deals Fire Damage (Damage Rate: +50%). Additionally, reduce the target's Intelligence by -15% (enhanced by Instinct) for 2 round(s).
+This effect can only trigger once per round.
+Habit levels:
+1 (default when habit unlocked): Damage Dealt: 50%, Intelligence: -15%
+2: Damage Dealt: 60%, Intelligence: -18%
+3: Damage Dealt: 70%, Intelligence: -21%
+4: Damage Dealt: 85%, Intelligence: -25.5%
+5: Damage Dealt: 100%, Intelligence: -30%
+Unbroken Splendor
+Start of Combat: Reduce your Fire Damage Received by -7% until the end of combat.
+Start of Each Round: If you are below 50% troop capacity, reduce your Damage Received by -7% until the end of the round. Additionally, there is a 25% chance to Cleanse 1 Negative effect that increases your Damage Received (prioritizes the Vulnerable condition).
+Habit levels:
+1 (default when habit unlocked): Fire Damage Received: -7.5%, Damage Received: -7.5%, Cleanse Chance: 25%
+2: Fire Damage Received: -9%, Damage Received: -9%, Cleanse Chance: 30%
+3: Fire Damage Received: -10.5%, Damage Received: -10.5%, Cleanse Chance: 35%
+4: Fire Damage Received: -12.75%, Damage Received: -12.75%, Cleanse Chance: 42.5%
+5: Fire Damage Received: -15%, Damage Received: -15%, Cleanse Chance: 50%
+Adaptive Glory
+Each Round: The first time you Receive Damage, activate one of the following effects based on the type of damage received.
+Fire Damage: Apply Recovery to yourself (Recovery Rate: +30% enhanced by Instinct).
+Tactical Damage: Increase the Damage Dealt of the Ally with the most troops by +12% for 1 round(s).
+Physical Damage (excluding Basic Attacks): Reduce the Damage Dealt of the Enemy with the most troops by -12% for 1 round(s).
+Basic Attack: Increase your Instinct by +12% and Initiative by +6% for 1 round(s).
+Habit levels:
+1 (default when habit unlocked): Rate: 30%, Damage Dealt: 12%, Damage Dealt: -12%, Instinct: 12%, Initiative: 6%
+2: Rate: 39%, Damage Dealt: 15.6%, Damage Dealt: -15.6%, Instinct: 15.6%, Initiative: 7.8%
+3: Rate: 48%, Damage Dealt: 19.2%, Damage Dealt: -19.2%, Instinct: 19.2%, Initiative: 9.6%
+4: Rate: 60%, Damage Dealt: 24%, Damage Dealt: -24%, Instinct: 24%, Initiative: 12%
+5: Rate: 75%, Damage Dealt: 30%, Damage Dealt: -30%, Instinct: 30%, Initiative: 15%
+
+Syrax habits
+Mindful Synergy (unlocks at 2 stars)
+Flight Mastery (unlocks at 4 stars)
+Strategic Revival (unlocks at 6 stars)
+Tactical Inferno (unlocks at 8 stars)
+Mother's Mercy (unlocks at 10 stars)
+Mindful Synergy
+Start of Combat: Increase the Intelligence and Instinct (enhanced by Initiative) of 3 Allies in any lane by +6.5% until the end of combat.
+Habit levels:
+1 (default when habit unlocked): Intelligence / Instinct: 6.5%
+2: Intelligence / Instinct: 7.8%
+3: Intelligence / Instinct: 9.1%
+4: Intelligence / Instinct: 11.05%
+5: Intelligence / Instinct: 13%
+Flight Mastery
+Start of Combat: Increase Initiative by +6% (enhanced by Instinct) of 3 Allies in any lane and reduce Initiative by -6% (enhanced by Instinct) of 3 Enemies in any lane until the end of combat.
+Habit levels:
+1 (default when habit unlocked): Initiative (Ally): 6%, Initiative (Enemy): -6%
+2: Initiative (Ally): 7.2%, Initiative (Enemy): -7.2%
+3: Initiative (Ally): 8.4%, Initiative (Enemy): -8.4%
+4: Initiative (Ally): 10.2%, Initiative (Enemy): -10.2%
+5: Initiative (Ally): 12%, Initiative (Enemy): -12%
+Strategic Revival
+Blazing Fury gains:
+Rounds 2, 5, 8: Apply Recovery to the Ally with the least troops (Recover Rate: +50%, enhanced by Initiative). The amount of Recovery is increased by 1.5x (+75%) if an Enemy is afflicted with Slow. Additionally, there is a 25% to grant the target Resistance (-20%) for 2 round(s).
+Resistance reduces the target's Damage Received.
+Habit levels:
+1 (default when habit unlocked): Resistance Chance: 25%, Rate: 50%
+2: Resistance Chance: 30%, Rate: 60%
+3: Resistance Chance: 35%, Rate: 70%
+4: Resistance Chance: 42.5%, Rate: 85%
+5: Resistance Chance: 50%, Rate: 100%
+Tactical Inferno
+Start of Round 1: Increase the Tactical Damage Dealt of 1 Ally in any lane (prioritizes the Left Flank) and the Fire Damage Dealt of 1 Ally in any lane (prioritizes the Right Flank) by +18% for 3 round(s).
+Habit levels:
+1 (default when habit unlocked): Tactical / Fire Damage Dealt: 18%
+2: Tactical / Fire Damage Dealt: 21.6%
+3: Tactical / Fire Damage Dealt: 25.2%
+4: Tactical / Fire Damage Dealt: 30.6%
+5: Tactical / Fire Damage Dealt: 36%
+Mother's Mercy
+Each Round: 14% chance to Cleanse 2 Negative and 1 Control effects from 1 Ally in any lane (prioritizes allies afflicted with a Control effect).
+Control effects include Stun, Stagger, Overwhelm, and Confusion.
+Habit levels:
+1 (default when habit unlocked): Cleanse Chance: 14%
+2: Cleanse Chance: 18.2%
+3: Cleanse Chance: 22.4%
+4: Cleanse Chance: 28%
+5: Cleanse Chance: 35%
+
+Tairax habits
+Whisper of Ash (unlocks at 2 stars)
+Sunder (unlocks at 4 stars)
+Gleamstrike (unlocks at 6 stars)
+Gift of Fire (unlocks at 8 stars)
+Moonlit Hunt (unlocks at 10 stars)
+Whisper of Ash
+Start of Round 1: Reduce the Strength and Initiative by -16% (enhanced by Intelligence) of 1 Enemy in the same lane for 5 round(s).
+Start of Round 6: Increase your Intelligence and Initiative by +16% for 5 round(s).
+Habit levels:
+1 (default when habit unlocked): Strength: -16%, Initiative: -16%, Intelligence: 16%, Initiative: 16%
+2: Strength: -19.2%, Initiative: -19.2%, Intelligence: 19.2%, Initiative: 19.2%
+3: Strength: -22.4%, Initiative: -22.4%, Intelligence: 22.4%, Initiative: 22.4%
+4: Strength: -27.2%, Initiative: -27.2%, Intelligence: 27.2%, Initiative: 27.2%
+5: Strength: -32%, Initiative: -32%, Intelligence: 32%, Initiative: 32%
+Sunder
+Start of Each Round: Increase the Damage Received by +7.5% of all enemies afflicted with a Control effect until the end of the round.
+Control effects include Stun, Stagger, Overwhelm, and Confusion.
+Habit levels:
+1 (default when habit unlocked): Damage Received: 7.5%
+2: Damage Received: 9%
+3: Damage Received: 10.5%
+4: Damage Received: 12.75%
+5: Damage Received: 15%
+Gleamstrike
+Burning Ward gains:
+Odd-numbered Rounds: Increase chance to afflict Stagger to 38%.
+Stagger prevents the target from using Attack Modifier Commands or launching Basic Attacks.
+Each Round: Deal Fire Damage to all Enemies afflicted with a Control effect (Damage Rate: +20%).
+Control effects include Stun, Stagger, Overwhelm, and Confusion.
+Habit levels:
+1 (default when habit unlocked): Stagger Chance: 37.5%, Damage Rate: 20%
+2: Stagger Chance: 40%, Damage Rate: 24%
+3: Stagger Chance: 42.5%, Damage Rate: 28%
+4: Stagger Chance: 46.25%, Damage Rate: 34%
+5: Stagger Chance: 50%, Damage Rate: 40%
+Gift of Fire
+Start of each Round: For each enemy afflicted with Burn, 18% chance to apply Resistance (-15%) to 1 Ally in any lane for 2 round(s) (prioritizes targets not already affected by Resistance).
+Resistance reduces the target's Damage Received.
+Habit levels:
+1 (default when habit unlocked): Resistance Chance: 17.5%
+2: Resistance Chance: 21%
+3: Resistance Chance: 24.5%
+4: Resistance Chance: 29.75%
+5: Resistance Chance: 35%
+Moonlit Hunt
+Start of Round 1: Grant yourself Evade for 5 round(s).
+Evade causes each instance of damage against the target to have a chance to be ignored.
+Start of Round 6: Increase your Fire Damage Dealt by +12% for 5 round(s).
+Habit levels:
+1 (default when habit unlocked): Evade Rate: 5%, Damage Dealt: 12%
+2: Evade Rate: 6.5%, Damage Dealt: 15.6%
+3: Evade Rate: 8%, Damage Dealt: 19.2%
+4: Evade Rate: 10%, Damage Dealt: 24%
+5: Evade Rate: 12.5%, Damage Dealt: 30%
+
+Tashix habits
+Enervate (unlocks at 2 stars)
+Dragon's Cunning (unlocks at 4 stars)
+Cunning Ruse (unlocks at 6 stars)
+Battle Guile (unlocks at 8 stars)
+Veiled Ambush (unlocks at 10 stars)
+Enervate
+Start of Combat: Reduce Tactical Damage Dealt by -10% of 1 Enemy that deals Tactical Damage until the end of combat.
+Habit levels:
+1 (default when habit unlocked): Damage Dealt: -10.5%
+2: Damage Dealt: -12.6%
+3: Damage Dealt: -14.7%
+4: Damage Dealt: -17.85%
+5: Damage Dealt: -21%
+Dragon's Cunning
+Start of Combat: Increase your Intelligence by +12% and reduce Instinct by -10% (enhanced by Initiative) of 2 Enemies within adjacency. Each effect lasts until the end of combat.
+Habit levels:
+1 (default when habit unlocked): Intelligence: 12%, Instinct: -10%
+2: Intelligence: 14.4%, Instinct: -12%
+3: Intelligence: 16.8%, Instinct: -14%
+4: Intelligence: 20.4%, Instinct: -17%
+5: Intelligence: 24%, Instinct: -20%
+Cunning Ruse
+Each Round: 25% chance to gain 1 stack of Mirage (Max 10 Stacks).
+Each stack of Mirage increases your Fire Damage Dealt by +2.5% until the end of combat.
+Each Round If you have 4 or more stacks of Mirage, there is a 10% chance to afflict 3 Enemies in any lane with Weakened (-15%) for 2 round(s). This chance is checked separately for each target and is doubled (20%) against targets that deal Tactical Damage.
+Weakened reduces the target's Damage Dealt.
+Habit levels:
+1 (default when habit unlocked): Weakened Chance: 10%
+2: Weakened Chance: 12%
+3: Weakened Chance: 14%
+4: Weakened Chance: 17%
+5: Weakened Chance: 20%
+Battle Guile
+Start of Combat Reduce Instinct and Initiative by -5% (enhanced by Initiative) of 3 Enemies in any lane until the end of combat.
+Habit levels:
+1 (default when habit unlocked): Instinct / Initiative: -5%
+2: Instinct / Initiative: -6%
+3: Instinct / Initiative: -7%
+4: Instinct / Initiative: -8.85%
+5: Instinct / Initiative: -10.5%
+Veiled Ambush
+Each Round: 25% chance to gain 1 stack of Mirage (Max 10 Stacks).
+Each stack of Mirage increases your Fire Damage Dealt by +2.5% until the end of combat.
+Each Round: If you 7 or more stacks of Mirage, deal Fire Damage (Damage Rate: +150%) to the Enemy with the most troops. This effect can only trigger once per combat.
+Habit levels:
+1 (default when habit unlocked): Damage Rate: 150%
+2: Damage Rate: 220%
+3: Damage Rate: 290%
+4: Damage Rate: 380%
+5: Damage Rate: 500%
+
+Tessarion habits
+Sharpened Beauty (unlocks at 2 stars)
+Blazing Leader (unlocks at 4 stars)
+Molten Armor (unlocks at 6 stars)
+Clever Maneuver (unlocks at 8 stars)
+The Blue Queen (unlocks at 10 stars)
+Sharpened Beauty
+Start of Each Round: Increase your Physical and Fire Damage Dealt by +7% until the end of the round. Double these effects (+14%) if you are above 75% Troop Capacity or if you have Advantage.
+Habit levels:
+1 (default when habit unlocked): Damage Dealt: 7%
+2: Damage Dealt: 8.4%
+3: Damage Dealt: 9.8%
+4: Damage Dealt: 11.9%
+5: Damage Dealt: 14%
+Blazing Leader
+Start of Combat: Increase the Fire Damage Dealt by +10% of 1 Ally in any lane (prioritizes the Left Flank) until the end of combat.
+Habit levels:
+1 (default when habit unlocked): Damage Dealt: 10%
+2: Damage Dealt: 12%
+3: Damage Dealt: 14%
+4: Damage Dealt: 17%
+5: Damage Dealt: 20%
+Molten Armor
+Start of Odd-numbered Rounds: 25% chance to increase your Fire Damage Dealt by +12% and reduce the Physical Damage Received by -12% of 2 other Allies in any lane. If you are afflicted with Panic, also apply the reduced Physical Damage Received effect to yourself. Each effect lasts for 2 round(s).
+Habit levels:
+1 (default when habit unlocked): Molten Armor Chance: 25%
+2: Molten Armor Chance: 30%
+3: Molten Armor Chance: 35%
+4: Molten Armor Chance: 42.5%
+5: Molten Armor Chance: 50%
+Clever Maneuver
+Start of Combat: Increase Intelligence by +18% and Initiative by +9% of the Ally with the highest Intelligence until the end of combat. Both effects are enhanced by Instinct.
+Habit levels:
+1 (default when habit unlocked): Intelligence: 18%, Initiative: 9%
+2: Intelligence: 21.6%, Initiative: 10.8%
+3: Intelligence: 25.2%, Initiative: 12.6%
+4: Intelligence: 30.6%, Initiative: 15.3%
+5: Intelligence: 36%, Initiative: 18%
+The Blue Queen
+Start of Odd-numbered Rounds: 40% chance to reduce the Damage Received by -10% and increase the Intelligence (enhanced by Intelligence) by +15% of 1 other Ally in any lane that deals Fire Damage for 2 round(s).
+If you are above 75% Troop Capacity, double the Damage Received reduction (-20%) and Intelligence increase (+30%).
+Habit levels:
+1 (default when habit unlocked): The Blue Queen Chance: 40%
+2: The Blue Queen Chance: 52%
+3: The Blue Queen Chance: 64%
+4: The Blue Queen Chance: 80%
+5: The Blue Queen Chance: 100%
+
+Thunderstrike habits
+Battle Rush (unlocks at 2 stars)
+Dragon's Might (unlocks at 4 stars)
+Barbed Lash (unlocks at 6 stars)
+Armor Break (unlocks at 8 stars)
+Staggering Assault (unlocks at 10 stars)
+Battle Rush
+At the start of round 1, increase your Initiative by +25% and reduce Instinct by -15% (enhanced by Strength) of 2 Enemies within adjacency. Each effect lasts for 3 rounds.
+Habit levels:
+1 (default when habit unlocked): Initiative: 25%, Instinct: -15%
+2: Initiative: 30%, Instinct: -18%
+3: Initiative: 35%, Instinct: -21%
+4: Initiative: 42.5%, Instinct: -25.5%
+5: Initiative: 50%, Instinct: -30%
+Dragon's Might
+Start of Combat: Increase your Physical Damage Dealt by +8% until the end of combat.
+Habit levels:
+1 (default when habit unlocked): Damage Dealt: 8%
+2: Damage Dealt: 9.6%
+3: Damage Dealt: 11.2%
+4: Damage Dealt: 13.6%
+5: Damage Dealt: 16%
+Barbed Lash
+Tail Whip gains:
+Even-numbered Rounds: Deal Physical Damage to 1 Enemy in the same lane (Damage Rate: +50%). Additionally, there is a 25% chance to afflict the target with Bleed for 2 round(s) (Damage Rate: +20%). Bleed deals Physical Damage to the target each round.
+Habit levels:
+1 (default when habit unlocked): Bleed Chance: 25%, Damage Rate: 50%
+2: Bleed Chance: 30%, Damage Rate: 60%
+3: Bleed Chance: 35%, Damage Rate: 70%
+4: Bleed Chance: 42.5%, Damage Rate: 85%
+5: Bleed Chance: 50%, Damage Rate: 100%
+Armor Break
+Start of Combat: Increase the Physical Damage Received by +4.8% of 1 opposing Enemy until the end of combat.
+Habit levels:
+1 (default when habit unlocked): Damage Received: 4.8%
+2: Damage Received: 5.67%
+3: Damage Received: 6.72%
+4: Damage Received: 8.16%
+5: Damage Received: 9.6%
+Staggering Assault
+Each Round: 10% to afflict Stagger on 1 Enemy in the same lane for 1 round(s). The duration is doubled (2 rounds) if you have Advantage.
+Stagger prevents the target from using Attack Modifier Commands or launching Basic Attacks on their turn.
+Habit levels:
+1 (default when habit unlocked): Stagger Chance: 10%
+2: Stagger Chance: 13%
+3: Stagger Chance: 16%
+4: Stagger Chance: 20%
+5: Stagger Chance: 25%
+
+Vaeldra habits
+Dragon's Valor (unlocks at 2 stars)
+Ensnare (unlocks at 4 stars)
+Tempting Distraction (unlocks at 6 stars)
+Infernal Force (unlocks at 8 stars)
+Siren's Call (unlocks at 10 stars)
+Dragon's Valor
+Start of Combat: Reduce your Damage Received by -6% and increase your Strength by +10.2% until the end of combat.
+Habit levels:
+1 (default when habit unlocked): Damage Received: -5%, Strength: 8.5%
+2: Damage Received: -6%, Strength: 10.2%
+3: Damage Received: -7%, Strength: 11.9%
+4: Damage Received: -8.5%, Strength: 14.45%
+5: Damage Received: -10%, Strength: 17%
+Ensnare
+Round 1: Reduce Instinct and Initiative by -18% (enhanced by Intelligence) of 2 Enemies within adjacency for 3 round(s).
+Habit levels:
+1 (default when habit unlocked): Instinct & Initiative: -18%
+2: Instinct & Initiative: -21.6%
+3: Instinct & Initiative: -25.2%
+4: Instinct & Initiative: -30.6%
+5: Instinct & Initiative: -36%
+Tempting Distraction
+When you afflict an Enemy with Taunt: Increase their Physical Damage Received (excluding Basic Attacks) and Fire Damage Received by +6% for 2 round(s).
+Habit levels:
+1 (default when habit unlocked): Damage Received: 6%
+2: Damage Received: 7.2%
+3: Damage Received: 8.4%
+4: Damage Received: 10.2%
+5: Damage Received: 12%
+Infernal Force
+Start of Round 1: Increase the Fire Damage Dealt of 1 Ally in any lane (prioritizes the Left Flank) and the Physical Damage Dealt (excluding Basic Attacks) of 1 Ally in any lane (prioritizes the Right Flank) by +12%. Each effect lasts for 3 rounds.
+Habit levels:
+1 (default when habit unlocked): Damage Dealt: 12%
+2: Damage Dealt: 14.4%
+3: Damage Dealt: 16.8%
+4: Damage Dealt: 20.4%
+5: Damage Dealt: 24%
+Siren's Call
+Start of Round 1: Reduce your Physical Damage Received by -10% for 3 round(s).
+Start of Rounds 1-3: 40% chance to Taunt all Enemies until the end of the round. Targets that are already afflicted with Taunt will be afflicted with Stagger instead.
+Habit levels:
+1 (default when habit unlocked): Damage Received: -10%, Taunt/Stagger Chance: 40%
+2: Damage Received: -13%, Taunt/Stagger Chance: 52%
+3: Damage Received: -16%, Taunt/Stagger Chance: 64%
+4: Damage Received: -20%, Taunt/Stagger Chance: 80%
+5: Damage Received: -25%, Taunt/Stagger Chance: 100%
+
+Velar habits
+Strategic Leader (unlocks at 2 stars)
+Quick Reflexes (unlocks at 4 stars)
+Gales of Power (unlocks at 6 stars)
+Fierce Unity (unlocks at 8 stars)
+Breath of Renewal (unlocks at 10 stars)
+Strategic Leader
+Start of Combat: Increase Tactical Damage Dealt by +10% of 1 Ally in any lane (prioritizes the Vanguard) until the end of combat.
+Habit levels:
+1 (default when habit unlocked): Damage Dealt: 10%
+2: Damage Dealt: 12%
+3: Damage Dealt: 14%
+4: Damage Dealt: 17%
+5: Damage Dealt: 20%
+Quick Reflexes
+Start of Combat: Increase your Instinct and Initiative by +16% until the end of combat.
+Habit levels:
+1 (default when habit unlocked): Instinct & Initiative: 16%
+2: Instinct & Initiative: 19.2%
+3: Instinct & Initiative: 22.4%
+4: Instinct & Initiative: 27.2%
+5: Instinct & Initiative: 32%
+Gales of Power
+Rounds 2, 4, 6, 8: 12% chance to grant First-Strike to 3 Allies in any lane and afflict Slow on 3 Enemies in any lane. Each effect is checked separately per target and lasts for 2 round(s).
+First-Strike causes the target to attack before all other combatants each round.
+Slow causes the target to attack after all other combatants each round.
+Habit levels:
+1 (default when habit unlocked): First-Strike Chance: 12%, Slow Chance: 12%
+2: First-Strike Chance: 14.4%, Slow Chance: 14.4%
+3: First-Strike Chance: 16.8%, Slow Chance: 16.8%
+4: First-Strike Chance: 20.4%, Slow Chance: 20.4%
+5: First-Strike Chance: 24%, Slow Chance: 24%
+Fierce Unity
+Start of Combat: Increase Strength and Instinct by +5% (enhanced by Initiative) of 3 Allies in any lane until the end of combat.
+Habit levels:
+1 (default when habit unlocked): Strength & Instinct: 5%
+2: Strength & Instinct: 6%
+3: Strength & Instinct: 7%
+4: Strength & Instinct: 8.5%
+5: Strength & Instinct: 10%
+Breath of Renewal
+Whirlwind gains:
+Each Round: 12% chance to Cleanse 1 instance of Bleed, Panic, or Burn from each Ally. This chance is checked separately per target.
+Rounds 2, 4, 6, 8: Apply Recovery to 3 Allies in any lane (Recovery Rate: +18%, enhanced by Initiative).
+Habit levels:
+1 (default when habit unlocked): Cleanse Chance: 12%, Rate: 18%
+2: Cleanse Chance: 16%, Rate: 23.4%
+3: Cleanse Chance: 19%, Rate: 28.8%
+4: Cleanse Chance: 24%, Rate: 36%
+5: Cleanse Chance: 30%, Rate: 45%
+
+Venator habits
+Hunter's Bane (unlocks at 2 stars)
+Dragon's Might (unlocks at 4 stars)
+Feral Precision (unlocks at 6 stars)
+Armor Break (unlocks at 8 stars)
+Desperate Ambush (unlocks at 10 stars)
+Hunter's Bane
+Start of Combat: Reduce Intelligence by -30% (enhanced by Strength) of 1 Enemy in any lane (prioritizes Hunters).
+Habit levels:
+1 (default when habit unlocked): Intelligence: -30%
+2: Intelligence: -36%
+3: Intelligence: -42%
+4: Intelligence: -51%
+5: Intelligence: -60%
+Dragon's Might
+Start of Combat: Increase your Physical Damage Dealt (excluding Basic Attacks) by +12.5% until the end of combat.
+Habit levels:
+1 (default when habit unlocked): Damage Dealt: 12.5%
+2: Damage Dealt: 15%
+3: Damage Dealt: 17.5%
+4: Damage Dealt: 21.25%
+5: Damage Dealt: 25%
+Feral Precision
+Feral Strike gains:
+After each Basic Attack: Deal Physical Damage to the enemy with the least troops (Damage Rate: +20%).
+Rounds 4, 6, 8: The chance to gain Double-Strike is increased to 40%.
+Double-Strike grants the target a 2nd Basic Attack each round.
+Habit levels:
+1 (default when habit unlocked): Double-Strike Chance: 40%, Damage Rate: 20%
+2: Double-Strike Chance: 42%, Damage Rate: 24%
+3: Double-Strike Chance: 44%, Damage Rate: 28%
+4: Double-Strike Chance: 47%, Damage Rate: 34%
+5: Double-Strike Chance: 50%, Damage Rate: 40%
+Armor Break
+Start of Combat: Increase the Physical Damage Received by +8% of 1 opposing Enemy until the end of combat.
+Habit levels:
+1 (default when habit unlocked): Damage Received: 8%
+2: Damage Received: 9.6%
+3: Damage Received: 11.2%
+4: Damage Received: 13.6%
+5: Damage Received: 16%
+Desperate Ambush
+Each Round: If you are below 50% troop capacity, deal Physical Damage to 1 Enemy in any lane (prioritizes Hunters) (Damage Rate: +60%). Additionally, there is a 12% chance to afflict the target with Overwhelm for 2 round(s).
+Overwhelm prevents the target from using Active Commands and Habits on their turn.
+Habit levels:
+1 (default when habit unlocked): Damage Rate: 60%, Overwhelm Chance: 12%
+2: Damage Rate: 78%, Overwhelm Chance: 15.6%
+3: Damage Rate: 96%, Overwhelm Chance: 19.2%
+4: Damage Rate: 120%, Overwhelm Chance: 24%
+5: Damage Rate: 150%, Overwhelm Chance: 30%
+
+
+Vermax habits
+Trial by Flame (unlocks at 2 stars)
+Reactive Instincts (unlocks at 4 stars)
+Rallying Flame (unlocks at 6 stars)
+Dragon's Valor (unlocks at 8 stars)
+Unyielding Resolve (unlocks at 10 stars)
+Trial by Flame
+Start of Each Round: Reduce the Fire Damage Received of all allies below 75% troop capacity by -5% until the end of the round. This effect is doubled (-10%) for target's below 50% troop capacity, and tripled (-15%) for targets below 25% troop capacity.
+Habit levels:
+1 (default when habit unlocked): Damage Received (Troop Capacity below 75%): -5%, Damage Received (Troop Capacity below 50%): -10%, Damage Received (Troop Capacity below 25%): -15%
+2: Damage Received (Troop Capacity below 75%): -6%, Damage Received (Troop Capacity below 50%): -12%, Damage Received (Troop Capacity below 25%): -18%
+3: Damage Received (Troop Capacity below 75%): -7%, Damage Received (Troop Capacity below 50%): -14%, Damage Received (Troop Capacity below 25%): -21%
+4: Damage Received (Troop Capacity below 75%): -8.5%, Damage Received (Troop Capacity below 50%): -17%, Damage Received (Troop Capacity below 25%): -25.5%
+5: Damage Received (Troop Capacity below 75%): -10%, Damage Received (Troop Capacity below 50%): -20%, Damage Received (Troop Capacity below 25%): -30%
+Reactive Instincts
+Start of Combat: Increase Instinct by +18% and Initiative by +9% of the Ally with the highest Instinct until the end of combat. Both effects are enhanced by Strength.
+Habit levels:
+1 (default when habit unlocked): Instinct: 18%, Initiative: 9%
+2: Instinct: 21.6%, Initiative: 10.8%
+3: Instinct: 25.2%, Initiative: 12.6%
+4: Instinct: 30.6%, Initiative: 15.3%
+5: Instinct: 36%, Initiative: 18%
+Rallying Flame
+Start of Combat: 50% chance to grant yourself 1 stack of Rallying Flame (Max 4 Stacks) until the end of combat. Repeat this chance for each enemy that deals Fire Damage.
+Each stack of Rallying Flame increases your Physical Damage Dealt by +5%.
+Start of Combat: 50% chance to grant 1 stack of Spreading Blaze (Max 10 Stacks) to 1 Ally that deals Tactical Damage until the end of combat. Repeat this chance for each enemy that deals Fire Damage.
+Each stack of Spreading Blaze increases the target's Tactical Damage Dealt by +2.5% until the end of combat.
+Habit levels:
+1 (default when habit unlocked): Rallying Flame Chance: 50%, Spreading Blaze Chance: 50%
+2: Rallying Flame Chance: 60%, Spreading Blaze Chance: 60%
+3: Rallying Flame Chance: 70%, Spreading Blaze Chance: 70%
+4: Rallying Flame Chance: 85%, Spreading Blaze Chance: 85%
+5: Rallying Flame Chance: 100%, Spreading Blaze Chance: 100%
+Dragon's Valor
+Start of Combat: Reduce your Damage Received by -5% and increase your Strength by +8.5% until the end of combat.
+Habit levels:
+1 (default when habit unlocked): Damage Received: -5%, Strength: 8.5%
+2: Damage Received: -6%, Strength: 10.2%
+3: Damage Received: -7%, Strength: 11.9%
+4: Damage Received: -8.5%, Strength: 14.45%
+5: Damage Received: -10%, Strength: 17%
+Unyielding Resolve
+Start of Each Round: 20% chance to grant yourself Advantage (+15%) for 2 round(s). This chance is increased by 1.5x (30%) if you are afflicted with Weakened, and if successful removes the Weakened effect.
+Advantage increases the target's Damage Dealt.
+Habit levels:
+1 (default when habit unlocked): Advantage Chance: 20%
+2: Advantage Chance: 26%
+3: Advantage Chance: 32%
+4: Advantage Chance: 40%
+5: Advantage Chance: 50%
+
+Vesper habits
+Strategic Leader (unlocks at 2 stars)
+Dragon's Insight (unlocks at 4 stars)
+Savior's Waltz (unlocks at 6 stars)
+Insightful Allies (unlocks at 8 stars)
+Midnight Onslaught (unlocks at 10 stars)
+Strategic Leader
+Start of Combat: Increase Tactical Damage Dealt by +8% of 1 Ally in any lane (prioritizes the Vanguard) until the end of combat.
+Habit levels:
+1 (default when habit unlocked): Damage Dealt: 8%
+2: Damage Dealt: 9.6%
+3: Damage Dealt: 11.2%
+4: Damage Dealt: 13.6%
+5: Damage Dealt: 16%
+Dragon's Insight
+Start of Combat: Reduce your Damage Received by -4% and increase your Instinct by +5% until the end of combat.
+Habit levels:
+1 (default when habit unlocked): Damage Received: -4%, Instinct: 5%
+2: Damage Received: -4.8%, Instinct: 6%
+3: Damage Received: -5.6%, Instinct: 7%
+4: Damage Received: -6.8%, Instinct: 8.5%
+5: Damage Received: -8%, Instinct: 10%
+Savior's Waltz
+Each Round: 13% chance to apply Resistance (-10%) to yourself and 1 other Ally within adjacency for 2 round(s). Resistance reduces the target's Damage Received.
+Habit levels:
+1 (default when habit unlocked): Resistance Chance: 12.5%
+2: Resistance Chance: 15%
+3: Resistance Chance: 17.5%
+4: Resistance Chance: 21.25%
+5: Resistance Chance: 25%
+Insightful Allies
+Start of Combat: Increase Instinct by +8% (enhanced by Instinct) of 3 Allies in any lane until the end of combat.
+Habit levels:
+1 (default when habit unlocked): Instinct: 8%
+2: Instinct: 9.6%
+3: Instinct: 11.2%
+4: Instinct: 13.6%
+5: Instinct: 16%
+Midnight Onslaught
+Rounds 6-10: 24% chance to afflict Confusion on 1 Enemy within adjacency for 2 round(s). Confusion causes the target to have a 50% chance to mistake Allies for Enemies and vice versa each time they activate a Command or Habit, or launch a Basic Attack on their turn.
+Habit levels:
+1 (default when habit unlocked): Confusion Chance: 24%
+2: Confusion Chance: 31.2%
+3: Confusion Chance: 38.4%
+4: Confusion Chance: 48%
+5: Confusion Chance: 60%
+
+Vhagar habits
+Ancestral Shield (unlocks at 2 stars)
+Battle Leader (unlocks at 4 stars)
+Eclipse Cover (unlocks at 6 stars)
+Blazing Onslaught (unlocks at 8 stars)
+Skyward Titan (unlocks at 10 stars)
+Ancestral Shield
+Start of Round 1: Reduce your Physical and Tactical Damage Received by -12% for 3 rounds.
+Start of Round 4: Increase your Recovery Received by +15% until the end of combat.
+Habit levels:
+1 (default when habit unlocked): Damage Received: -12%, Received: 15%
+2: Damage Received: -14.4%, Received: 18%
+3: Damage Received: -16.8%, Received: 21%
+4: Damage Received: -20.4%, Received: 25.5%
+5: Damage Received: -24%, Received: 30%
+Battle Leader
+Start of Combat: Increase Physical Damage Dealt (excluding Basic Attacks) by +12.5% of 1 Ally in any lane (prioritizes the Right Flank) until the end of combat.
+Habit levels:
+1 (default when habit unlocked): Damage Dealt: 12.5%
+2: Damage Dealt: 15%
+3: Damage Dealt: 17.5%
+4: Damage Dealt: 21.25%
+5: Damage Dealt: 25%
+Eclipse Cover
+Rounds 3-7: 18% chance to grant Advantage (+20%) to the Ally with the most troops and afflict Weakened (-20%) on the Enemy with the most troops. Each effect lasts for 2 round(s).
+Advantage increases the target's Damage Dealt.
+Weakened reduces the target's Damage Dealt.
+Habit levels:
+1 (default when habit unlocked): Advantage & Weakened Chance: 17.5%
+2: Advantage & Weakened Chance: 21%
+3: Advantage & Weakened Chance: 24.5%
+4: Advantage & Weakened Chance: 29.8%
+5: Advantage & Weakened Chance: 35%
+Blazing Onslaught
+Start of Round 1: Increase Fire Damage Received of 1 Enemy in any lane (prioritizes the Left Flank) and Physical Damage Received (excluding Basic Attacks) of 1 Enemy in any lane (prioritizes the Right Flank) by +18% for 3 round(s).
+Habit levels:
+1 (default when habit unlocked): Damage Received: 18%
+2: Damage Received: 21.6%
+3: Damage Received: 25.2%
+4: Damage Received: 30.6%
+5: Damage Received: 36%
+Skyward Titan
+Each Round: 30% chance to gain 1 stack of Bulwark (Max 5 Stacks) until the end of combat.
+Each Stack of Bulwark increases your Strength by +5% and reduces your Physical and Tactical Damage Received by -2%.
+Gain 3rd Stack of Bulwark: Deal Physical Damage (Damage Rate: +100%) to 1 Enemy in the same lane.
+Habit levels:
+1 (default when habit unlocked): Strength: 5%, Damage Received: -2.5%, Damage Rate: 100%
+2: Strength: 6.5%, Damage Received: -3.25%, Damage Rate: 130%
+3: Strength: 8%, Damage Received: -4%, Damage Rate: 160%
+4: Strength: 10%, Damage Received: -5%, Damage Rate: 200%
+5: Strength: 12.5%, Damage Received: -6.25%, Damage Rate: 250%
+
+Zivern habits
+Battle Mastery (unlocks at 2 stars)
+Keen Instinct (unlocks at 4 stars)
+Fearsome Reach (unlocks at 6 stars)
+Steel Shroud (unlocks at 8 stars)
+Cloak of Terror (unlocks at 10 stars)
+Battle Mastery
+Start of Combat: Reduce the Strength and Instinct (enhanced by Intelligence) of 3 enemies by -5% until the end of combat.
+Habit levels:
+1 (default when habit unlocked): Strength & Instinct: -5%
+2: Strength & Instinct: -6%
+3: Strength & Instinct: -7%
+4: Strength & Instinct: -8.85%
+5: Strength & Instinct: -10.5%
+Keen Instinct
+Start of Combat: Increase your Intelligence and Instinct by +16% until the end of combat.
+Habit levels:
+1 (default when habit unlocked): Intelligence & Instinct: 16%
+2: Intelligence & Instinct: 19.2%
+3: Intelligence & Instinct: 22.4%
+4: Intelligence & Instinct: 27.2%
+5: Intelligence & Instinct: 32%
+Fearsome Reach
+Odd-numbered Rounds: 30% chance to reduce the Instinct (enhanced by Intelligence) by -15% and afflict Panic (Damage Rate: +20%) on 3 Enemies in any lane for 2 round(s).
+Panic deals Tactical Damage to the target each round.
+Habit levels:
+1 (default when habit unlocked): Fearsome Reach Chance: 30%
+2: Fearsome Reach Chance: 36%
+3: Fearsome Reach Chance: 42%
+4: Fearsome Reach Chance: 51%
+5: Fearsome Reach Chance: 60%
+Steel Shroud
+Start of Combat: Reduce Physical Damage Received (excluding Basic Attacks) and Tactical Damage Received by -3% of 2 other Allies in any lane until the end of combat.
+Habit levels:
+1 (default when habit unlocked): Damage Received: -3.5%
+2: Damage Received: -4.2%
+3: Damage Received: -4.9%
+4: Damage Received: -5.95%
+5: Damage Received: -7%
+Cloak of Terror
+Odd-numbered Rounds: 10% chance to afflict Overwhelm on 2 Enemies within adjacency for 2 round(s). This chance is doubled (20%) if the target is afflicted with Vulnerable.
+Overwhelm prevents the target from using Active Commands and Habits on their turn.
+Habit levels:
+1 (default when habit unlocked): Overwhelm Chance: 10%
+2: Overwhelm Chance: 13%
+3: Overwhelm Chance: 16%
+4: Overwhelm Chance: 20%
+5: Overwhelm Chance: 25%

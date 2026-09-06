@@ -130,13 +130,29 @@
             {
               "t": "status",
               "st": "panic",
+              "rate": 20,
               "dur": 2,
               "chance": [15, 18, 21, 25.5, 30],
               "chancePerTarget": true,
               "tgt": {
                 "side": "enemy",
-                "count": 2,
-                "select": "adjacency"
+                "count": 1,
+                "select": "adjacency",
+                "excludeLastBasic": true
+              }
+            },
+            {
+              "t": "status",
+              "st": "panic",
+              "rate": 20,
+              "dur": 2,
+              "chance": [15, 18, 21, 25.5, 30],
+              "chancePerTarget": true,
+              "tgt": {
+                "side": "enemy",
+                "count": 1,
+                "select": "adjacency",
+                "excludeLastDmg": true
               }
             }
           ]

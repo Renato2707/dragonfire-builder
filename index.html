@@ -208,9 +208,9 @@
                 <div id="teamAStatus"></div>
             </div>
             <div>
-                <div id="battleLog">Monte a formação. Tropa do time liga Affinity (+20%) só nos dragões que têm essa tropa.</div>
+                <div id="battleLog">Monte a formacao e clique Iniciar.</div>
                 <div class="controls">
-                    <button id="btnNextRound" disabled>Próxima rodada</button>
+                    <button id="btnNextRound" disabled>Proxima rodada</button>
                     <button id="btnReset" disabled>Reiniciar</button>
                 </div>
             </div>
@@ -241,7 +241,7 @@
       function describe(prefix) {
         var troop = selectedName(prefix + '-troop') || 'sem tropa';
         var dragons = [0, 1, 2].map(function (slot) {
-          return selectedName(prefix + '-slot-' + slot) || '—';
+          return selectedName(prefix + '-slot-' + slot) || '-';
         }).join(', ');
         return troop + ' · ' + dragons;
       }
@@ -296,7 +296,7 @@
           var select = document.getElementById(prefix + '-saved');
           if (!select) return;
           var keep = prefix === 'teamA' ? selectedA : selectedB;
-          select.innerHTML = '<option value="">—</option>';
+          select.innerHTML = '<option value="">-</option>';
           names().forEach(function (name) {
             var opt = document.createElement('option');
             opt.value = name;
