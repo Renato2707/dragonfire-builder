@@ -6,7 +6,7 @@ import { Battle } from './battle.js';
 import { loadDragonHabitsSync, loadCommandSync, ifBonusApplies, executeModAction, executeHabitAction, resolveChance, Habit } from './habitParser.js';
 import { applyEffect, hasEffect, cleanseCharacter, getEffect, isImmuneTo, processHealingEffects } from './effects.js';
 import { selectTargets } from './positionSystem.js';
-import { applyChanceIf, statusConditionMet, sortByInitiative } from './utils.js';
+import { applyChanceIf, statusConditionMet, sortByInitiative, calculateFinalDamage } from './utils.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -1441,7 +1441,7 @@ function mockFx(ids) {
     const btl = new Battle([sun], foes, { verbose: false });
     btl.currentRound = 1;
     btl.executeKit(sun, kit, 'turn', 1, 'Golden Wrath');
-    return { sun, foes };
+    return { sun, foes, btl };
   };
   const healthy = run(80);
   if (healthy.sun.lastDamageTargets.length !== 1) throw new Error('>=75% Golden Wrath hits only same-lane');
@@ -1453,13 +1453,16 @@ function mockFx(ids) {
   if (mid.sun.lastDamageTargets.length !== 2) throw new Error('<75% should hit a 2nd adjacent enemy');
   if (mid.sun.lastDamageTargets.includes(mid.foes[1]) === false) throw new Error('2nd hit must keep the same-lane target');
   if (hasEffect(mid.foes[1], 'burn')) throw new Error('<75% but >=50% should not Burn');
+  if (mid.btl.battleLog.some(line => /Fire Damage/.test(line))) {
+    throw new Error('<75% but >=50% should not deal Fire');
+  }
   const low = run(40);
   if (low.sun.lastDamageTargets.length !== 2) throw new Error('<50% still two targets');
   const burned = low.foes.filter(f => hasEffect(f, 'burn'));
   if (burned.length !== 2) throw new Error('<50% Burn on the same two targets');
-  const midDmg = 10000 - mid.foes[1].currentHealth;
-  const lowDmg = 10000 - low.foes[1].currentHealth;
-  if (lowDmg <= midDmg) throw new Error('<50% should add Fire on the same targets');
+  if (!low.btl.battleLog.some(line => /Fire Damage/.test(line))) {
+    throw new Error('<50% should add Fire on the same targets');
+  }
   console.log('✓ Golden Wrath same-lane / 2nd adjacent / Fire+Burn\n');
 }
 
@@ -1976,6 +1979,36 @@ function mockFx(ids) {
   if (btl.selectDamageType(champFire) !== 'FIRE') throw new Error('Champion BA follows highest stat (INT → Fire)');
   if (btl.selectDamageType(champPhys) !== 'PHYSICAL') throw new Error('Champion BA follows highest stat (STR → Physical)');
   console.log('✓ dealer type from class (Champion uses highest stat)\n');
+}
+
+{
+  const atk = new Character({
+    id: 'atk', name: 'Atk', breed: 'Warrior', rarity: 'Rare',
+    stats: { str: 80, inst: 10, int: 10, init: 10 }
+  }, 0, 1);
+  const def = new Character({
+    id: 'def', name: 'Def', breed: 'Warrior', rarity: 'Rare',
+    stats: { str: 10, inst: 40, int: 10, init: 10 }
+  }, 1, 1);
+  atk.maxHealth = 4800;
+  atk.currentHealth = 4800;
+  def.maxHealth = 4800;
+  def.currentHealth = 4800;
+  const fullCmd = calculateFinalDamage(atk, def, 'PHYSICAL', 70);
+  const fullBa = calculateFinalDamage(atk, def, 'PHYSICAL', 0, { basic: true });
+  atk.currentHealth = 2400;
+  const halfCmd = calculateFinalDamage(atk, def, 'PHYSICAL', 70);
+  const halfBa = calculateFinalDamage(atk, def, 'PHYSICAL', 0, { basic: true });
+  if (!(fullCmd > 0)) throw new Error('full command damage should land');
+  if (Math.abs(halfCmd - fullCmd / 2) > 1) {
+    throw new Error(`living troops should halve command damage, full ${fullCmd} half ${halfCmd}`);
+  }
+  if (halfBa !== fullBa) throw new Error(`Basic Attack must stay unscaled, full ${fullBa} half ${halfBa}`);
+  atk.currentHealth = 0;
+  atk.isDead = true;
+  const deadDot = calculateFinalDamage(atk, def, 'PHYSICAL', 20);
+  if (!(deadDot > 0)) throw new Error('DoT from retreated inflictor should still tick via cap');
+  console.log('✓ command damage scales with living troops; BA unscaled\n');
 }
 
 try {
