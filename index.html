@@ -37,18 +37,13 @@
         }
         .slot-row.troop-row { grid-template-columns: 110px minmax(0, 1fr); }
         .slot-row label { font-size: 0.8em; color: #8a8a8a; }
-        select, input[type="text"], textarea {
+        select, input[type="text"] {
             width: 100%;
             padding: 7px;
             background: #111;
             border: 1px solid #333;
             color: #c8c8c8;
             font-size: 0.8em;
-        }
-        textarea {
-            min-height: 120px;
-            font-family: Consolas, monospace;
-            resize: vertical;
         }
         button {
             padding: 8px 14px;
@@ -70,11 +65,6 @@
             font-size: 0.8em;
             color: #8a8a8a;
             min-height: 1.2em;
-        }
-        .prep-hint {
-            font-size: 0.75em;
-            color: #8a8a8a;
-            margin: 10px 0 6px;
         }
         .start-section { text-align: center; margin-bottom: 16px; }
         .start-section label { font-size: 12px; color: #8a8a8a; margin-right: 8px; }
@@ -166,8 +156,6 @@
                     <button type="button" onclick="dfbDeleteTeam('teamA')">Apagar</button>
                 </div>
                 <div id="teamA-save-status" class="team-save-status">Escreva um nome e clique Salvar.</div>
-                <div class="prep-hint">Cola o bloco Preparations deste time (texto do jogo).</div>
-                <textarea id="teamA-prep" placeholder="[ Champion: Damage ] (4.623%)..."></textarea>
             </div>
             <div class="team-panel">
                 <h2>Time B</h2>
@@ -204,8 +192,6 @@
                     <button type="button" onclick="dfbDeleteTeam('teamB')">Apagar</button>
                 </div>
                 <div id="teamB-save-status" class="team-save-status">Escreva um nome e clique Salvar.</div>
-                <div class="prep-hint">Cola o bloco Preparations deste time (texto do jogo).</div>
-                <textarea id="teamB-prep" placeholder="[ Champion: Damage ] (28.476%)..."></textarea>
             </div>
         </div>
         <div class="start-section">
@@ -222,7 +208,7 @@
                 <div id="teamAStatus"></div>
             </div>
             <div>
-                <div id="battleLog">Monte a formacao. Cola as Preparations de cada time. Sem isso o combate fica equilibrado a forca.</div>
+                <div id="battleLog">Monte a formacao e clique Iniciar.</div>
                 <div class="controls">
                     <button id="btnNextRound" disabled>Proxima rodada</button>
                     <button id="btnReset" disabled>Reiniciar</button>
@@ -283,7 +269,6 @@
       function snapshot(prefix) {
         return {
           troop: val(prefix + '-troop'),
-          prep: val(prefix + '-prep'),
           slots: [0, 1, 2].map(function (slot) {
             return {
               id: val(prefix + '-slot-' + slot),
@@ -297,7 +282,6 @@
       function apply(prefix, data) {
         if (!data) return;
         setVal(prefix + '-troop', data.troop || '');
-        if (data.prep != null) setVal(prefix + '-prep', data.prep);
         (data.slots || []).forEach(function (slot, index) {
           setVal(prefix + '-slot-' + index, slot.id || '');
           setVal(prefix + '-level-' + index, slot.level || '');

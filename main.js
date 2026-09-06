@@ -5,7 +5,6 @@ import { Character, SLOT_NAMES, DEFAULT_LEVEL, DEFAULT_STARS, DEFAULT_HABIT_RANK
 import { Battle } from './battle.js';
 import { applyVanguardLabel } from './hook-vanguard-label.js';
 import { applyEngineHooks } from './hook-engine.js';
-import { applyPreparations } from './hook-preparations.js';
 import { loadDragonHabitsSync, loadCommandSync } from './habitParser.js';
 import { troopAdvantageSign, TROOP_ADVANTAGE_PCT } from './troopAdvantage.js';
 import { VANGUARD_NAMES } from './vanguardNames.js';
@@ -50,8 +49,6 @@ async function boot() {
   document.getElementById('teamA-troop').addEventListener('change', onFormationChange);
   document.getElementById('teamB-troop').addEventListener('change', onFormationChange);
   document.getElementById('defending-team').addEventListener('change', onFormationChange);
-  document.getElementById('teamA-prep').addEventListener('input', onFormationChange);
-  document.getElementById('teamB-prep').addEventListener('input', onFormationChange);
   document.getElementById('btnStartBattle').addEventListener('click', startBattle);
   document.getElementById('btnNextRound').addEventListener('click', nextRound);
   document.getElementById('btnReset').addEventListener('click', reset);
@@ -135,7 +132,7 @@ function fillHabitSelect(select) {
     const option = document.createElement('option');
     option.value = String(rank);
     option.textContent = `Lvl ${rank}`;
-    if (rank === 5) option.selected = true;
+    if (rank === DEFAULT_HABIT_RANK) option.selected = true;
     select.appendChild(option);
   }
 }
@@ -158,11 +155,6 @@ function readNumber(id, fallback) {
 
 function readTroop(prefix) {
   return document.getElementById(`${prefix}-troop`).value || null;
-}
-
-function readPrep(prefix) {
-  const el = document.getElementById(`${prefix}-prep`);
-  return el ? el.value : '';
 }
 
 function troopLabel(id) {
@@ -207,18 +199,7 @@ function formatTeamFormation(title, team, enemyTroop) {
   return lines.join('\n');
 }
 
-function formatPrepBlock(title, result) {
-  const lines = [title + ' preparations: ' + (result.mods || []).length + ' lines / ' + (result.applied || []).length + ' applied'];
-  if (!(result.applied || []).length) {
-    lines.push('  (none — parser found 0 bonuses)');
-    return lines.join('\n');
-  }
-  result.applied.slice(0, 40).forEach(row => lines.push('  ' + row));
-  if (result.applied.length > 40) lines.push('  …');
-  return lines.join('\n');
-}
-
-function formatTroopFormation(battle, prepA, prepB) {
+function formatTroopFormation(battle) {
   return [
     BAR,
     '• Troop Formation',
@@ -230,8 +211,7 @@ function formatTroopFormation(battle, prepA, prepB) {
     BAR,
     '• Preparations',
     DASH,
-    formatPrepBlock('Team A', prepA || { mods: [], applied: [] }),
-    formatPrepBlock('Team B', prepB || { mods: [], applied: [] }),
+    'Any special global effects will be listed here, such as effects from City Upgrades, Boosts, etc.',
     ''
   ].join('\n');
 }
@@ -239,7 +219,6 @@ function formatTroopFormation(battle, prepA, prepB) {
 function snapshotTeam(prefix) {
   return {
     troop: readTroop(prefix),
-    prep: readPrep(prefix),
     slots: SLOTS.map(slot => ({
       id: document.getElementById(`${prefix}-slot-${slot}`).value || '',
       level: document.getElementById(`${prefix}-level-${slot}`).value,
@@ -252,10 +231,6 @@ function snapshotTeam(prefix) {
 function applyTeam(prefix, data) {
   if (!data) return;
   if (data.troop != null) document.getElementById(`${prefix}-troop`).value = data.troop || '';
-  if (data.prep != null) {
-    const prep = document.getElementById(`${prefix}-prep`);
-    if (prep) prep.value = data.prep;
-  }
   (data.slots || []).forEach((slot, index) => {
     const id = document.getElementById(`${prefix}-slot-${index}`);
     const level = document.getElementById(`${prefix}-level-${index}`);
@@ -317,8 +292,6 @@ function setSlotsDisabled(disabled) {
   document.getElementById('teamA-troop').disabled = disabled;
   document.getElementById('teamB-troop').disabled = disabled;
   document.getElementById('defending-team').disabled = disabled;
-  document.getElementById('teamA-prep').disabled = disabled;
-  document.getElementById('teamB-prep').disabled = disabled;
   SLOTS.forEach(slot => {
     ['teamA', 'teamB'].forEach(prefix => {
       document.getElementById(`${prefix}-slot-${slot}`).disabled = disabled;
@@ -372,14 +345,12 @@ async function startBattle() {
   const teamB = buildTeam('teamB', 1);
   if (teamA.length !== 3 || teamB.length !== 3) return;
   for (const character of [...teamA, ...teamB]) await loadKit(character);
-  const prepA = applyPreparations(teamA, readPrep('teamA'));
-  const prepB = applyPreparations(teamB, readPrep('teamB'));
   currentBattle = new Battle(teamA, teamB, {
     teamTroop: [readTroop('teamA'), readTroop('teamB')],
     defendingTeam: Number(document.getElementById('defending-team').value)
   });
   currentBattle.start();
-  formationHeader = formatTroopFormation(currentBattle, prepA, prepB);
+  formationHeader = formatTroopFormation(currentBattle);
   currentBattle.runRound();
   updateBattleDisplay();
   setSlotsDisabled(true);
