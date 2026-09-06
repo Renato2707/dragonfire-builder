@@ -33,7 +33,7 @@ function ensureBox(prefix, slot) {
   const box = document.createElement('div');
   box.id = hostId;
   box.className = 'habit-slots';
-  const fallback = Number(habit.value) || 5;
+  const fallback = Number(habit.value) || 1;
   for (let i = 1; i <= 5; i += 1) {
     const sel = document.createElement('select');
     sel.id = `${prefix}-hr-${slot}-${i}`;
@@ -77,7 +77,7 @@ function collect() {
       syncUnlocks(id, slot);
       const dragonEl = document.getElementById(`${id}-slot-${slot}`);
       const dragon = dragonEl && dragonEl.value ? getDragon(dragonEl.value) : null;
-      const fallback = Number((document.getElementById(`${id}-habit-${slot}`) || {}).value) || 5;
+      const fallback = Number((document.getElementById(`${id}-habit-${slot}`) || {}).value) || 1;
       const ranks = {};
       ((dragon && dragon.habits) || []).forEach((habit, index) => {
         const el = document.getElementById(`${id}-hr-${slot}-${index + 1}`);
