@@ -9,8 +9,6 @@ import { applyIfBonusTarget } from './hook-ifbonus-target.js';
 import { applyOnCleanseStack } from './hook-cleanse-positive.js';
 import { applyExtraStatuses } from './hook-extra-statuses.js';
 import { applySameLaneBasic } from './hook-basic-target.js';
-import { applyPrintDamageScale } from './hook-print-scale.js';
-import { applyHealFormula } from './hook-heal-formula.js';
 import { applyHabitRanks } from './hook-habit-rank.js';
 
 function applyPanelRanks(Battle) {
@@ -41,8 +39,6 @@ export function applyEngineHooks(Battle) {
   applyOnCleanseStack(Battle);
   applyLinkProcOrder(Battle);
   applySameLaneBasic(Battle);
-  applyPrintDamageScale(Battle);
-  applyHealFormula(Battle);
   if (typeof document !== 'undefined') {
     import('./habit-panel.js').catch(() => {});
   }

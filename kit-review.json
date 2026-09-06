@@ -1,0 +1,471 @@
+{
+  "generated": "2026-09-06T03:32:08.988Z",
+  "skipped": [
+    "starshower",
+    "vermithor"
+  ],
+  "totals": {
+    "reviewed": 34,
+    "pass": 34,
+    "fail": 0
+  },
+  "results": [
+    {
+      "id": "antares",
+      "name": "Antares",
+      "pass": true,
+      "fails": [],
+      "notes": [
+        "rounds=10"
+      ],
+      "gatedHabits": [],
+      "missingFiles": [],
+      "fixPushed": false
+    },
+    {
+      "id": "arrax",
+      "name": "Arrax",
+      "pass": true,
+      "fails": [],
+      "notes": [
+        "rounds=10"
+      ],
+      "gatedHabits": [],
+      "missingFiles": [],
+      "fixPushed": false
+    },
+    {
+      "id": "arulix",
+      "name": "Arulix",
+      "pass": true,
+      "fails": [],
+      "notes": [
+        "rounds=10"
+      ],
+      "gatedHabits": [],
+      "missingFiles": [],
+      "fixPushed": false
+    },
+    {
+      "id": "bevlorin",
+      "name": "Bevlorin",
+      "pass": true,
+      "fails": [],
+      "notes": [
+        "rounds=10"
+      ],
+      "gatedHabits": [],
+      "missingFiles": [],
+      "fixPushed": false
+    },
+    {
+      "id": "caraxes",
+      "name": "Caraxes",
+      "pass": true,
+      "fails": [],
+      "notes": [
+        "rounds=10"
+      ],
+      "gatedHabits": [],
+      "missingFiles": [],
+      "fixPushed": false
+    },
+    {
+      "id": "crimson",
+      "name": "Crimson",
+      "pass": true,
+      "fails": [],
+      "notes": [
+        "rounds=10",
+        "gated habit Enervate"
+      ],
+      "gatedHabits": [
+        {
+          "name": "Enervate",
+          "reasons": [
+            "Enervate: conditional targeting"
+          ]
+        }
+      ],
+      "missingFiles": [],
+      "fixPushed": false
+    },
+    {
+      "id": "daemoros",
+      "name": "Daemoros",
+      "pass": true,
+      "fails": [],
+      "notes": [
+        "rounds=10"
+      ],
+      "gatedHabits": [],
+      "missingFiles": [],
+      "fixPushed": false
+    },
+    {
+      "id": "dawnseeker",
+      "name": "Dawnseeker",
+      "pass": true,
+      "fails": [],
+      "notes": [
+        "rounds=10"
+      ],
+      "gatedHabits": [],
+      "missingFiles": [],
+      "fixPushed": false
+    },
+    {
+      "id": "feskar",
+      "name": "Feskar",
+      "pass": true,
+      "fails": [],
+      "notes": [
+        "rounds=10"
+      ],
+      "gatedHabits": [],
+      "missingFiles": [],
+      "fixPushed": false
+    },
+    {
+      "id": "jagadrix",
+      "name": "Jagadrix",
+      "pass": true,
+      "fails": [],
+      "notes": [
+        "rounds=10",
+        "gated habit Enervate"
+      ],
+      "gatedHabits": [
+        {
+          "name": "Enervate",
+          "reasons": [
+            "Enervate: conditional targeting"
+          ]
+        }
+      ],
+      "missingFiles": [],
+      "fixPushed": false
+    },
+    {
+      "id": "kalspire",
+      "name": "Kalspire",
+      "pass": true,
+      "fails": [],
+      "notes": [
+        "rounds=10"
+      ],
+      "gatedHabits": [],
+      "missingFiles": [],
+      "fixPushed": false
+    },
+    {
+      "id": "malachite",
+      "name": "Malachite",
+      "pass": true,
+      "fails": [],
+      "notes": [
+        "rounds=10"
+      ],
+      "gatedHabits": [],
+      "missingFiles": [],
+      "fixPushed": false
+    },
+    {
+      "id": "moondancer",
+      "name": "Moondancer",
+      "pass": true,
+      "fails": [],
+      "notes": [
+        "rounds=10"
+      ],
+      "gatedHabits": [],
+      "missingFiles": [],
+      "fixPushed": false
+    },
+    {
+      "id": "nyrena",
+      "name": "Nyrena",
+      "pass": true,
+      "fails": [],
+      "notes": [
+        "rounds=10"
+      ],
+      "gatedHabits": [],
+      "missingFiles": [],
+      "fixPushed": false
+    },
+    {
+      "id": "rhysarion",
+      "name": "Rhysarion",
+      "pass": true,
+      "fails": [],
+      "notes": [
+        "rounds=10"
+      ],
+      "gatedHabits": [],
+      "missingFiles": [],
+      "fixPushed": false
+    },
+    {
+      "id": "seasmoke",
+      "name": "Seasmoke",
+      "pass": true,
+      "fails": [],
+      "notes": [
+        "rounds=10"
+      ],
+      "gatedHabits": [],
+      "missingFiles": [],
+      "fixPushed": false
+    },
+    {
+      "id": "shadowrend",
+      "name": "Shadowrend",
+      "pass": true,
+      "fails": [],
+      "notes": [
+        "rounds=10"
+      ],
+      "gatedHabits": [],
+      "missingFiles": [],
+      "fixPushed": false
+    },
+    {
+      "id": "shadowsong",
+      "name": "Shadowsong",
+      "pass": true,
+      "fails": [],
+      "notes": [
+        "rounds=10"
+      ],
+      "gatedHabits": [],
+      "missingFiles": [],
+      "fixPushed": false
+    },
+    {
+      "id": "sheepstealer",
+      "name": "Sheepstealer",
+      "pass": true,
+      "fails": [],
+      "notes": [
+        "rounds=10"
+      ],
+      "gatedHabits": [],
+      "missingFiles": [],
+      "fixPushed": false
+    },
+    {
+      "id": "shimmer",
+      "name": "Shimmer",
+      "pass": true,
+      "fails": [],
+      "notes": [
+        "rounds=10"
+      ],
+      "gatedHabits": [],
+      "missingFiles": [],
+      "fixPushed": false
+    },
+    {
+      "id": "solstryker",
+      "name": "Solstryker",
+      "pass": true,
+      "fails": [],
+      "notes": [
+        "rounds=10"
+      ],
+      "gatedHabits": [],
+      "missingFiles": [],
+      "fixPushed": false
+    },
+    {
+      "id": "sunfyre",
+      "name": "Sunfyre",
+      "pass": true,
+      "fails": [],
+      "notes": [
+        "rounds=10",
+        "gated habit Extinguish",
+        "gated habit The King's Ire"
+      ],
+      "gatedHabits": [
+        {
+          "name": "Extinguish",
+          "reasons": [
+            "Extinguish: conditional targeting"
+          ]
+        },
+        {
+          "name": "The King's Ire",
+          "reasons": [
+            "The King's Ire: conditional targeting",
+            "The King's Ire: reactive phase on_ally_fire_damage"
+          ]
+        }
+      ],
+      "missingFiles": [],
+      "fixPushed": false
+    },
+    {
+      "id": "syrax",
+      "name": "Syrax",
+      "pass": true,
+      "fails": [],
+      "notes": [
+        "rounds=10"
+      ],
+      "gatedHabits": [],
+      "missingFiles": [],
+      "fixPushed": false
+    },
+    {
+      "id": "tairax",
+      "name": "Tairax",
+      "pass": true,
+      "fails": [],
+      "notes": [
+        "rounds=10"
+      ],
+      "gatedHabits": [],
+      "missingFiles": [],
+      "fixPushed": false
+    },
+    {
+      "id": "tashix",
+      "name": "Tashix",
+      "pass": true,
+      "fails": [],
+      "notes": [
+        "rounds=10",
+        "gated habit Enervate"
+      ],
+      "gatedHabits": [
+        {
+          "name": "Enervate",
+          "reasons": [
+            "Enervate: conditional targeting"
+          ]
+        }
+      ],
+      "missingFiles": [],
+      "fixPushed": false
+    },
+    {
+      "id": "tessarion",
+      "name": "Tessarion",
+      "pass": true,
+      "fails": [],
+      "notes": [
+        "rounds=10"
+      ],
+      "gatedHabits": [],
+      "missingFiles": [],
+      "fixPushed": false
+    },
+    {
+      "id": "thunderstrike",
+      "name": "Thunderstrike",
+      "pass": true,
+      "fails": [],
+      "notes": [
+        "rounds=10"
+      ],
+      "gatedHabits": [],
+      "missingFiles": [],
+      "fixPushed": false
+    },
+    {
+      "id": "vaeldra",
+      "name": "Vaeldra",
+      "pass": true,
+      "fails": [],
+      "notes": [
+        "rounds=10"
+      ],
+      "gatedHabits": [],
+      "missingFiles": [],
+      "fixPushed": false
+    },
+    {
+      "id": "velar",
+      "name": "Velar",
+      "pass": true,
+      "fails": [],
+      "notes": [
+        "rounds=10"
+      ],
+      "gatedHabits": [],
+      "missingFiles": [],
+      "fixPushed": false
+    },
+    {
+      "id": "venator",
+      "name": "Venator",
+      "pass": true,
+      "fails": [],
+      "notes": [
+        "rounds=10",
+        "gated habit Desperate Ambush"
+      ],
+      "gatedHabits": [
+        {
+          "name": "Desperate Ambush",
+          "reasons": [
+            "Desperate Ambush: requires HP below 50%",
+            "Desperate Ambush: chance 12% on turn"
+          ]
+        }
+      ],
+      "missingFiles": [],
+      "fixPushed": false
+    },
+    {
+      "id": "vermax",
+      "name": "Vermax",
+      "pass": true,
+      "fails": [],
+      "notes": [
+        "rounds=10"
+      ],
+      "gatedHabits": [],
+      "missingFiles": [],
+      "fixPushed": false
+    },
+    {
+      "id": "vesper",
+      "name": "Vesper",
+      "pass": true,
+      "fails": [],
+      "notes": [
+        "rounds=10"
+      ],
+      "gatedHabits": [],
+      "missingFiles": [],
+      "fixPushed": false
+    },
+    {
+      "id": "vhagar",
+      "name": "Vhagar",
+      "pass": true,
+      "fails": [],
+      "notes": [
+        "rounds=10"
+      ],
+      "gatedHabits": [],
+      "missingFiles": [],
+      "fixPushed": false
+    },
+    {
+      "id": "zivern",
+      "name": "Zivern",
+      "pass": true,
+      "fails": [],
+      "notes": [
+        "rounds=10"
+      ],
+      "gatedHabits": [],
+      "missingFiles": [],
+      "fixPushed": false
+    }
+  ]
+}
