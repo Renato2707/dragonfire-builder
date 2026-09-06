@@ -1,6 +1,6 @@
 // habitParser.js
 
-import { rollChance, calculateFinalDamage, scaleByStat, statusConditionMet, roundScaled } from './utils.js';
+import { rollChance, calculateFinalDamage, calculateRecovery, scaleByStat, statusConditionMet, roundScaled } from './utils.js';
 import { getDealerType } from './positionSystem.js';
 import { hasEffect } from './effects.js';
 
@@ -431,17 +431,11 @@ function executeHealAction(habit, actionData, attacker, targets, scalingValue, e
     if (bonus && bonus.pct != null && ifBonusApplies(bonus, attacker, target, extras)) {
       usedRate = scaleByStat(bonus.pct, attacker, bonus.scaleStat);
     }
-    const statName = raw.scaleStat || 'inst';
-    const stat = typeof attacker.getModifiedStat === 'function'
-      ? attacker.getModifiedStat(statName)
-      : 50;
-    let amount = Math.max(1, Number(stat) * 1.2) * (1 + Number(usedRate || 0) / 100);
+    let amount = calculateRecovery(attacker, target, usedRate);
     if (bonus && bonus.mult != null && ifBonusApplies(bonus, attacker, target, extras)) {
-      amount *= Number(bonus.mult);
+      amount = Math.max(1, Math.round(amount * Number(bonus.mult)));
     }
-    if (typeof attacker.getRecoveryDealtMultiplier === 'function') amount *= attacker.getRecoveryDealtMultiplier();
-    if (typeof target.getRecoveryReceivedMultiplier === 'function') amount *= target.getRecoveryReceivedMultiplier();
-    heals.push({ target: target.name, amount: Math.max(1, Math.round(amount)) });
+    heals.push({ target: target.name, amount });
   }
   return heals;
 }

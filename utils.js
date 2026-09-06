@@ -120,6 +120,18 @@ function calculateFinalDamage(attacker, defender, damageType, bonusPercent = 0, 
   return Math.max(1, Math.round(damageMitigated));
 }
 
+function calculateRecovery(attacker, target, ratePercent) {
+  const level = Math.max(1, Number(attacker && attacker.level) || 1);
+  let amount = level * 1.2 * (Number(ratePercent || 0) / 100) * commandTroopFactor(attacker);
+  if (attacker && typeof attacker.getRecoveryDealtMultiplier === 'function') {
+    amount *= attacker.getRecoveryDealtMultiplier();
+  }
+  if (target && typeof target.getRecoveryReceivedMultiplier === 'function') {
+    amount *= target.getRecoveryReceivedMultiplier();
+  }
+  return Math.max(1, Math.round(amount));
+}
+
 function hasActiveId(character, id) {
   const want = String(id).toLowerCase();
   return (character.activeEffects || []).some(e => {
@@ -314,6 +326,7 @@ export {
   calculateMitigation,
   applyDamageMultipliers,
   calculateFinalDamage,
+  calculateRecovery,
   hasActiveId,
   hasControl,
   statusConditionMet,

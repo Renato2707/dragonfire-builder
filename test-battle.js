@@ -6,7 +6,7 @@ import { Battle } from './battle.js';
 import { loadDragonHabitsSync, loadCommandSync, ifBonusApplies, executeModAction, executeHabitAction, resolveChance, Habit } from './habitParser.js';
 import { applyEffect, hasEffect, cleanseCharacter, getEffect, isImmuneTo, processHealingEffects } from './effects.js';
 import { selectTargets } from './positionSystem.js';
-import { applyChanceIf, statusConditionMet, sortByInitiative, calculateFinalDamage } from './utils.js';
+import { applyChanceIf, statusConditionMet, sortByInitiative, calculateFinalDamage, calculateRecovery } from './utils.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -2009,6 +2009,69 @@ function mockFx(ids) {
   const deadDot = calculateFinalDamage(atk, def, 'PHYSICAL', 20);
   if (!(deadDot > 0)) throw new Error('DoT from retreated inflictor should still tick via cap');
   console.log('✓ command damage scales with living troops; BA unscaled\n');
+}
+
+{
+  const mk = (level, hp, max) => {
+    const c = new Character({
+      id: 'healer', name: 'Healer', breed: 'Sentinel', rarity: 'Rare',
+      stats: { str: 10, inst: 80, int: 10, init: 10 }
+    }, 0, 1, { level, stars: 2, habitRank: 1 });
+    c.maxHealth = max;
+    c.currentHealth = hp;
+    return c;
+  };
+  const ally = new Character({
+    id: 'ally', name: 'Ally', breed: 'Warrior', rarity: 'Rare',
+    stats: { str: 10, inst: 10, int: 10, init: 10 }
+  }, 0, 0, { level: 16, stars: 2, habitRank: 1 });
+  const full = mk(50, 4800, 4800);
+  const halfHp = mk(50, 2400, 4800);
+  const halfLv = mk(25, 4800, 4800);
+  const fullHeal = calculateRecovery(full, ally, 70);
+  const halfHpHeal = calculateRecovery(halfHp, ally, 70);
+  const halfLvHeal = calculateRecovery(halfLv, ally, 70);
+  if (!(fullHeal > 0)) throw new Error('recovery should land');
+  if (Math.abs(halfHpHeal - fullHeal / 2) > 1) {
+    throw new Error(`living troops should halve Recovery, full ${fullHeal} half ${halfHpHeal}`);
+  }
+  if (Math.abs(halfLvHeal - fullHeal / 2) > 1) {
+    throw new Error(`Level should scale Recovery, L50 ${fullHeal} L25 ${halfLvHeal}`);
+  }
+  const habit = new Habit({ name: "Warden's Rally", structured: [] }, 'malachite');
+  const acted = executeHabitAction(habit, { t: 'heal', pct: 70, scaleStat: 'inst' }, full, [ally], 1, { skipChance: true });
+  if (!(acted.heals[0].amount > 0)) throw new Error('heal action should restore troops');
+  console.log('✓ Recovery scales with Level and living troops\n');
+}
+
+{
+  const mk = (level) => new Character({
+    id: 'mal', name: 'Malachite', breed: 'Sentinel', rarity: 'Legendary',
+    stats: { str: 10, inst: 60, int: 10, init: 10 }
+  }, 0, 1, { level, stars: 2, habitRank: 1 });
+  const kit = new Habit({
+    name: "Sentinel's Presence",
+    structured: [{
+      phase: 'combat_start',
+      rounds: [1],
+      actions: [{ t: 'mod', mods: [{ stat: 'recovery_dealt', pct: 15 }], dur: 'combat', tgt: { side: 'self' } }]
+    }]
+  }, 'malachite');
+  const low = mk(15);
+  low.setVanguardKit(kit);
+  const high = mk(16);
+  high.setVanguardKit(kit);
+  const foe = new Character({
+    id: 'foe', name: 'Foe', breed: 'Warrior', rarity: 'Rare',
+    stats: { str: 10, inst: 10, int: 10, init: 10 }
+  }, 1, 1);
+  const btlLow = new Battle([low], [foe], { verbose: false });
+  btlLow.executeVanguard(low);
+  if (low.getPercentTotal('recovery_dealt') !== 0) throw new Error('Vanguard must not fire below Level 16');
+  const btlHigh = new Battle([high], [foe], { verbose: false });
+  btlHigh.executeVanguard(high);
+  if (high.getPercentTotal('recovery_dealt') !== 15) throw new Error('Vanguard at Level 16+ should apply');
+  console.log('✓ Vanguard requires Level 16+\n');
 }
 
 try {

@@ -119,6 +119,7 @@ export const battlePart2 = {
   },
   executeVanguard(character) {
     if (character.slotPosition !== POSITIONS.VANGUARD) return;
+    if (Number(character.level) < 16) return;
     const kit = character.vanguardKit;
     if (!kit) return;
     const label = character.vanguardName
